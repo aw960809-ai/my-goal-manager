@@ -1,0 +1,17 @@
+# Local/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Generated archives and local test artifacts
+*.zip
+*.tar
+*.tgz
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Local build output
+_site/

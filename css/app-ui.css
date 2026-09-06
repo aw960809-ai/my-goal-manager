@@ -1,0 +1,216 @@
+/* V96.4 Final UI/UX refinement — hierarchy, touch targets, responsive density, dark mode. */
+:root{
+  --ui-green:#00563B;
+  --ui-green-2:#0b6b4d;
+  --ui-gold:#C9A45B;
+  --ui-ink:#17334f;
+  --ui-muted:#66727d;
+  --ui-bg:#f5f8f7;
+  --ui-surface:#ffffff;
+  --ui-soft:#f1f5f3;
+  --ui-line:#e3eae7;
+  --ui-focus:rgba(0,86,59,.18);
+  --ui-shadow:0 8px 24px rgba(20,50,42,.055);
+  --ui-shadow-hover:0 12px 30px rgba(20,50,42,.09);
+}
+
+html,body{min-height:100%;}
+body{background:var(--ui-bg);color:var(--ui-ink);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;}
+.app{max-width:1180px;padding-top:26px;}
+
+/* Consistent module headers */
+.view>.panel:first-child,.view>.calendar-shell:first-child{margin-top:4px;}
+.overview-head,.stats-hero{position:relative;padding:3px 0 3px 15px;margin:0 0 18px;}
+.overview-head::before,.stats-hero::before{content:"";position:absolute;left:0;top:1px;bottom:1px;width:5px;border-radius:99px;background:linear-gradient(180deg,var(--ui-green),var(--ui-gold));}
+.overview-head h2,.stats-hero h2{font-size:28px!important;line-height:1.15!important;margin:0!important;color:var(--ui-green);}
+.section-title h2,.panel h2,.panel h3{color:var(--ui-ink);}
+
+/* Cards: quieter borders, stronger hierarchy */
+.card,.panel,.activity-card,.scholarship-card,.goal-tree-panel,.calendar-month-grid{border-color:var(--ui-line);box-shadow:var(--ui-shadow);}
+.card{background:var(--ui-surface);}
+.card:hover,.activity-card:hover,.scholarship-card:hover{box-shadow:var(--ui-shadow-hover);}
+.big{color:var(--ui-green);letter-spacing:-.035em;}
+.muted,.card small,.panel small{color:var(--ui-muted);}
+
+/* Controls */
+.btn,.softbtn,.dangerbtn,.calendar-nav button,.settings-close,.goal-search,.goal-map-tools select,.filter-control{min-height:42px;}
+.btn{border-radius:12px;}
+.btn.primary{background:var(--ui-green);border-color:var(--ui-green);}
+.btn.gold{background:var(--ui-gold);border-color:var(--ui-gold);}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--ui-focus);outline-offset:2px;}
+input,select,textarea{accent-color:var(--ui-green);}
+
+/* Goal map: primary action and search lead the hierarchy. */
+#goals .goal-tree-panel{padding:20px;}
+#goals .goal-crud-toolbar .btn:first-child{box-shadow:0 6px 16px rgba(0,86,59,.13);}
+#goals .goal-search{min-height:48px;}
+#goals .goal-search input{font-size:14px;}
+#goals .goal-filter-state{margin-top:10px;}
+
+/* Activity radar: ring guide becomes a quiet legend rather than four competing cards. */
+#activity .activity-radar-guide{gap:6px;}
+#activity .radar-ring{min-height:66px;padding:9px 10px;border-radius:13px;}
+#activity .radar-ring b{font-size:12px;}
+#activity .radar-ring small{font-size:9px;}
+#activity .activity-searchbox{box-shadow:0 5px 18px rgba(20,50,42,.045);}
+#activity .search-submit{min-width:88px;border-radius:12px;}
+
+/* Scholarship: deadline and recommendation should scan immediately. */
+#scholarship .scholarship-card{min-height:72px;}
+#scholarship .scholarship-card .title{letter-spacing:-.015em;}
+#scholarship .badge{font-weight:850;}
+
+/* Calendar: keep controls aligned and avoid accidental overflow. */
+#calendar .calendar-shell{box-shadow:var(--ui-shadow);border-color:var(--ui-line);}
+#calendar .calendar-toolbar{padding-left:2px;padding-right:2px;}
+#calendar .calendar-title b{color:var(--ui-green);}
+#calendar .calendar-nav button{background:var(--ui-surface);}
+#calendar .calendar-nav .today{background:#eef6f2;border-color:#cfe2d9;color:var(--ui-green);font-weight:850;}
+
+/* Execution: make the timer the visual anchor. */
+#today .compact-timer-panel{border-color:#dce8e3;}
+#today .timer{font-variant-numeric:tabular-nums;letter-spacing:.035em;color:var(--ui-green);}
+#today .timerbtns .btn{min-height:48px;}
+#today .timer-task{border:1px solid var(--ui-line);}
+
+/* Analysis: KPI cards read as one system. */
+#stats .stats-kpi{gap:10px;}
+#stats .stat-kpi{position:relative;overflow:hidden;}
+#stats .stat-kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--ui-green);opacity:.9;}
+#stats .stat-kpi:nth-child(2)::before{background:#6d99a7;}
+#stats .stat-kpi:nth-child(3)::before{background:var(--ui-gold);}
+#stats .stat-kpi:nth-child(4)::before{background:#78a38e;}
+#stats .execution-analysis-kpis>div{background:var(--ui-soft);border-color:var(--ui-line);}
+
+/* Settings / diagnostics inherit the same visual language. */
+.settings-trigger{color:var(--ui-green);}
+.settings-box,.developer-box{box-shadow:0 24px 70px rgba(20,50,42,.20);}
+.settings-section{box-shadow:0 2px 9px rgba(20,50,42,.025);}
+.settings-section-head h3{color:var(--ui-green);}
+.settings-action-grid .btn{min-height:44px;}
+
+/* Fixed bottom navigation: consistent, calm, touch-safe. */
+.bottom-nav{z-index:1000;border-top-color:var(--ui-line);background:rgba(255,255,255,.94);box-shadow:0 -8px 28px rgba(20,50,42,.075);}
+.bottom-nav button{min-height:58px;font-weight:650;}
+.bottom-nav button.active{color:var(--ui-green);background:#f0f6f3;}
+.bottom-nav button.active .bn-icon{color:var(--ui-gold);}
+.bottom-nav button:focus-visible{outline:2px solid rgba(0,86,59,.22);outline-offset:-2px;}
+
+/* Mobile: fewer competing margins, comfortable touch targets, no title wrapping. */
+@media(max-width:650px){
+  .app{padding:58px 12px var(--bottom-nav-clearance);}
+  .overview-head,.stats-hero{padding-left:13px;margin-bottom:14px;}
+  .overview-head h2,.stats-hero h2{font-size:24px!important;}
+  .view>.panel,.view>.calendar-shell{margin-bottom:10px;}
+  .panel{padding:14px;}
+  .cards{gap:9px;}
+  .card{padding:13px;}
+  .big{font-size:25px;}
+  .section-title h2{font-size:18px;}
+  .section-title{gap:8px;}
+  .btn{min-height:44px;padding:9px 12px;}
+  #goals .goal-tree-panel{padding:13px;}
+  #goals .goal-crud-toolbar{gap:7px;}
+  #goals .goal-map-tools{margin-top:8px;}
+  #activity .activity-radar-guide{margin-top:9px;}
+  #activity .radar-ring{min-height:60px;}
+  #scholarship .scholarship-card{min-height:68px;}
+  #calendar .calendar-title b{font-size:19px;}
+  #calendar .calendar-title span{display:block;margin-top:2px;}
+  #today .timer{font-size:36px;margin:20px 0;}
+  #stats .stats-kpi{min-height:92px;}
+  #stats .stats-kpi .big{font-size:25px;}
+  .bottom-nav{height:calc(76px + env(safe-area-inset-bottom));padding:4px 4px calc(4px + env(safe-area-inset-bottom));}
+  .bottom-nav button{min-height:60px;font-size:9px;border-radius:14px;}
+  .bottom-nav button .bn-icon{font-size:17px;}
+}
+
+/* Tablet / desktop: let information breathe without giant cards. */
+@media(min-width:651px){
+  .app{padding-left:20px;padding-right:20px;}
+  .view>.panel,.view>.calendar-shell{margin-bottom:14px;}
+  .bottom-nav{height:66px;}
+}
+
+/* Dark mode is a real theme, not a settings-only preview. */
+html.app-dark body{background:#101816;color:#e8f0ec;}
+html.app-dark .card,html.app-dark .panel,html.app-dark .activity-card,html.app-dark .scholarship-card,html.app-dark .goal-tree-panel,html.app-dark .calendar-month-grid{background:#17211e;border-color:#2a3833;box-shadow:0 7px 24px rgba(0,0,0,.18);}
+html.app-dark .overview-head h2,html.app-dark .stats-hero h2,html.app-dark .big{color:#8dd0b4;}
+html.app-dark .section-title h2,html.app-dark .panel h2,html.app-dark .panel h3,html.app-dark .taskname,html.app-dark .direction h3{color:#e1eee9;}
+html.app-dark .muted,html.app-dark .card small,html.app-dark .panel small{color:#a8b8b2;}
+html.app-dark input,html.app-dark select,html.app-dark textarea,html.app-dark .btn:not(.primary):not(.gold),html.app-dark .calendar-nav button{background:#1b2824;color:#e4eee9;border-color:#34433e;}
+html.app-dark .goal-map-tools,html.app-dark .activity-search-panel,html.app-dark .timer-task,html.app-dark .context,html.app-dark .settings-data-status>div,html.app-dark .execution-analysis-kpis>div{background:#1e2a26;border-color:#2d3b36;}
+html.app-dark .bottom-nav{background:rgba(18,28,25,.95);border-color:#2a3833;}
+html.app-dark .bottom-nav button{color:#a9b8b2;}
+html.app-dark .bottom-nav button.active{background:#20322c;color:#8dd0b4;}
+html.app-dark .bottom-nav button.active .bn-icon{color:#d1ad61;}
+
+@media(prefers-reduced-motion:reduce){.card:hover,.activity-card:hover,.scholarship-card:hover{transform:none!important;}}
+
+/* V96.4.2 Mobile edge-to-edge + adaptive navigation.
+   The viewport is the canvas; cards provide hierarchy instead of an outer frame. */
+:root{--mobile-nav-space:84px}
+@media(max-width:700px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  body{padding-bottom:0!important}
+  .app{width:100%;max-width:none;margin:0;padding:8px 0 0!important}
+  .view{width:100%;max-width:none;margin:0;padding-bottom:calc(var(--mobile-nav-space) + 10px)!important}
+  .view>.panel,.view>.calendar-shell{width:auto;max-width:none;margin-left:12px;margin-right:12px}
+  .view>.panel{box-shadow:none}
+  .view>.panel,.view>.calendar-shell{border-color:transparent}
+
+  /* Calendar is a true edge-to-edge surface: no parent frame to steal width. */
+  #calendar .calendar-shell{
+    width:100vw;
+    margin-left:calc(50% - 50vw)!important;
+    margin-right:calc(50% - 50vw)!important;
+    border:0!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+    overflow:visible!important;
+  }
+  #calendar .calendar-hero,
+  #calendar .calendar-toolbar,
+  #calendar .calendar-date-picker,
+  #calendar .calendar-summary,
+  #calendar .calendar-legend,
+  #calendar .calendar-agenda,
+  #calendar #calendarDetail{margin-left:12px;margin-right:12px}
+  #calendar .calendar-month-grid{width:100%;border-left:0;border-right:0;border-radius:0;box-shadow:none}
+  #calendar .calendar-days{width:100%}
+  #calendar .calendar-cell{padding-left:6px;padding-right:6px}
+
+  /* Hide the nav while reading/scrolling; it returns as soon as the user reverses. */
+  .bottom-nav{
+    transform:translate3d(-50%,0,0);
+    transition:transform .24s ease,opacity .2s ease;
+    will-change:transform;
+  }
+  body.nav-hidden .bottom-nav{
+    transform:translate3d(-50%,calc(100% + env(safe-area-inset-bottom)),0);
+    opacity:.08;
+    pointer-events:none;
+  }
+  body.nav-hidden .view{padding-bottom:14px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .bottom-nav{transition:none!important}
+}
+
+
+/* V96.4.3: mobile navigation follows gesture direction and fully leaves the canvas when hidden. */
+@media(max-width:700px){
+  .bottom-nav{transition:transform .22s ease,opacity .18s ease,visibility .22s ease;will-change:transform,opacity;touch-action:manipulation;}
+  body.nav-hidden .bottom-nav{transform:translate3d(-50%,calc(100% + env(safe-area-inset-bottom) + 12px),0)!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important;}
+  body.nav-hidden .view{padding-bottom:12px!important;}
+}
+@media(prefers-reduced-motion:reduce){body.nav-hidden .bottom-nav{transition:none!important;}}
+
+
+/* V96.4.4: authoritative mobile bottom-nav state. Immediate gesture response; no residual ghost frame. */
+@media(max-width:700px){
+  .bottom-nav{transition:transform .12s ease,opacity .1s ease,visibility .12s ease;will-change:transform,opacity,visibility;touch-action:pan-y pinch-zoom;}
+  body.nav-hidden .bottom-nav{transform:translate3d(-50%,calc(100% + env(safe-area-inset-bottom) + 14px),0)!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important;}
+  body.nav-hidden .view{padding-bottom:12px!important;}
+}
+@media(prefers-reduced-motion:reduce){.bottom-nav{transition:none!important;}body.nav-hidden .bottom-nav{transition:none!important;}}
