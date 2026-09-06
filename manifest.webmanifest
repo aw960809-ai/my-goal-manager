@@ -1,0 +1,11 @@
+{
+  "name": "個人目標與學習行動管理系統",
+  "short_name": "目標管理",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f6f5",
+  "theme_color": "#00563B",
+  "description": "個人目標、學習、活動與執行管理系統",
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
