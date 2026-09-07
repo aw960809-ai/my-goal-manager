@@ -1,6 +1,3 @@
-raw/
-normalized/
-validated/
-deduped/
-validation-report.json
-dedupe-report.json
+*
+!.gitignore
+!.gitkeep

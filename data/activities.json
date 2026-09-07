@@ -1,12 +1,12 @@
 {
   "meta": {
-    "updatedAt": "2026-09-06T00:00:00+00:00",
+    "updatedAt": "2026-09-07T03:17:08.357263+00:00",
     "sources": 11,
     "events": 6,
     "ok": 0,
     "failed": 0,
     "errors": [],
-    "generator": "V95 Activity Radar + Independent Scholarship Radar",
+    "generator": "V96.6.4 AutoFetch + Activity Radar",
     "sourcePolicy": "政府資訊為主；東海官方活動為活動核心；獎學金獨立資料集合與獨立判斷",
     "scholarships": 7
   },

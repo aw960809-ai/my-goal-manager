@@ -1,0 +1,46 @@
+name: V96.6 Scheduled Activity AutoFetch
+
+on:
+  schedule:
+    - cron: "17 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-autofetch
+  cancel-in-progress: true
+
+jobs:
+  fetch-build-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: AutoFetch activities
+        run: |
+          python tools/autofetch/autofetch.py --apply --limit 30
+          python -m json.tool data/activities.json >/dev/null
+      - name: Existing static QA
+        run: |
+          if [ -f qa_static.py ]; then python qa_static.py; fi
+      - name: Build site
+        run: |
+          if [ -f tools_build_preview.py ]; then python tools_build_preview.py; fi
+          if [ -d _site ]; then echo "SITE_DIR=_site" >> "$GITHUB_ENV";
+          elif [ -d dist ]; then echo "SITE_DIR=dist" >> "$GITHUB_ENV";
+          else mkdir -p _autofetch_site; cp -a . _autofetch_site/repo; rm -rf _autofetch_site/repo/.git _autofetch_site/repo/data/staging; echo "SITE_DIR=_autofetch_site/repo" >> "$GITHUB_ENV"; fi
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: ${{ env.SITE_DIR }}
+      - id: deployment
+        uses: actions/deploy-pages@v4

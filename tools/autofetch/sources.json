@@ -1,5 +1,5 @@
 {
-  "version": "96.6",
+  "version": "96.6.4",
   "mode": "whitelist",
   "default_enabled": false,
   "sources": [
@@ -12,9 +12,10 @@
         "thu.edu.tw"
       ],
       "enabled": false,
+      "start_urls": [],
       "fetch_type": "html",
       "trust_level": "official",
-      "notes": "第一圈：東海校內官方活動來源。待確認實際公告頁後再啟用。"
+      "notes": "待建立東海專用 adapter 後再啟用。"
     },
     {
       "id": "yda_official",
@@ -24,14 +25,13 @@
       "domain_allowlist": [
         "yda.gov.tw"
       ],
+      "enabled": true,
       "start_urls": [
-        "https://www.yda.gov.tw/",
-        "https://www.yda.gov.tw/index.aspx?pid=23&uid=23"
+        "https://www.yda.gov.tw/EventList.aspx?pid=56&uid=101"
       ],
-      "enabled": false,
       "fetch_type": "html",
       "trust_level": "official",
-      "notes": "第三圈：青年活動、國際參與、職涯、生涯與海外相關計畫。"
+      "notes": "V96.6.4 青年署專用結構化 adapter。"
     }
   ]
 }
