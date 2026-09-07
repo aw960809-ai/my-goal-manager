@@ -1,4 +1,4 @@
-name: V96.6 Scheduled Activity AutoFetch
+name: V96.6 Scheduled Multi-Source Activity AutoFetch
 
 on:
   schedule:

@@ -12,14 +12,20 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import parse_qs, urljoin, urlparse
 
-USER_AGENT = 'GoalManager-AutoFetch/96.6.9.1 (+https://github.com/aw960809-ai/my-goal-manager)'
+USER_AGENT = 'GoalManager-AutoFetch/96.6.10 (+https://github.com/aw960809-ai/my-goal-manager)'
 MAX_BYTES = 2_000_000
 AUTO_PREFIX = 'auto-yda-'
 THU_AUTO_PREFIX = 'auto-thu-'
 TAICHUNG_AUTO_PREFIX = 'auto-tcjob-'
+PATHFINDER_AUTO_PREFIX = 'auto-tgpi-'
+MOFA_WH_AUTO_PREFIX = 'auto-mofa-wh-'
+
 YDA_LIST = 'https://www.yda.gov.tw/EventList.aspx?pid=56&uid=101'
 THU_LIST = 'https://tevent.thu.edu.tw/tEvent_front/index.php'
 TAICHUNG_LIST = 'https://1catchjob.taichung.gov.tw/more.aspx?cat=new'
+PATHFINDER_DOWNLOADS = 'https://twpathfinder.yda.gov.tw/downloads'
+PATHFINDER_OVERVIEW = 'https://twpathfinder.yda.gov.tw/overview1830'
+MOFA_WORKING_HOLIDAY = 'https://youthtaiwan.mofa.gov.tw/WorkingHoliday/'
 
 DEADLINE_SIGNAL = re.compile(r'報名截止|截止日期|申請截止|收件截止|徵件期間|報名期間|申請期間|投件期間|額滿提早截止|截止')
 DATE_SECTION_SIGNAL = re.compile(r'活動日期及地點|活動時間及地點|活動日期|活動時間|活動期間|辦理日期|體驗期間|展出資訊')
@@ -30,10 +36,10 @@ FULL_DATE_RE = re.compile(r'(?<!\d)(20\d{2}|\d{3})[./\-年]\s*(\d{1,2})[./\-月]
 PARTIAL_DATE_RE = re.compile(r'(?<![\d./\-年])(\d{1,2})[./\-月]\s*(\d{1,2})日?')
 MAJOR_SECTION_RE = re.compile(r'^[壹貳參肆伍陸柒捌玖拾一二三四五六七八九十]+[、.]')
 
-WORKFLOW = '''name: V96.6 Scheduled Activity AutoFetch\n\non:\n  schedule:\n    - cron: "17 1 * * *"\n  workflow_dispatch:\n\npermissions:\n  contents: read\n  pages: write\n  id-token: write\n\nconcurrency:\n  group: pages-autofetch\n  cancel-in-progress: true\n\njobs:\n  fetch-build-deploy:\n    runs-on: ubuntu-latest\n    environment:\n      name: github-pages\n      url: ${{ steps.deployment.outputs.page_url }}\n    steps:\n      - uses: actions/checkout@v6\n      - uses: actions/setup-python@v6\n        with:\n          python-version: "3.12"\n      - name: AutoFetch activities\n        run: |\n          python tools/autofetch/autofetch.py --apply --limit 30\n          python -m json.tool data/activities.json >/dev/null\n      - name: Existing static QA\n        run: |\n          if [ -f qa_static.py ]; then python qa_static.py; fi\n      - name: Build site\n        run: |\n          if [ -f tools_build_preview.py ]; then python tools_build_preview.py; fi\n          if [ -d _site ]; then echo "SITE_DIR=_site" >> "$GITHUB_ENV";\n          elif [ -d dist ]; then echo "SITE_DIR=dist" >> "$GITHUB_ENV";\n          else mkdir -p _autofetch_site; cp -a . _autofetch_site/repo; rm -rf _autofetch_site/repo/.git _autofetch_site/repo/data/staging; echo "SITE_DIR=_autofetch_site/repo" >> "$GITHUB_ENV"; fi\n      - uses: actions/configure-pages@v5\n      - uses: actions/upload-pages-artifact@v4\n        with:\n          path: ${{ env.SITE_DIR }}\n      - id: deployment\n        uses: actions/deploy-pages@v4\n'''
+WORKFLOW = '''name: V96.6 Scheduled Multi-Source Activity AutoFetch\n\non:\n  schedule:\n    - cron: "17 1 * * *"\n  workflow_dispatch:\n\npermissions:\n  contents: read\n  pages: write\n  id-token: write\n\nconcurrency:\n  group: pages-autofetch\n  cancel-in-progress: true\n\njobs:\n  fetch-build-deploy:\n    runs-on: ubuntu-latest\n    environment:\n      name: github-pages\n      url: ${{ steps.deployment.outputs.page_url }}\n    steps:\n      - uses: actions/checkout@v6\n      - uses: actions/setup-python@v6\n        with:\n          python-version: "3.12"\n      - name: AutoFetch activities\n        run: |\n          python tools/autofetch/autofetch.py --apply --limit 30\n          python -m json.tool data/activities.json >/dev/null\n      - name: Existing static QA\n        run: |\n          if [ -f qa_static.py ]; then python qa_static.py; fi\n      - name: Build site\n        run: |\n          if [ -f tools_build_preview.py ]; then python tools_build_preview.py; fi\n          if [ -d _site ]; then echo "SITE_DIR=_site" >> "$GITHUB_ENV";\n          elif [ -d dist ]; then echo "SITE_DIR=dist" >> "$GITHUB_ENV";\n          else mkdir -p _autofetch_site; cp -a . _autofetch_site/repo; rm -rf _autofetch_site/repo/.git _autofetch_site/repo/data/staging; echo "SITE_DIR=_autofetch_site/repo" >> "$GITHUB_ENV"; fi\n      - uses: actions/configure-pages@v5\n      - uses: actions/upload-pages-artifact@v4\n        with:\n          path: ${{ env.SITE_DIR }}\n      - id: deployment\n        uses: actions/deploy-pages@v4\n'''
 
 SOURCES = {
-    'version': '96.6.9.1',
+    'version': '96.6.10',
     'mode': 'whitelist',
     'default_enabled': False,
     'sources': [
@@ -47,7 +53,7 @@ SOURCES = {
             'start_urls': [THU_LIST],
             'fetch_type': 'html',
             'trust_level': 'official',
-            'notes': 'V96.6.9.1.1 東海大學 tEvent 專用結構化 adapter。',
+            'notes': 'V96.6.10 東海大學 tEvent 專用結構化 adapter。',
         },
         {
             'id': 'taichung_job',
@@ -59,7 +65,31 @@ SOURCES = {
             'start_urls': [TAICHUNG_LIST],
             'fetch_type': 'html',
             'trust_level': 'official',
-            'notes': 'V96.6.9.1.1 臺中市就業服務處活動專用結構化 adapter；排除明確中高齡/銀髮與雇主專屬項目。',
+            'notes': 'V96.6.10 臺中市就業服務處活動專用結構化 adapter；排除明確中高齡/銀髮與雇主專屬項目。',
+        },
+        {
+            'id': 'pathfinder_official',
+            'name': '青年百億海外圓夢基金計畫',
+            'scope': 'overseas',
+            'priority': 4,
+            'domain_allowlist': ['twpathfinder.yda.gov.tw'],
+            'enabled': True,
+            'start_urls': [PATHFINDER_DOWNLOADS, PATHFINDER_OVERVIEW],
+            'fetch_type': 'html',
+            'trust_level': 'official',
+            'notes': 'V96.6.10 海外翱翔組官方申請窗口 adapter。',
+        },
+        {
+            'id': 'mofa_working_holiday',
+            'name': '外交部青年度假打工',
+            'scope': 'overseas',
+            'priority': 4,
+            'domain_allowlist': ['youthtaiwan.mofa.gov.tw'],
+            'enabled': True,
+            'start_urls': [MOFA_WORKING_HOLIDAY],
+            'fetch_type': 'html',
+            'trust_level': 'official',
+            'notes': 'V96.6.10 外交部青年度假打工常設官方入口。',
         },
         {
             'id': 'yda_official',
@@ -71,7 +101,7 @@ SOURCES = {
             'start_urls': [YDA_LIST],
             'fetch_type': 'html',
             'trust_level': 'official',
-            'notes': 'V96.6.9.1.1 青年署專用結構化 adapter。',
+            'notes': 'V96.6.10 青年署專用結構化 adapter。',
         },
     ],
 }
@@ -131,8 +161,8 @@ def install(repo: Path, src: Path):
 
     subprocess.run([sys.executable, '-m', 'py_compile', str(dest)], check=True)
     read_json(repo / 'data/activities.json')
-    log('INSTALL_OK version=96.6.9.1')
-    log('下一步： python tools/autofetch/autofetch.py --check --limit 12  （東海＋台中＋青年署；資格閘門＋跨ID語意去重 hotfix＋目標適配度）')
+    log('INSTALL_OK version=96.6.10')
+    log('下一步： python tools/autofetch/autofetch.py --check --limit 12  （東海＋台中＋全國＋海外／國際；資格閘門＋去重＋目標適配度）')
 
 
 class LinkParser(HTMLParser):
@@ -221,6 +251,40 @@ class YDADetailParser(HTMLParser):
                 self.ended = True
                 return
             self.lines.append(text)
+
+
+
+class PlainTextParser(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.skip = 0
+        self.lines = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag.lower() in {'script', 'style', 'noscript'}:
+            self.skip += 1
+
+    def handle_endtag(self, tag):
+        if tag.lower() in {'script', 'style', 'noscript'} and self.skip:
+            self.skip -= 1
+
+    def handle_data(self, data):
+        if self.skip:
+            return
+        value = re.sub(r'\s+', ' ', data.replace('\u3000', ' ')).strip()
+        if value:
+            self.lines.append(value)
+
+
+def parse_plain_lines(body):
+    p = PlainTextParser()
+    p.feed(decode_body(body))
+    out = []
+    for line in p.lines:
+        if out and out[-1] == line:
+            continue
+        out.append(line)
+    return out
 
 
 def allowed(host, allowlist):
@@ -592,7 +656,7 @@ def build_candidate(url, body):
         'eventEndDate': end or '',
         'location': location or '',
         'autofetch': {
-            'engine': 'V96.6.9.1.1',
+            'engine': 'V96.6.10',
             'sourceId': 'yda_official',
             'eid': eid(url),
             'fetchedAt': now_iso(),
@@ -848,7 +912,7 @@ def build_thu_candidate(url, body):
         'organizer': organizer,
         'audience': audience,
         'autofetch': {
-            'engine': 'V96.6.9.1.1',
+            'engine': 'V96.6.10',
             'sourceId': 'thu_official',
             'conferenceCode': code,
             'fetchedAt': now_iso(),
@@ -1296,7 +1360,7 @@ def build_taichung_candidate(url, body):
         'organizer': organizer or '',
         'audience': audience,
         'autofetch': {
-            'engine': 'V96.6.9.1.1',
+            'engine': 'V96.6.10',
             'sourceId': 'taichung_job',
             'act': act,
             'fetchedAt': now_iso(),
@@ -1414,8 +1478,200 @@ def run_taichung_source(limit):
 
 
 
+
 # ---------------------------------------------------------------------------
-# V96.6.9.1.1 Goal-fit engine
+# V96.6.10 Fourth circle — overseas / international
+# ---------------------------------------------------------------------------
+
+def pathfinder_deadline(lines):
+    joined = '\n'.join(lines)
+
+    # Prefer an explicit Gregorian date near "截止/關閉".
+    for m in re.finditer(r'(20\d{2})年\s*(\d{1,2})月\s*(\d{1,2})日', joined):
+        context = joined[max(0, m.start() - 100):m.end() + 100]
+        if re.search(r'截止|關閉|報名至|申請至|受理', context):
+            value = mkdate(m.group(1), m.group(2), m.group(3))
+            if value:
+                return value
+
+    # ROC-year fallback.
+    for m in re.finditer(r'(\d{3})年\s*(\d{1,2})月\s*(\d{1,2})日', joined):
+        context = joined[max(0, m.start() - 100):m.end() + 100]
+        if re.search(r'截止|關閉|報名至|申請至|受理', context):
+            value = mkdate(roc(m.group(1)), m.group(2), m.group(3))
+            if value:
+                return value
+
+    return None
+
+
+def build_pathfinder_candidate(body):
+    lines = parse_plain_lines(body)
+    if len(lines) < 2:
+        return None, 'article_too_short'
+
+    joined = '\n'.join(lines)
+    if '海外翱翔' not in joined:
+        return None, 'overseas_program_missing'
+
+    deadline = pathfinder_deadline(lines)
+    if not deadline:
+        return None, 'deadline_not_found'
+
+    if not re.search(r'報名|申請|受理|截止|系統將關閉', joined):
+        return None, 'no_application_signal'
+
+    return {
+        'id': PATHFINDER_AUTO_PREFIX + 'overseas1830',
+        'title': '青年百億海外圓夢基金計畫｜海外翱翔組18–30歲',
+        'date': deadline,
+        'time': '',
+        'scope': '海外／國際',
+        'type': '語言／國際',
+        'kind': 'program',
+        'url': PATHFINDER_OVERVIEW,
+        'keywords': '青年 海外圓夢 海外翱翔 國際組織 智庫見習 青年議會 國際交流 海外服務 職能培訓',
+        'direct': True,
+        'team': False,
+        'available': True,
+        'source': '教育部青年發展署｜青年百億海外圓夢基金計畫',
+        'statusText': f'海外翱翔組官方申請窗口；本輪截止 {deadline}',
+        'government': True,
+        'deadline': deadline,
+        'eventEndDate': '',
+        'location': '海外／依各圓夢機會',
+        'organizer': '教育部青年發展署',
+        'audience': '18–30歲青年；實際資格、語言及個別條件依官方簡章',
+        'openEnded': False,
+        'autofetch': {
+            'engine': 'V96.6.10',
+            'sourceId': 'pathfinder_official',
+            'fetchedAt': now_iso(),
+        },
+    }, None
+
+
+def run_pathfinder_source(limit):
+    src = next(x for x in SOURCES['sources'] if x['id'] == 'pathfinder_official')
+    accepted, rejected, failures = [], [], []
+    skipped_past = 0
+    parsed_ok = 0
+
+    try:
+        _, body = fetch(PATHFINDER_DOWNLOADS, src['domain_allowlist'])
+        candidate, reason = build_pathfinder_candidate(body)
+
+        if candidate is None:
+            # Between rounds is a healthy zero-result state.
+            if reason in {'deadline_not_found', 'no_application_signal'}:
+                log(f'PATHFINDER FILTER reason={reason}')
+            else:
+                rejected.append({'url': PATHFINDER_DOWNLOADS, 'reason': reason})
+                log(f'PATHFINDER REJECT reason={reason}')
+        else:
+            parsed_ok = 1
+            actionable, action_reason = actionable_status(candidate)
+            if actionable:
+                accepted.append(candidate)
+                log(f'PATHFINDER ACCEPT reason={action_reason} deadline={candidate["deadline"]}')
+            else:
+                skipped_past = 1
+                log(f'PATHFINDER SKIP_DEADLINE deadline={candidate["deadline"]}')
+
+    except Exception as exc:
+        failures.append({'url': PATHFINDER_DOWNLOADS, 'reason': str(exc)})
+        log(f'PATHFINDER FAIL {exc}')
+
+    return {
+        'sourceId': 'pathfinder_official',
+        'prefix': PATHFINDER_AUTO_PREFIX,
+        'discovered': 1,
+        'parsedOk': parsed_ok,
+        'accepted': accepted,
+        'skippedPast': skipped_past,
+        'rejected': rejected,
+        'fetchFailures': failures,
+        'healthy': not rejected and not failures,
+    }
+
+
+def build_mofa_working_holiday_candidate(body):
+    lines = parse_plain_lines(body)
+    joined = '\n'.join(lines)
+
+    if '青年度假打工' not in joined and not ('青年' in joined and '度假打工' in joined):
+        return None, 'working_holiday_content_missing'
+
+    return {
+        'id': MOFA_WH_AUTO_PREFIX + 'portal',
+        'title': '青年度假打工｜外交部官方計畫入口',
+        'date': '',
+        'time': '',
+        'scope': '海外／國際',
+        'type': '語言／國際',
+        'kind': 'program',
+        'url': MOFA_WORKING_HOLIDAY,
+        'keywords': '青年度假打工 海外工作 國際交流 海外生活 外語 澳洲 日本 加拿大 紐西蘭 英國 德國 韓國',
+        'direct': True,
+        'team': False,
+        'available': True,
+        'source': '中華民國外交部｜臺灣青年FUN眼世界',
+        'statusText': '外交部常設青年度假打工官方入口；各國年齡、名額、簽證與保險條件依官方國別資訊',
+        'government': True,
+        'deadline': '',
+        'eventEndDate': '',
+        'location': '海外／依度假打工協定國',
+        'organizer': '中華民國外交部',
+        'audience': '青年；實際年齡與簽證資格依各協定國規定',
+        'openEnded': True,
+        'autofetch': {
+            'engine': 'V96.6.10',
+            'sourceId': 'mofa_working_holiday',
+            'fetchedAt': now_iso(),
+        },
+    }, None
+
+
+def run_mofa_working_holiday_source(limit):
+    src = next(x for x in SOURCES['sources'] if x['id'] == 'mofa_working_holiday')
+    accepted, rejected, failures = [], [], []
+    parsed_ok = 0
+
+    try:
+        _, body = fetch(MOFA_WORKING_HOLIDAY, src['domain_allowlist'])
+        candidate, reason = build_mofa_working_holiday_candidate(body)
+
+        if candidate is None:
+            rejected.append({'url': MOFA_WORKING_HOLIDAY, 'reason': reason})
+            log(f'MOFA_WH REJECT reason={reason}')
+        else:
+            parsed_ok = 1
+            actionable, action_reason = actionable_status(candidate)
+            if actionable:
+                accepted.append(candidate)
+                log(f'MOFA_WH ACCEPT reason={action_reason}')
+            else:
+                rejected.append({'url': MOFA_WORKING_HOLIDAY, 'reason': 'not_actionable'})
+
+    except Exception as exc:
+        failures.append({'url': MOFA_WORKING_HOLIDAY, 'reason': str(exc)})
+        log(f'MOFA_WH FAIL {exc}')
+
+    return {
+        'sourceId': 'mofa_working_holiday',
+        'prefix': MOFA_WH_AUTO_PREFIX,
+        'discovered': 1,
+        'parsedOk': parsed_ok,
+        'accepted': accepted,
+        'skippedPast': 0,
+        'rejected': rejected,
+        'fetchFailures': failures,
+        'healthy': parsed_ok == 1 and not rejected and not failures,
+    }
+
+
+# ---------------------------------------------------------------------------
+# V96.6.10 Goal-fit engine
 # ---------------------------------------------------------------------------
 # Scoring is intentionally task-oriented rather than "all events are useful".
 # It encodes the current Activity Radar design:
@@ -1467,6 +1723,8 @@ CIRCLE_META = {
     'thu_official': (1, '東海校內', 8),
     'taichung_job': (2, '台中', 4),
     'yda_official': (3, '全國', 2),
+    'pathfinder_official': (4, '海外／國際', 0),
+    'mofa_working_holiday': (4, '海外／國際', 0),
 }
 
 LOW_VALUE_PATTERNS = [
@@ -1786,6 +2044,9 @@ def actionable_status(candidate):
     if deadline and deadline >= today:
         return True, 'deadline_open'
 
+    if candidate.get('openEnded'):
+        return True, 'open_ended_official'
+
     if end and end >= today:
         return True, 'event_future'
 
@@ -1805,6 +2066,10 @@ def run(repo, limit, apply):
         results.append(run_taichung_source(limit))
     if 'yda_official' in enabled:
         results.append(run_yda_source(limit))
+    if 'pathfinder_official' in enabled:
+        results.append(run_pathfinder_source(limit))
+    if 'mofa_working_holiday' in enabled:
+        results.append(run_mofa_working_holiday_source(limit))
 
     if not results:
         raise RuntimeError('沒有啟用任何 AutoFetch 來源')
@@ -1872,7 +2137,7 @@ def run(repo, limit, apply):
     write_json(
         staging / 'autofetch-report.json',
         {
-            'schemaVersion': '96.6.9.1-report-1',
+            'schemaVersion': '96.6.10-report-1',
             'generatedAt': now_iso(),
             'mode': 'apply' if apply else 'check',
             'summary': totals,
@@ -1947,7 +2212,7 @@ def run(repo, limit, apply):
                 for r in results
                 for x in (r['rejected'] + r['fetchFailures'])
             ][:20],
-            'generator': 'V96.6.9.1.1 Multi-Source AutoFetch + Activity Radar',
+            'generator': 'V96.6.10 Multi-Source AutoFetch + Activity Radar',
         })
         write_json(activities_file, {'meta': meta, 'events': merged})
         log(
@@ -2257,7 +2522,36 @@ def self_test():
     }
     assert semantic_duplicate(s1, s2) is False, (s1, s2)
 
-    log('SELF_TEST_OK version=96.6.9.1')
+    pf_fixture = '''<html><body>
+    <h2>簡章下載</h2>
+    <p>116年第二梯次海外翱翔組受理報名，預計將於 2099年5月15日中午12:00截止，其後系統將關閉。</p>
+    <p>海外翱翔組18-30歲。</p>
+    </body></html>'''.encode('utf-8')
+    pf, reason = build_pathfinder_candidate(pf_fixture)
+    assert reason is None and pf, (reason, pf)
+    assert pf['deadline'] == '2099-05-15', pf
+    assert actionable_status(pf) == (True, 'deadline_open'), pf
+
+    pf_old_fixture = '''<html><body>
+    <p>115年第二梯次海外翱翔組受理報名，預計將於 2000年5月15日中午12:00截止，其後系統將關閉。</p>
+    <p>海外翱翔組18-30歲。</p>
+    </body></html>'''.encode('utf-8')
+    pf_old, reason_old = build_pathfinder_candidate(pf_old_fixture)
+    assert reason_old is None and pf_old, (reason_old, pf_old)
+    assert actionable_status(pf_old)[0] is False, pf_old
+
+    wh_fixture = '''<html><body>
+    <h1>青年度假打工</h1>
+    <p>外交部為擴大我國青年與國際接軌，積極推動度假打工計畫。</p>
+    </body></html>'''.encode('utf-8')
+    wh, wh_reason = build_mofa_working_holiday_candidate(wh_fixture)
+    assert wh_reason is None and wh, (wh_reason, wh)
+    assert actionable_status(wh) == (True, 'open_ended_official'), wh
+    wh_fit = fit_candidate(wh)
+    assert wh_fit['radarEligible'] is True, wh_fit
+    assert '語言／國際／海外' in wh_fit['goalMatches'], wh_fit
+
+    log('SELF_TEST_OK version=96.6.10')
 
 
 def main():

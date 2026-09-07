@@ -1,12 +1,12 @@
 {
   "meta": {
-    "updatedAt": "2026-09-07T04:05:56.657474+00:00",
-    "sources": 3,
-    "events": 13,
-    "ok": 7,
+    "updatedAt": "2026-09-07T04:19:07.324064+00:00",
+    "sources": 5,
+    "events": 14,
+    "ok": 8,
     "failed": 0,
     "errors": [],
-    "generator": "V96.6.9.1.1 Multi-Source AutoFetch + Activity Radar",
+    "generator": "V96.6.10 Multi-Source AutoFetch + Activity Radar",
     "sourcePolicy": "政府資訊為主；東海官方活動為活動核心；獎學金獨立資料集合與獨立判斷",
     "scholarships": 7
   },
@@ -138,10 +138,10 @@
       "organizer": "教學發展中心",
       "audience": "教職員，費用：0；學生，費用：0",
       "autofetch": {
-        "engine": "V96.6.9.1.1",
+        "engine": "V96.6.10",
         "sourceId": "thu_official",
         "conferenceCode": "2026070017",
-        "fetchedAt": "2026-09-07T04:05:31.814635+00:00"
+        "fetchedAt": "2026-09-07T04:18:47.009782+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -186,10 +186,10 @@
       "organizer": "健康暨諮商中心",
       "audience": "學生，費用：0",
       "autofetch": {
-        "engine": "V96.6.9.1.1",
+        "engine": "V96.6.10",
         "sourceId": "thu_official",
         "conferenceCode": "2026080023",
-        "fetchedAt": "2026-09-07T04:05:32.191917+00:00"
+        "fetchedAt": "2026-09-07T04:18:47.368166+00:00"
       },
       "fitScore": 73,
       "fitTier": "高適配",
@@ -234,10 +234,10 @@
       "organizer": "教學發展中心",
       "audience": "教職員，費用：0；學生，費用：0",
       "autofetch": {
-        "engine": "V96.6.9.1.1",
+        "engine": "V96.6.10",
         "sourceId": "thu_official",
         "conferenceCode": "2026070019",
-        "fetchedAt": "2026-09-07T04:05:32.870799+00:00"
+        "fetchedAt": "2026-09-07T04:18:48.136757+00:00"
       },
       "fitScore": 48,
       "fitTier": "探索",
@@ -283,10 +283,10 @@
       "organizer": "生活輔導組",
       "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
       "autofetch": {
-        "engine": "V96.6.9.1.1",
+        "engine": "V96.6.10",
         "sourceId": "thu_official",
         "conferenceCode": "2026090016",
-        "fetchedAt": "2026-09-07T04:05:35.378404+00:00"
+        "fetchedAt": "2026-09-07T04:18:50.659496+00:00"
       },
       "fitScore": 78,
       "fitTier": "高適配",
@@ -330,10 +330,10 @@
       "organizer": "臺中市就業服務處",
       "audience": "有限制",
       "autofetch": {
-        "engine": "V96.6.9.1.1",
+        "engine": "V96.6.10",
         "sourceId": "taichung_job",
         "act": "5583",
-        "fetchedAt": "2026-09-07T04:05:38.514302+00:00"
+        "fetchedAt": "2026-09-07T04:18:53.853368+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -378,10 +378,10 @@
       "organizer": "臺中市就業服務處",
       "audience": "高中職以上學生及家長。",
       "autofetch": {
-        "engine": "V96.6.9.1.1",
+        "engine": "V96.6.10",
         "sourceId": "taichung_job",
         "act": "5387",
-        "fetchedAt": "2026-09-07T04:05:39.865018+00:00"
+        "fetchedAt": "2026-09-07T04:18:55.063050+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -426,10 +426,10 @@
       "organizer": "臺中市就業服務處",
       "audience": "有限制",
       "autofetch": {
-        "engine": "V96.6.9.1.1",
+        "engine": "V96.6.10",
         "sourceId": "taichung_job",
         "act": "5582",
-        "fetchedAt": "2026-09-07T04:05:40.061640+00:00"
+        "fetchedAt": "2026-09-07T04:18:55.228758+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -447,6 +447,53 @@
       ],
       "circleLevel": 2,
       "circleLabel": "台中",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": ""
+    },
+    {
+      "id": "auto-mofa-wh-portal",
+      "title": "青年度假打工｜外交部官方計畫入口",
+      "date": "",
+      "time": "",
+      "scope": "海外／國際",
+      "type": "語言／國際",
+      "kind": "program",
+      "url": "https://youthtaiwan.mofa.gov.tw/WorkingHoliday/",
+      "keywords": "青年度假打工 海外工作 國際交流 海外生活 外語 澳洲 日本 加拿大 紐西蘭 英國 德國 韓國",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "中華民國外交部｜臺灣青年FUN眼世界",
+      "statusText": "外交部常設青年度假打工官方入口；各國年齡、名額、簽證與保險條件依官方國別資訊",
+      "government": true,
+      "deadline": "",
+      "eventEndDate": "",
+      "location": "海外／依度假打工協定國",
+      "organizer": "中華民國外交部",
+      "audience": "青年；實際年齡與簽證資格依各協定國規定",
+      "openEnded": true,
+      "autofetch": {
+        "engine": "V96.6.10",
+        "sourceId": "mofa_working_holiday",
+        "fetchedAt": "2026-09-07T04:19:07.310769+00:00"
+      },
+      "fitScore": 94,
+      "fitTier": "高適配",
+      "fitReasons": [
+        "同心圓第4圈：海外／國際+0",
+        "語言／國際／海外+40",
+        "青少年／營隊／教學+34",
+        "直接連結海外／國際經驗目標+18",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "語言／國際／海外",
+        "青少年／營隊／教學"
+      ],
+      "circleLevel": 4,
+      "circleLabel": "海外／國際",
       "radarEligible": true,
       "hardFilterReason": "",
       "eligibilityReason": "",
