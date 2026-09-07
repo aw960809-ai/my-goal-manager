@@ -90,8 +90,10 @@
     <div class="activity-filter-row visual-filters" style="margin-top:9px">
       <!-- V96.7 activity filters --><label class="filter-control"><span>📍 同心圓</span><select id="activityScope" onchange="activityPage=1;renderActivities()"><option value="全部">全部圈層</option><option value="東海校內">① 東海校內</option><option value="台中">② 台中</option><option value="全國">③ 全國</option><option value="海外／國際">④ 海外／國際</option></select></label>
       <label class="filter-control"><span>▦ 類型</span><select id="activityType" onchange="renderActivities()"><option value="全部">全部類型</option><option>法律／學術</option><option>語言／國際</option><option>教育／青少年</option><option>職涯／實習</option><option>公共參與</option></select></label><label class="filter-control"><span>◎ 適配度</span><select id="activityFitTier" onchange="activityPage=1;renderActivities()"><option value="全部">全部適配度</option><option value="高適配">高適配</option><option value="中適配">中適配</option><option value="探索">探索</option></select></label>
+      <!-- V96.8 goal bridge --><label class="filter-control"><span>🎯 子任務</span><select id="activityGoalFilter" onchange="activityPage=1;renderActivities()"><option value="全部">全部子任務</option></select></label>
     </div>
     <div id="activityStats" class="context"></div>
+    <div id="activityGoalContext" class="activity-goal-context" aria-live="polite"></div>
     <div class="activity-radar-guide" aria-label="活動雷達同心圓判準"><div class="radar-ring core"><b>① 東海校內</b><small>校內活動，執行成本最低</small></div><div class="radar-ring near"><b>② 台中</b><small>台中地區，可直接安排參與</small></div><div class="radar-ring extended"><b>③ 全國</b><small>全國性機會，以目標適配度決定優先</small></div><div class="radar-ring explore"><b>④ 海外／國際</b><small>海外工作、交流、實習與長期國際經驗</small></div></div><div id="activityAutoStatus" class="panel" style="margin:10px 0;padding:12px;display:none"><div class="section-title"><div><h3 style="margin:0">自動活動資料</h3></div><span id="activityAutoUpdated" class="muted"></span></div><div id="activityAutoMeta" class="muted"></div></div>
     <div id="activityList" class="list"></div>
     <div id="activityPagination" class="activity-pagination" aria-label="活動雷達分頁"></div>

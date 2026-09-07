@@ -213,3 +213,86 @@ function renderActivityReferences(){
  const box=document.getElementById('activityReferences');if(!box)return;const refs=activityStore().filter(a=>a.kind==='reference'&&activityExternalUrl(a));box.innerHTML=refs.length?`<div class="reference-title">📚 相關計畫資料（不列入可直接參加活動）</div>`+refs.map(a=>`<div class="reference-item"><div><b>${esc(a.title)}</b><small>${esc(a.statusText||'參考資料')} · ${esc(a.source||'官方來源')}</small></div><a class="btn" href="${esc(safeExternalUrl(activityExternalUrl(a)))}" target="_blank" rel="noopener noreferrer">查看官方資訊</a></div>`).join(''):'';
 }
 function activityResetFilters(){['activitySearch'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});['activityScope','activityType','activityFitTier'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='全部'});activityPage=1;renderActivities()}
+
+/* V96.8 Goal Map <-> Activity Radar bridge */
+function activityActiveSubtasks(){
+  return (Array.isArray(db?.tasks)?db.tasks:[]).filter(t=>Number(t.level)===3&&t.status!=='已封存').sort((a,b)=>activityGoalPathText(a).localeCompare(activityGoalPathText(b),'zh-Hant'));
+}
+function activityGoalPathText(t){if(!t)return '';try{return ancestors(t.id).map(x=>String(x.name||'')).join(' → ')}catch(_){return String(t.name||'')}}
+function activitySubtaskForTask(t){
+  if(!t)return null;if(Number(t.level)===3)return t;
+  if(Number(t.level)===4){const p=(db.tasks||[]).find(x=>String(x.id)===String(t.parent));return p&&Number(p.level)===3?p:null}
+  return null;
+}
+function activityGoalCategorySet(text){
+  const s=String(text||'').toLowerCase(),out=new Set();
+  if(/法律|法學|刑法|民法|憲法|行政法|轉學考|國考|司法/.test(s))out.add('法律／轉學考');
+  if(/英語|英文|日語|日文|語言|toeic|toefl|ielts|jlpt|檢定|國際|海外|交換/.test(s))out.add('語言／國際／海外');
+  if(/青少年|營隊|教學|社課|演辯|辯論|高中|帶領|教育/.test(s))out.add('青少年／營隊／教學');
+  if(/實習|工作|職涯|履歷|就業|打工|產業|職場/.test(s))out.add('職涯／實習');
+  if(/ai|人工智慧|gpt|claude|gemini|notebooklm|簡報|溝通|數位|工具/.test(s))out.add('通用能力／AI工具');
+  return out;
+}
+function activityGoalTokens(text){
+  const stop=new Set(['目標','任務','子任務','具體','實現','方式','學習','準備','複習','建立','計畫','規劃','能力','上學期','下學期','年度','階段','課程']);
+  return [...new Set(String(text||'').toLowerCase().split(/[／/、，,\s+｜·：:（）()【】\[\]「」『』_-]+/).map(x=>x.trim()).filter(x=>x.length>=2&&!stop.has(x)))];
+}
+function activityGoalCorpus(subtask){
+  const children=(db.tasks||[]).filter(t=>Number(t.level)===4&&String(t.parent)===String(subtask?.id)&&t.status!=='已封存');
+  return {path:activityGoalPathText(subtask),children,text:[activityGoalPathText(subtask),...children.map(x=>x.name)].join(' ')};
+}
+function activityGoalAffinity(a,subtask){
+  if(!a||!subtask)return {score:0,evidence:[],concrete:[]};
+  const goal=activityGoalCorpus(subtask),activityText=[a.title,a.keywords,a.type,a.scope,a.source,a.organizer,a.audience,...(a.goalMatches||[]),...(a.fitReasons||[])].filter(Boolean).join(' ').toLowerCase();
+  let score=0;const evidence=[],goalCats=activityGoalCategorySet(goal.text),activityCats=activityGoalCategorySet(activityText),backendCats=new Set(Array.isArray(a.goalMatches)?a.goalMatches:[]);
+  [...goalCats].forEach(cat=>{if(activityCats.has(cat)||backendCats.has(cat)){score+=28;evidence.push(cat)}});
+  let hits=0;activityGoalTokens(goal.path).forEach(token=>{if(activityText.includes(token)){hits++;score+=10}});if(hits>=2)score+=8;
+  const concrete=[];goal.children.forEach(child=>{const cc=activityGoalCategorySet(child.name),ct=activityGoalTokens(child.name),catHit=[...cc].some(x=>activityCats.has(x)||backendCats.has(x)),wordHits=ct.filter(x=>activityText.includes(x)).length;if(catHit||wordHits){score+=Math.min(18,(catHit?8:0)+wordHits*5);concrete.push(child)}});
+  if(a.type==='法律／學術'&&goalCats.has('法律／轉學考'))score+=8;if(a.type==='語言／國際'&&goalCats.has('語言／國際／海外'))score+=8;if(a.type==='教育／青少年'&&goalCats.has('青少年／營隊／教學'))score+=8;if(a.type==='職涯／實習'&&(goalCats.has('職涯／實習')||goalCats.has('語言／國際／海外')))score+=6;
+  return {score:Math.max(0,Math.min(100,Math.round(score))),evidence:[...new Set(evidence)],concrete:concrete.slice(0,3)};
+}
+function activitySelectedSubtask(){const id=document.getElementById('activityGoalFilter')?.value||'全部';return id==='全部'?null:activityActiveSubtasks().find(t=>String(t.id)===String(id))||null}
+function activityEnsureGoalFilter(){
+  const sel=document.getElementById('activityGoalFilter');if(!sel)return;const before=sel.value||'全部',tasks=activityActiveSubtasks();
+  sel.innerHTML='<option value="全部">全部子任務</option>'+tasks.map(t=>{const p=activityGoalPathText(t).split(' → ').slice(-2,-1)[0]||'';return `<option value="${esc(String(t.id))}">${esc(t.name)}${p?' · '+esc(p):''}</option>`}).join('');
+  sel.value=tasks.some(t=>String(t.id)===String(before))?before:'全部';
+}
+function activityGoalLinkFor(a){
+  const selected=activitySelectedSubtask();if(selected){const affinity=activityGoalAffinity(a,selected);return affinity.score>=20?{subtask:selected,affinity}:null}
+  let best=null;activityActiveSubtasks().forEach(t=>{const affinity=activityGoalAffinity(a,t);if(!best||affinity.score>best.affinity.score)best={subtask:t,affinity}});return best&&best.affinity.score>=20?best:null;
+}
+function activityMatchesGoalFilter(a){const s=activitySelectedSubtask();return !s||activityGoalAffinity(a,s).score>=20}
+function activityRenderGoalContext(){
+  const box=document.getElementById('activityGoalContext');if(!box)return;const s=activitySelectedSubtask();if(!s){box.style.display='none';box.innerHTML='';return}
+  const count=activityStore().filter(a=>activityIsEligibleBaseV968(a)&&activityMatchesGoalFilter(a)).length;box.style.display='flex';box.innerHTML=`<div><small>🎯 目前活動目標</small><b>${esc(s.name)}</b><span>${esc(activityGoalPathText(s))}</span><em>${count?`目前約 ${count} 項活動符合此子任務`:'目前沒有達到關聯門檻的活動'}；Level 4 具體實現方式只作適配參考，不作為篩選層級。</em></div><button class="btn" type="button" onclick="activityOpenGoal('${String(s.id)}')">查看目標</button>`;
+}
+function activityOpenGoal(taskId){
+  const t=typeof getTask==='function'?getTask(taskId):null,sub=activitySubtaskForTask(t)||t;if(!sub){toast('找不到對應子任務');return}
+  try{const chain=ancestors(sub.id);chain.forEach(x=>{if(Number(x.level)<4)storeSet('o'+x.id,'1')});const q=document.getElementById('q'),sf=document.getElementById('sf'),lf=document.getElementById('lf');if(q)q.value='';if(sf)sf.value='all';if(lf)lf.value='all';selected=sub.id;goalPath={long:chain.find(x=>x.level===1)?.id||null,mid:chain.find(x=>x.level===2)?.id||null,short:sub.id,exec:null};go('goals');renderTree();setTimeout(()=>{document.getElementById('task-'+sub.id)?.scrollIntoView({behavior:'smooth',block:'center'});if(typeof openGoalInfoModal==='function')openGoalInfoModal(sub.id)},100)}catch(e){console.error(e);toast('目標定位失敗')}
+}
+function activityOpenFromGoal(taskId){
+  const t=typeof getTask==='function'?getTask(taskId):null,sub=activitySubtaskForTask(t);if(!sub){toast('活動雷達只以子任務層級篩選');return}
+  go('activity');activityEnsureGoalFilter();const sel=document.getElementById('activityGoalFilter');if(sel)sel.value=String(sub.id);activityPage=1;renderActivities();setTimeout(()=>document.getElementById('activityGoalContext')?.scrollIntoView({behavior:'smooth',block:'center'}),80);toast('已依子任務「'+sub.name+'」篩選活動');
+}
+const activityIsEligibleBaseV968=activityIsEligible;
+activityIsEligible=function(a){return activityIsEligibleBaseV968(a)&&activityMatchesGoalFilter(a)};
+const activityCardHTMLBaseV968=activityCardHTML;
+activityCardHTML=function(a,today){
+  let html=activityCardHTMLBaseV968(a,today),link=activityGoalLinkFor(a);if(!link)return html;
+  const concrete=link.affinity.concrete.length?`<div class="activity-concrete-evidence"><em>具體實現參考</em>${link.affinity.concrete.map(x=>`<span>${esc(x.name)}</span>`).join('')}</div>`:'';
+  const bridge=`<div class="activity-goal-bridge-card"><button type="button" onclick="activityOpenGoal('${String(link.subtask.id)}')"><span>🎯 ${esc(link.subtask.name)}</span><b>${link.affinity.score}%</b></button><small>${esc(activityGoalPathText(link.subtask))}</small>${concrete}</div>`;
+  html=html.replace('<details class="activity-reasons">',bridge+'<details class="activity-reasons">');
+  html=html.replace('<ul>',`<ul><li>目標地圖：與子任務「${esc(link.subtask.name)}」關聯 ${link.affinity.score}%</li>`);
+  html=html.replace('<div class="activity-actions">',`<div class="activity-actions"><button class="btn" type="button" onclick="activityOpenGoal('${String(link.subtask.id)}')">查看目標</button>`);
+  return html;
+};
+const renderActivitiesBaseV968=renderActivities;
+renderActivities=function(){activityEnsureGoalFilter();renderActivitiesBaseV968();activityRenderGoalContext()};
+const activityResetFiltersBaseV968=activityResetFilters;
+activityResetFilters=function(){const e=document.getElementById('activityGoalFilter');if(e)e.value='全部';activityResetFiltersBaseV968();activityRenderGoalContext()};
+function installActivityGoalBridge(){
+  const original=window.openGoalInfoModal;if(typeof original!=='function'||original.__v968GoalBridge)return;
+  function wrapped(id,...args){const result=original.call(this,id,...args);try{const t=typeof getTask==='function'?getTask(id):null,sub=activitySubtaskForTask(t);if(sub){const body=document.getElementById('goalInfoBody');if(body&&!body.querySelector('.goal-activity-bridge')){const note=Number(t?.level)===4?`目前具體實現「${esc(t.name)}」只作活動適配參考；雷達篩選回到子任務「${esc(sub.name)}」。`:`活動雷達以此子任務作為篩選層級，並參考其 Level 4 具體實現方式。`;body.insertAdjacentHTML('beforeend',`<div class="goal-activity-bridge"><div><small>活動雷達連動</small><b>${esc(sub.name)}</b><span>${note}</span></div><button class="btn gold" type="button" onclick="activityOpenFromGoal('${String(sub.id)}')">查看相關活動 →</button></div>`)}}}catch(e){console.error(e)}return result}
+  wrapped.__v968GoalBridge=true;window.openGoalInfoModal=wrapped;
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(installActivityGoalBridge,0),{once:true});else setTimeout(installActivityGoalBridge,0);

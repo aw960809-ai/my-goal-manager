@@ -252,3 +252,17 @@ html.app-dark .bottom-nav button.active .bn-icon{color:#d1ad61;}
 html.app-dark #activity .activity-score-block,html.app-dark #activity .activity-decision-grid>div,html.app-dark #activity .activity-source{background:#1e2a26;border-color:#2d3b36}
 html.app-dark #activity .activity-goal-chip{background:#17211e;border-color:#34433e;color:#e4eee9}
 html.app-dark #activity .activity-eyebrow,html.app-dark #activity .activity-reasons summary{color:#8dd0b4}
+
+/* V96.8 Goal Map <-> Activity Radar */
+#activity .activity-goal-context{display:none;align-items:center;justify-content:space-between;gap:12px;margin:10px 0;padding:12px 13px;border:1px solid rgba(0,86,59,.18);border-radius:14px;background:linear-gradient(135deg,rgba(0,86,59,.055),rgba(197,160,89,.055))}
+#activity .activity-goal-context>div{min-width:0;display:grid;gap:3px}#activity .activity-goal-context small,.goal-activity-bridge small{font-size:9px;font-weight:900;color:var(--ui-green,#00563B)}
+#activity .activity-goal-context b{font-size:13px}#activity .activity-goal-context span,#activity .activity-goal-context em{font-size:9px;line-height:1.45;color:var(--ui-muted,#66727d);font-style:normal;overflow-wrap:anywhere}
+#activity .activity-goal-bridge-card{display:grid;gap:5px;margin-top:9px;padding:9px 10px;border:1px solid rgba(0,86,59,.15);border-radius:11px;background:rgba(0,86,59,.035)}
+#activity .activity-goal-bridge-card>button{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:0;border:0;background:transparent;text-align:left;color:inherit;cursor:pointer}
+#activity .activity-goal-bridge-card>button span{font-size:10px;font-weight:850;overflow-wrap:anywhere}#activity .activity-goal-bridge-card>button b{font-size:10px;color:var(--ui-green,#00563B);white-space:nowrap}
+#activity .activity-goal-bridge-card>small{font-size:8.5px;color:var(--ui-muted,#66727d);line-height:1.35;overflow-wrap:anywhere}
+#activity .activity-concrete-evidence{display:flex;gap:4px;flex-wrap:wrap;align-items:center}#activity .activity-concrete-evidence em{font-style:normal;font-size:8px;color:var(--ui-muted,#66727d)}
+#activity .activity-concrete-evidence span{display:inline-flex;padding:3px 6px;border-radius:999px;border:1px dashed rgba(0,86,59,.26);background:rgba(255,255,255,.7);font-size:8px;line-height:1.2}
+.goal-activity-bridge{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding:12px;border:1px solid rgba(0,86,59,.18);border-radius:14px;background:linear-gradient(135deg,rgba(0,86,59,.055),rgba(197,160,89,.055))}.goal-activity-bridge>div{min-width:0;display:grid;gap:3px}.goal-activity-bridge b{font-size:12px}.goal-activity-bridge span{font-size:9px;line-height:1.45;color:var(--ui-muted,#66727d)}
+@media(max-width:650px){#activity .activity-goal-context,.goal-activity-bridge{align-items:stretch;flex-direction:column}#activity .activity-goal-context .btn,.goal-activity-bridge .btn{width:100%}}
+html.app-dark #activity .activity-goal-context,html.app-dark #activity .activity-goal-bridge-card,html.app-dark .goal-activity-bridge{background:linear-gradient(135deg,rgba(48,126,94,.13),rgba(197,160,89,.08));border-color:#34433e}html.app-dark #activity .activity-concrete-evidence span{background:#17211e;border-color:#40554c}
