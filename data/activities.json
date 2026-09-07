@@ -1,6 +1,6 @@
 {
   "meta": {
-    "updatedAt": "2026-09-07T10:03:02.861974+00:00",
+    "updatedAt": "2026-09-07T10:37:23.033454+00:00",
     "sources": 5,
     "events": 21,
     "ok": 15,
@@ -141,7 +141,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026070017",
-        "fetchedAt": "2026-09-07T10:01:04.457797+00:00"
+        "fetchedAt": "2026-09-07T10:35:20.861303+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -189,7 +189,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026080023",
-        "fetchedAt": "2026-09-07T10:01:05.848517+00:00"
+        "fetchedAt": "2026-09-07T10:35:22.186706+00:00"
       },
       "fitScore": 73,
       "fitTier": "高適配",
@@ -237,7 +237,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026070019",
-        "fetchedAt": "2026-09-07T10:01:07.757173+00:00"
+        "fetchedAt": "2026-09-07T10:35:24.041970+00:00"
       },
       "fitScore": 48,
       "fitTier": "探索",
@@ -286,7 +286,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090016",
-        "fetchedAt": "2026-09-07T10:01:15.724431+00:00"
+        "fetchedAt": "2026-09-07T10:35:31.181880+00:00"
       },
       "fitScore": 78,
       "fitTier": "高適配",
@@ -333,7 +333,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026080015",
-        "fetchedAt": "2026-09-07T10:01:22.325011+00:00"
+        "fetchedAt": "2026-09-07T10:35:37.882589+00:00"
       },
       "fitScore": 96,
       "fitTier": "高適配",
@@ -380,7 +380,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026080013",
-        "fetchedAt": "2026-09-07T10:01:25.391418+00:00"
+        "fetchedAt": "2026-09-07T10:35:40.941425+00:00"
       },
       "fitScore": 51,
       "fitTier": "探索",
@@ -427,7 +427,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090001",
-        "fetchedAt": "2026-09-07T10:01:28.304444+00:00"
+        "fetchedAt": "2026-09-07T10:35:43.584786+00:00"
       },
       "fitScore": 42,
       "fitTier": "探索",
@@ -473,7 +473,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026080014",
-        "fetchedAt": "2026-09-07T10:01:32.065380+00:00"
+        "fetchedAt": "2026-09-07T10:35:46.389414+00:00"
       },
       "fitScore": 47,
       "fitTier": "探索",
@@ -521,7 +521,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026080025",
-        "fetchedAt": "2026-09-07T10:01:33.135907+00:00"
+        "fetchedAt": "2026-09-07T10:35:47.655558+00:00"
       },
       "fitScore": 47,
       "fitTier": "探索",
@@ -569,7 +569,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026080017",
-        "fetchedAt": "2026-09-07T10:01:36.635960+00:00"
+        "fetchedAt": "2026-09-07T10:35:51.182011+00:00"
       },
       "fitScore": 73,
       "fitTier": "高適配",
@@ -617,7 +617,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026070022",
-        "fetchedAt": "2026-09-07T10:01:38.102622+00:00"
+        "fetchedAt": "2026-09-07T10:35:52.820750+00:00"
       },
       "fitScore": 43,
       "fitTier": "探索",
@@ -665,7 +665,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "taichung_job",
         "act": "5583",
-        "fetchedAt": "2026-09-07T10:01:44.769102+00:00"
+        "fetchedAt": "2026-09-07T10:36:02.594243+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -713,7 +713,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "taichung_job",
         "act": "5387",
-        "fetchedAt": "2026-09-07T10:01:50.081253+00:00"
+        "fetchedAt": "2026-09-07T10:36:08.494982+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -761,7 +761,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "taichung_job",
         "act": "5582",
-        "fetchedAt": "2026-09-07T10:01:51.060192+00:00"
+        "fetchedAt": "2026-09-07T10:36:09.468936+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -809,7 +809,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-09-07T10:03:02.849655+00:00"
+        "fetchedAt": "2026-09-07T10:37:23.021336+00:00"
       },
       "fitScore": 94,
       "fitTier": "高適配",
