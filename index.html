@@ -88,17 +88,11 @@
       <div class="search-status-row"><span id="activitySearchStatus"></span><button class="search-reset" type="button" onclick="activityResetFilters()">↺ 重設條件</button></div>
     </div>
     <div class="activity-filter-row visual-filters" style="margin-top:9px">
-      <label class="filter-control"><span>📍 範圍</span><select id="activityScope" onchange="renderActivities()"><option value="全部">全部範圍</option><option>東海校內</option><option>西屯／沙鹿</option><option>臺中</option><option>中部</option><option>全臺</option><option>線上／海外</option></select></label>
-      <label class="filter-control"><span>▦ 類型</span><select id="activityType" onchange="renderActivities()"><option value="全部">全部類型</option><option>法律／學術</option><option>語言／國際</option><option>教育／青少年</option><option>職涯／實習</option><option>公共參與</option></select></label>
+      <!-- V96.7 activity filters --><label class="filter-control"><span>📍 同心圓</span><select id="activityScope" onchange="activityPage=1;renderActivities()"><option value="全部">全部圈層</option><option value="東海校內">① 東海校內</option><option value="台中">② 台中</option><option value="全國">③ 全國</option><option value="海外／國際">④ 海外／國際</option></select></label>
+      <label class="filter-control"><span>▦ 類型</span><select id="activityType" onchange="renderActivities()"><option value="全部">全部類型</option><option>法律／學術</option><option>語言／國際</option><option>教育／青少年</option><option>職涯／實習</option><option>公共參與</option></select></label><label class="filter-control"><span>◎ 適配度</span><select id="activityFitTier" onchange="activityPage=1;renderActivities()"><option value="全部">全部適配度</option><option value="高適配">高適配</option><option value="中適配">中適配</option><option value="探索">探索</option></select></label>
     </div>
     <div id="activityStats" class="context"></div>
-    <div class="activity-radar-guide" aria-label="活動雷達同心圓判準">
-      <div class="radar-ring core"><b>① 核心圈</b><small>高匹配＋東海／近生活圈＋現在值得行動</small></div>
-      <div class="radar-ring near"><b>② 近距圈</b><small>高度相關＋中低投入成本，可優先安排</small></div>
-      <div class="radar-ring extended"><b>③ 延伸圈</b><small>有價值，但距離／成本／時效降低優先度</small></div>
-      <div class="radar-ring explore"><b>④ 探索圈</b><small>長期、低立即性或純探索資訊</small></div>
-    </div>
-    <div id="activityAutoStatus" class="panel" style="margin:10px 0;padding:12px;display:none"><div class="section-title"><div><h3 style="margin:0">自動活動資料</h3></div><span id="activityAutoUpdated" class="muted"></span></div><div id="activityAutoMeta" class="muted"></div></div>
+    <div class="activity-radar-guide" aria-label="活動雷達同心圓判準"><div class="radar-ring core"><b>① 東海校內</b><small>校內活動，執行成本最低</small></div><div class="radar-ring near"><b>② 台中</b><small>台中地區，可直接安排參與</small></div><div class="radar-ring extended"><b>③ 全國</b><small>全國性機會，以目標適配度決定優先</small></div><div class="radar-ring explore"><b>④ 海外／國際</b><small>海外工作、交流、實習與長期國際經驗</small></div></div><div id="activityAutoStatus" class="panel" style="margin:10px 0;padding:12px;display:none"><div class="section-title"><div><h3 style="margin:0">自動活動資料</h3></div><span id="activityAutoUpdated" class="muted"></span></div><div id="activityAutoMeta" class="muted"></div></div>
     <div id="activityList" class="list"></div>
     <div id="activityPagination" class="activity-pagination" aria-label="活動雷達分頁"></div>
     <div id="activityReferences" class="activity-references"></div>

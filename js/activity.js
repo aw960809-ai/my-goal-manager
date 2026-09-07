@@ -27,7 +27,53 @@ function catalogItemById(id){
  return activityStore().find(x=>String(x.id)===key)||scholarshipStore().find(x=>String(x.id)===key)||null;
 }
 
-function activityDistance(scope){return ({'東海校內':1,'西屯／沙鹿':2,'臺中':3,'中部':4,'全臺':5,'線上／海外':6}[scope]||6)}
+/* V96.7 Activity Radar UI: backend fit/circle aware */
+function activityCircleInfo(a){
+  const raw=String(a?.circleLabel||a?.scope||'').trim().replace('臺','台');
+  const explicit=Number(a?.circleLevel||0);
+  if(explicit>=1&&explicit<=4){
+    const label=explicit===1?'東海校內':explicit===2?'台中':explicit===3?'全國':'海外／國際';
+    return {level:explicit,label,key:'circle'+explicit};
+  }
+  if(/東海|校內/.test(raw))return {level:1,label:'東海校內',key:'circle1'};
+  if(/西屯|沙鹿|台中/.test(raw))return {level:2,label:'台中',key:'circle2'};
+  if(/海外|國際|線上/.test(raw))return {level:4,label:'海外／國際',key:'circle4'};
+  return {level:3,label:'全國',key:'circle3'};
+}
+function activityDistance(scope){return activityCircleInfo({scope}).level}
+function activityDeadlineInfo(a){
+  const today=todayKey(),deadline=String(a?.deadline||'').trim();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(deadline))return {deadline:'',closed:false,days:null,label:a?.openEnded?'常設開放':'依公告／無單一截止日'};
+  const days=Math.round((new Date(deadline+'T00:00:00')-new Date(today+'T00:00:00'))/86400000);
+  if(days<0)return {deadline,closed:true,days,label:`已截止 ${deadline}`};
+  if(days===0)return {deadline,closed:false,days,label:'今天截止'};
+  if(days<=7)return {deadline,closed:false,days,label:`${days} 天內截止 · ${deadline}`};
+  return {deadline,closed:false,days,label:`截止 ${deadline}`};
+}
+function activityFitTier(score){
+  const n=Number(score||0);if(n>=72)return '高適配';if(n>=52)return '中適配';if(n>=38)return '探索';return '低適配';
+}
+function activityFitClass(tier){return tier==='高適配'?'fit-high':tier==='中適配'?'fit-mid':tier==='探索'?'fit-explore':'fit-low'}
+function activityReasonLabel(reason){
+  const s=String(reason||'').replace(/[+-]\d+$/,'').trim();if(!s)return '';
+  if(/^同心圓/.test(s))return s.replace(/^同心圓第\d+圈：/,'位置：');
+  if(s==='法律／轉學考')return '直接連結法律／轉學考目標';
+  if(s==='語言／國際／海外')return '直接連結語言／海外／國際目標';
+  if(s==='青少年／營隊／教學')return '連結青少年營隊／教學目標';
+  if(s==='職涯／實習')return '具職涯／實習行動價值';
+  if(s==='通用能力／AI工具')return '可提升通用能力／AI工具能力';
+  if(/有明確截止日/.test(s))return '有明確截止日，可直接安排';
+  if(/有明確地點/.test(s))return '有明確地點，執行成本可判斷';
+  if(/直接連結海外/.test(s))return '直接連結海外／國際經驗';
+  if(/直接連結法律/.test(s))return '直接連結法律學習';
+  if(/大學生/.test(s))return '活動對象與大學生身分相符';
+  if(/職場體驗|產業探索|實習/.test(s))return '具體職涯體驗，可轉化為行動';
+  return s;
+}
+function activityGoalLabels(a,fit){
+  const result=[];(Array.isArray(a?.goalMatches)?a.goalMatches:[]).forEach(x=>{if(x&&!result.includes(x))result.push(x)});
+  if(fit?.task?.name&&!result.includes(fit.task.name))result.unshift(fit.task.name);return result.slice(0,3);
+}
 function activityAutoClass(a){
  const allowed=['法律／學術','語言／國際','教育／青少年','職涯／實習','公共參與'];
  if(allowed.includes(a.type))return a.type;
@@ -58,42 +104,33 @@ function activityMatchDetails(a){
  return {task:best,matchScore:bestScore};
 }
 function activityTimeState(a){
- const today=todayKey();
- const date=String(a.date||'').trim();
- const duration=Number(a.durationMinutes||a.duration||0)||0;
- if(a.available===false)return {eligible:false,state:'停用',reason:'資料標示不可用'};
- if(a.kind==='reference')return {eligible:false,state:'參考',reason:'資訊入口，不列入可直接參加清單'};
- if(date && /^\d{4}-\d{2}-\d{2}$/.test(date) && date<today)return {eligible:false,state:'已過期',reason:'活動日期已經過去'};
- if(duration>0 && duration<(window.ActivityRules?.minimumDurationMinutes||30))return {eligible:false,state:'過短',reason:'活動時間少於 30 分鐘，暫不列入行動推薦'};
- if(date)return {eligible:true,state:'可安排',reason:'已有明確日期'};
- return {eligible:true,state:'持續資訊',reason:'未提供單一日期，依公告／梯次判斷'};
+  const today=todayKey(),date=String(a.date||'').trim(),duration=Number(a.durationMinutes||a.duration||0)||0,deadline=activityDeadlineInfo(a);
+  if(a.radarEligible===false)return {eligible:false,state:'已排除',reason:a.eligibilityReason||a.hardFilterReason||'後端雷達判斷為不適用'};
+  if(a.available===false)return {eligible:false,state:'停用',reason:'資料標示不可用'};
+  if(a.kind==='reference')return {eligible:false,state:'參考',reason:'資訊入口，不列入可直接參加清單'};
+  if(deadline.closed)return {eligible:false,state:'已截止',reason:deadline.label};
+  if(date&&/^\d{4}-\d{2}-\d{2}$/.test(date)&&date<today)return {eligible:false,state:'已過期',reason:'活動日期已經過去'};
+  if(duration>0&&duration<(window.ActivityRules?.minimumDurationMinutes||30))return {eligible:false,state:'過短',reason:'活動時間少於 30 分鐘，暫不列入行動推薦'};
+  if(deadline.deadline)return {eligible:true,state:'可報名',reason:deadline.label};
+  if(a.openEnded)return {eligible:true,state:'常設',reason:'官方常設計畫／入口'};
+  if(date)return {eligible:true,state:'可安排',reason:'已有明確日期'};
+  return {eligible:true,state:'持續資訊',reason:'未提供單一日期，依公告／梯次判斷'};
 }
 function activityFit(a){
- // V95.2：把「目標匹配度」與「推薦優先度／同心圓」分開。
- // 目標匹配度回答「它適不適合我」；同心圓回答「我現在應不應優先投入」。
- const rel=activityMatchDetails(a),d=activityDistance(a.scope),text=(a.title+' '+(a.keywords||'')+' '+(a.type||'')).toLowerCase();
- const goal=Math.min(45,Math.round(rel.matchScore*3));
- const direct=a.direct===true&&!a.team;
- const knowledge=/實習|工作|打工|職涯|學術|法律|教育|語言|國際|技能|培訓|講座|見習|證照/.test(text)?(window.ActivityRules?.weights?.knowledge||15):8;
- const proximity={1:15,2:12,3:9,4:6,5:3,6:0}[d]||0;
- const freshness=a.available===false?0:(a.date?5:3);
- const time=activityTimeState(a);
- const action=direct?(window.ActivityRules?.weights?.direct||20):10;
- const institutional=(a.scope==='東海校內'&&a.sourcePriority==='core')?(window.ActivityRules?.institutionalBonus||5):0;
- const priority=Math.max(0,Math.min(100,goal+action+knowledge+proximity+freshness+institutional));
- const matchPercent=Math.max(0,Math.min(100,Math.round((goal/45)*100)));
- let ring='explore';
- const rr=window.ActivityRules?.rings||{};
- if(time.eligible&&d<=(rr.core?.distance||2)&&priority>=(rr.core?.priority||75))ring='core';
- else if(time.eligible&&d<=(rr.near?.distance||3)&&priority>=(rr.near?.priority||65))ring='near';
- else if(time.eligible&&priority>=(rr.extended?.priority||45))ring='extended';
- return {score:priority,priority,matchPercent,goal,direct:action,knowledge,geo:proximity,freshness,institutional,task:rel.task,eligible:time.eligible,timeState:time.state,timeReason:time.reason,ring};
+  const rel=activityMatchDetails(a),circle=activityCircleInfo(a),backendScore=Number(a.fitScore),hasBackend=Number.isFinite(backendScore)&&String(a.id||'').startsWith('auto-');
+  if(hasBackend){
+    const score=Math.max(0,Math.min(100,Math.round(backendScore))),tier=String(a.fitTier||activityFitTier(score)),time=activityTimeState(a);
+    return {score,priority:score,tier,matchPercent:score,task:rel.task,eligible:time.eligible,timeState:time.state,timeReason:time.reason,circleLevel:circle.level,circleLabel:circle.label,circleKey:circle.key,reasons:Array.isArray(a.fitReasons)?a.fitReasons:[],goalMatches:Array.isArray(a.goalMatches)?a.goalMatches:[],sourceMode:'backend'};
+  }
+  const d=circle.level,text=(a.title+' '+(a.keywords||'')+' '+(a.type||'')).toLowerCase(),goal=Math.min(45,Math.round(rel.matchScore*3)),direct=a.direct===true&&!a.team;
+  const knowledge=/實習|工作|打工|職涯|學術|法律|教育|語言|國際|技能|培訓|講座|見習|證照/.test(text)?(window.ActivityRules?.weights?.knowledge||15):8;
+  const proximity={1:8,2:4,3:2,4:0}[d]||0,freshness=a.available===false?0:(a.date?5:3),action=direct?(window.ActivityRules?.weights?.direct||20):10,institutional=(circle.level===1&&a.sourcePriority==='core')?(window.ActivityRules?.institutionalBonus||5):0;
+  const score=Math.max(0,Math.min(100,goal+action+knowledge+proximity+freshness+institutional)),tier=activityFitTier(score),time=activityTimeState(a);
+  return {score,priority:score,tier,matchPercent:Math.max(0,Math.min(100,Math.round((goal/45)*100))),task:rel.task,eligible:time.eligible,timeState:time.state,timeReason:time.reason,circleLevel:circle.level,circleLabel:circle.label,circleKey:circle.key,reasons:[],goalMatches:[],sourceMode:'local'};
 }
-function activityRingLabel(r){return ({core:'① 核心圈',near:'② 近距圈',extended:'③ 延伸圈',explore:'④ 探索圈'})[r]||'④ 探索圈'}
-function activitySort(a,b){
- const order={core:1,near:2,extended:3,explore:4};
- return (order[a.fit.ring]-order[b.fit.ring])||((a.date||'9999-12-31').localeCompare(b.date||'9999-12-31'))||(b.fit.score-a.fit.score)||a.title.localeCompare(b.title,'zh-Hant');
-}
+function activityRingLabel(r){return String(r||'')}
+function activityCircleLabel(level){return ({1:'① 東海校內',2:'② 台中',3:'③ 全國',4:'④ 海外／國際'})[Number(level)]||'③ 全國'}
+function activitySort(a,b){return (b.fit.score-a.fit.score)||(a.fit.circleLevel-b.fit.circleLevel)||((a.date||'9999-12-31').localeCompare(b.date||'9999-12-31'))||a.title.localeCompare(b.title,'zh-Hant')}
 let activityPage=1;
 const ACTIVITY_PAGE_SIZE=window.ActivityRules?.pageSize||4;
 function clearActivitySearch(){const input=document.getElementById('activitySearch');if(input)input.value='';activityPage=1;updateActivitySearchUI();renderActivities();toast('已清除搜尋')}
@@ -105,13 +142,11 @@ function activityDateLabel(a,today){if(a.date)return `${esc(a.date)}${a.time?' �
 let remoteActivityCatalog=[];
 let activityAutoMeta={updatedAt:'',sources:0,events:0,ok:0,failed:0};
 function normalizeRemoteActivity(a,i){
- const x={...(a||{})};
- x.id=String(x.id||('auto-'+i+'-'+Math.abs(hashCode(String(x.title||'activity')+String(x.date||'')))));
- x.title=String(x.title||'未命名活動').trim();x.date=String(x.date||'').trim();x.time=String(x.time||'').trim();
- x.scope=String(x.scope||'全臺').trim();x.type=String(x.type||'公共參與').trim();x.kind=x.kind||'event';
- x.scholarship=!!x.scholarship;x.url=String(x.url||x.externalUrl||'').trim();x.keywords=String(x.keywords||'').trim();x.source=String(x.source||'自動活動資料').trim();
- x.statusText=String(x.statusText||'自動抓取').trim();x.direct=x.direct!==false;x.team=!!x.team;x.available=x.available!==false;
- x.durationMinutes=Number(x.durationMinutes||x.duration||0)||0;if(x.scholarship)x.type='獎學金／助學金';return x;
+  const x={...(a||{})};x.id=String(x.id||('auto-'+i+'-'+Math.abs(hashCode(String(x.title||'activity')+String(x.date||'')))));
+  x.title=String(x.title||'未命名活動').trim();x.date=String(x.date||'').trim();x.time=String(x.time||'').trim();x.deadline=String(x.deadline||'').trim();x.scope=String(x.scope||x.circleLabel||'全國').trim();x.type=String(x.type||'公共參與').trim();x.kind=x.kind||'event';
+  x.scholarship=!!x.scholarship;x.url=String(x.url||x.externalUrl||'').trim();x.keywords=String(x.keywords||'').trim();x.source=String(x.source||'自動活動資料').trim();x.statusText=String(x.statusText||'自動抓取').trim();x.direct=x.direct!==false;x.team=!!x.team;x.available=x.available!==false;
+  x.fitScore=(x.fitScore===null||x.fitScore===undefined||x.fitScore==='')?null:Number(x.fitScore);x.fitTier=String(x.fitTier||'').trim();x.circleLabel=String(x.circleLabel||'').trim();x.circleLevel=Number(x.circleLevel||0)||0;
+  x.fitReasons=Array.isArray(x.fitReasons)?x.fitReasons.filter(Boolean):[];x.goalMatches=Array.isArray(x.goalMatches)?x.goalMatches.filter(Boolean):[];x.radarEligible=x.radarEligible!==false;x.audience=String(x.audience||'').trim();x.organizer=String(x.organizer||'').trim();x.durationMinutes=Number(x.durationMinutes||x.duration||0)||0;if(x.scholarship)x.type='獎學金／助學金';return x;
 }
 function hashCode(str){let h=0;for(let i=0;i<str.length;i++)h=((h<<5)-h)+str.charCodeAt(i)|0;return h}
 function mergeRemoteActivities(base,remote){const map=new Map((Array.isArray(base)?base:[]).map(a=>[String(a.id),a]));(Array.isArray(remote)?remote:[]).forEach((a,i)=>{const x=normalizeRemoteActivity(a,i);map.set(String(x.id),{...(map.get(String(x.id))||{}),...x})});return [...map.values()]}
@@ -150,9 +185,12 @@ async function loadRemoteActivities(){
  }catch(e){const box=document.getElementById('activityAutoStatus');if(box){box.style.display='block';const u=document.getElementById('activityAutoUpdated'),m=document.getElementById('activityAutoMeta');if(u)u.textContent='自動資料暫不可用';if(m)m.textContent='目前使用內建活動資料；下次更新會再嘗試。'}}
 }
 function activityCardHTML(a,today){
- const f=a.fit,relation=f.task?`<span class="activity-chip">→ ${esc(f.task.name)}</span>`:'';const dateBadge=f.timeState==='已過期'?'<span class="activity-chip">已過期</span>':f.timeState==='過短'?'<span class="activity-chip">過短，不推薦</span>':(a.date?'<span class="activity-chip">可安排</span>':'<span class="activity-chip">持續資訊</span>');
- const priorityLabel=f.ring==='core'?'現在優先':f.ring==='near'?'可優先安排':f.ring==='extended'?'值得保留':'探索／長期';
- return `<div class="activity-card ${f.ring==='core'?'recommended':''}"><div class="activity-head"><div><h3>${esc(a.title)}</h3><div class="muted">${activityDateLabel(a,today)}</div></div><div class="activity-score-block"><span class="activity-score">${f.score}%</span><small>推薦優先度</small></div></div><div class="activity-meta"><span class="activity-chip">${esc(activityRingLabel(f.ring))}</span><span class="activity-chip">${priorityLabel}</span><span class="activity-chip">${esc(a.scope)}</span><span class="activity-chip">${esc(a.type)}</span>${relation}${dateBadge}</div><div class="activity-fit"><b>判斷</b><span>目標匹配 ${f.matchPercent}%</span><span>可直接參加 ${f.direct}/20</span><span>專業價值 ${f.knowledge}/15</span><span>生活圈 ${f.geo}/15</span><span>時效 ${f.freshness}/5</span>${f.institutional?`<span>東海官方 +${f.institutional}</span>`:''}</div><div class="activity-actions">${activityExternalUrl(a)?`<a class="btn" href="${esc(safeExternalUrl(activityExternalUrl(a)))}" target="_blank" rel="noopener noreferrer">外部資訊</a>`:''}${((a.kind==='event'||a.kind==='plan')&&a.date)?`<button class="btn gold" type="button" onclick="addActivityToCalendar('${a.id}')">加入行事曆</button>`:''}</div></div>`;
+  const f=a.fit,tierClass=activityFitClass(f.tier),deadline=activityDeadlineInfo(a),goals=activityGoalLabels(a,f);
+  const goalHTML=goals.length?goals.map(g=>`<span class="activity-goal-chip">${esc(g)}</span>`).join(''):'<span class="muted">尚無直接目標連結</span>';
+  const reasons=(Array.isArray(f.reasons)?f.reasons:[]).map(activityReasonLabel).filter(Boolean).filter((x,i,arr)=>arr.indexOf(x)===i).slice(0,5);
+  const localReason=f.task?`與「${f.task.name}」直接相關`:'依活動內容與目標地圖進行匹配',reasonHTML=(reasons.length?reasons:[localReason]).map(r=>`<li>${esc(r)}</li>`).join('');
+  const dateText=a.date?`${esc(a.date)}${a.time?' · '+esc(a.time):''}`:esc(a.time||'依公告'),sourceText=[a.organizer||a.source,a.audience].filter(Boolean).map(esc).join(' · ');
+  return `<article class="activity-card ${tierClass}"><div class="activity-head"><div class="activity-title-block"><div class="activity-eyebrow">${esc(activityCircleLabel(f.circleLevel))}</div><h3>${esc(a.title)}</h3><div class="muted">${dateText}</div></div><div class="activity-score-block ${tierClass}"><span class="activity-score">${f.score}</span><small>${esc(f.tier)}</small></div></div><div class="activity-meta"><span class="activity-chip circle-chip">${esc(f.circleLabel)}</span><span class="activity-chip tier-chip ${tierClass}">${esc(f.tier)}</span><span class="activity-chip">${esc(a.type)}</span><span class="activity-chip">${esc(f.timeState)}</span></div><div class="activity-decision-grid"><div><small>報名／時效</small><b>${esc(deadline.label)}</b></div><div><small>目標關聯</small><div class="activity-goals">${goalHTML}</div></div></div><details class="activity-reasons"><summary>為什麼推薦</summary><ul>${reasonHTML}</ul>${sourceText?`<div class="activity-source">來源／資格：${sourceText}</div>`:''}</details><div class="activity-actions">${activityExternalUrl(a)?`<a class="btn" href="${esc(safeExternalUrl(activityExternalUrl(a)))}" target="_blank" rel="noopener noreferrer">官方資訊</a>`:''}${((a.kind==='event'||a.kind==='plan')&&a.date)?`<button class="btn gold" type="button" onclick="addActivityToCalendar('${String(a.id).replace(/'/g,"\\'")}')">加入行事曆</button>`:''}</div></article>`;
 }
 function renderActivityPagination(total){
  const el=document.getElementById('activityPagination');if(!el)return;const pages=Math.max(1,Math.ceil(total/ACTIVITY_PAGE_SIZE));activityPage=Math.min(Math.max(1,activityPage),pages);
@@ -161,22 +199,17 @@ function renderActivityPagination(total){
 function activityPrevPage(){if(activityPage>1){activityPage--;renderActivities();window.scrollTo({top:0,behavior:'smooth'})}}
 function activityNextPage(){activityPage++;renderActivities();window.scrollTo({top:0,behavior:'smooth'})}
 function renderActivities(){
- ensureActivities();bindActivitySearch();
- const q=(document.getElementById('activitySearch')?.value||'').trim().toLowerCase(),scope=document.getElementById('activityScope')?.value||'全部',type=document.getElementById('activityType')?.value||'全部',today=todayKey();
- let arr=activityStore().filter(activityIsEligible).map(a=>({...a,type:activityAutoClass(a),fit:activityFit(a)})).filter(a=>(!q||(a.title+' '+a.keywords+' '+a.scope).toLowerCase().includes(q))&&(scope==='全部'||a.scope===scope)&&(type==='全部'||a.type===type));
- arr.sort(activitySort);
- const groups={core:arr.filter(a=>a.fit.ring==='core'),near:arr.filter(a=>a.fit.ring==='near'),extended:arr.filter(a=>a.fit.ring==='extended'),explore:arr.filter(a=>a.fit.ring==='explore')};
- const pages=Math.max(1,Math.ceil(arr.length/ACTIVITY_PAGE_SIZE));activityPage=Math.min(Math.max(1,activityPage),pages);const pageItems=arr.slice((activityPage-1)*ACTIVITY_PAGE_SIZE,activityPage*ACTIVITY_PAGE_SIZE);
- const upcoming=arr.filter(a=>!a.date||a.date>=today).length;
- document.getElementById('activityStats').innerHTML=`目前 <b>${arr.length}</b> 項 · 核心 ${groups.core.length} · 近距 ${groups.near.length} · 延伸 ${groups.extended.length} · 探索 ${groups.explore.length} · 已排除過期／過短／參考入口 ${activityStore().length-arr.length} 項。`;
- const st=document.getElementById('activitySearchStatus');if(st)st.textContent=q?`搜尋「${esc(q)}」：找到 ${arr.length} 項`:`目前顯示 ${arr.length} 項符合時間與參加判準的活動／計畫`;
- const list=document.getElementById('activityList');
- if(!pageItems.length){list.innerHTML='<div class="empty">目前沒有符合條件的活動。可調整搜尋或範圍／類型。</div>';renderActivityPagination(0);renderActivityReferences();return;}
- const pageGroups={core:[],near:[],extended:[],explore:[]};pageItems.forEach(a=>pageGroups[a.fit.ring].push(a));
- list.innerHTML=Object.entries(pageGroups).filter(([,items])=>items.length).map(([ring,items])=>`<section class="activity-group ${ring}"><div class="activity-group-head"><div class="activity-group-title"><i></i>${activityRingLabel(ring)}</div><small>${ring==='core'?'現在最值得行動':ring==='near'?'可優先安排':ring==='extended'?'值得保留':'探索／長期資訊'}</small></div><div class="list">${items.map(a=>activityCardHTML(a,today)).join('')}</div></section>`).join('');
- renderActivityPagination(arr.length);renderActivityReferences();
+  ensureActivities();bindActivitySearch();const q=(document.getElementById('activitySearch')?.value||'').trim().toLowerCase(),circleFilter=document.getElementById('activityScope')?.value||'全部',type=document.getElementById('activityType')?.value||'全部',tierFilter=document.getElementById('activityFitTier')?.value||'全部',today=todayKey();
+  let arr=activityStore().filter(activityIsEligible).map(a=>({...a,type:activityAutoClass(a),fit:activityFit(a)})).filter(a=>{const hay=[a.title,a.keywords,a.scope,a.source,a.organizer,...(a.goalMatches||[])].join(' ').toLowerCase();return (!q||hay.includes(q))&&(circleFilter==='全部'||a.fit.circleLabel===circleFilter)&&(type==='全部'||a.type===type)&&(tierFilter==='全部'||a.fit.tier===tierFilter)});
+  arr.sort(activitySort);const tierCounts={high:arr.filter(a=>a.fit.tier==='高適配').length,mid:arr.filter(a=>a.fit.tier==='中適配').length,explore:arr.filter(a=>a.fit.tier==='探索').length},pages=Math.max(1,Math.ceil(arr.length/ACTIVITY_PAGE_SIZE));activityPage=Math.min(Math.max(1,activityPage),pages);const pageItems=arr.slice((activityPage-1)*ACTIVITY_PAGE_SIZE,activityPage*ACTIVITY_PAGE_SIZE);
+  const stats=document.getElementById('activityStats');if(stats)stats.innerHTML=`目前 <b>${arr.length}</b> 項 · 高適配 ${tierCounts.high} · 中適配 ${tierCounts.mid} · 探索 ${tierCounts.explore} · 每日自動更新後僅保留仍可行動項目。`;
+  const st=document.getElementById('activitySearchStatus');if(st)st.textContent=q?`搜尋「${q}」：找到 ${arr.length} 項`:`依適配度排序；同分時優先較近的同心圓`;
+  const list=document.getElementById('activityList');if(!pageItems.length){list.innerHTML='<div class="empty">目前沒有符合條件的活動。可調整搜尋、圈層、類型或適配度。</div>';renderActivityPagination(0);renderActivityReferences();return}
+  const pageGroups={1:[],2:[],3:[],4:[]};pageItems.forEach(a=>(pageGroups[a.fit.circleLevel]||pageGroups[3]).push(a));
+  list.innerHTML=Object.entries(pageGroups).filter(([,items])=>items.length).map(([level,items])=>`<section class="activity-group circle${level}"><div class="activity-group-head"><div class="activity-group-title"><i></i>${activityCircleLabel(level)}</div><small>${level==='1'?'最低執行成本':level==='2'?'台中可直接行動':level==='3'?'全國機會':'海外／國際長期目標'}</small></div><div class="list">${items.map(a=>activityCardHTML(a,today)).join('')}</div></section>`).join('');
+  renderActivityPagination(arr.length);renderActivityReferences();
 }
 function renderActivityReferences(){
  const box=document.getElementById('activityReferences');if(!box)return;const refs=activityStore().filter(a=>a.kind==='reference'&&activityExternalUrl(a));box.innerHTML=refs.length?`<div class="reference-title">📚 相關計畫資料（不列入可直接參加活動）</div>`+refs.map(a=>`<div class="reference-item"><div><b>${esc(a.title)}</b><small>${esc(a.statusText||'參考資料')} · ${esc(a.source||'官方來源')}</small></div><a class="btn" href="${esc(safeExternalUrl(activityExternalUrl(a)))}" target="_blank" rel="noopener noreferrer">查看官方資訊</a></div>`).join(''):'';
 }
-function activityResetFilters(){['activitySearch'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});['activityScope','activityType'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='全部'});activityPage=1;renderActivities()}
+function activityResetFilters(){['activitySearch'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});['activityScope','activityType','activityFitTier'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='全部'});activityPage=1;renderActivities()}
