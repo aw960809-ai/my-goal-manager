@@ -171,10 +171,11 @@ jobs:
           elif [ -d dist ]; then
             echo "SITE_DIR=dist" >> "$GITHUB_ENV"
           else
+            # Package the repository without copying the destination into itself.
             rm -rf _autofetch_site
             mkdir -p _autofetch_site/repo
-            cp -a . _autofetch_site/repo/
-            rm -rf               _autofetch_site/repo/.git               _autofetch_site/repo/.github               _autofetch_site/repo/data/staging
+            tar               --exclude='./.git'               --exclude='./.github'               --exclude='./data/staging'               --exclude='./_autofetch_site'               -cf - . | tar -xf - -C _autofetch_site/repo
+            test -f _autofetch_site/repo/index.html
             echo "SITE_DIR=_autofetch_site/repo" >> "$GITHUB_ENV"
           fi
 

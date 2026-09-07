@@ -12,7 +12,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import parse_qs, urljoin, urlparse
 
-USER_AGENT = 'GoalManager-AutoFetch/96.6.11 (+https://github.com/aw960809-ai/my-goal-manager)'
+USER_AGENT = 'GoalManager-AutoFetch/96.6.11.1 (+https://github.com/aw960809-ai/my-goal-manager)'
 MAX_BYTES = 2_000_000
 AUTO_PREFIX = 'auto-yda-'
 THU_AUTO_PREFIX = 'auto-thu-'
@@ -209,13 +209,16 @@ jobs:
           elif [ -d dist ]; then
             echo "SITE_DIR=dist" >> "$GITHUB_ENV"
           else
+            # Package the repository without copying the destination into itself.
             rm -rf _autofetch_site
             mkdir -p _autofetch_site/repo
-            cp -a . _autofetch_site/repo/
-            rm -rf \
-              _autofetch_site/repo/.git \
-              _autofetch_site/repo/.github \
-              _autofetch_site/repo/data/staging
+            tar \
+              --exclude='./.git' \
+              --exclude='./.github' \
+              --exclude='./data/staging' \
+              --exclude='./_autofetch_site' \
+              -cf - . | tar -xf - -C _autofetch_site/repo
+            test -f _autofetch_site/repo/index.html
             echo "SITE_DIR=_autofetch_site/repo" >> "$GITHUB_ENV"
           fi
 
@@ -260,7 +263,7 @@ jobs:
 
 
 SOURCES = {
-    'version': '96.6.11',
+    'version': '96.6.11.1',
     'mode': 'whitelist',
     'default_enabled': False,
     'sources': [
@@ -274,7 +277,7 @@ SOURCES = {
             'start_urls': [THU_LIST],
             'fetch_type': 'html',
             'trust_level': 'official',
-            'notes': 'V96.6.11 東海大學 tEvent 專用結構化 adapter。',
+            'notes': 'V96.6.11.1.1 東海大學 tEvent 專用結構化 adapter。',
         },
         {
             'id': 'taichung_job',
@@ -286,7 +289,7 @@ SOURCES = {
             'start_urls': [TAICHUNG_LIST],
             'fetch_type': 'html',
             'trust_level': 'official',
-            'notes': 'V96.6.11 臺中市就業服務處活動專用結構化 adapter；排除明確中高齡/銀髮與雇主專屬項目。',
+            'notes': 'V96.6.11.1.1 臺中市就業服務處活動專用結構化 adapter；排除明確中高齡/銀髮與雇主專屬項目。',
         },
         {
             'id': 'pathfinder_official',
@@ -298,7 +301,7 @@ SOURCES = {
             'start_urls': [PATHFINDER_DOWNLOADS, PATHFINDER_OVERVIEW],
             'fetch_type': 'html',
             'trust_level': 'official',
-            'notes': 'V96.6.11 海外翱翔組官方申請窗口 adapter。',
+            'notes': 'V96.6.11.1.1 海外翱翔組官方申請窗口 adapter。',
         },
         {
             'id': 'mofa_working_holiday',
@@ -310,7 +313,7 @@ SOURCES = {
             'start_urls': [MOFA_WORKING_HOLIDAY],
             'fetch_type': 'html',
             'trust_level': 'official',
-            'notes': 'V96.6.11 外交部青年度假打工常設官方入口。',
+            'notes': 'V96.6.11.1.1 外交部青年度假打工常設官方入口。',
         },
         {
             'id': 'yda_official',
@@ -322,7 +325,7 @@ SOURCES = {
             'start_urls': [YDA_LIST],
             'fetch_type': 'html',
             'trust_level': 'official',
-            'notes': 'V96.6.11 青年署專用結構化 adapter。',
+            'notes': 'V96.6.11.1.1 青年署專用結構化 adapter。',
         },
     ],
 }
@@ -382,7 +385,7 @@ def install(repo: Path, src: Path):
 
     subprocess.run([sys.executable, '-m', 'py_compile', str(dest)], check=True)
     read_json(repo / 'data/activities.json')
-    log('INSTALL_OK version=96.6.11')
+    log('INSTALL_OK version=96.6.11.1')
     log('下一步： python tools/autofetch/autofetch.py --check --limit 12  （五來源安全檢查；正式排程僅於 default branch 套用、保存、部署）')
 
 
@@ -877,7 +880,7 @@ def build_candidate(url, body):
         'eventEndDate': end or '',
         'location': location or '',
         'autofetch': {
-            'engine': 'V96.6.11',
+            'engine': 'V96.6.11.1.1',
             'sourceId': 'yda_official',
             'eid': eid(url),
             'fetchedAt': now_iso(),
@@ -1133,7 +1136,7 @@ def build_thu_candidate(url, body):
         'organizer': organizer,
         'audience': audience,
         'autofetch': {
-            'engine': 'V96.6.11',
+            'engine': 'V96.6.11.1.1',
             'sourceId': 'thu_official',
             'conferenceCode': code,
             'fetchedAt': now_iso(),
@@ -1581,7 +1584,7 @@ def build_taichung_candidate(url, body):
         'organizer': organizer or '',
         'audience': audience,
         'autofetch': {
-            'engine': 'V96.6.11',
+            'engine': 'V96.6.11.1.1',
             'sourceId': 'taichung_job',
             'act': act,
             'fetchedAt': now_iso(),
@@ -1701,7 +1704,7 @@ def run_taichung_source(limit):
 
 
 # ---------------------------------------------------------------------------
-# V96.6.11 Fourth circle — overseas / international
+# V96.6.11.1.1 Fourth circle — overseas / international
 # ---------------------------------------------------------------------------
 
 def pathfinder_deadline(lines):
@@ -1765,7 +1768,7 @@ def build_pathfinder_candidate(body):
         'audience': '18–30歲青年；實際資格、語言及個別條件依官方簡章',
         'openEnded': False,
         'autofetch': {
-            'engine': 'V96.6.11',
+            'engine': 'V96.6.11.1.1',
             'sourceId': 'pathfinder_official',
             'fetchedAt': now_iso(),
         },
@@ -1846,7 +1849,7 @@ def build_mofa_working_holiday_candidate(body):
         'audience': '青年；實際年齡與簽證資格依各協定國規定',
         'openEnded': True,
         'autofetch': {
-            'engine': 'V96.6.11',
+            'engine': 'V96.6.11.1.1',
             'sourceId': 'mofa_working_holiday',
             'fetchedAt': now_iso(),
         },
@@ -1892,7 +1895,7 @@ def run_mofa_working_holiday_source(limit):
 
 
 # ---------------------------------------------------------------------------
-# V96.6.11 Goal-fit engine
+# V96.6.11.1.1 Goal-fit engine
 # ---------------------------------------------------------------------------
 # Scoring is intentionally task-oriented rather than "all events are useful".
 # It encodes the current Activity Radar design:
@@ -2358,7 +2361,7 @@ def run(repo, limit, apply):
     write_json(
         staging / 'autofetch-report.json',
         {
-            'schemaVersion': '96.6.11-report-1',
+            'schemaVersion': '96.6.11.1-report-1',
             'generatedAt': now_iso(),
             'mode': 'apply' if apply else 'check',
             'summary': totals,
@@ -2433,7 +2436,7 @@ def run(repo, limit, apply):
                 for r in results
                 for x in (r['rejected'] + r['fetchFailures'])
             ][:20],
-            'generator': 'V96.6.11 Multi-Source AutoFetch + Activity Radar',
+            'generator': 'V96.6.11.1.1 Multi-Source AutoFetch + Activity Radar',
         })
         write_json(activities_file, {'meta': meta, 'events': merged})
         log(
@@ -2772,7 +2775,7 @@ def self_test():
     assert wh_fit['radarEligible'] is True, wh_fit
     assert '語言／國際／海外' in wh_fit['goalMatches'], wh_fit
 
-    # V96.6.11 production workflow regression guards.
+    # V96.6.11.1.1 production workflow regression guards.
     assert 'contents: write' in WORKFLOW
     assert 'schedule:' in WORKFLOW and '17 1 * * *' in WORKFLOW
     assert 'Production integrity guard' in WORKFLOW
@@ -2783,7 +2786,12 @@ def self_test():
     assert 'Deploy GitHub Pages' in WORKFLOW
     assert 'Verify deployed site' in WORKFLOW
 
-    log('SELF_TEST_OK version=96.6.11')
+    # V96.6.11.1 regression: no recursive copy into child output dir.
+    assert "\n            cp -a . _autofetch_site/repo/" not in WORKFLOW
+    assert "--exclude='./_autofetch_site'" in WORKFLOW
+    assert 'test -f _autofetch_site/repo/index.html' in WORKFLOW
+
+    log('SELF_TEST_OK version=96.6.11.1')
 
 
 def main():
