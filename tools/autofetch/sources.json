@@ -1,0 +1,37 @@
+{
+  "version": "96.6",
+  "mode": "whitelist",
+  "default_enabled": false,
+  "sources": [
+    {
+      "id": "thu_official",
+      "name": "東海大學官方",
+      "scope": "campus",
+      "priority": 1,
+      "domain_allowlist": [
+        "thu.edu.tw"
+      ],
+      "enabled": false,
+      "fetch_type": "html",
+      "trust_level": "official",
+      "notes": "第一圈：東海校內官方活動來源。待確認實際公告頁後再啟用。"
+    },
+    {
+      "id": "yda_official",
+      "name": "教育部青年發展署",
+      "scope": "national",
+      "priority": 3,
+      "domain_allowlist": [
+        "yda.gov.tw"
+      ],
+      "start_urls": [
+        "https://www.yda.gov.tw/",
+        "https://www.yda.gov.tw/index.aspx?pid=23&uid=23"
+      ],
+      "enabled": false,
+      "fetch_type": "html",
+      "trust_level": "official",
+      "notes": "第三圈：青年活動、國際參與、職涯、生涯與海外相關計畫。"
+    }
+  ]
+}
