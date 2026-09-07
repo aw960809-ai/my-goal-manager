@@ -12,7 +12,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import parse_qs, urljoin, urlparse
 
-USER_AGENT = 'GoalManager-AutoFetch/96.6.10 (+https://github.com/aw960809-ai/my-goal-manager)'
+USER_AGENT = 'GoalManager-AutoFetch/96.6.11 (+https://github.com/aw960809-ai/my-goal-manager)'
 MAX_BYTES = 2_000_000
 AUTO_PREFIX = 'auto-yda-'
 THU_AUTO_PREFIX = 'auto-thu-'
@@ -36,10 +36,231 @@ FULL_DATE_RE = re.compile(r'(?<!\d)(20\d{2}|\d{3})[./\-年]\s*(\d{1,2})[./\-月]
 PARTIAL_DATE_RE = re.compile(r'(?<![\d./\-年])(\d{1,2})[./\-月]\s*(\d{1,2})日?')
 MAJOR_SECTION_RE = re.compile(r'^[壹貳參肆伍陸柒捌玖拾一二三四五六七八九十]+[、.]')
 
-WORKFLOW = '''name: V96.6 Scheduled Multi-Source Activity AutoFetch\n\non:\n  schedule:\n    - cron: "17 1 * * *"\n  workflow_dispatch:\n\npermissions:\n  contents: read\n  pages: write\n  id-token: write\n\nconcurrency:\n  group: pages-autofetch\n  cancel-in-progress: true\n\njobs:\n  fetch-build-deploy:\n    runs-on: ubuntu-latest\n    environment:\n      name: github-pages\n      url: ${{ steps.deployment.outputs.page_url }}\n    steps:\n      - uses: actions/checkout@v6\n      - uses: actions/setup-python@v6\n        with:\n          python-version: "3.12"\n      - name: AutoFetch activities\n        run: |\n          python tools/autofetch/autofetch.py --apply --limit 30\n          python -m json.tool data/activities.json >/dev/null\n      - name: Existing static QA\n        run: |\n          if [ -f qa_static.py ]; then python qa_static.py; fi\n      - name: Build site\n        run: |\n          if [ -f tools_build_preview.py ]; then python tools_build_preview.py; fi\n          if [ -d _site ]; then echo "SITE_DIR=_site" >> "$GITHUB_ENV";\n          elif [ -d dist ]; then echo "SITE_DIR=dist" >> "$GITHUB_ENV";\n          else mkdir -p _autofetch_site; cp -a . _autofetch_site/repo; rm -rf _autofetch_site/repo/.git _autofetch_site/repo/data/staging; echo "SITE_DIR=_autofetch_site/repo" >> "$GITHUB_ENV"; fi\n      - uses: actions/configure-pages@v5\n      - uses: actions/upload-pages-artifact@v4\n        with:\n          path: ${{ env.SITE_DIR }}\n      - id: deployment\n        uses: actions/deploy-pages@v4\n'''
+WORKFLOW = """name: V96.6 Production Activity Radar AutoFetch
+
+on:
+  schedule:
+    # 09:17 Asia/Taipei (UTC+8)
+    - cron: "17 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: activity-radar-production
+  cancel-in-progress: false
+
+jobs:
+  autofetch-build-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Confirm production branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+          echo "default_branch=$DEFAULT_BRANCH"
+          echo "ref_name=$GITHUB_REF_NAME"
+          if [ "$GITHUB_REF_NAME" != "$DEFAULT_BRANCH" ]; then
+            echo "::error::Production AutoFetch may only run on the default branch."
+            exit 1
+          fi
+
+      - name: Snapshot production data
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp data/activities.json "$RUNNER_TEMP/activities-before.json"
+          python -m json.tool "$RUNNER_TEMP/activities-before.json" >/dev/null
+
+      - name: AutoFetch and apply
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/autofetch/autofetch.py --apply --limit 30
+          python -m json.tool data/activities.json >/dev/null
+
+      - name: Production integrity guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          before = json.loads(
+              (Path(os.environ["RUNNER_TEMP"]) / "activities-before.json")
+              .read_text(encoding="utf-8")
+          )
+          after = json.loads(
+              Path("data/activities.json").read_text(encoding="utf-8")
+          )
+
+          old = before.get("events", [])
+          new = after.get("events", [])
+
+          if not isinstance(old, list) or not isinstance(new, list):
+              raise SystemExit("INTEGRITY_FAIL events must be lists")
+
+          ids = [str(x.get("id", "")) for x in new]
+          if any(not x for x in ids):
+              raise SystemExit("INTEGRITY_FAIL empty event id")
+          if len(ids) != len(set(ids)):
+              raise SystemExit("INTEGRITY_FAIL duplicate event ids")
+
+          manual_before = [
+              x for x in old if not str(x.get("id", "")).startswith("auto-")
+          ]
+          manual_after = [
+              x for x in new if not str(x.get("id", "")).startswith("auto-")
+          ]
+          mb = {str(x.get("id", "")): x for x in manual_before}
+          ma = {str(x.get("id", "")): x for x in manual_after}
+
+          # AutoFetch is never allowed to delete or mutate manually maintained events.
+          if mb != ma:
+              removed = sorted(set(mb) - set(ma))
+              changed = sorted(k for k in set(mb) & set(ma) if mb[k] != ma[k])
+              raise SystemExit(
+                  "INTEGRITY_FAIL manual events changed "
+                  f"removed={removed[:10]} changed={changed[:10]}"
+              )
+
+          old_count = len(old)
+          new_count = len(new)
+          removed_count = max(0, old_count - new_count)
+
+          # Conservative destructive-change fuse. Small normal expirations are allowed.
+          if old_count >= 20 and removed_count >= 10 and new_count < old_count * 0.40:
+              raise SystemExit(
+                  "INTEGRITY_FAIL destructive shrink "
+                  f"before={old_count} after={new_count}"
+              )
+
+          print(
+              "INTEGRITY_OK "
+              f"before={old_count} after={new_count} "
+              f"manual={len(manual_after)} "
+              f"auto={sum(str(x.get('id','')).startswith('auto-') for x in new)}"
+          )
+          PY
+
+      - name: Existing QA
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f qa_static.py ]; then python qa_static.py; fi
+          git diff --check
+
+      - name: Detect production-data change
+        id: data_change
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- data/activities.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "DATA_UNCHANGED"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "DATA_CHANGED"
+            git diff --stat -- data/activities.json
+          fi
+
+      - name: Persist updated activity data
+        if: steps.data_change.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "goal-manager-autofetch[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/activities.json
+          git commit -m "chore(activity-radar): daily autofetch ${GITHUB_RUN_ID} [skip ci]"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+
+      - name: Build site
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f tools_build_preview.py ]; then
+            python tools_build_preview.py
+          fi
+
+          if [ -d _site ]; then
+            echo "SITE_DIR=_site" >> "$GITHUB_ENV"
+          elif [ -d dist ]; then
+            echo "SITE_DIR=dist" >> "$GITHUB_ENV"
+          else
+            rm -rf _autofetch_site
+            mkdir -p _autofetch_site/repo
+            cp -a . _autofetch_site/repo/
+            rm -rf \
+              _autofetch_site/repo/.git \
+              _autofetch_site/repo/.github \
+              _autofetch_site/repo/data/staging
+            echo "SITE_DIR=_autofetch_site/repo" >> "$GITHUB_ENV"
+          fi
+
+      - name: Upload AutoFetch audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: autofetch-audit-${{ github.run_id }}
+          path: |
+            data/staging/autofetch-report.json
+            data/staging/autofetch-candidates.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ${{ env.SITE_DIR }}
+
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Verify deployed site
+        shell: bash
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          echo "Verifying $PAGE_URL"
+          curl -fL \
+            --retry 6 \
+            --retry-delay 5 \
+            --retry-all-errors \
+            --max-time 30 \
+            "$PAGE_URL" >/dev/null
+          echo "PRODUCTION_DEPLOY_VERIFY_OK"
+"""
+
 
 SOURCES = {
-    'version': '96.6.10',
+    'version': '96.6.11',
     'mode': 'whitelist',
     'default_enabled': False,
     'sources': [
@@ -53,7 +274,7 @@ SOURCES = {
             'start_urls': [THU_LIST],
             'fetch_type': 'html',
             'trust_level': 'official',
-            'notes': 'V96.6.10 東海大學 tEvent 專用結構化 adapter。',
+            'notes': 'V96.6.11 東海大學 tEvent 專用結構化 adapter。',
         },
         {
             'id': 'taichung_job',
@@ -65,7 +286,7 @@ SOURCES = {
             'start_urls': [TAICHUNG_LIST],
             'fetch_type': 'html',
             'trust_level': 'official',
-            'notes': 'V96.6.10 臺中市就業服務處活動專用結構化 adapter；排除明確中高齡/銀髮與雇主專屬項目。',
+            'notes': 'V96.6.11 臺中市就業服務處活動專用結構化 adapter；排除明確中高齡/銀髮與雇主專屬項目。',
         },
         {
             'id': 'pathfinder_official',
@@ -77,7 +298,7 @@ SOURCES = {
             'start_urls': [PATHFINDER_DOWNLOADS, PATHFINDER_OVERVIEW],
             'fetch_type': 'html',
             'trust_level': 'official',
-            'notes': 'V96.6.10 海外翱翔組官方申請窗口 adapter。',
+            'notes': 'V96.6.11 海外翱翔組官方申請窗口 adapter。',
         },
         {
             'id': 'mofa_working_holiday',
@@ -89,7 +310,7 @@ SOURCES = {
             'start_urls': [MOFA_WORKING_HOLIDAY],
             'fetch_type': 'html',
             'trust_level': 'official',
-            'notes': 'V96.6.10 外交部青年度假打工常設官方入口。',
+            'notes': 'V96.6.11 外交部青年度假打工常設官方入口。',
         },
         {
             'id': 'yda_official',
@@ -101,7 +322,7 @@ SOURCES = {
             'start_urls': [YDA_LIST],
             'fetch_type': 'html',
             'trust_level': 'official',
-            'notes': 'V96.6.10 青年署專用結構化 adapter。',
+            'notes': 'V96.6.11 青年署專用結構化 adapter。',
         },
     ],
 }
@@ -161,8 +382,8 @@ def install(repo: Path, src: Path):
 
     subprocess.run([sys.executable, '-m', 'py_compile', str(dest)], check=True)
     read_json(repo / 'data/activities.json')
-    log('INSTALL_OK version=96.6.10')
-    log('下一步： python tools/autofetch/autofetch.py --check --limit 12  （東海＋台中＋全國＋海外／國際；資格閘門＋去重＋目標適配度）')
+    log('INSTALL_OK version=96.6.11')
+    log('下一步： python tools/autofetch/autofetch.py --check --limit 12  （五來源安全檢查；正式排程僅於 default branch 套用、保存、部署）')
 
 
 class LinkParser(HTMLParser):
@@ -656,7 +877,7 @@ def build_candidate(url, body):
         'eventEndDate': end or '',
         'location': location or '',
         'autofetch': {
-            'engine': 'V96.6.10',
+            'engine': 'V96.6.11',
             'sourceId': 'yda_official',
             'eid': eid(url),
             'fetchedAt': now_iso(),
@@ -912,7 +1133,7 @@ def build_thu_candidate(url, body):
         'organizer': organizer,
         'audience': audience,
         'autofetch': {
-            'engine': 'V96.6.10',
+            'engine': 'V96.6.11',
             'sourceId': 'thu_official',
             'conferenceCode': code,
             'fetchedAt': now_iso(),
@@ -1360,7 +1581,7 @@ def build_taichung_candidate(url, body):
         'organizer': organizer or '',
         'audience': audience,
         'autofetch': {
-            'engine': 'V96.6.10',
+            'engine': 'V96.6.11',
             'sourceId': 'taichung_job',
             'act': act,
             'fetchedAt': now_iso(),
@@ -1480,7 +1701,7 @@ def run_taichung_source(limit):
 
 
 # ---------------------------------------------------------------------------
-# V96.6.10 Fourth circle — overseas / international
+# V96.6.11 Fourth circle — overseas / international
 # ---------------------------------------------------------------------------
 
 def pathfinder_deadline(lines):
@@ -1544,7 +1765,7 @@ def build_pathfinder_candidate(body):
         'audience': '18–30歲青年；實際資格、語言及個別條件依官方簡章',
         'openEnded': False,
         'autofetch': {
-            'engine': 'V96.6.10',
+            'engine': 'V96.6.11',
             'sourceId': 'pathfinder_official',
             'fetchedAt': now_iso(),
         },
@@ -1625,7 +1846,7 @@ def build_mofa_working_holiday_candidate(body):
         'audience': '青年；實際年齡與簽證資格依各協定國規定',
         'openEnded': True,
         'autofetch': {
-            'engine': 'V96.6.10',
+            'engine': 'V96.6.11',
             'sourceId': 'mofa_working_holiday',
             'fetchedAt': now_iso(),
         },
@@ -1671,7 +1892,7 @@ def run_mofa_working_holiday_source(limit):
 
 
 # ---------------------------------------------------------------------------
-# V96.6.10 Goal-fit engine
+# V96.6.11 Goal-fit engine
 # ---------------------------------------------------------------------------
 # Scoring is intentionally task-oriented rather than "all events are useful".
 # It encodes the current Activity Radar design:
@@ -2137,7 +2358,7 @@ def run(repo, limit, apply):
     write_json(
         staging / 'autofetch-report.json',
         {
-            'schemaVersion': '96.6.10-report-1',
+            'schemaVersion': '96.6.11-report-1',
             'generatedAt': now_iso(),
             'mode': 'apply' if apply else 'check',
             'summary': totals,
@@ -2212,7 +2433,7 @@ def run(repo, limit, apply):
                 for r in results
                 for x in (r['rejected'] + r['fetchFailures'])
             ][:20],
-            'generator': 'V96.6.10 Multi-Source AutoFetch + Activity Radar',
+            'generator': 'V96.6.11 Multi-Source AutoFetch + Activity Radar',
         })
         write_json(activities_file, {'meta': meta, 'events': merged})
         log(
@@ -2551,7 +2772,18 @@ def self_test():
     assert wh_fit['radarEligible'] is True, wh_fit
     assert '語言／國際／海外' in wh_fit['goalMatches'], wh_fit
 
-    log('SELF_TEST_OK version=96.6.10')
+    # V96.6.11 production workflow regression guards.
+    assert 'contents: write' in WORKFLOW
+    assert 'schedule:' in WORKFLOW and '17 1 * * *' in WORKFLOW
+    assert 'Production integrity guard' in WORKFLOW
+    assert 'manual events changed' in WORKFLOW
+    assert 'Persist updated activity data' in WORKFLOW
+    assert 'git push origin "HEAD:${GITHUB_REF_NAME}"' in WORKFLOW
+    assert 'Upload AutoFetch audit report' in WORKFLOW
+    assert 'Deploy GitHub Pages' in WORKFLOW
+    assert 'Verify deployed site' in WORKFLOW
+
+    log('SELF_TEST_OK version=96.6.11')
 
 
 def main():

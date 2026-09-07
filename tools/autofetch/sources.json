@@ -1,5 +1,5 @@
 {
-  "version": "96.6.10",
+  "version": "96.6.11",
   "mode": "whitelist",
   "default_enabled": false,
   "sources": [
@@ -17,7 +17,7 @@
       ],
       "fetch_type": "html",
       "trust_level": "official",
-      "notes": "V96.6.10 東海大學 tEvent 專用結構化 adapter。"
+      "notes": "V96.6.11 東海大學 tEvent 專用結構化 adapter。"
     },
     {
       "id": "taichung_job",
@@ -33,7 +33,7 @@
       ],
       "fetch_type": "html",
       "trust_level": "official",
-      "notes": "V96.6.10 臺中市就業服務處活動專用結構化 adapter；排除明確中高齡/銀髮與雇主專屬項目。"
+      "notes": "V96.6.11 臺中市就業服務處活動專用結構化 adapter；排除明確中高齡/銀髮與雇主專屬項目。"
     },
     {
       "id": "pathfinder_official",
@@ -50,7 +50,7 @@
       ],
       "fetch_type": "html",
       "trust_level": "official",
-      "notes": "V96.6.10 海外翱翔組官方申請窗口 adapter。"
+      "notes": "V96.6.11 海外翱翔組官方申請窗口 adapter。"
     },
     {
       "id": "mofa_working_holiday",
@@ -66,7 +66,7 @@
       ],
       "fetch_type": "html",
       "trust_level": "official",
-      "notes": "V96.6.10 外交部青年度假打工常設官方入口。"
+      "notes": "V96.6.11 外交部青年度假打工常設官方入口。"
     },
     {
       "id": "yda_official",
@@ -82,7 +82,7 @@
       ],
       "fetch_type": "html",
       "trust_level": "official",
-      "notes": "V96.6.10 青年署專用結構化 adapter。"
+      "notes": "V96.6.11 青年署專用結構化 adapter。"
     }
   ]
 }
