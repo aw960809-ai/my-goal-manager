@@ -1,12 +1,12 @@
 {
   "meta": {
-    "updatedAt": "2026-09-07T04:19:07.324064+00:00",
+    "updatedAt": "2026-09-07T04:58:03.257601+00:00",
     "sources": 5,
-    "events": 14,
-    "ok": 8,
+    "events": 21,
+    "ok": 15,
     "failed": 0,
     "errors": [],
-    "generator": "V96.6.10 Multi-Source AutoFetch + Activity Radar",
+    "generator": "V96.6.11 Multi-Source AutoFetch + Activity Radar",
     "sourcePolicy": "政府資訊為主；東海官方活動為活動核心；獎學金獨立資料集合與獨立判斷",
     "scholarships": 7
   },
@@ -138,10 +138,10 @@
       "organizer": "教學發展中心",
       "audience": "教職員，費用：0；學生，費用：0",
       "autofetch": {
-        "engine": "V96.6.10",
+        "engine": "V96.6.11",
         "sourceId": "thu_official",
         "conferenceCode": "2026070017",
-        "fetchedAt": "2026-09-07T04:18:47.009782+00:00"
+        "fetchedAt": "2026-09-07T04:56:24.229099+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -186,10 +186,10 @@
       "organizer": "健康暨諮商中心",
       "audience": "學生，費用：0",
       "autofetch": {
-        "engine": "V96.6.10",
+        "engine": "V96.6.11",
         "sourceId": "thu_official",
         "conferenceCode": "2026080023",
-        "fetchedAt": "2026-09-07T04:18:47.368166+00:00"
+        "fetchedAt": "2026-09-07T04:56:25.200367+00:00"
       },
       "fitScore": 73,
       "fitTier": "高適配",
@@ -234,10 +234,10 @@
       "organizer": "教學發展中心",
       "audience": "教職員，費用：0；學生，費用：0",
       "autofetch": {
-        "engine": "V96.6.10",
+        "engine": "V96.6.11",
         "sourceId": "thu_official",
         "conferenceCode": "2026070019",
-        "fetchedAt": "2026-09-07T04:18:48.136757+00:00"
+        "fetchedAt": "2026-09-07T04:56:26.518764+00:00"
       },
       "fitScore": 48,
       "fitTier": "探索",
@@ -283,10 +283,10 @@
       "organizer": "生活輔導組",
       "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
       "autofetch": {
-        "engine": "V96.6.10",
+        "engine": "V96.6.11",
         "sourceId": "thu_official",
         "conferenceCode": "2026090016",
-        "fetchedAt": "2026-09-07T04:18:50.659496+00:00"
+        "fetchedAt": "2026-09-07T04:56:32.692946+00:00"
       },
       "fitScore": 78,
       "fitTier": "高適配",
@@ -300,6 +300,338 @@
       ],
       "goalMatches": [
         "法律／轉學考"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": ""
+    },
+    {
+      "id": "auto-thu-2026080015",
+      "title": "【公共事務菁英講座】幸福臺中升級的關鍵：智慧化、永續化與國際化X江啟臣(立法院副院長)@心之谷永續教育園區",
+      "date": "2026-09-19",
+      "time": "",
+      "scope": "東海校內",
+      "type": "語言／國際",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=3&conference_code=2026080015",
+      "keywords": "【公共事務菁英講座】幸福臺中升級的關鍵：智慧化、永續化與國際化X江啟臣(立法院副院長)@心之谷永續教育園區 東海大學 公共事務碩士在職專班 學術活動 教職員，費用：0；學生，費用：0；校外人士，費用：0 學術／講座 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 公共事務碩士在職專班；活動日 2026-09-19；截止 2026-09-17",
+      "government": false,
+      "deadline": "2026-09-17",
+      "eventEndDate": "2026-09-19",
+      "location": "幸福臺中升級的關鍵：智慧化、永續化與國際化",
+      "organizer": "公共事務碩士在職專班",
+      "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026080015",
+        "fetchedAt": "2026-09-07T04:56:39.746246+00:00"
+      },
+      "fitScore": 96,
+      "fitTier": "高適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+42",
+        "語言／國際／海外+40",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "語言／國際／海外"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": ""
+    },
+    {
+      "id": "auto-thu-2026080013",
+      "title": "115學年上學期Agentic AI應用課程",
+      "date": "2026-10-08",
+      "time": "",
+      "scope": "東海校內",
+      "type": "法律／學術",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026080013",
+      "keywords": "115學年上學期Agentic AI應用課程 東海大學 圖書暨資訊處 教育活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 圖書暨資訊處；活動日 2026-10-08；截止 2026-11-26",
+      "government": false,
+      "deadline": "2026-11-26",
+      "eventEndDate": "2026-10-08",
+      "location": "",
+      "organizer": "圖書暨資訊處",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026080013",
+        "fetchedAt": "2026-09-07T04:56:42.652520+00:00"
+      },
+      "fitScore": 51,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "通用能力／AI工具+14",
+        "直接連結法律學習目標+15",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "通用能力／AI工具"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": ""
+    },
+    {
+      "id": "auto-thu-2026090001",
+      "title": "【免費論壇】2026SDGs文化x表演藝術論壇－當藝術與創生行動走入地方",
+      "date": "2026-09-23",
+      "time": "",
+      "scope": "東海校內",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026090001",
+      "keywords": "【免費論壇】2026SDGs文化x表演藝術論壇－當藝術與創生行動走入地方 東海大學 企業管理學系 學術活動 教職員，費用：0；學生，費用：0；校外人士，費用：0 學術／講座 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 企業管理學系；活動日 2026-09-23；截止 2026-09-23",
+      "government": false,
+      "deadline": "2026-09-23",
+      "eventEndDate": "2026-09-23",
+      "location": "東海大學 (詳細地點將另行通知，請確保報名資訊填寫無誤)",
+      "organizer": "企業管理學系",
+      "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090001",
+        "fetchedAt": "2026-09-07T04:56:45.333232+00:00"
+      },
+      "fitScore": 42,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "職涯／實習+20",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "職涯／實習"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": ""
+    },
+    {
+      "id": "auto-thu-2026080014",
+      "title": "115年度器材管理借用及使用教學認證課程",
+      "date": "2026-10-04",
+      "time": "",
+      "scope": "東海校內",
+      "type": "教育／青少年",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026080014",
+      "keywords": "115年度器材管理借用及使用教學認證課程 東海大學 課外活動暨學生發展組 教育活動 學生，費用：0；說明：僅限社團、系學會成員 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 課外活動暨學生發展組；活動日 2026-10-04；截止 2026-09-26",
+      "government": false,
+      "deadline": "2026-09-26",
+      "eventEndDate": "2026-10-04",
+      "location": "中正紀念堂前廳",
+      "organizer": "課外活動暨學生發展組",
+      "audience": "學生，費用：0；說明：僅限社團、系學會成員",
+      "autofetch": {
+        "engine": "V96.6.11",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026080014",
+        "fetchedAt": "2026-09-07T04:56:47.713849+00:00"
+      },
+      "fitScore": 47,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "青少年／營隊／教學+8",
+        "直接連結法律學習目標+15",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "青少年／營隊／教學"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": ""
+    },
+    {
+      "id": "auto-thu-2026080025",
+      "title": "東海大學教師宿舍區保育共生地環境教育課程",
+      "date": "2026-09-19",
+      "time": "",
+      "scope": "東海校內",
+      "type": "教育／青少年",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026080025",
+      "keywords": "東海大學教師宿舍區保育共生地環境教育課程 東海大學 永續發展暨校務研究處 教育活動 教職員，費用：0；學生，費用：0；校外人士，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 永續發展暨校務研究處；活動日 2026-09-19；截止 2026-12-29",
+      "government": false,
+      "deadline": "2026-12-29",
+      "eventEndDate": "2026-09-19",
+      "location": "東海大學教師宿舍區保育共生地環境教育課程(9/19)",
+      "organizer": "永續發展暨校務研究處",
+      "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026080025",
+        "fetchedAt": "2026-09-07T04:56:48.974505+00:00"
+      },
+      "fitScore": 47,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "青少年／營隊／教學+8",
+        "直接連結法律學習目標+15",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "青少年／營隊／教學"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": ""
+    },
+    {
+      "id": "auto-thu-2026080017",
+      "title": "115年度學生社團評鑑線上說明會",
+      "date": "2026-09-23",
+      "time": "",
+      "scope": "東海校內",
+      "type": "教育／青少年",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026080017",
+      "keywords": "115年度學生社團評鑑線上說明會 東海大學 課外活動暨學生發展組 其他活動 學生，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 課外活動暨學生發展組；活動日 2026-09-23；截止 2026-09-22",
+      "government": false,
+      "deadline": "2026-09-22",
+      "eventEndDate": "2026-09-23",
+      "location": "線上會議室 (",
+      "organizer": "課外活動暨學生發展組",
+      "audience": "學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026080017",
+        "fetchedAt": "2026-09-07T04:56:52.274192+00:00"
+      },
+      "fitScore": 73,
+      "fitTier": "高適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "青少年／營隊／教學+34",
+        "直接連結法律學習目標+15",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "青少年／營隊／教學"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": ""
+    },
+    {
+      "id": "auto-thu-2026070022",
+      "title": "【線上學生增能活動X勵學基金】防彈筆記法，時間管理、高效產出的筆記方法",
+      "date": "2026-11-13",
+      "time": "",
+      "scope": "東海校內",
+      "type": "教育／青少年",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026070022",
+      "keywords": "【線上學生增能活動X勵學基金】防彈筆記法，時間管理、高效產出的筆記方法 東海大學 教學發展中心 學術活動 教職員，費用：0；學生，費用：0 學術／講座 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 教學發展中心；活動日 2026-11-13；截止 2026-11-12",
+      "government": false,
+      "deadline": "2026-11-12",
+      "eventEndDate": "2026-11-13",
+      "location": "Google Meet會議連結：",
+      "organizer": "教學發展中心",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026070022",
+        "fetchedAt": "2026-09-07T04:56:53.587271+00:00"
+      },
+      "fitScore": 43,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "青少年／營隊／教學+8",
+        "通用能力／AI工具+14",
+        "明確以大學生／學生為對象+7",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "青少年／營隊／教學",
+        "通用能力／AI工具"
       ],
       "circleLevel": 1,
       "circleLabel": "東海校內",
@@ -330,10 +662,10 @@
       "organizer": "臺中市就業服務處",
       "audience": "有限制",
       "autofetch": {
-        "engine": "V96.6.10",
+        "engine": "V96.6.11",
         "sourceId": "taichung_job",
         "act": "5583",
-        "fetchedAt": "2026-09-07T04:18:53.853368+00:00"
+        "fetchedAt": "2026-09-07T04:56:59.422216+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -378,10 +710,10 @@
       "organizer": "臺中市就業服務處",
       "audience": "高中職以上學生及家長。",
       "autofetch": {
-        "engine": "V96.6.10",
+        "engine": "V96.6.11",
         "sourceId": "taichung_job",
         "act": "5387",
-        "fetchedAt": "2026-09-07T04:18:55.063050+00:00"
+        "fetchedAt": "2026-09-07T04:57:04.171748+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -426,10 +758,10 @@
       "organizer": "臺中市就業服務處",
       "audience": "有限制",
       "autofetch": {
-        "engine": "V96.6.10",
+        "engine": "V96.6.11",
         "sourceId": "taichung_job",
         "act": "5582",
-        "fetchedAt": "2026-09-07T04:18:55.228758+00:00"
+        "fetchedAt": "2026-09-07T04:57:04.977420+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -475,9 +807,9 @@
       "audience": "青年；實際年齡與簽證資格依各協定國規定",
       "openEnded": true,
       "autofetch": {
-        "engine": "V96.6.10",
+        "engine": "V96.6.11",
         "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-09-07T04:19:07.310769+00:00"
+        "fetchedAt": "2026-09-07T04:58:03.246210+00:00"
       },
       "fitScore": 94,
       "fitTier": "高適配",
