@@ -1,5 +1,5 @@
 {
-  "version": "96.6.5",
+  "version": "96.6.9.1",
   "mode": "whitelist",
   "default_enabled": false,
   "sources": [
@@ -17,7 +17,23 @@
       ],
       "fetch_type": "html",
       "trust_level": "official",
-      "notes": "V96.6.5 東海大學 tEvent 專用結構化 adapter。"
+      "notes": "V96.6.9.1.1 東海大學 tEvent 專用結構化 adapter。"
+    },
+    {
+      "id": "taichung_job",
+      "name": "臺中市就業服務一鍵Catch",
+      "scope": "city",
+      "priority": 2,
+      "domain_allowlist": [
+        "1catchjob.taichung.gov.tw"
+      ],
+      "enabled": true,
+      "start_urls": [
+        "https://1catchjob.taichung.gov.tw/more.aspx?cat=new"
+      ],
+      "fetch_type": "html",
+      "trust_level": "official",
+      "notes": "V96.6.9.1.1 臺中市就業服務處活動專用結構化 adapter；排除明確中高齡/銀髮與雇主專屬項目。"
     },
     {
       "id": "yda_official",
@@ -33,7 +49,7 @@
       ],
       "fetch_type": "html",
       "trust_level": "official",
-      "notes": "V96.6.5 青年署專用結構化 adapter。"
+      "notes": "V96.6.9.1.1 青年署專用結構化 adapter。"
     }
   ]
 }

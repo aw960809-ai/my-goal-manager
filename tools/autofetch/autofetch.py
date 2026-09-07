@@ -12,12 +12,14 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import parse_qs, urljoin, urlparse
 
-USER_AGENT = 'GoalManager-AutoFetch/96.6.5 (+https://github.com/aw960809-ai/my-goal-manager)'
+USER_AGENT = 'GoalManager-AutoFetch/96.6.9.1 (+https://github.com/aw960809-ai/my-goal-manager)'
 MAX_BYTES = 2_000_000
 AUTO_PREFIX = 'auto-yda-'
 THU_AUTO_PREFIX = 'auto-thu-'
+TAICHUNG_AUTO_PREFIX = 'auto-tcjob-'
 YDA_LIST = 'https://www.yda.gov.tw/EventList.aspx?pid=56&uid=101'
 THU_LIST = 'https://tevent.thu.edu.tw/tEvent_front/index.php'
+TAICHUNG_LIST = 'https://1catchjob.taichung.gov.tw/more.aspx?cat=new'
 
 DEADLINE_SIGNAL = re.compile(r'報名截止|截止日期|申請截止|收件截止|徵件期間|報名期間|申請期間|投件期間|額滿提早截止|截止')
 DATE_SECTION_SIGNAL = re.compile(r'活動日期及地點|活動時間及地點|活動日期|活動時間|活動期間|辦理日期|體驗期間|展出資訊')
@@ -31,7 +33,7 @@ MAJOR_SECTION_RE = re.compile(r'^[壹貳參肆伍陸柒捌玖拾一二三四五�
 WORKFLOW = '''name: V96.6 Scheduled Activity AutoFetch\n\non:\n  schedule:\n    - cron: "17 1 * * *"\n  workflow_dispatch:\n\npermissions:\n  contents: read\n  pages: write\n  id-token: write\n\nconcurrency:\n  group: pages-autofetch\n  cancel-in-progress: true\n\njobs:\n  fetch-build-deploy:\n    runs-on: ubuntu-latest\n    environment:\n      name: github-pages\n      url: ${{ steps.deployment.outputs.page_url }}\n    steps:\n      - uses: actions/checkout@v6\n      - uses: actions/setup-python@v6\n        with:\n          python-version: "3.12"\n      - name: AutoFetch activities\n        run: |\n          python tools/autofetch/autofetch.py --apply --limit 30\n          python -m json.tool data/activities.json >/dev/null\n      - name: Existing static QA\n        run: |\n          if [ -f qa_static.py ]; then python qa_static.py; fi\n      - name: Build site\n        run: |\n          if [ -f tools_build_preview.py ]; then python tools_build_preview.py; fi\n          if [ -d _site ]; then echo "SITE_DIR=_site" >> "$GITHUB_ENV";\n          elif [ -d dist ]; then echo "SITE_DIR=dist" >> "$GITHUB_ENV";\n          else mkdir -p _autofetch_site; cp -a . _autofetch_site/repo; rm -rf _autofetch_site/repo/.git _autofetch_site/repo/data/staging; echo "SITE_DIR=_autofetch_site/repo" >> "$GITHUB_ENV"; fi\n      - uses: actions/configure-pages@v5\n      - uses: actions/upload-pages-artifact@v4\n        with:\n          path: ${{ env.SITE_DIR }}\n      - id: deployment\n        uses: actions/deploy-pages@v4\n'''
 
 SOURCES = {
-    'version': '96.6.5',
+    'version': '96.6.9.1',
     'mode': 'whitelist',
     'default_enabled': False,
     'sources': [
@@ -45,7 +47,19 @@ SOURCES = {
             'start_urls': [THU_LIST],
             'fetch_type': 'html',
             'trust_level': 'official',
-            'notes': 'V96.6.5 東海大學 tEvent 專用結構化 adapter。',
+            'notes': 'V96.6.9.1.1 東海大學 tEvent 專用結構化 adapter。',
+        },
+        {
+            'id': 'taichung_job',
+            'name': '臺中市就業服務一鍵Catch',
+            'scope': 'city',
+            'priority': 2,
+            'domain_allowlist': ['1catchjob.taichung.gov.tw'],
+            'enabled': True,
+            'start_urls': [TAICHUNG_LIST],
+            'fetch_type': 'html',
+            'trust_level': 'official',
+            'notes': 'V96.6.9.1.1 臺中市就業服務處活動專用結構化 adapter；排除明確中高齡/銀髮與雇主專屬項目。',
         },
         {
             'id': 'yda_official',
@@ -57,7 +71,7 @@ SOURCES = {
             'start_urls': [YDA_LIST],
             'fetch_type': 'html',
             'trust_level': 'official',
-            'notes': 'V96.6.5 青年署專用結構化 adapter。',
+            'notes': 'V96.6.9.1.1 青年署專用結構化 adapter。',
         },
     ],
 }
@@ -117,8 +131,8 @@ def install(repo: Path, src: Path):
 
     subprocess.run([sys.executable, '-m', 'py_compile', str(dest)], check=True)
     read_json(repo / 'data/activities.json')
-    log('INSTALL_OK version=96.6.5')
-    log('下一步： python tools/autofetch/autofetch.py --check --limit 12  （同時檢查東海＋青年署）')
+    log('INSTALL_OK version=96.6.9.1')
+    log('下一步： python tools/autofetch/autofetch.py --check --limit 12  （東海＋台中＋青年署；資格閘門＋跨ID語意去重 hotfix＋目標適配度）')
 
 
 class LinkParser(HTMLParser):
@@ -578,7 +592,7 @@ def build_candidate(url, body):
         'eventEndDate': end or '',
         'location': location or '',
         'autofetch': {
-            'engine': 'V96.6.5',
+            'engine': 'V96.6.9.1.1',
             'sourceId': 'yda_official',
             'eid': eid(url),
             'fetchedAt': now_iso(),
@@ -689,6 +703,42 @@ def field_after(lines, label):
     return None
 
 
+
+def thu_audience(lines):
+    """Extract the Open Audience section from THU tEvent pages."""
+    start = None
+    end_labels = {
+        '承辦單位', '承辦人員', '活動簡介', '活動詳情',
+        '附加檔案', '相關連結', '活動備註', '活動報名',
+    }
+
+    for i, line in enumerate(lines):
+        if line == '開放對象' or line.startswith('開放對象'):
+            start = i
+            break
+
+    if start is None:
+        return ''
+
+    parts = []
+    first = lines[start]
+    inline = first[len('開放對象'):].lstrip('：:｜| ').strip()
+    if inline:
+        parts.append(inline)
+
+    for line in lines[start + 1:start + 10]:
+        if line in end_labels:
+            break
+        if any(line.startswith(label) for label in end_labels):
+            break
+        if line not in {'說明：', '說明:', '費用：0', '費用:0'}:
+            parts.append(line)
+
+    value = '；'.join(parts)
+    value = re.sub(r'\s+', ' ', value).strip('； ')
+    return value
+
+
 def thu_registration_deadline(lines):
     joined = '\n'.join(lines)
     m = REG_RANGE_RE.search(joined)
@@ -749,6 +799,7 @@ def build_thu_candidate(url, body):
         location = location or b_location
 
     organizer = field_after(lines, '承辦單位') or ''
+    audience = thu_audience(lines)
     category = ''
     title_idx = lines.index(title) if title in lines else 0
     for candidate in reversed(lines[max(0, title_idx - 4):title_idx]):
@@ -784,7 +835,7 @@ def build_thu_candidate(url, body):
         'type': typ,
         'kind': 'event',
         'url': url,
-        'keywords': f'{title} 東海大學 {organizer} {category} {typ} 校內',
+        'keywords': f'{title} 東海大學 {organizer} {category} {audience} {typ} 校內',
         'direct': True,
         'team': False,
         'available': True,
@@ -795,8 +846,9 @@ def build_thu_candidate(url, body):
         'eventEndDate': end or '',
         'location': location or '',
         'organizer': organizer,
+        'audience': audience,
         'autofetch': {
-            'engine': 'V96.6.5',
+            'engine': 'V96.6.9.1.1',
             'sourceId': 'thu_official',
             'conferenceCode': code,
             'fetchedAt': now_iso(),
@@ -963,6 +1015,756 @@ def run_thu_source(limit):
     }
 
 
+
+class TaichungDetailParser(HTMLParser):
+    """Parser for 1catchjob.taichung.gov.tw detail.aspx pages."""
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.skip = 0
+        self.heading_tag = None
+        self.heading_parts = []
+        self.title = None
+        self.lines = []
+
+    @staticmethod
+    def clean(value):
+        return re.sub(r'\s+', ' ', value.replace('\u3000', ' ')).strip()
+
+    def handle_starttag(self, tag, attrs):
+        tag = tag.lower()
+        if tag in {'script', 'style', 'noscript'}:
+            self.skip += 1
+        if tag in {'h1', 'h2'}:
+            self.heading_tag = tag
+            self.heading_parts = []
+
+    def handle_endtag(self, tag):
+        tag = tag.lower()
+        if tag in {'script', 'style', 'noscript'} and self.skip:
+            self.skip -= 1
+        if self.heading_tag == tag:
+            heading = self.clean(' '.join(self.heading_parts))
+            if heading and '就業服務一鍵Catch報名網' not in heading:
+                self.title = heading
+            self.heading_tag = None
+            self.heading_parts = []
+
+    def handle_data(self, data):
+        if self.skip:
+            return
+        value = self.clean(data)
+        if not value:
+            return
+        if self.heading_tag:
+            self.heading_parts.append(value)
+        self.lines.append(value)
+
+
+def parse_taichung_detail(body):
+    parser = TaichungDetailParser()
+    parser.feed(decode_body(body))
+
+    output = []
+    for line in parser.lines:
+        line = re.sub(r'\s+', ' ', line).strip()
+        if not line:
+            continue
+        if output and output[-1] == line:
+            continue
+        output.append(line)
+
+    return parser.title, output
+
+
+def is_taichung_detail(url):
+    p = urlparse(url)
+    q = parse_qs(p.query)
+    act = q.get('act', [''])[0]
+    return (
+        p.scheme == 'https'
+        and p.hostname == '1catchjob.taichung.gov.tw'
+        and p.path.lower().endswith('/detail.aspx')
+        and bool(re.fullmatch(r'\d{1,8}', act))
+    )
+
+
+def taichung_act(url):
+    return parse_qs(urlparse(url).query).get('act', [''])[0]
+
+
+def labelled_value(lines, label):
+    """Read both '標籤 : 值' and label/value split across adjacent text nodes."""
+    normalized_label = re.sub(r'\s+', '', label)
+    for i, line in enumerate(lines):
+        compact = re.sub(r'\s+', '', line)
+        if compact == normalized_label:
+            if i + 1 < len(lines):
+                nxt = lines[i + 1].lstrip('：:｜| ').strip()
+                if nxt:
+                    return nxt
+        if compact.startswith(normalized_label):
+            value = re.sub(r'^\s*' + re.escape(label) + r'\s*[：:]?\s*', '', line).strip()
+            if value and value != line:
+                return value
+            # compact labels can include spaces in HTML
+            m = re.match(r'^.*?[：:]\s*(.+)$', line)
+            if m:
+                return m.group(1).strip()
+    return None
+
+
+TAICHUNG_EVENT_DATE_RE = re.compile(
+    r'活動日期\s*[：:]\s*(\d{4})[-/](\d{1,2})[-/](\d{1,2})'
+    r'(?:\s+(\d{1,2}):(\d{2}))?'
+)
+TAICHUNG_REG_RE = re.compile(
+    r'報名日期\s*[：:]\s*'
+    r'(\d{4})[/\-](\d{1,2})[/\-](\d{1,2})\s+\d{1,2}:\d{2}'
+    r'\s*~\s*'
+    r'(\d{4})[/\-](\d{1,2})[/\-](\d{1,2})\s+(\d{1,2}):(\d{2})'
+)
+
+
+def taichung_dates(lines):
+    joined = '\n'.join(lines)
+    event_date = None
+    time_value = ''
+    deadline = None
+
+    m = TAICHUNG_EVENT_DATE_RE.search(joined)
+    if m:
+        event_date = mkdate(m.group(1), m.group(2), m.group(3))
+        if m.group(4):
+            time_value = f'{int(m.group(4)):02d}:{m.group(5)}'
+
+    m = TAICHUNG_REG_RE.search(joined)
+    if m:
+        deadline = mkdate(m.group(4), m.group(5), m.group(6))
+
+    return event_date, time_value, deadline
+
+
+def taichung_location(lines):
+    for line in lines:
+        if not re.search(r'活動地點|活動地址|地點[｜：:]|地址[｜：:]', line):
+            continue
+        value = re.split(r'活動地點|活動地址|地點|地址', line, maxsplit=1)[-1]
+        value = value.lstrip('：:｜|▲●• -–—').strip()
+        if value and len(value) <= 300:
+            return value
+    return None
+
+
+
+def taichung_audience(lines):
+    """Extract likely participation/identity restrictions from Taichung pages."""
+    labels = (
+        '參加對象', '活動對象', '適用對象', '報名資格',
+        '資格條件', '參加資格', '對象'
+    )
+    for label in labels:
+        value = labelled_value(lines, label)
+        if value and len(value) <= 300:
+            return value
+
+    joined = '\n'.join(lines[:160])
+
+    patterns = [
+        r'(?:參加對象|活動對象|適用對象|報名資格|資格條件|參加資格)\s*[：:]\s*([^\n]{2,300})',
+        r'(?:限|僅限)\s*([^\n。；]{2,120})',
+    ]
+    for pattern in patterns:
+        m = re.search(pattern, joined)
+        if m:
+            return m.group(1).strip()
+
+    return ''
+
+
+def taichung_organizer(lines):
+    for key in ('主辦單位', '承辦單位', '承辦機關', '主辦機關'):
+        value = labelled_value(lines, key)
+        if value and len(value) <= 200:
+            return value
+    joined = '\n'.join(lines)
+    m = re.search(r'本活動由(.{2,100}?)主辦', joined)
+    if m:
+        return m.group(1).strip()
+    return '臺中市就業服務處'
+
+
+def taichung_relevance(title, lines):
+    """Keep useful student/youth/general career activities; reject clear audience mismatches.
+
+    This is intentionally conservative. It does NOT require the word 青年, because
+    general career workshops and workplace-experience events can still be useful
+    to university students.
+    """
+    body = '\n'.join(lines[:120])
+    combined = f'{title}\n{body}'
+
+    hard_exclude = (
+        r'中高齡|銀髮|高齡者|雇主座談|企業雇主|人資代表|'
+        r'單一徵才|聯合徵才|徵才活動'
+    )
+    if re.search(hard_exclude, combined):
+        return False, 'audience_mismatch'
+
+    # A page is useful if it signals youth/student participation, self-improvement,
+    # career exploration, internship/work experience, language/law, or a public
+    # workshop/course.
+    useful = (
+        r'青年|青少年|學生|大學生|高中職|職涯|工作坊|講座|課程|'
+        r'實境體驗|職場體驗|實習|培訓|履歷|面試|創業|創生|'
+        r'法律|通譯|翻譯|語言|國際|海外|就業促進|生涯'
+    )
+    if re.search(useful, combined):
+        return True, 'relevant'
+
+    return False, 'low_relevance'
+
+
+def build_taichung_candidate(url, body):
+    title, lines = parse_taichung_detail(body)
+    if not title or len(title) < 4 or len(title) > 200:
+        return None, 'invalid_heading'
+
+    # Audience mismatch is a semantic hard-stop and should be checked before
+    # minimum-content length. This prevents a short but clearly irrelevant page
+    # (e.g. silver-age-only activity) from being misclassified as a parser error.
+    relevant, why = taichung_relevance(title, lines)
+    if not relevant:
+        return None, why
+
+    if len(lines) < 5:
+        return None, 'article_too_short'
+
+    event_date, time_value, deadline = taichung_dates(lines)
+    location = taichung_location(lines)
+    organizer = taichung_organizer(lines)
+    audience = taichung_audience(lines)
+
+    # If structured top metadata was absent, use the common body rules as fallback.
+    if not event_date:
+        year = context_year(title, lines)
+        event_date, _ = event_dates(lines, year, deadline)
+    if not deadline:
+        year = context_year(title, lines)
+        deadline = deadline_of(lines, year)
+    if not time_value:
+        time_value = time_of(lines)
+
+    scope, typ = classify(title, '\n'.join(lines), location)
+    scope = '台中'
+
+    if re.search(r'職涯|工作|就業|職場|實習|履歷|面試|創業|創生|實境體驗', title + '\n' + '\n'.join(lines[:100])):
+        typ = '職涯／實習'
+    if re.search(r'法律|通譯|翻譯', title + '\n' + '\n'.join(lines[:100])):
+        typ = '法律／學術'
+    elif re.search(r'語言|國際|海外', title + '\n' + '\n'.join(lines[:100])):
+        typ = '語言／國際'
+    elif re.search(r'青年|青少年|學生|教育|親子', title + '\n' + '\n'.join(lines[:100])) and typ == '公共參與':
+        typ = '教育／青少年'
+
+    act = taichung_act(url)
+    status = ['臺中市就業服務處官方活動']
+    if event_date:
+        status.append('活動日 ' + event_date)
+    if deadline:
+        status.append('截止 ' + deadline)
+
+    return {
+        'id': TAICHUNG_AUTO_PREFIX + act,
+        'title': title,
+        'date': event_date or deadline or '',
+        'time': time_value,
+        'scope': scope,
+        'type': typ,
+        'kind': 'event',
+        'url': url,
+        'keywords': f'{title} 台中 臺中市 青年 職涯 {typ}',
+        'direct': True,
+        'team': False,
+        'available': True,
+        'source': '臺中市就業服務一鍵Catch',
+        'statusText': '；'.join(status),
+        'government': True,
+        'deadline': deadline or '',
+        'eventEndDate': '',
+        'location': location or '',
+        'organizer': organizer or '',
+        'audience': audience,
+        'autofetch': {
+            'engine': 'V96.6.9.1.1',
+            'sourceId': 'taichung_job',
+            'act': act,
+            'fetchedAt': now_iso(),
+        },
+    }, None
+
+
+def run_taichung_source(limit):
+    src = next(x for x in SOURCES['sources'] if x['id'] == 'taichung_job')
+    allowlist = src['domain_allowlist']
+
+    # Fetch more list candidates than the final per-source limit because the
+    # official latest list also includes employer-only and older-worker items.
+    details = []
+    seen = set()
+    list_urls = [
+        TAICHUNG_LIST,
+        'https://1catchjob.taichung.gov.tw/more.aspx?cat=help',
+    ]
+
+    fetch_failed = []
+    for list_url in list_urls:
+        try:
+            final, body = fetch(list_url, allowlist)
+            for url in discover_links(body, final):
+                if not is_taichung_detail(url):
+                    continue
+                act = taichung_act(url)
+                if not act or act in seen:
+                    continue
+                seen.add(act)
+                details.append(url)
+                if len(details) >= max(limit * 4, 30):
+                    break
+        except Exception as exc:
+            fetch_failed.append({'url': list_url, 'reason': str(exc)})
+            log(f'TAICHUNG LIST FAIL {list_url} {exc}')
+
+    accepted = []
+    skipped_past = 0
+    rejected = []
+    parsed_ok = 0
+    inspected = 0
+
+    for url in details:
+        if len(accepted) >= limit:
+            break
+        inspected += 1
+        try:
+            _, detail_body = fetch(url, allowlist)
+            candidate, reason = build_taichung_candidate(url, detail_body)
+
+            if candidate is None:
+                # Audience/relevance filtering is an intentional skip, not a parser error.
+                if reason in {'audience_mismatch', 'low_relevance'}:
+                    log(
+                        f'TAICHUNG {inspected:02d}/{len(details):02d} FILTER '
+                        f'reason={reason} act={taichung_act(url)}'
+                    )
+                    continue
+                rejected.append({'url': url, 'reason': reason})
+                log(
+                    f'TAICHUNG {inspected:02d}/{len(details):02d} REJECT '
+                    f'reason={reason}'
+                )
+                continue
+
+            parsed_ok += 1
+            actionable, action_reason = actionable_status(candidate)
+            if actionable:
+                accepted.append(candidate)
+                log(
+                    f'TAICHUNG {inspected:02d}/{len(details):02d} ACCEPT '
+                    f'reason={action_reason} date={candidate["date"] or "-"} '
+                    f'deadline={candidate["deadline"] or "-"} '
+                    f'title={candidate["title"]}'
+                )
+            else:
+                skipped_past += 1
+                label = 'SKIP_DEADLINE' if action_reason == 'deadline_passed' else 'SKIP_PAST'
+                log(
+                    f'TAICHUNG {inspected:02d}/{len(details):02d} {label} '
+                    f'date={candidate["date"] or "-"} '
+                    f'deadline={candidate["deadline"] or "-"} '
+                    f'title={candidate["title"]}'
+                )
+
+        except Exception as exc:
+            fetch_failed.append({'url': url, 'reason': str(exc)})
+            log(f'TAICHUNG {inspected:02d}/{len(details):02d} FAIL {exc}')
+
+    accepted = list({c['id']: c for c in accepted}.values())
+
+    # Health is based on actual relevant parsed items plus successful filtering.
+    # A source with zero accepted can still be healthy when its pages were parsed
+    # and merely filtered/expired; require at least one relevant parsed item or
+    # a non-empty inspected set with no systemic failures.
+    healthy = (
+        inspected > 0
+        and len(fetch_failed) <= max(2, inspected // 4)
+        and len(rejected) <= max(2, inspected // 4)
+    )
+
+    return {
+        'sourceId': 'taichung_job',
+        'prefix': TAICHUNG_AUTO_PREFIX,
+        'discovered': inspected,
+        'parsedOk': parsed_ok,
+        'accepted': accepted,
+        'skippedPast': skipped_past,
+        'rejected': rejected,
+        'fetchFailures': fetch_failed,
+        'healthy': healthy,
+    }
+
+
+
+# ---------------------------------------------------------------------------
+# V96.6.9.1.1 Goal-fit engine
+# ---------------------------------------------------------------------------
+# Scoring is intentionally task-oriented rather than "all events are useful".
+# It encodes the current Activity Radar design:
+#   1) legal/transfer preparation
+#   2) language + international / overseas opportunities
+#   3) youth/camp/teaching/leadership experience
+#   4) career + self-improvement
+# and combines that with the concentric-circle distance:
+#   THU -> Taichung -> National -> Overseas/online
+#
+# This metadata is written into each auto-fetched event so the UI can later
+# filter/sort without re-parsing event text.
+
+FIT_TASKS = {
+    # Core long-term goals: strongest influence.
+    '法律／轉學考': {
+        'title': r'法律|法學|憲法|民法|刑法|行政法|人權|司法|法院|法官|律師|法治|法律系',
+        'body': r'法律|法學|憲法|民法|刑法|行政法|人權|司法|法院|法官|律師|法治',
+        'weight': 42,
+    },
+    '語言／國際／海外': {
+        'title': r'英語|英文|日語|日文|語言|國際|海外|交換|留學|度假打工|國際交流|外語',
+        'body': r'英語|英文|日語|日文|語言|國際|海外|交換|留學|度假打工|國際交流|外語',
+        'weight': 40,
+    },
+    '青少年／營隊／教學': {
+        'title': r'青年|青少年|營隊|領導力|社團|志工|服務學習|高中生|學生培訓|演辯|辯論',
+        'body': r'青年|青少年|營隊|領導力|社團|志工|服務學習|高中生|學生培訓|演辯|辯論',
+        'weight': 34,
+    },
+
+    # Useful but secondary: should not outrank a direct core-goal activity merely
+    # because it is nearby.
+    '職涯／實習': {
+        'title': r'職涯|實習|履歷|面試|創業|創生|職場體驗|產業探索|生涯',
+        'body': r'職涯|實習|履歷|面試|創業|創生|職場體驗|產業探索|生涯',
+        'weight': 20,
+    },
+    '通用能力／AI工具': {
+        'title': r'AI|人工智慧|Gemini|NotebookLM|Claude|GPT|簡報|溝通|時間管理|筆記|社群媒體',
+        'body': r'AI|人工智慧|Gemini|NotebookLM|Claude|GPT|簡報|溝通|時間管理|筆記|社群媒體',
+        'weight': 14,
+    },
+}
+
+
+CIRCLE_META = {
+    # Geography is deliberately a small bonus. Goal fit must dominate.
+    'thu_official': (1, '東海校內', 8),
+    'taichung_job': (2, '台中', 4),
+    'yda_official': (3, '全國', 2),
+}
+
+LOW_VALUE_PATTERNS = [
+    (r'適性就業輔導促進就業計畫', -24, '一般就業輔導，與目前學生目標連結較弱'),
+    (r'就業博覽會|聯合徵才|單一徵才|徵才活動', -22, '以徵才媒合為主，非目前優先自我精進項目'),
+    (r'就業服務站|就業促進', -10, '一般就業服務，降低目標適配度'),
+]
+
+STRONG_BONUS_PATTERNS = [
+    (r'度假打工|海外工作|海外實習|國際青年|國際交流', 18, '直接連結海外／國際經驗目標'),
+    (r'法律|憲法|民法|刑法|人權|法治', 15, '直接連結法律學習目標'),
+    (r'大學生|學生增能|學生學習', 7, '明確以大學生／學生為對象'),
+    (r'職場體驗|產業探索|實習', 8, '具體職涯體驗，可轉化為行動'),
+]
+
+
+def event_text(candidate):
+    return ' '.join([
+        str(candidate.get('title', '')),
+        str(candidate.get('keywords', '')),
+        str(candidate.get('statusText', '')),
+        str(candidate.get('location', '')),
+        str(candidate.get('organizer', '')),
+        str(candidate.get('type', '')),
+    ])
+
+
+def normalize_candidate_type(candidate):
+    """Prefer title semantics over incidental words buried in the page body."""
+    title = candidate.get('title', '')
+    current = candidate.get('type', '')
+
+    if re.search(r'法律|法學|憲法|民法|刑法|人權|司法|法治', title):
+        return '法律／學術'
+    if re.search(r'英語|英文|日語|日文|語言|國際|海外|交換|留學|度假打工', title):
+        return '語言／國際'
+    if re.search(r'職涯|實習|職場|工作坊|產業|就業|履歷|面試|創業|創生|體驗', title):
+        return '職涯／實習'
+    if re.search(r'青年|青少年|營隊|教育|教學|領導力|學生', title):
+        return '教育／青少年'
+
+    # Keep a reliable source-specific type only if title doesn't give a better cue.
+    return current or '公共參與'
+
+
+
+IDENTITY_RESTRICTIONS = [
+    (r'國際生|境外生|外籍生|僑生', 'international_student_only', '特定身分：國際生／境外生'),
+    (r'新住民', 'new_immigrant_only', '特定身分：新住民'),
+    (r'原住民|原住民族', 'indigenous_only', '特定身分：原住民'),
+    (r'身心障礙|身障', 'disability_only', '特定身分：身心障礙者'),
+]
+
+OPEN_AUDIENCE_SIGNAL = re.compile(
+    r'不限身分|不限資格|一般民眾|社會大眾|皆可參加|均可參加|'
+    r'全體學生|本校學生|大學生|學生皆可|學生均可|公開報名'
+)
+
+
+def eligibility_status(candidate):
+    """Return (eligible_for_main_radar, reason_code, reason_text).
+
+    We do not assume the user's identity. If an activity appears limited to a
+    particular status (international student, new immigrant, indigenous, etc.),
+    it stays in staging for audit but is excluded from the main radar until
+    eligibility is explicitly confirmed elsewhere.
+    """
+    source_id = candidate.get('autofetch', {}).get('sourceId', '')
+    title = str(candidate.get('title', ''))
+    audience = str(candidate.get('audience', ''))
+    combined = f'{title}\n{audience}\n{event_text(candidate)}'
+
+    # Existing THU teacher-only gate.
+    if (
+        source_id == 'thu_official'
+        and audience
+        and re.search(r'教職員|教師|導師', audience)
+        and not re.search(r'學生|校外人士|一般民眾', audience)
+    ):
+        return False, 'faculty_only', '僅教師／教職員可參加'
+
+    # Explicit general/open language can override a keyword appearing only in
+    # subject matter, but not a restriction explicitly stated in the title.
+    open_signal = bool(OPEN_AUDIENCE_SIGNAL.search(audience))
+
+    for pattern, code, label in IDENTITY_RESTRICTIONS:
+        title_hit = bool(re.search(pattern, title))
+        audience_hit = bool(re.search(pattern, audience))
+
+        if title_hit or audience_hit:
+            if open_signal and not title_hit:
+                continue
+            return False, code, f'{label}；資格未確認'
+
+    return True, '', ''
+
+
+def fit_candidate(candidate):
+    source_id = candidate.get('autofetch', {}).get('sourceId', '')
+    circle_level, circle_label, circle_bonus = CIRCLE_META.get(
+        source_id, (4, '海外／其他', 0)
+    )
+
+    candidate['type'] = normalize_candidate_type(candidate)
+
+    title = candidate.get('title', '')
+    body = event_text(candidate)
+
+    score = circle_bonus
+    reasons = [f'同心圓第{circle_level}圈：{circle_label}+{circle_bonus}']
+    matches = []
+
+    for task, cfg in FIT_TASKS.items():
+        title_hit = bool(re.search(cfg['title'], title, re.I))
+        body_hit = bool(re.search(cfg['body'], body, re.I))
+
+        if title_hit:
+            add = cfg['weight']
+        elif body_hit:
+            add = max(4, cfg['weight'] // 4)
+        else:
+            add = 0
+
+        if add:
+            score += add
+            matches.append(task)
+            reasons.append(f'{task}+{add}')
+
+    for pattern, add, reason in STRONG_BONUS_PATTERNS:
+        if re.search(pattern, title + ' ' + body, re.I):
+            score += add
+            reasons.append(f'{reason}+{add}')
+
+    for pattern, delta, reason in LOW_VALUE_PATTERNS:
+        if re.search(pattern, title + ' ' + body, re.I):
+            score += delta
+            reasons.append(f'{reason}{delta}')
+
+    if re.search(r'教師增能|教師專業成長|導師知能|新進教師', title):
+        score -= 8
+        reasons.append('教師增能取向-8')
+
+    if candidate.get('deadline'):
+        score += 4
+        reasons.append('有明確截止日+4')
+    if candidate.get('location'):
+        score += 2
+        reasons.append('有明確地點+2')
+
+    score = max(0, min(100, score))
+
+    status_ok, hard_filter, eligibility_reason = eligibility_status(candidate)
+
+    if not status_ok:
+        tier = '資格待確認' if hard_filter != 'faculty_only' else '不適用'
+        eligible = False
+        reasons.append(eligibility_reason)
+    else:
+        if score >= 72:
+            tier = '高適配'
+        elif score >= 52:
+            tier = '中適配'
+        elif score >= 38:
+            tier = '探索'
+        else:
+            tier = '低適配'
+        eligible = score >= 38
+
+    candidate['fitScore'] = score
+    candidate['fitTier'] = tier
+    candidate['fitReasons'] = reasons[:12]
+    candidate['goalMatches'] = list(dict.fromkeys(matches))
+    candidate['circleLevel'] = circle_level
+    candidate['circleLabel'] = circle_label
+    candidate['radarEligible'] = eligible
+    candidate['hardFilterReason'] = hard_filter
+    candidate['eligibilityReason'] = eligibility_reason
+
+    return candidate
+
+
+
+def normalize_event_title(value):
+    value = str(value or '').lower()
+    value = re.sub(r'[\u3000\s]+', '', value)
+    value = re.sub(r'[【】〖〗「」『』（）()［］\[\]<>《》]', '', value)
+    value = re.sub(r'[×x✕✖•●◎○★☆✨📍📅🎯｜|：:，,。.!！?？~～_\-—–/\\\\]+', '', value)
+    # Remove date fragments and session labels that often create duplicate IDs
+    # for the same underlying activity.
+    value = re.sub(r'20\d{2}\d{1,2}\d{1,2}', '', value)
+    value = re.sub(r'\d{1,2}月\d{1,2}日', '', value)
+    value = re.sub(r'\d{1,2}[/-]\d{1,2}', '', value)
+    value = re.sub(r'第?[一二三四五六七八九十0-9]+場|上午場|下午場|晚間場', '', value)
+    return value
+
+
+def normalize_location(value):
+    value = str(value or '').lower()
+    value = re.sub(r'[\u3000\s]+', '', value)
+    value = value.replace('臺', '台')
+    value = re.sub(r'[（）()［］\[\]｜|：:，,。.!！?？~～_\-—–/\\\\]+', '', value)
+    return value
+
+
+def semantic_duplicate(a, b):
+    """Detect duplicate activity records across different source IDs.
+
+    Primary identity is normalized title + event date.
+    Location is intentionally *not* a hard blocker because the same official
+    activity is often published once with a venue name and once with a full
+    postal address. Distinct same-day sessions remain separate when both records
+    contain different explicit times.
+    """
+    if normalize_event_title(a.get('title')) != normalize_event_title(b.get('title')):
+        return False
+
+    if (a.get('date') or '') != (b.get('date') or ''):
+        return False
+
+    ta = str(a.get('time') or '').strip()
+    tb = str(b.get('time') or '').strip()
+
+    # Explicitly different times indicate separate sessions on the same day.
+    if ta and tb and ta != tb:
+        return False
+
+    return True
+
+
+def dedupe_radar_candidates(results):
+    """Mark semantic duplicates and rebuild per-source radarEligible lists.
+
+    Winner priority:
+      1) higher fitScore
+      2) closer concentric circle
+      3) richer metadata (location/deadline/audience)
+      4) stable ID
+    """
+    pool = []
+    for result in results:
+        pool.extend(result.get('radarEligible', []))
+
+    def quality(c):
+        richness = sum(bool(c.get(k)) for k in ('location', 'deadline', 'audience', 'organizer'))
+        return (
+            int(c.get('fitScore', 0)),
+            -int(c.get('circleLevel', 9)),
+            richness,
+            str(c.get('id', '')),
+        )
+
+    ordered = sorted(pool, key=quality, reverse=True)
+    winners = []
+
+    for candidate in ordered:
+        duplicate_of = None
+        for winner in winners:
+            if semantic_duplicate(candidate, winner):
+                duplicate_of = winner
+                break
+
+        if duplicate_of is None:
+            winners.append(candidate)
+            candidate['semanticDuplicateOf'] = ''
+        else:
+            candidate['radarEligible'] = False
+            candidate['fitTier'] = '重複'
+            candidate['hardFilterReason'] = 'semantic_duplicate'
+            candidate['eligibilityReason'] = ''
+            candidate['semanticDuplicateOf'] = duplicate_of.get('id', '')
+            candidate.setdefault('fitReasons', []).append(
+                f'與 {duplicate_of.get("title","")} 同標題／日期／地點，保留較高品質版本'
+            )
+
+    winner_ids = {c.get('id') for c in winners}
+
+    for result in results:
+        result['radarEligible'] = [
+            c for c in result.get('accepted', [])
+            if c.get('radarEligible') and c.get('id') in winner_ids
+        ]
+        result['semanticDuplicates'] = sum(
+            1 for c in result.get('accepted', [])
+            if c.get('hardFilterReason') == 'semantic_duplicate'
+        )
+        result['fitFiltered'] = len(result.get('accepted', [])) - len(result['radarEligible'])
+
+    return results, winners
+
+
+def apply_fit_to_result(result):
+    fitted = [fit_candidate(c) for c in result.get('accepted', [])]
+    result['accepted'] = fitted
+    result['radarEligible'] = [c for c in fitted if c.get('radarEligible')]
+    result['fitFiltered'] = len(fitted) - len(result['radarEligible'])
+    return result
+
+
 def actionable_status(candidate):
     """Return (is_actionable, reason).
 
@@ -999,18 +1801,44 @@ def run(repo, limit, apply):
 
     if 'thu_official' in enabled:
         results.append(run_thu_source(limit))
+    if 'taichung_job' in enabled:
+        results.append(run_taichung_source(limit))
     if 'yda_official' in enabled:
         results.append(run_yda_source(limit))
 
     if not results:
         raise RuntimeError('沒有啟用任何 AutoFetch 來源')
 
+    results = [apply_fit_to_result(r) for r in results]
+    results, deduped_winners = dedupe_radar_candidates(results)
+
+    # Staging keeps all actionable candidates, including low-fit items, so the
+    # user can audit what was filtered. Production receives radarEligible only.
     all_candidates = []
+    radar_candidates = []
     for result in results:
         all_candidates.extend(result['accepted'])
+        radar_candidates.extend(result['radarEligible'])
 
     all_candidates = list({c['id']: c for c in all_candidates}.values())
-    all_candidates.sort(key=lambda x: (x.get('date') or '9999-12-31', x['title']))
+    radar_candidates = list({c['id']: c for c in radar_candidates}.values())
+
+    all_candidates.sort(
+        key=lambda x: (
+            -int(x.get('fitScore', 0)),
+            int(x.get('circleLevel', 9)),
+            x.get('date') or '9999-12-31',
+            x['title'],
+        )
+    )
+    radar_candidates.sort(
+        key=lambda x: (
+            -int(x.get('fitScore', 0)),
+            int(x.get('circleLevel', 9)),
+            x.get('date') or '9999-12-31',
+            x['title'],
+        )
+    )
 
     totals = {
         'sources': len(results),
@@ -1018,17 +1846,33 @@ def run(repo, limit, apply):
         'discovered': sum(r['discovered'] for r in results),
         'parsedOk': sum(r['parsedOk'] for r in results),
         'accepted': len(all_candidates),
+        'radarEligible': len(radar_candidates),
+        'fitFiltered': sum(r.get('fitFiltered', 0) for r in results),
+        'semanticDuplicates': sum(r.get('semanticDuplicates', 0) for r in results),
         'skippedPast': sum(r['skippedPast'] for r in results),
         'rejected': sum(len(r['rejected']) for r in results),
         'fetchFailed': sum(len(r['fetchFailures']) for r in results),
     }
 
     staging = repo / 'data/staging'
-    write_json(staging / 'autofetch-candidates.json', {'events': all_candidates})
+    write_json(
+        staging / 'autofetch-candidates.json',
+        {
+            'events': all_candidates,
+            'radarEvents': radar_candidates,
+            'meta': {
+                'accepted': len(all_candidates),
+                'radarEligible': len(radar_candidates),
+                'fitFiltered': totals['fitFiltered'],
+                'semanticDuplicates': totals['semanticDuplicates'],
+                'ranking': 'fitScore DESC, circleLevel ASC, date ASC',
+            },
+        },
+    )
     write_json(
         staging / 'autofetch-report.json',
         {
-            'schemaVersion': '96.6.5-report-1',
+            'schemaVersion': '96.6.9.1-report-1',
             'generatedAt': now_iso(),
             'mode': 'apply' if apply else 'check',
             'summary': totals,
@@ -1039,6 +1883,9 @@ def run(repo, limit, apply):
                     'discovered': r['discovered'],
                     'parsedOk': r['parsedOk'],
                     'accepted': len(r['accepted']),
+                    'radarEligible': len(r.get('radarEligible', [])),
+                    'fitFiltered': r.get('fitFiltered', 0),
+                    'semanticDuplicates': r.get('semanticDuplicates', 0),
                     'skippedPast': r['skippedPast'],
                     'rejected': len(r['rejected']),
                     'fetchFailed': len(r['fetchFailures']),
@@ -1054,8 +1901,10 @@ def run(repo, limit, apply):
         log(
             f'SOURCE_SUMMARY source={r["sourceId"]} healthy={str(r["healthy"]).lower()} '
             f'discovered={r["discovered"]} parsed={r["parsedOk"]} '
-            f'accepted={len(r["accepted"])} skippedPast={r["skippedPast"]} '
-            f'rejected={len(r["rejected"])} fetchFailed={len(r["fetchFailures"])}'
+            f'accepted={len(r["accepted"])} radarEligible={len(r.get("radarEligible", []))} '
+            f'fitFiltered={r.get("fitFiltered", 0)} semanticDuplicates={r.get("semanticDuplicates", 0)} '
+            f'skippedPast={r["skippedPast"]} rejected={len(r["rejected"])} '
+            f'fetchFailed={len(r["fetchFailures"])}'
         )
 
     if apply:
@@ -1075,7 +1924,7 @@ def run(repo, limit, apply):
                 continue
             prefix = r['prefix']
             merged = [e for e in merged if not str(e.get('id', '')).startswith(prefix)]
-            merged.extend(r['accepted'])
+            merged.extend(r.get('radarEligible', []))
 
         merged = list({str(e.get('id', '')): e for e in merged}.values())
 
@@ -1091,28 +1940,32 @@ def run(repo, limit, apply):
             'updatedAt': now_iso(),
             'events': len(merged),
             'sources': totals['healthySources'],
-            'ok': totals['accepted'],
+            'ok': totals['radarEligible'],
             'failed': totals['rejected'] + totals['fetchFailed'],
             'errors': [
                 x['reason']
                 for r in results
                 for x in (r['rejected'] + r['fetchFailures'])
             ][:20],
-            'generator': 'V96.6.5 Multi-Source AutoFetch + Activity Radar',
+            'generator': 'V96.6.9.1.1 Multi-Source AutoFetch + Activity Radar',
         })
         write_json(activities_file, {'meta': meta, 'events': merged})
         log(
             f'AUTOFETCH_APPLY_OK sources={totals["sources"]} healthySources={totals["healthySources"]} '
             f'discovered={totals["discovered"]} parsed={totals["parsedOk"]} '
-            f'accepted={totals["accepted"]} skippedPast={totals["skippedPast"]} '
-            f'rejected={totals["rejected"]} fetchFailed={totals["fetchFailed"]}'
+            f'accepted={totals["accepted"]} radarEligible={totals["radarEligible"]} '
+            f'fitFiltered={totals["fitFiltered"]} semanticDuplicates={totals["semanticDuplicates"]} '
+            f'skippedPast={totals["skippedPast"]} rejected={totals["rejected"]} '
+            f'fetchFailed={totals["fetchFailed"]}'
         )
     else:
         log(
             f'AUTOFETCH_CHECK_OK sources={totals["sources"]} healthySources={totals["healthySources"]} '
             f'discovered={totals["discovered"]} parsed={totals["parsedOk"]} '
-            f'accepted={totals["accepted"]} skippedPast={totals["skippedPast"]} '
-            f'rejected={totals["rejected"]} fetchFailed={totals["fetchFailed"]}'
+            f'accepted={totals["accepted"]} radarEligible={totals["radarEligible"]} '
+            f'fitFiltered={totals["fitFiltered"]} semanticDuplicates={totals["semanticDuplicates"]} '
+            f'skippedPast={totals["skippedPast"]} rejected={totals["rejected"]} '
+            f'fetchFailed={totals["fetchFailed"]}'
         )
         log('production data was NOT changed')
 
@@ -1167,7 +2020,7 @@ def self_test():
     <div>教育活動</div>
     <h1>〖學生增能工作坊X勵學基金〗商務簡報與溝通訓練工作坊</h1>
     <div>報名起迄</div><div>2026-09-03 12:00 ~ 2026-10-02 12:00</div>
-    <div>承辦單位</div><div>教學發展中心</div>
+    <div>開放對象</div><div>學生，費用：0</div><div>承辦單位</div><div>教學發展中心</div>
     <h3>活動 報名</h3>
     <div>場次名稱</div><div>地 點</div><div>日 期</div><div>時 間</div>
     <div>商務簡報與溝通訓練工作坊</div>
@@ -1188,7 +2041,223 @@ def self_test():
     assert tc['organizer'] == '教學發展中心', tc
     assert '東海大學' in tc['location'], tc
 
-    log('SELF_TEST_OK version=96.6.5')
+    taichung_fixture = '''<html><body>
+    <h2>115年度『親子未來職涯對話工作坊』</h2>
+    <div>活動編號 : A260608005</div>
+    <div>活動日期 : 2026-09-12 13:00</div>
+    <div>報名日期 : 2026/06/10 00:00 ~ 2026/09/10 00:00</div>
+    <div>活動說明 :</div>
+    <p>陪伴高中職以上學生及家長一起探索職涯。</p>
+    <p>活動地點｜思享空間－201大教室（臺中市東區公園東路130號2樓）</p>
+    <p>主辦單位：臺中市就業服務處</p>
+    </body></html>'''.encode('utf-8')
+    cc, cr = build_taichung_candidate(
+        'https://1catchjob.taichung.gov.tw/detail.aspx?act=5387',
+        taichung_fixture,
+    )
+    assert cr is None and cc, (cr, cc)
+    assert cc['id'] == 'auto-tcjob-5387', cc
+    assert cc['date'] == '2026-09-12', cc
+    assert cc['deadline'] == '2026-09-10', cc
+    assert cc['time'] == '13:00', cc
+    assert cc['scope'] == '台中', cc
+    assert cc['type'] in {'職涯／實習', '教育／青少年'}, cc
+    assert '臺中市東區' in cc['location'], cc
+
+    excluded_fixture = '''<html><body>
+    <h2>115年度銀髮就業促進課程</h2>
+    <div>活動日期 : 2026-10-07 00:00</div>
+    <div>報名日期 : 2026/04/28 00:00 ~ 2026/10/06 00:00</div>
+    <p>中高齡及銀髮人才服務。</p>
+    </body></html>'''.encode('utf-8')
+    ec, er = build_taichung_candidate(
+        'https://1catchjob.taichung.gov.tw/detail.aspx?act=9999',
+        excluded_fixture,
+    )
+    assert ec is None and er == 'audience_mismatch', (ec, er)
+
+    # Fit engine regressions.
+    generic_job = fit_candidate({
+        'id': 'auto-tcjob-test1',
+        'title': '適性就業輔導促進就業計畫-臺中站-線上-職涯講座',
+        'date': '2099-09-30',
+        'deadline': '2099-09-23',
+        'location': '',
+        'type': '職涯／實習',
+        'keywords': '',
+        'statusText': '',
+        'organizer': '臺中市就業服務處',
+        'autofetch': {'sourceId': 'taichung_job'},
+    })
+    assert generic_job['radarEligible'] is False, generic_job
+    assert generic_job['fitTier'] == '低適配', generic_job
+
+    hotel_exp = fit_candidate({
+        'id': 'auto-tcjob-test2',
+        'title': '裕元花園酒店 × 旅宿業職場體驗',
+        'date': '2099-09-21',
+        'deadline': '2099-09-18',
+        'location': '臺中市西屯區',
+        'type': '職涯／實習',
+        'keywords': '',
+        'statusText': '',
+        'organizer': '臺中市就業服務處',
+        'autofetch': {'sourceId': 'taichung_job'},
+    })
+    assert hotel_exp['radarEligible'] is True, hotel_exp
+    assert hotel_exp['fitScore'] >= 35, hotel_exp
+
+    legal_thu = fit_candidate({
+        'id': 'auto-thu-test3',
+        'title': '大學生常見法律問題暨防制詐騙講座',
+        'date': '2099-10-07',
+        'deadline': '2099-10-05',
+        'location': '東海大學',
+        'type': '教育／青少年',
+        'keywords': '',
+        'statusText': '',
+        'organizer': '東海大學',
+        'autofetch': {'sourceId': 'thu_official'},
+    })
+    assert legal_thu['fitTier'] in {'高適配', '中適配'}, legal_thu
+    assert '法律／轉學考' in legal_thu['goalMatches'], legal_thu
+
+    immigrant = fit_candidate({
+        'id': 'auto-tcjob-test4',
+        'title': '新住民產業鏈工作坊-多元服務產業探索',
+        'date': '2099-09-20',
+        'deadline': '2099-09-17',
+        'location': '',
+        'type': '法律／學術',
+        'keywords': '',
+        'statusText': '',
+        'organizer': '臺中市就業服務處',
+        'autofetch': {'sourceId': 'taichung_job'},
+    })
+    assert immigrant['type'] == '職涯／實習', immigrant
+
+    # Audience-aware THU filtering.
+    faculty = fit_candidate({
+        'id': 'auto-thu-faculty',
+        'title': '【教師增能活動】AI 教學實踐工作坊',
+        'date': '2099-10-01',
+        'deadline': '2099-09-30',
+        'location': '東海大學',
+        'type': '通用能力／AI工具',
+        'keywords': '',
+        'statusText': '',
+        'organizer': '教學發展中心',
+        'audience': '教職員，費用：0',
+        'autofetch': {'sourceId': 'thu_official'},
+    })
+    assert faculty['radarEligible'] is False, faculty
+    assert faculty['fitTier'] == '不適用', faculty
+    assert faculty['hardFilterReason'] == 'faculty_only', faculty
+
+    student_ai = fit_candidate({
+        'id': 'auto-thu-ai-student',
+        'title': '【學生增能工作坊】大學生的第一堂 AI 使喚術',
+        'date': '2099-10-21',
+        'deadline': '2099-10-20',
+        'location': '線上',
+        'type': '通用能力／AI工具',
+        'keywords': '',
+        'statusText': '',
+        'organizer': '教學發展中心',
+        'audience': '學生，費用：0',
+        'autofetch': {'sourceId': 'thu_official'},
+    })
+    assert student_ai['radarEligible'] is True, student_ai
+    assert student_ai['fitScore'] < 72, student_ai
+
+    # Identity-restricted activities stay in staging but not main radar.
+    intl_only = fit_candidate({
+        'id': 'auto-thu-intl',
+        'title': '國際生留臺就業輔導計畫說明會',
+        'date': '2099-09-15',
+        'deadline': '2099-09-14',
+        'location': '東海大學',
+        'type': '語言／國際',
+        'keywords': '',
+        'statusText': '',
+        'organizer': '國際處',
+        'audience': '',
+        'autofetch': {'sourceId': 'thu_official'},
+    })
+    assert intl_only['radarEligible'] is False, intl_only
+    assert intl_only['hardFilterReason'] == 'international_student_only', intl_only
+    assert intl_only['fitTier'] == '資格待確認', intl_only
+
+    immigrant_only = fit_candidate({
+        'id': 'auto-tcjob-immigrant',
+        'title': '新住民產業鏈工作坊-多元服務產業探索',
+        'date': '2099-09-20',
+        'deadline': '2099-09-17',
+        'location': '臺中市',
+        'type': '職涯／實習',
+        'keywords': '',
+        'statusText': '',
+        'organizer': '臺中市就業服務處',
+        'audience': '',
+        'autofetch': {'sourceId': 'taichung_job'},
+    })
+    assert immigrant_only['radarEligible'] is False, immigrant_only
+    assert immigrant_only['hardFilterReason'] == 'new_immigrant_only', immigrant_only
+
+    # Semantic duplicate: same title + date + compatible location keeps one.
+    d1 = fit_candidate({
+        'id': 'auto-tcjob-dup1',
+        'title': '裕元花園酒店 × 旅宿業職場體驗',
+        'date': '2099-09-21',
+        'deadline': '2099-09-18',
+        'location': '裕元花園酒店（臺中市西屯區）',
+        'type': '職涯／實習',
+        'keywords': '',
+        'statusText': '',
+        'organizer': '臺中市就業服務處',
+        'autofetch': {'sourceId': 'taichung_job'},
+    })
+    d2 = fit_candidate({
+        'id': 'auto-tcjob-dup2',
+        'title': '◎裕元花園酒店 × 旅宿業職場體驗 ◎',
+        'date': '2099-09-21',
+        'deadline': '2099-09-18',
+        'location': '裕元花園酒店（台中市西屯區福安里台灣大道四段610號）',
+        'type': '職涯／實習',
+        'keywords': '',
+        'statusText': '',
+        'organizer': '臺中市就業服務處',
+        'autofetch': {'sourceId': 'taichung_job'},
+    })
+    rr = [{
+        'sourceId': 'taichung_job',
+        'prefix': TAICHUNG_AUTO_PREFIX,
+        'accepted': [d1, d2],
+        'radarEligible': [d1, d2],
+        'fitFiltered': 0,
+        'semanticDuplicates': 0,
+    }]
+    rr, winners = dedupe_radar_candidates(rr)
+    assert len(winners) == 1, winners
+    assert rr[0]['semanticDuplicates'] == 1, rr
+    assert len(rr[0]['radarEligible']) == 1, rr
+
+    # Same title/date but explicitly different times are separate sessions.
+    s1 = {
+        'title': '同名活動',
+        'date': '2099-10-01',
+        'time': '10:00–12:00',
+        'location': 'A教室',
+    }
+    s2 = {
+        'title': '同名活動',
+        'date': '2099-10-01',
+        'time': '14:00–16:00',
+        'location': 'B教室',
+    }
+    assert semantic_duplicate(s1, s2) is False, (s1, s2)
+
+    log('SELF_TEST_OK version=96.6.9.1')
 
 
 def main():
