@@ -12,10 +12,12 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import parse_qs, urljoin, urlparse
 
-USER_AGENT = 'GoalManager-AutoFetch/96.6.4 (+https://github.com/aw960809-ai/my-goal-manager)'
+USER_AGENT = 'GoalManager-AutoFetch/96.6.5 (+https://github.com/aw960809-ai/my-goal-manager)'
 MAX_BYTES = 2_000_000
 AUTO_PREFIX = 'auto-yda-'
+THU_AUTO_PREFIX = 'auto-thu-'
 YDA_LIST = 'https://www.yda.gov.tw/EventList.aspx?pid=56&uid=101'
+THU_LIST = 'https://tevent.thu.edu.tw/tEvent_front/index.php'
 
 DEADLINE_SIGNAL = re.compile(r'報名截止|截止日期|申請截止|收件截止|徵件期間|報名期間|申請期間|投件期間|額滿提早截止|截止')
 DATE_SECTION_SIGNAL = re.compile(r'活動日期及地點|活動時間及地點|活動日期|活動時間|活動期間|辦理日期|體驗期間|展出資訊')
@@ -26,24 +28,24 @@ FULL_DATE_RE = re.compile(r'(?<!\d)(20\d{2}|\d{3})[./\-年]\s*(\d{1,2})[./\-月]
 PARTIAL_DATE_RE = re.compile(r'(?<![\d./\-年])(\d{1,2})[./\-月]\s*(\d{1,2})日?')
 MAJOR_SECTION_RE = re.compile(r'^[壹貳參肆伍陸柒捌玖拾一二三四五六七八九十]+[、.]')
 
-WORKFLOW = '''name: V96.6 Scheduled Activity AutoFetch\n\non:\n  schedule:\n    - cron: "17 1 * * *"\n  workflow_dispatch:\n\npermissions:\n  contents: read\n  pages: write\n  id-token: write\n\nconcurrency:\n  group: pages-autofetch\n  cancel-in-progress: true\n\njobs:\n  fetch-build-deploy:\n    runs-on: ubuntu-latest\n    environment:\n      name: github-pages\n      url: ${{ steps.deployment.outputs.page_url }}\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-python@v5\n        with:\n          python-version: "3.12"\n      - name: AutoFetch activities\n        run: |\n          python tools/autofetch/autofetch.py --apply --limit 30\n          python -m json.tool data/activities.json >/dev/null\n      - name: Existing static QA\n        run: |\n          if [ -f qa_static.py ]; then python qa_static.py; fi\n      - name: Build site\n        run: |\n          if [ -f tools_build_preview.py ]; then python tools_build_preview.py; fi\n          if [ -d _site ]; then echo "SITE_DIR=_site" >> "$GITHUB_ENV";\n          elif [ -d dist ]; then echo "SITE_DIR=dist" >> "$GITHUB_ENV";\n          else mkdir -p _autofetch_site; cp -a . _autofetch_site/repo; rm -rf _autofetch_site/repo/.git _autofetch_site/repo/data/staging; echo "SITE_DIR=_autofetch_site/repo" >> "$GITHUB_ENV"; fi\n      - uses: actions/configure-pages@v5\n      - uses: actions/upload-pages-artifact@v4\n        with:\n          path: ${{ env.SITE_DIR }}\n      - id: deployment\n        uses: actions/deploy-pages@v4\n'''
+WORKFLOW = '''name: V96.6 Scheduled Activity AutoFetch\n\non:\n  schedule:\n    - cron: "17 1 * * *"\n  workflow_dispatch:\n\npermissions:\n  contents: read\n  pages: write\n  id-token: write\n\nconcurrency:\n  group: pages-autofetch\n  cancel-in-progress: true\n\njobs:\n  fetch-build-deploy:\n    runs-on: ubuntu-latest\n    environment:\n      name: github-pages\n      url: ${{ steps.deployment.outputs.page_url }}\n    steps:\n      - uses: actions/checkout@v6\n      - uses: actions/setup-python@v6\n        with:\n          python-version: "3.12"\n      - name: AutoFetch activities\n        run: |\n          python tools/autofetch/autofetch.py --apply --limit 30\n          python -m json.tool data/activities.json >/dev/null\n      - name: Existing static QA\n        run: |\n          if [ -f qa_static.py ]; then python qa_static.py; fi\n      - name: Build site\n        run: |\n          if [ -f tools_build_preview.py ]; then python tools_build_preview.py; fi\n          if [ -d _site ]; then echo "SITE_DIR=_site" >> "$GITHUB_ENV";\n          elif [ -d dist ]; then echo "SITE_DIR=dist" >> "$GITHUB_ENV";\n          else mkdir -p _autofetch_site; cp -a . _autofetch_site/repo; rm -rf _autofetch_site/repo/.git _autofetch_site/repo/data/staging; echo "SITE_DIR=_autofetch_site/repo" >> "$GITHUB_ENV"; fi\n      - uses: actions/configure-pages@v5\n      - uses: actions/upload-pages-artifact@v4\n        with:\n          path: ${{ env.SITE_DIR }}\n      - id: deployment\n        uses: actions/deploy-pages@v4\n'''
 
 SOURCES = {
-    'version': '96.6.4',
+    'version': '96.6.5',
     'mode': 'whitelist',
     'default_enabled': False,
     'sources': [
         {
             'id': 'thu_official',
-            'name': '東海大學官方',
+            'name': '東海大學活動報名系統',
             'scope': 'campus',
             'priority': 1,
             'domain_allowlist': ['thu.edu.tw'],
-            'enabled': False,
-            'start_urls': [],
+            'enabled': True,
+            'start_urls': [THU_LIST],
             'fetch_type': 'html',
             'trust_level': 'official',
-            'notes': '待建立東海專用 adapter 後再啟用。',
+            'notes': 'V96.6.5 東海大學 tEvent 專用結構化 adapter。',
         },
         {
             'id': 'yda_official',
@@ -55,7 +57,7 @@ SOURCES = {
             'start_urls': [YDA_LIST],
             'fetch_type': 'html',
             'trust_level': 'official',
-            'notes': 'V96.6.4 青年署專用結構化 adapter。',
+            'notes': 'V96.6.5 青年署專用結構化 adapter。',
         },
     ],
 }
@@ -115,8 +117,8 @@ def install(repo: Path, src: Path):
 
     subprocess.run([sys.executable, '-m', 'py_compile', str(dest)], check=True)
     read_json(repo / 'data/activities.json')
-    log('INSTALL_OK version=96.6.4')
-    log('下一步： python tools/autofetch/autofetch.py --check --limit 12')
+    log('INSTALL_OK version=96.6.5')
+    log('下一步： python tools/autofetch/autofetch.py --check --limit 12  （同時檢查東海＋青年署）')
 
 
 class LinkParser(HTMLParser):
@@ -576,7 +578,7 @@ def build_candidate(url, body):
         'eventEndDate': end or '',
         'location': location or '',
         'autofetch': {
-            'engine': 'V96.6.4',
+            'engine': 'V96.6.5',
             'sourceId': 'yda_official',
             'eid': eid(url),
             'fetchedAt': now_iso(),
@@ -585,37 +587,233 @@ def build_candidate(url, body):
     return candidate, None
 
 
-def actionable_status(candidate):
-    """Return (is_actionable, reason).
 
-    Policy for the main Activity Radar:
-    - If a machine-readable registration/application deadline exists and it is
-      already past, the item is NOT actionable even when the event itself is
-      still in the future.
-    - If there is no deadline, a future event date/end date can remain visible.
-    - If all relevant dates are in the past or missing, it is not actionable.
-    """
-    today = date.today().isoformat()
-    deadline = candidate.get('deadline', '')
-    start = candidate.get('date', '')
-    end = candidate.get('eventEndDate', '')
+class THUDetailParser(HTMLParser):
+    """Lightweight parser for Tunghai tEvent detail pages."""
 
-    if deadline and deadline < today:
-        return False, 'deadline_passed'
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.skip = 0
+        self.in_h1 = False
+        self.h1_parts = []
+        self.title = None
+        self.lines = []
 
-    if deadline and deadline >= today:
-        return True, 'deadline_open'
+    @staticmethod
+    def clean(value):
+        return re.sub(r'\s+', ' ', value.replace('\u3000', ' ')).strip()
 
-    if end and end >= today:
-        return True, 'event_future'
+    def handle_starttag(self, tag, attrs):
+        tag = tag.lower()
+        if tag in {'script', 'style', 'noscript'}:
+            self.skip += 1
+        if tag == 'h1':
+            self.in_h1 = True
+            self.h1_parts = []
 
-    if start and start >= today:
-        return True, 'event_future'
+    def handle_endtag(self, tag):
+        tag = tag.lower()
+        if tag in {'script', 'style', 'noscript'} and self.skip:
+            self.skip -= 1
+        if tag == 'h1' and self.in_h1:
+            title = self.clean(' '.join(self.h1_parts))
+            if title:
+                self.title = title
+            self.in_h1 = False
+            self.h1_parts = []
 
-    return False, 'past_or_undated'
+    def handle_data(self, data):
+        if self.skip:
+            return
+        value = self.clean(data)
+        if not value:
+            return
+        if self.in_h1:
+            self.h1_parts.append(value)
+        self.lines.append(value)
 
 
-def run(repo, limit, apply):
+def parse_thu_detail(body: bytes):
+    parser = THUDetailParser()
+    parser.feed(decode_body(body))
+    out = []
+    for line in parser.lines:
+        line = re.sub(r'\s+', ' ', line).strip()
+        if not line:
+            continue
+        if out and line == out[-1]:
+            continue
+        out.append(line)
+    return parser.title, out
+
+
+def is_thu_detail(url):
+    p = urlparse(url)
+    q = parse_qs(p.query)
+    code = q.get('conference_code', [''])[0]
+    return (
+        p.scheme == 'https'
+        and p.hostname == 'tevent.thu.edu.tw'
+        and p.path.lower().endswith('/tevent_front/tevent.php')
+        and bool(re.fullmatch(r'\d{8,14}', code))
+    )
+
+
+def thu_code(url):
+    return parse_qs(urlparse(url).query).get('conference_code', [''])[0]
+
+
+REG_RANGE_RE = re.compile(
+    r'報名起迄\s*'
+    r'(\d{4}-\d{2}-\d{2})\s+\d{1,2}:\d{2}\s*~\s*'
+    r'(\d{4}-\d{2}-\d{2})\s+\d{1,2}:\d{2}'
+)
+
+SESSION_RE = re.compile(
+    r'(\d{4}-\d{2}-\d{2})\s*~\s*(\d{4}-\d{2}-\d{2})'
+    r'(?:\s+(\d{1,2}:\d{2})\s*~\s*(\d{1,2}:\d{2}))?'
+)
+
+
+def field_after(lines, label):
+    for i, line in enumerate(lines):
+        if line == label:
+            if i + 1 < len(lines):
+                value = lines[i + 1].strip()
+                if value and value != label:
+                    return value
+        if line.startswith(label):
+            value = line[len(label):].lstrip('：:｜| ').strip()
+            if value:
+                return value
+    return None
+
+
+def thu_registration_deadline(lines):
+    joined = '\n'.join(lines)
+    m = REG_RANGE_RE.search(joined)
+    return m.group(2) if m else None
+
+
+def thu_session(lines):
+    """Return (start, end, time, location) from the registration-session table."""
+    start_index = 0
+    for i, line in enumerate(lines):
+        if '報名場次' in line or line == '活動 報名' or line == '活動報名':
+            start_index = i
+
+    for i in range(start_index, len(lines)):
+        m = SESSION_RE.search(lines[i])
+        if not m:
+            continue
+        start, end = m.group(1), m.group(2)
+        time_value = ''
+        if m.group(3):
+            time_value = m.group(3) + (('–' + m.group(4)) if m.group(4) else '')
+
+        location = None
+        for candidate in reversed(lines[max(start_index, i - 7):i]):
+            c = candidate.strip()
+            if not c or c in {'地 點', '日期', '日 期', '時間', '時 間', '場次名稱'}:
+                continue
+            if c.startswith('加入Google') or c == lines[0]:
+                continue
+            if re.search(r'東海|臺中|台中|教室|大樓|館|廳|中心|線上|Teams|Meet|Zoom|校區|聚落|室', c):
+                location = c[:300]
+                break
+        return start, end, time_value, location
+
+    return None, None, '', None
+
+
+def thu_body_event_date(title, lines, deadline):
+    year = context_year(title, lines)
+    start, end = event_dates(lines, year, deadline)
+    return start, end, time_of(lines), location_of(lines)
+
+
+def build_thu_candidate(url, body):
+    title, lines = parse_thu_detail(body)
+    if not title or len(title) < 4 or len(title) > 200:
+        return None, 'invalid_heading'
+    if len(lines) < 3:
+        return None, 'article_too_short'
+
+    deadline = thu_registration_deadline(lines)
+    start, end, time_value, location = thu_session(lines)
+
+    if not start:
+        b_start, b_end, b_time, b_location = thu_body_event_date(title, lines, deadline)
+        start, end = b_start, b_end
+        time_value = time_value or b_time
+        location = location or b_location
+
+    organizer = field_after(lines, '承辦單位') or ''
+    category = ''
+    title_idx = lines.index(title) if title in lines else 0
+    for candidate in reversed(lines[max(0, title_idx - 4):title_idx]):
+        if candidate in {'教育活動', '學術活動', '藝文活動', '育樂活動', '其他活動', '教師專業成長活動', '導師知能研習課程'}:
+            category = candidate
+            break
+
+    scope, typ = classify(title, '\n'.join(lines), location)
+    scope = '東海校內'
+
+    if category == '學術活動':
+        typ = '法律／學術' if re.search(r'法律|憲法|民法|刑法|法學', '\n'.join(lines)) else '學術／講座'
+    elif category == '教育活動' and typ == '公共參與':
+        typ = '教育／青少年'
+
+    status = ['東海大學官方活動']
+    if organizer:
+        status.append('承辦 ' + organizer)
+    if start:
+        status.append('活動日 ' + start + (('–' + end) if end and end != start else ''))
+    if deadline:
+        status.append('截止 ' + deadline)
+
+    action_date = start or deadline or ''
+    code = thu_code(url)
+
+    return {
+        'id': THU_AUTO_PREFIX + code,
+        'title': title,
+        'date': action_date,
+        'time': time_value,
+        'scope': scope,
+        'type': typ,
+        'kind': 'event',
+        'url': url,
+        'keywords': f'{title} 東海大學 {organizer} {category} {typ} 校內',
+        'direct': True,
+        'team': False,
+        'available': True,
+        'source': '東海大學活動報名系統',
+        'statusText': '；'.join(status),
+        'government': False,
+        'deadline': deadline or '',
+        'eventEndDate': end or '',
+        'location': location or '',
+        'organizer': organizer,
+        'autofetch': {
+            'engine': 'V96.6.5',
+            'sourceId': 'thu_official',
+            'conferenceCode': code,
+            'fetchedAt': now_iso(),
+        },
+    }, None
+
+
+def source_health(discovered, parsed_ok, fetch_failed):
+    if discovered <= 0:
+        return False
+    return (
+        parsed_ok >= max(1, (discovered * 7) // 10)
+        and fetch_failed <= max(1, discovered // 5)
+    )
+
+
+def run_yda_source(limit):
     src = next(x for x in SOURCES['sources'] if x['id'] == 'yda_official')
     allowlist = src['domain_allowlist']
     final, body = fetch(YDA_LIST, allowlist)
@@ -668,37 +866,218 @@ def run(repo, limit, apply):
             log(f'YDA {i:02d}/{len(details):02d} FAIL {exc}')
 
     accepted = list({c['id']: c for c in accepted}.values())
-    accepted.sort(key=lambda x: (x.get('date') or '9999-12-31', x['title']))
-
-    staging = repo / 'data/staging'
-    write_json(staging / 'autofetch-candidates.json', {'events': accepted})
-    report = {
-        'schemaVersion': '96.6.4-report-1',
-        'generatedAt': now_iso(),
-        'mode': 'apply' if apply else 'check',
-        'summary': {
-            'discovered': len(details),
-            'parsedOk': parsed_ok,
-            'accepted': len(accepted),
-            'skippedPast': skipped_past,
-            'rejected': len(rejected),
-            'fetchFailed': len(fetch_failed),
-        },
+    return {
+        'sourceId': 'yda_official',
+        'prefix': AUTO_PREFIX,
+        'discovered': len(details),
+        'parsedOk': parsed_ok,
+        'accepted': accepted,
+        'skippedPast': skipped_past,
         'rejected': rejected,
         'fetchFailures': fetch_failed,
+        'healthy': source_health(len(details), parsed_ok, len(fetch_failed)),
     }
-    write_json(staging / 'autofetch-report.json', report)
+
+
+def run_thu_source(limit):
+    src = next(x for x in SOURCES['sources'] if x['id'] == 'thu_official')
+    allowlist = src['domain_allowlist']
+
+    details = []
+    seen = set()
+    list_failures = []
+
+    # Current tEvent listing is paginated; stop once the requested detail limit is reached.
+    for page in range(1, 6):
+        list_url = THU_LIST if page == 1 else f'{THU_LIST}?page={page}'
+        try:
+            final, body = fetch(list_url, allowlist)
+        except Exception as exc:
+            list_failures.append({'url': list_url, 'reason': str(exc)})
+            log(f'THU LIST page={page} FAIL {exc}')
+            continue
+
+        page_new = 0
+        for url in discover_links(body, final):
+            if is_thu_detail(url):
+                code = thu_code(url)
+                if code and code not in seen:
+                    seen.add(code)
+                    details.append(url)
+                    page_new += 1
+                    if len(details) >= limit:
+                        break
+        if len(details) >= limit:
+            break
+        if page > 1 and page_new == 0:
+            break
+
+    accepted = []
+    skipped_past = 0
+    rejected = []
+    fetch_failed = list(list_failures)
+    parsed_ok = 0
+
+    for i, url in enumerate(details, 1):
+        try:
+            _, detail_body = fetch(url, allowlist)
+            candidate, reason = build_thu_candidate(url, detail_body)
+            if candidate is None:
+                rejected.append({'url': url, 'reason': reason})
+                log(f'THU {i:02d}/{len(details):02d} REJECT reason={reason}')
+                continue
+            parsed_ok += 1
+            actionable, action_reason = actionable_status(candidate)
+            if actionable:
+                accepted.append(candidate)
+                log(
+                    f'THU {i:02d}/{len(details):02d} ACCEPT '
+                    f'reason={action_reason} date={candidate["date"] or "-"} '
+                    f'deadline={candidate["deadline"] or "-"} '
+                    f'title={candidate["title"]}'
+                )
+            else:
+                skipped_past += 1
+                label = 'SKIP_DEADLINE' if action_reason == 'deadline_passed' else 'SKIP_PAST'
+                log(
+                    f'THU {i:02d}/{len(details):02d} {label} '
+                    f'date={candidate["date"] or "-"} '
+                    f'deadline={candidate["deadline"] or "-"} '
+                    f'title={candidate["title"]}'
+                )
+        except Exception as exc:
+            fetch_failed.append({'url': url, 'reason': str(exc)})
+            log(f'THU {i:02d}/{len(details):02d} FAIL {exc}')
+
+    accepted = list({c['id']: c for c in accepted}.values())
+    return {
+        'sourceId': 'thu_official',
+        'prefix': THU_AUTO_PREFIX,
+        'discovered': len(details),
+        'parsedOk': parsed_ok,
+        'accepted': accepted,
+        'skippedPast': skipped_past,
+        'rejected': rejected,
+        'fetchFailures': fetch_failed,
+        'healthy': source_health(len(details), parsed_ok, len(fetch_failed)),
+    }
+
+
+def actionable_status(candidate):
+    """Return (is_actionable, reason).
+
+    Policy for the main Activity Radar:
+    - If a machine-readable registration/application deadline exists and it is
+      already past, the item is NOT actionable even when the event itself is
+      still in the future.
+    - If there is no deadline, a future event date/end date can remain visible.
+    - If all relevant dates are in the past or missing, it is not actionable.
+    """
+    today = date.today().isoformat()
+    deadline = candidate.get('deadline', '')
+    start = candidate.get('date', '')
+    end = candidate.get('eventEndDate', '')
+
+    if deadline and deadline < today:
+        return False, 'deadline_passed'
+
+    if deadline and deadline >= today:
+        return True, 'deadline_open'
+
+    if end and end >= today:
+        return True, 'event_future'
+
+    if start and start >= today:
+        return True, 'event_future'
+
+    return False, 'past_or_undated'
+
+
+def run(repo, limit, apply):
+    enabled = {s['id'] for s in SOURCES['sources'] if s.get('enabled')}
+    results = []
+
+    if 'thu_official' in enabled:
+        results.append(run_thu_source(limit))
+    if 'yda_official' in enabled:
+        results.append(run_yda_source(limit))
+
+    if not results:
+        raise RuntimeError('沒有啟用任何 AutoFetch 來源')
+
+    all_candidates = []
+    for result in results:
+        all_candidates.extend(result['accepted'])
+
+    all_candidates = list({c['id']: c for c in all_candidates}.values())
+    all_candidates.sort(key=lambda x: (x.get('date') or '9999-12-31', x['title']))
+
+    totals = {
+        'sources': len(results),
+        'healthySources': sum(1 for r in results if r['healthy']),
+        'discovered': sum(r['discovered'] for r in results),
+        'parsedOk': sum(r['parsedOk'] for r in results),
+        'accepted': len(all_candidates),
+        'skippedPast': sum(r['skippedPast'] for r in results),
+        'rejected': sum(len(r['rejected']) for r in results),
+        'fetchFailed': sum(len(r['fetchFailures']) for r in results),
+    }
+
+    staging = repo / 'data/staging'
+    write_json(staging / 'autofetch-candidates.json', {'events': all_candidates})
+    write_json(
+        staging / 'autofetch-report.json',
+        {
+            'schemaVersion': '96.6.5-report-1',
+            'generatedAt': now_iso(),
+            'mode': 'apply' if apply else 'check',
+            'summary': totals,
+            'sources': [
+                {
+                    'sourceId': r['sourceId'],
+                    'healthy': r['healthy'],
+                    'discovered': r['discovered'],
+                    'parsedOk': r['parsedOk'],
+                    'accepted': len(r['accepted']),
+                    'skippedPast': r['skippedPast'],
+                    'rejected': len(r['rejected']),
+                    'fetchFailed': len(r['fetchFailures']),
+                    'rejectedItems': r['rejected'],
+                    'fetchFailures': r['fetchFailures'],
+                }
+                for r in results
+            ],
+        },
+    )
+
+    for r in results:
+        log(
+            f'SOURCE_SUMMARY source={r["sourceId"]} healthy={str(r["healthy"]).lower()} '
+            f'discovered={r["discovered"]} parsed={r["parsedOk"]} '
+            f'accepted={len(r["accepted"])} skippedPast={r["skippedPast"]} '
+            f'rejected={len(r["rejected"])} fetchFailed={len(r["fetchFailures"])}'
+        )
 
     if apply:
-        discovered = len(details)
-        healthy = discovered > 0 and parsed_ok >= max(1, (discovered * 7) // 10) and len(fetch_failed) <= max(1, discovered // 5)
-        if not healthy:
-            raise RuntimeError('fail-closed：解析健康度不足，不覆蓋正式資料')
+        if totals['healthySources'] == 0:
+            raise RuntimeError('fail-closed：所有來源健康度不足，不覆蓋正式資料')
 
         activities_file = repo / 'data/activities.json'
         payload = read_json(activities_file)
-        existing = payload.get('events', [])
-        preserved = [e for e in existing if not str(e.get('id', '')).startswith(AUTO_PREFIX)]
+        merged = list(payload.get('events', []))
+
+        # Per-source fail-closed behavior:
+        # healthy source -> replace only that source's auto-owned records
+        # unhealthy source -> preserve its previous production records
+        for r in results:
+            if not r['healthy']:
+                log(f'SOURCE_PRESERVED source={r["sourceId"]} reason=unhealthy')
+                continue
+            prefix = r['prefix']
+            merged = [e for e in merged if not str(e.get('id', '')).startswith(prefix)]
+            merged.extend(r['accepted'])
+
+        merged = list({str(e.get('id', '')): e for e in merged}.values())
 
         backup_dir = staging / 'backups'
         backup_dir.mkdir(parents=True, exist_ok=True)
@@ -707,27 +1086,36 @@ def run(repo, limit, apply):
             backup_dir / f'activities-{datetime.now().strftime("%Y%m%d-%H%M%S")}.json',
         )
 
-        merged = preserved + accepted
         meta = dict(payload.get('meta', {}))
         meta.update({
             'updatedAt': now_iso(),
             'events': len(merged),
-            'ok': len(accepted),
-            'failed': len(rejected) + len(fetch_failed),
-            'errors': [x['reason'] for x in rejected + fetch_failed][:20],
-            'generator': 'V96.6.4 AutoFetch + Activity Radar',
+            'sources': totals['healthySources'],
+            'ok': totals['accepted'],
+            'failed': totals['rejected'] + totals['fetchFailed'],
+            'errors': [
+                x['reason']
+                for r in results
+                for x in (r['rejected'] + r['fetchFailures'])
+            ][:20],
+            'generator': 'V96.6.5 Multi-Source AutoFetch + Activity Radar',
         })
         write_json(activities_file, {'meta': meta, 'events': merged})
         log(
-            f'AUTOFETCH_APPLY_OK discovered={len(details)} parsed={parsed_ok} '
-            f'accepted={len(accepted)} skippedPast={skipped_past} rejected={len(rejected)} fetchFailed={len(fetch_failed)}'
+            f'AUTOFETCH_APPLY_OK sources={totals["sources"]} healthySources={totals["healthySources"]} '
+            f'discovered={totals["discovered"]} parsed={totals["parsedOk"]} '
+            f'accepted={totals["accepted"]} skippedPast={totals["skippedPast"]} '
+            f'rejected={totals["rejected"]} fetchFailed={totals["fetchFailed"]}'
         )
     else:
         log(
-            f'AUTOFETCH_CHECK_OK discovered={len(details)} parsed={parsed_ok} '
-            f'accepted={len(accepted)} skippedPast={skipped_past} rejected={len(rejected)} fetchFailed={len(fetch_failed)}'
+            f'AUTOFETCH_CHECK_OK sources={totals["sources"]} healthySources={totals["healthySources"]} '
+            f'discovered={totals["discovered"]} parsed={totals["parsedOk"]} '
+            f'accepted={totals["accepted"]} skippedPast={totals["skippedPast"]} '
+            f'rejected={totals["rejected"]} fetchFailed={totals["fetchFailed"]}'
         )
         log('production data was NOT changed')
+
 
 
 def self_test():
@@ -775,7 +1163,32 @@ def self_test():
     })
     assert action2 is True and why2 == 'event_future', (action2, why2)
 
-    log('SELF_TEST_OK version=96.6.4')
+    thu_fixture = '''<html><body>
+    <div>教育活動</div>
+    <h1>〖學生增能工作坊X勵學基金〗商務簡報與溝通訓練工作坊</h1>
+    <div>報名起迄</div><div>2026-09-03 12:00 ~ 2026-10-02 12:00</div>
+    <div>承辦單位</div><div>教學發展中心</div>
+    <h3>活動 報名</h3>
+    <div>場次名稱</div><div>地 點</div><div>日 期</div><div>時 間</div>
+    <div>商務簡報與溝通訓練工作坊</div>
+    <div>東海大學學習共享空間</div>
+    <div>2026-10-05 ~ 2026-10-05 12:30 ~ 15:30</div>
+    </body></html>'''.encode('utf-8')
+    tc, tr = build_thu_candidate(
+        'https://tevent.thu.edu.tw/tEvent_front/tEvent.php?conference_code=2026090001&page=1&type=0',
+        thu_fixture,
+    )
+    assert tr is None and tc, (tr, tc)
+    assert tc['id'] == 'auto-thu-2026090001', tc
+    assert tc['deadline'] == '2026-10-02', tc
+    assert tc['date'] == '2026-10-05', tc
+    assert tc['eventEndDate'] == '2026-10-05', tc
+    assert tc['time'] == '12:30–15:30', tc
+    assert tc['scope'] == '東海校內', tc
+    assert tc['organizer'] == '教學發展中心', tc
+    assert '東海大學' in tc['location'], tc
+
+    log('SELF_TEST_OK version=96.6.5')
 
 
 def main():

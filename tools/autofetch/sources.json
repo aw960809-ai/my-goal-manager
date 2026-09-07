@@ -1,21 +1,23 @@
 {
-  "version": "96.6.4",
+  "version": "96.6.5",
   "mode": "whitelist",
   "default_enabled": false,
   "sources": [
     {
       "id": "thu_official",
-      "name": "東海大學官方",
+      "name": "東海大學活動報名系統",
       "scope": "campus",
       "priority": 1,
       "domain_allowlist": [
         "thu.edu.tw"
       ],
-      "enabled": false,
-      "start_urls": [],
+      "enabled": true,
+      "start_urls": [
+        "https://tevent.thu.edu.tw/tEvent_front/index.php"
+      ],
       "fetch_type": "html",
       "trust_level": "official",
-      "notes": "待建立東海專用 adapter 後再啟用。"
+      "notes": "V96.6.5 東海大學 tEvent 專用結構化 adapter。"
     },
     {
       "id": "yda_official",
@@ -31,7 +33,7 @@
       ],
       "fetch_type": "html",
       "trust_level": "official",
-      "notes": "V96.6.4 青年署專用結構化 adapter。"
+      "notes": "V96.6.5 青年署專用結構化 adapter。"
     }
   ]
 }
