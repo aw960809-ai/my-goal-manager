@@ -1,0 +1,53 @@
+name: V96.6 AutoFetch Safe Check
+
+on:
+  push:
+    branches:
+      - v96.6-auto-fetch
+    paths:
+      - "tools/autofetch/**"
+      - "data/activities.json"
+      - ".github/workflows/autofetch-check.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v96-6-autofetch-safe-check
+  cancel-in-progress: true
+
+jobs:
+  safe-check:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Taipei
+
+    steps:
+      - name: Checkout V96.6 branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate source files
+        run: |
+          python -m py_compile tools/autofetch/autofetch.py
+          python -m json.tool tools/autofetch/sources.json >/dev/null
+          python -m json.tool data/activities.json >/dev/null
+
+      - name: Run AutoFetch in safe check mode
+        run: |
+          python tools/autofetch/autofetch.py --check --limit 12
+
+      - name: Run existing static QA
+        run: |
+          python qa_static.py
+
+      - name: Confirm production files were not modified
+        run: |
+          git diff --exit-code -- data/activities.json
+          test -z "$(git status --porcelain --untracked-files=no)"
+          echo "V96_6_GITHUB_SAFE_CHECK_OK"
