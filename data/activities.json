@@ -1,12 +1,12 @@
 {
   "meta": {
-    "updatedAt": "2026-09-07T04:58:03.257601+00:00",
+    "updatedAt": "2026-09-07T05:09:56.273266+00:00",
     "sources": 5,
     "events": 21,
     "ok": 15,
     "failed": 0,
     "errors": [],
-    "generator": "V96.6.11 Multi-Source AutoFetch + Activity Radar",
+    "generator": "V96.6.11.1.1 Multi-Source AutoFetch + Activity Radar",
     "sourcePolicy": "政府資訊為主；東海官方活動為活動核心；獎學金獨立資料集合與獨立判斷",
     "scholarships": 7
   },
@@ -138,10 +138,10 @@
       "organizer": "教學發展中心",
       "audience": "教職員，費用：0；學生，費用：0",
       "autofetch": {
-        "engine": "V96.6.11",
+        "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026070017",
-        "fetchedAt": "2026-09-07T04:56:24.229099+00:00"
+        "fetchedAt": "2026-09-07T05:07:56.134295+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -186,10 +186,10 @@
       "organizer": "健康暨諮商中心",
       "audience": "學生，費用：0",
       "autofetch": {
-        "engine": "V96.6.11",
+        "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026080023",
-        "fetchedAt": "2026-09-07T04:56:25.200367+00:00"
+        "fetchedAt": "2026-09-07T05:07:57.469799+00:00"
       },
       "fitScore": 73,
       "fitTier": "高適配",
@@ -234,10 +234,10 @@
       "organizer": "教學發展中心",
       "audience": "教職員，費用：0；學生，費用：0",
       "autofetch": {
-        "engine": "V96.6.11",
+        "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026070019",
-        "fetchedAt": "2026-09-07T04:56:26.518764+00:00"
+        "fetchedAt": "2026-09-07T05:07:59.166452+00:00"
       },
       "fitScore": 48,
       "fitTier": "探索",
@@ -283,10 +283,10 @@
       "organizer": "生活輔導組",
       "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
       "autofetch": {
-        "engine": "V96.6.11",
+        "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090016",
-        "fetchedAt": "2026-09-07T04:56:32.692946+00:00"
+        "fetchedAt": "2026-09-07T05:08:06.333404+00:00"
       },
       "fitScore": 78,
       "fitTier": "高適配",
@@ -330,10 +330,10 @@
       "organizer": "公共事務碩士在職專班",
       "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
       "autofetch": {
-        "engine": "V96.6.11",
+        "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026080015",
-        "fetchedAt": "2026-09-07T04:56:39.746246+00:00"
+        "fetchedAt": "2026-09-07T05:08:14.033720+00:00"
       },
       "fitScore": 96,
       "fitTier": "高適配",
@@ -377,10 +377,10 @@
       "organizer": "圖書暨資訊處",
       "audience": "教職員，費用：0；學生，費用：0",
       "autofetch": {
-        "engine": "V96.6.11",
+        "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026080013",
-        "fetchedAt": "2026-09-07T04:56:42.652520+00:00"
+        "fetchedAt": "2026-09-07T05:08:17.061612+00:00"
       },
       "fitScore": 51,
       "fitTier": "探索",
@@ -424,10 +424,10 @@
       "organizer": "企業管理學系",
       "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
       "autofetch": {
-        "engine": "V96.6.11",
+        "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090001",
-        "fetchedAt": "2026-09-07T04:56:45.333232+00:00"
+        "fetchedAt": "2026-09-07T05:08:19.965883+00:00"
       },
       "fitScore": 42,
       "fitTier": "探索",
@@ -470,10 +470,10 @@
       "organizer": "課外活動暨學生發展組",
       "audience": "學生，費用：0；說明：僅限社團、系學會成員",
       "autofetch": {
-        "engine": "V96.6.11",
+        "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026080014",
-        "fetchedAt": "2026-09-07T04:56:47.713849+00:00"
+        "fetchedAt": "2026-09-07T05:08:22.827288+00:00"
       },
       "fitScore": 47,
       "fitTier": "探索",
@@ -518,10 +518,10 @@
       "organizer": "永續發展暨校務研究處",
       "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
       "autofetch": {
-        "engine": "V96.6.11",
+        "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026080025",
-        "fetchedAt": "2026-09-07T04:56:48.974505+00:00"
+        "fetchedAt": "2026-09-07T05:08:24.167924+00:00"
       },
       "fitScore": 47,
       "fitTier": "探索",
@@ -566,10 +566,10 @@
       "organizer": "課外活動暨學生發展組",
       "audience": "學生，費用：0",
       "autofetch": {
-        "engine": "V96.6.11",
+        "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026080017",
-        "fetchedAt": "2026-09-07T04:56:52.274192+00:00"
+        "fetchedAt": "2026-09-07T05:08:28.083416+00:00"
       },
       "fitScore": 73,
       "fitTier": "高適配",
@@ -614,10 +614,10 @@
       "organizer": "教學發展中心",
       "audience": "教職員，費用：0；學生，費用：0",
       "autofetch": {
-        "engine": "V96.6.11",
+        "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026070022",
-        "fetchedAt": "2026-09-07T04:56:53.587271+00:00"
+        "fetchedAt": "2026-09-07T05:08:30.237388+00:00"
       },
       "fitScore": 43,
       "fitTier": "探索",
@@ -662,10 +662,10 @@
       "organizer": "臺中市就業服務處",
       "audience": "有限制",
       "autofetch": {
-        "engine": "V96.6.11",
+        "engine": "V96.6.11.1.1",
         "sourceId": "taichung_job",
         "act": "5583",
-        "fetchedAt": "2026-09-07T04:56:59.422216+00:00"
+        "fetchedAt": "2026-09-07T05:08:37.539372+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -710,10 +710,10 @@
       "organizer": "臺中市就業服務處",
       "audience": "高中職以上學生及家長。",
       "autofetch": {
-        "engine": "V96.6.11",
+        "engine": "V96.6.11.1.1",
         "sourceId": "taichung_job",
         "act": "5387",
-        "fetchedAt": "2026-09-07T04:57:04.171748+00:00"
+        "fetchedAt": "2026-09-07T05:08:43.457091+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -758,10 +758,10 @@
       "organizer": "臺中市就業服務處",
       "audience": "有限制",
       "autofetch": {
-        "engine": "V96.6.11",
+        "engine": "V96.6.11.1.1",
         "sourceId": "taichung_job",
         "act": "5582",
-        "fetchedAt": "2026-09-07T04:57:04.977420+00:00"
+        "fetchedAt": "2026-09-07T05:08:44.433892+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -807,9 +807,9 @@
       "audience": "青年；實際年齡與簽證資格依各協定國規定",
       "openEnded": true,
       "autofetch": {
-        "engine": "V96.6.11",
+        "engine": "V96.6.11.1.1",
         "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-09-07T04:58:03.246210+00:00"
+        "fetchedAt": "2026-09-07T05:09:56.261617+00:00"
       },
       "fitScore": 94,
       "fitTier": "高適配",
