@@ -68,6 +68,7 @@ function renderSettings(){
    <div class="settings-row"><div><b>提前天數</b><small>活動／獎學金提醒偏好</small></div>${settingsSelect('reminderDays',[['1','1 天前'],['3','3 天前'],['7','7 天前'],['14','14 天前']])}</div>
    <div class="settings-permission"><span>瀏覽器通知權限：<b>${notif==='granted'?'已允許':notif==='denied'?'已拒絕':notif==='unsupported'?'不支援':'尚未設定'}</b></span><button class="btn" type="button" onclick="requestNotificationPermission()">${notif==='granted'?'重新確認':'允許通知'}</button></div>
   </div>
+  ${typeof pwaSettingsPanelHTML==='function'?pwaSettingsPanelHTML():''}
   <div class="settings-section">
    <div class="settings-section-head"><div><h3>資料管理</h3><p>你的使用者資料以本機保存為主。匯入會先驗證格式與完整性。</p></div></div>
    <div class="settings-action-grid">
@@ -90,7 +91,7 @@ function renderSettings(){
   </div>
   <div class="settings-section about-section">
    <div class="settings-section-head"><div><h3>關於系統</h3><p>個人目標與學習行動管理系統</p></div></div>
-   <div class="about-version"><b id="settingsVersion">V96.5</b><span>七模組工作層＋系統控制層</span></div>
+   <div class="about-version"><b id="settingsVersion">V96.8.1</b><span>七模組工作層＋系統控制層</span></div>
    ${window.__DEV_PREVIEW__===true?'<button class="text-button developer-entry" type="button" onclick="registerDeveloperTap()">檢視進階系統資訊</button><div class="developer-hint">預覽／開發環境限定：連續點擊版本 7 次可開啟進階測試工具</div>':''}
   </div>`;
  updateSettingsDataStatus();

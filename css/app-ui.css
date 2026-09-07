@@ -266,3 +266,46 @@ html.app-dark #activity .activity-eyebrow,html.app-dark #activity .activity-reas
 .goal-activity-bridge{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding:12px;border:1px solid rgba(0,86,59,.18);border-radius:14px;background:linear-gradient(135deg,rgba(0,86,59,.055),rgba(197,160,89,.055))}.goal-activity-bridge>div{min-width:0;display:grid;gap:3px}.goal-activity-bridge b{font-size:12px}.goal-activity-bridge span{font-size:9px;line-height:1.45;color:var(--ui-muted,#66727d)}
 @media(max-width:650px){#activity .activity-goal-context,.goal-activity-bridge{align-items:stretch;flex-direction:column}#activity .activity-goal-context .btn,.goal-activity-bridge .btn{width:100%}}
 html.app-dark #activity .activity-goal-context,html.app-dark #activity .activity-goal-bridge-card,html.app-dark .goal-activity-bridge{background:linear-gradient(135deg,rgba(48,126,94,.13),rgba(197,160,89,.08));border-color:#34433e}html.app-dark #activity .activity-concrete-evidence span{background:#17211e;border-color:#40554c}
+
+/* V96.8.1 PWA formalization */
+.pwa-update-bar{
+  position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));z-index:1200;
+  width:min(560px,calc(100% - 24px));transform:translate(-50%,18px);
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:11px 12px;border:1px solid rgba(0,86,59,.22);border-radius:16px;
+  background:rgba(250,252,251,.97);box-shadow:0 12px 38px rgba(22,42,34,.18);
+  opacity:0;pointer-events:none;transition:opacity .18s ease,transform .18s ease;
+}
+.pwa-update-bar.show{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+.pwa-update-bar>div{min-width:0;display:grid;gap:2px}
+.pwa-update-bar b{font-size:12px;color:var(--ui-text,#173044)}
+.pwa-update-bar span{font-size:9px;color:var(--ui-muted,#66727d)}
+.pwa-update-bar button{flex:0 0 auto;border:0;border-radius:11px;padding:9px 12px;background:var(--ui-green,#00563B);color:#fff;font-weight:850;font-size:10px;cursor:pointer}
+.pwa-settings-status{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0 10px;padding:11px 12px;border:1px solid var(--ui-line,#e3eae7);border-radius:13px;background:var(--ui-soft,#f1f5f3)}
+.pwa-settings-status>div{display:grid;gap:2px}
+.pwa-settings-status b{font-size:12px}
+.pwa-settings-status small,.pwa-settings-status>span{font-size:9px;color:var(--ui-muted,#66727d)}
+.pwa-settings-status.ready{border-color:rgba(0,86,59,.28);background:rgba(0,86,59,.055)}
+.pwa-settings-status.installed{border-color:rgba(197,160,89,.35);background:rgba(197,160,89,.08)}
+.pwa-settings-note{margin-top:8px;font-size:9px;line-height:1.45;color:var(--ui-muted,#66727d)}
+.pwa-settings-section button:disabled{opacity:.55;cursor:default}
+html.app-dark .pwa-update-bar{background:rgba(24,34,31,.98);border-color:#3a4c45}
+html.app-dark .pwa-settings-status{background:#1e2a26;border-color:#34433e}
+@media(max-width:650px){
+  .pwa-update-bar{bottom:calc(92px + env(safe-area-inset-bottom));align-items:stretch}
+  .pwa-update-bar button{min-width:78px}
+}
+
+/* V96.8.1.1 update feedback hotfix */
+.pwa-update-status{
+  display:flex;align-items:center;gap:8px;margin-top:8px;padding:9px 11px;
+  border-radius:11px;border:1px solid var(--ui-line,#e3eae7);
+  background:var(--ui-soft,#f1f5f3);font-size:9px;color:var(--ui-muted,#66727d)
+}
+.pwa-update-status span{width:16px;text-align:center;font-weight:900}
+.pwa-update-status b{font-size:9px;line-height:1.35}
+.pwa-update-status.checking{border-color:rgba(197,160,89,.35);background:rgba(197,160,89,.08)}
+.pwa-update-status.ok{border-color:rgba(0,86,59,.28);background:rgba(0,86,59,.055);color:var(--ui-green,#00563B)}
+.pwa-update-status.update{border-color:rgba(197,160,89,.45);background:rgba(197,160,89,.12);color:#8a681a}
+.pwa-update-status.error{border-color:rgba(160,60,60,.3);background:rgba(160,60,60,.07);color:#9a3838}
+html.app-dark .pwa-update-status{background:#1e2a26;border-color:#34433e}

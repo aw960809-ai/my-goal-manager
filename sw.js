@@ -1,8 +1,71 @@
-const CACHE='law-goal-web-v96-5';
-const CORE=['./','./index.html','./manifest.webmanifest','./icon.svg','./404.html','./css/base.css','./css/app-ui.css','./config/system-config.js','./js/security.js','./js/store.js','./js/settings.js','./js/activity.js','./js/scholarship.js','./js/app.js','./js/navigation.js','./js/bootstrap.js','./data/events.json','./data/activities.json','./data/scholarships.json'];
-self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
-self.addEventListener('fetch',e=>{
- if(e.request.method!=='GET') return;
- e.respondWith(caches.match(e.request).then(cached=>cached||fetch(e.request).then(res=>{const copy=res.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return res}).catch(()=>{if(e.request.mode==='navigate')return caches.match('./index.html');return Response.error();})));
+/* V96.8.1 service worker */
+const PWA_VERSION='96.8.1';
+const CACHE_PREFIX='law-goal-web-v';
+const CACHE=CACHE_PREFIX+PWA_VERSION;
+const APP_SHELL=[
+  './','./index.html','./manifest.webmanifest','./icon.svg',
+  './icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png',
+  './404.html','./css/base.css','./css/app-ui.css','./config/system-config.js',
+  './js/security.js','./js/store.js','./js/settings.js','./js/activity.js',
+  './js/scholarship.js','./js/app.js','./js/navigation.js','./js/pwa.js','./js/bootstrap.js'
+];
+const MUTABLE_DATA=['./data/events.json','./data/activities.json','./data/scholarships.json'];
+
+async function cacheResponse(request,response){
+  if(!response||!response.ok||response.type==='opaque')return;
+  const cache=await caches.open(CACHE);
+  await cache.put(request,response.clone());
+}
+async function networkFirst(request,fallbackUrl){
+  try{
+    const response=await fetch(request,{cache:'no-store'});
+    if(response&&response.ok)await cacheResponse(request,response);
+    return response;
+  }catch(_){
+    const cached=await caches.match(request);
+    if(cached)return cached;
+    if(fallbackUrl){
+      const fallback=await caches.match(fallbackUrl);
+      if(fallback)return fallback;
+    }
+    return Response.error();
+  }
+}
+async function staleWhileRevalidate(request){
+  const cached=await caches.match(request);
+  const fresh=fetch(request,{cache:'no-store'})
+    .then(async response=>{
+      if(response&&response.ok)await cacheResponse(request,response);
+      return response;
+    }).catch(()=>null);
+  return cached||await fresh||Response.error();
+}
+
+self.addEventListener('install',event=>{
+  event.waitUntil((async()=>{
+    const cache=await caches.open(CACHE);
+    await cache.addAll(APP_SHELL);
+    await Promise.allSettled(MUTABLE_DATA.map(url=>cache.add(url)));
+  })());
+});
+self.addEventListener('activate',event=>{
+  event.waitUntil((async()=>{
+    const keys=await caches.keys();
+    await Promise.all(keys.filter(k=>k.startsWith(CACHE_PREFIX)&&k!==CACHE).map(k=>caches.delete(k)));
+    await self.clients.claim();
+  })());
+});
+self.addEventListener('message',event=>{
+  if(event.data?.type==='SKIP_WAITING')self.skipWaiting();
+  if(event.data?.type==='GET_VERSION'&&event.ports?.[0])event.ports[0].postMessage({version:PWA_VERSION});
+});
+self.addEventListener('fetch',event=>{
+  const request=event.request;
+  if(request.method!=='GET')return;
+  const url=new URL(request.url);
+  if(url.origin!==self.location.origin)return;
+  if(request.mode==='navigate'){event.respondWith(networkFirst(request,'./index.html'));return}
+  if(/\/data\/(?:activities|scholarships|events)\.json$/.test(url.pathname)){event.respondWith(networkFirst(request));return}
+  if(/\.(?:js|css|webmanifest|svg|png)$/.test(url.pathname)){event.respondWith(staleWhileRevalidate(request));return}
+  event.respondWith(networkFirst(request));
 });
