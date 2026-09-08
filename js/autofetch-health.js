@@ -3,7 +3,7 @@
 (function(){
   "use strict";
 
-  const VERSION="96.8.2.2";
+  const VERSION="96.8.2.3";
   const STALE_HOURS=36;
   const state={
     checkedAt:"",
@@ -59,27 +59,21 @@
   function activityInfo(payload){
     const meta=metaOf(payload),summary=meta.summary||{},quality=meta.quality||{};
     const updated=first(meta.updatedAt,payload?.updatedAt,summary.updatedAt);
-    const sources=n(first(meta.sources,summary.sources,meta.totalSources),0);
-
-    // V96.8.2.2: legacy meta.ok is event/success count, not healthy-source count.
-    const failed=Math.max(0,n(first(meta.failedSources,meta.failed,summary.failed),0));
+    const explicitTotal=first(meta.totalSources,summary.totalSources);
     const explicitHealthy=first(meta.healthySources,summary.healthySources);
-    const healthy=explicitHealthy!==null
-      ? Math.max(0,Math.min(sources,n(explicitHealthy,0)))
-      : Math.max(0,sources-failed);
-
-    const prunePast=first(meta.skippedPast,summary.skippedPast,meta.expiredPruned,summary.expiredPruned,quality.expiredPruned);
-    const pruneDeadline=first(meta.skippedDeadline,summary.skippedDeadline,meta.deadlinePruned,summary.deadlinePruned);
-    const pruned=(prunePast===null&&pruneDeadline===null)
-      ? null
-      : n(prunePast,0)+n(pruneDeadline,0);
-
+    const explicitFailed=first(meta.failedSources,summary.failedSources);
+    const legacyHealthy=first(meta.sources,summary.sources);
+    const total=explicitTotal!==null?n(explicitTotal,0):n(legacyHealthy,0);
+    const healthy=explicitHealthy!==null?n(explicitHealthy,0):n(legacyHealthy,0);
+    const failed=explicitFailed!==null?n(explicitFailed,0):Math.max(0,total-healthy);
+    const prunedRaw=first(meta.skippedPast,summary.skippedPast,meta.expiredPruned,summary.expiredPruned,quality.expiredPruned);
+    const pruned=prunedRaw===null?null:n(prunedRaw,0);
     const retained=n(first(meta.retainedOnFailure,summary.retainedOnFailure,meta.preservedOnFailure),0);
     const count=rowsOf(payload).length;
     const age=ageHours(updated),stale=age!==null&&age>STALE_HOURS;
     const warning=failed>0;
-    const ok=sources>0 ? healthy>0 : count>=0;
-    return {kind:"activity",updated,sources,healthy,failed,pruned,retained,count,age,stale,warning,ok};
+    const ok=total>0 ? healthy>0 : count>=0;
+    return {kind:"activity",updated,sources:total,healthy,failed,pruned,retained,count,age,stale,warning,ok};
   }
   function scholarshipInfo(payload){
     const meta=metaOf(payload),summary=meta.summary||{};

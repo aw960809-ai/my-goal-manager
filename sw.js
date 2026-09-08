@@ -1,5 +1,5 @@
-/* V96.8.2.2 service worker */
-const PWA_VERSION='96.8.2.2';
+/* V96.8.2.3 service worker */
+const PWA_VERSION='96.8.2.3';
 const CACHE_PREFIX='law-goal-web-v';
 const CACHE=CACHE_PREFIX+PWA_VERSION;
 const APP_SHELL=[

@@ -2428,9 +2428,21 @@ def run(repo, limit, apply):
         meta.update({
             'updatedAt': now_iso(),
             'events': len(merged),
+
+            # Backward-compatible legacy fields.
             'sources': totals['healthySources'],
             'ok': totals['radarEligible'],
             'failed': totals['rejected'] + totals['fetchFailed'],
+
+            # V96.8.2.3 explicit health/lifecycle metrics.
+            'totalSources': totals['sources'],
+            'healthySources': totals['healthySources'],
+            'failedSources': totals['sources'] - totals['healthySources'],
+            'rejectedItems': totals['rejected'],
+            'fetchFailedItems': totals['fetchFailed'],
+            'skippedPast': totals['skippedPast'],
+            'fitFiltered': totals['fitFiltered'],
+            'semanticDuplicates': totals['semanticDuplicates'],
             'errors': [
                 x['reason']
                 for r in results
