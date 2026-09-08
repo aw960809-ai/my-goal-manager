@@ -3,7 +3,7 @@
 (function(){
   "use strict";
 
-  const VERSION="96.8.2.1";
+  const VERSION="96.8.2.2";
   const STALE_HOURS=36;
   const state={
     checkedAt:"",
@@ -60,20 +60,26 @@
     const meta=metaOf(payload),summary=meta.summary||{},quality=meta.quality||{};
     const updated=first(meta.updatedAt,payload?.updatedAt,summary.updatedAt);
     const sources=n(first(meta.sources,summary.sources,meta.totalSources),0);
-    const healthy=n(first(meta.healthySources,summary.healthySources,meta.ok,summary.ok),0);
-    const failed=n(first(meta.failedSources,meta.failed,summary.failed),Math.max(0,sources-healthy));
-    const pruned=n(first(
-      meta.skippedPast,summary.skippedPast,
-      meta.expiredPruned,summary.expiredPruned,quality.expiredPruned
-    ),0)+n(first(
-      meta.skippedDeadline,summary.skippedDeadline,
-      meta.deadlinePruned,summary.deadlinePruned
-    ),0);
+
+    // V96.8.2.2: legacy meta.ok is event/success count, not healthy-source count.
+    const failed=Math.max(0,n(first(meta.failedSources,meta.failed,summary.failed),0));
+    const explicitHealthy=first(meta.healthySources,summary.healthySources);
+    const healthy=explicitHealthy!==null
+      ? Math.max(0,Math.min(sources,n(explicitHealthy,0)))
+      : Math.max(0,sources-failed);
+
+    const prunePast=first(meta.skippedPast,summary.skippedPast,meta.expiredPruned,summary.expiredPruned,quality.expiredPruned);
+    const pruneDeadline=first(meta.skippedDeadline,summary.skippedDeadline,meta.deadlinePruned,summary.deadlinePruned);
+    const pruned=(prunePast===null&&pruneDeadline===null)
+      ? null
+      : n(prunePast,0)+n(pruneDeadline,0);
+
     const retained=n(first(meta.retainedOnFailure,summary.retainedOnFailure,meta.preservedOnFailure),0);
     const count=rowsOf(payload).length;
     const age=ageHours(updated),stale=age!==null&&age>STALE_HOURS;
-    const ok=count>=0 && !(sources>0&&healthy===0);
-    return {kind:"activity",updated,sources,healthy,failed,pruned,retained,count,age,stale,ok};
+    const warning=failed>0;
+    const ok=sources>0 ? healthy>0 : count>=0;
+    return {kind:"activity",updated,sources,healthy,failed,pruned,retained,count,age,stale,warning,ok};
   }
   function scholarshipInfo(payload){
     const meta=metaOf(payload),summary=meta.summary||{};
@@ -119,7 +125,7 @@
     if(!info||info.error){
       return `<div class="gm-health-card"><div class="gm-health-head"><b>${esc(title)}</b><span class="gm-health-pill bad">無法讀取</span></div><div class="gm-health-muted">${esc(info?.error||"尚未檢查")}</div></div>`;
     }
-    const badge=healthLabel(info.ok,info.stale);
+    const badge=healthLabel(info.ok,info.stale||info.warning);
     return `<div class="gm-health-card">
       <div class="gm-health-head"><b>${esc(title)}</b><span class="gm-health-pill ${badge.cls}">${badge.text}</span></div>
       <div class="gm-health-grid">
@@ -148,7 +154,7 @@
       </div>
       <div class="gm-health-stack">
         ${card("活動雷達",state.activities,info=>`
-          <span>本輪汰除<b>${info.pruned}</b></span>
+          <span>本輪汰除<b>${info.pruned===null?'未提供':info.pruned}</b></span>
           <span>失敗保留<b>${info.retained}</b></span>`)}
         ${card("獎學金",state.scholarships,info=>`
           <span>官方自動資料<b>${info.activeAuto}</b></span>
