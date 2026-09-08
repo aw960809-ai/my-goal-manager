@@ -3,7 +3,7 @@
 (function(){
   "use strict";
 
-  const VERSION="96.8.2";
+  const VERSION="96.8.2.1";
   const STALE_HOURS=36;
   const state={
     checkedAt:"",
@@ -220,13 +220,11 @@
     };
   }
 
-  const observer=new MutationObserver(()=>{
-    if(document.getElementById("settingsModal")?.classList.contains("show"))injectSettings();
-  });
   function boot(){
     ensureStyles();
-    const modal=document.getElementById("settingsModal");
-    if(modal)observer.observe(modal,{attributes:true,subtree:true,childList:true,attributeFilter:["class"]});
+    // V96.8.2.1: renderSettings wrapper is sufficient.
+    // Do not observe settingsBody/subtree: injecting the health panel itself would
+    // retrigger the observer and create an infinite render loop.
     refresh().catch(e=>{
       state.error=String(e?.message||e);state.overall="error";renderEverywhere();
     });
