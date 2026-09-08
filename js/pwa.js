@@ -1,4 +1,4 @@
-/* V96.8.1 PWA lifecycle */
+/* V96.8.2 PWA lifecycle */
 window.PWA=(function(){
   let deferredPrompt=null;
   let registration=null;
@@ -43,7 +43,7 @@ window.PWA=(function(){
         <button id="pwaUpdateCheckBtn" class="btn" type="button" onclick="pwaCheckForUpdate()">↻ 檢查程式更新</button>
       </div>
       <div id="pwaUpdateStatus" class="pwa-update-status idle" aria-live="polite"><span>●</span><b>尚未檢查更新</b></div>
-      <div class="pwa-settings-note">版本 V96.8.1｜支援離線啟動；活動資料在有網路時採網路優先，以避免桌面 App 長期停留在舊資料。</div>
+      <div class="pwa-settings-note">版本 V96.8.2｜支援離線啟動；活動資料在有網路時採網路優先，以避免桌面 App 長期停留在舊資料。</div>
     </div>`;
   }
   function ensureUpdateBar(){
@@ -106,7 +106,7 @@ window.PWA=(function(){
     toastSafe('請使用 Chrome／Edge 選單中的「安裝應用程式」或「新增至主畫面」');
     return false;
   }
-  /* V96.8.1.1 update feedback hotfix */
+  /* V96.8.2.1 update feedback hotfix */
   function setUpdateCheckUI(state,message){
     const box=document.getElementById('pwaUpdateStatus');
     const btn=document.getElementById('pwaUpdateCheckBtn');

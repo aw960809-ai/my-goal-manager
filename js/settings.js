@@ -91,7 +91,7 @@ function renderSettings(){
   </div>
   <div class="settings-section about-section">
    <div class="settings-section-head"><div><h3>關於系統</h3><p>個人目標與學習行動管理系統</p></div></div>
-   <div class="about-version"><b id="settingsVersion">V96.8.1</b><span>七模組工作層＋系統控制層</span></div>
+   <div class="about-version"><b id="settingsVersion">V96.8.2</b><span>七模組工作層＋系統控制層</span></div>
    ${window.__DEV_PREVIEW__===true?'<button class="text-button developer-entry" type="button" onclick="registerDeveloperTap()">檢視進階系統資訊</button><div class="developer-hint">預覽／開發環境限定：連續點擊版本 7 次可開啟進階測試工具</div>':''}
   </div>`;
  updateSettingsDataStatus();

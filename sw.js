@@ -1,5 +1,5 @@
-/* V96.8.1 service worker */
-const PWA_VERSION='96.8.1';
+/* V96.8.2 service worker */
+const PWA_VERSION='96.8.2';
 const CACHE_PREFIX='law-goal-web-v';
 const CACHE=CACHE_PREFIX+PWA_VERSION;
 const APP_SHELL=[
@@ -7,7 +7,7 @@ const APP_SHELL=[
   './icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png',
   './404.html','./css/base.css','./css/app-ui.css','./config/system-config.js',
   './js/security.js','./js/store.js','./js/settings.js','./js/activity.js',
-  './js/scholarship.js','./js/app.js','./js/navigation.js','./js/pwa.js','./js/bootstrap.js'
+  './js/scholarship.js','./js/app.js','./js/scholarship-lifecycle.js','./js/autofetch-health.js','./js/navigation.js','./js/pwa.js','./js/bootstrap.js'
 ];
 const MUTABLE_DATA=['./data/events.json','./data/activities.json','./data/scholarships.json'];
 
