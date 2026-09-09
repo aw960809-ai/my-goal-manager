@@ -1,53 +1,42 @@
-name: V96.6 AutoFetch Safe Check
-
+name: THU Goal Manager AutoFetch Safe Check
 on:
   push:
-    branches:
-      - v96.6-auto-fetch
+    branches: [main]
     paths:
       - "tools/autofetch/**"
       - "data/activities.json"
+      - "data/scholarships.json"
       - ".github/workflows/autofetch-check.yml"
+      - ".github/workflows/autofetch.yml"
+      - ".github/workflows/scholarship-autofetch.yml"
   workflow_dispatch:
-
 permissions:
   contents: read
-
 concurrency:
-  group: v96-6-autofetch-safe-check
+  group: thu-autofetch-safe-check
   cancel-in-progress: true
-
 jobs:
   safe-check:
     runs-on: ubuntu-latest
-    env:
-      TZ: Asia/Taipei
-
     steps:
-      - name: Checkout V96.6 branch
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
-      - name: Validate source files
+      - name: Validate
         run: |
-          python -m py_compile tools/autofetch/autofetch.py
+          python -m py_compile tools/autofetch/autofetch.py tools/autofetch/scholarship_autofetch.py
           python -m json.tool tools/autofetch/sources.json >/dev/null
+          python -m json.tool tools/autofetch/scholarship-sources.json >/dev/null
           python -m json.tool data/activities.json >/dev/null
-
-      - name: Run AutoFetch in safe check mode
+          python -m json.tool data/scholarships.json >/dev/null
+      - name: Activity safe check
+        run: python tools/autofetch/autofetch.py --check --limit 12
+      - name: Scholarship safe check
+        run: python tools/autofetch/scholarship_autofetch.py --repo . --check
+      - name: Static QA
+        run: python qa_static.py
+      - name: Confirm no data writes
         run: |
-          python tools/autofetch/autofetch.py --check --limit 12
-
-      - name: Run existing static QA
-        run: |
-          python qa_static.py
-
-      - name: Confirm production files were not modified
-        run: |
-          git diff --exit-code -- data/activities.json
-          test -z "$(git status --porcelain --untracked-files=no)"
-          echo "V96_6_GITHUB_SAFE_CHECK_OK"
+          git diff --exit-code -- data/activities.json data/scholarships.json
+          echo "THU_AUTOFETCH_SAFE_CHECK_OK"

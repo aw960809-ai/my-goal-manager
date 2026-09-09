@@ -1,213 +1,153 @@
-name: V96.6 Production Activity Radar AutoFetch
-
+name: THU Goal Manager Zero-Config AutoFetch
 on:
   schedule:
-    # 09:17 Asia/Taipei (UTC+8)
     - cron: "17 1 * * *"
   workflow_dispatch:
-
 permissions:
   contents: write
   pages: write
   id-token: write
-
 concurrency:
-  group: activity-radar-production
+  group: thu-goal-manager-autofetch-production
   cancel-in-progress: false
-
 jobs:
-  autofetch-build-deploy:
+  refresh-build-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
-
       - name: Confirm production branch
         shell: bash
         run: |
           set -euo pipefail
           DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
-          echo "default_branch=$DEFAULT_BRANCH"
-          echo "ref_name=$GITHUB_REF_NAME"
-          if [ "$GITHUB_REF_NAME" != "$DEFAULT_BRANCH" ]; then
-            echo "::error::Production AutoFetch may only run on the default branch."
-            exit 1
-          fi
-
-      - name: Snapshot production data
+          test "$GITHUB_REF_NAME" = "$DEFAULT_BRANCH"
+      - name: Validate engines and production data
         shell: bash
         run: |
           set -euo pipefail
+          python -m py_compile tools/autofetch/autofetch.py tools/autofetch/scholarship_autofetch.py tools/autofetch/public_source_registry_bridge.py
+          python -m json.tool tools/autofetch/sources.json >/dev/null
+          python -m json.tool tools/autofetch/scholarship-sources.json >/dev/null
+          python -m json.tool data/activities.json >/dev/null
+          python -m json.tool data/scholarships.json >/dev/null
+      - name: Snapshot production data
+        shell: bash
+        run: |
           cp data/activities.json "$RUNNER_TEMP/activities-before.json"
-          python -m json.tool "$RUNNER_TEMP/activities-before.json" >/dev/null
-
-      - name: AutoFetch and apply
+          cp data/scholarships.json "$RUNNER_TEMP/scholarships-before.json"
+      - name: Refresh scholarships
+        shell: bash
+        run: |
+          set -euo pipefail
+          python tools/autofetch/scholarship_autofetch.py --repo .
+          python -m json.tool data/scholarships.json >/dev/null
+      - name: Refresh activity radar
         shell: bash
         run: |
           set -euo pipefail
           python tools/autofetch/autofetch.py --apply --limit 30
+          python tools/autofetch/public_source_registry_bridge.py --apply
           python -m json.tool data/activities.json >/dev/null
-
       - name: Production integrity guard
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
-          import json
-          import os
+          import json, os
           from pathlib import Path
+          tmp=Path(os.environ["RUNNER_TEMP"])
+          before_a=json.loads((tmp/"activities-before.json").read_text(encoding="utf-8"))
+          after_a=json.loads(Path("data/activities.json").read_text(encoding="utf-8"))
+          old_a=before_a.get("events",[]); new_a=after_a.get("events",[])
+          if not isinstance(old_a,list) or not isinstance(new_a,list): raise SystemExit("INTEGRITY_FAIL activity shape")
+          ids=[str(x.get("id","")) for x in new_a]
+          if any(not x for x in ids) or len(ids)!=len(set(ids)): raise SystemExit("INTEGRITY_FAIL activity ids")
+          mb={str(x.get("id","")):x for x in old_a if not str(x.get("id","")).startswith("auto-")}
+          ma={str(x.get("id","")):x for x in new_a if not str(x.get("id","")).startswith("auto-")}
+          if mb!=ma: raise SystemExit("INTEGRITY_FAIL manual activities changed")
+          removed=max(0,len(old_a)-len(new_a))
+          if len(old_a)>=20 and removed>=10 and len(new_a)<len(old_a)*0.40:
+              raise SystemExit("INTEGRITY_FAIL destructive activity shrink")
 
-          before = json.loads(
-              (Path(os.environ["RUNNER_TEMP"]) / "activities-before.json")
-              .read_text(encoding="utf-8")
-          )
-          after = json.loads(
-              Path("data/activities.json").read_text(encoding="utf-8")
-          )
-
-          old = before.get("events", [])
-          new = after.get("events", [])
-
-          if not isinstance(old, list) or not isinstance(new, list):
-              raise SystemExit("INTEGRITY_FAIL events must be lists")
-
-          ids = [str(x.get("id", "")) for x in new]
-          if any(not x for x in ids):
-              raise SystemExit("INTEGRITY_FAIL empty event id")
-          if len(ids) != len(set(ids)):
-              raise SystemExit("INTEGRITY_FAIL duplicate event ids")
-
-          manual_before = [
-              x for x in old if not str(x.get("id", "")).startswith("auto-")
-          ]
-          manual_after = [
-              x for x in new if not str(x.get("id", "")).startswith("auto-")
-          ]
-          mb = {str(x.get("id", "")): x for x in manual_before}
-          ma = {str(x.get("id", "")): x for x in manual_after}
-
-          # AutoFetch is never allowed to delete or mutate manually maintained events.
-          if mb != ma:
-              removed = sorted(set(mb) - set(ma))
-              changed = sorted(k for k in set(mb) & set(ma) if mb[k] != ma[k])
-              raise SystemExit(
-                  "INTEGRITY_FAIL manual events changed "
-                  f"removed={removed[:10]} changed={changed[:10]}"
-              )
-
-          old_count = len(old)
-          new_count = len(new)
-          removed_count = max(0, old_count - new_count)
-
-          # Conservative destructive-change fuse. Small normal expirations are allowed.
-          if old_count >= 20 and removed_count >= 10 and new_count < old_count * 0.40:
-              raise SystemExit(
-                  "INTEGRITY_FAIL destructive shrink "
-                  f"before={old_count} after={new_count}"
-              )
-
-          print(
-              "INTEGRITY_OK "
-              f"before={old_count} after={new_count} "
-              f"manual={len(manual_after)} "
-              f"auto={sum(str(x.get('id','')).startswith('auto-') for x in new)}"
-          )
+          before_s=json.loads((tmp/"scholarships-before.json").read_text(encoding="utf-8"))
+          after_s=json.loads(Path("data/scholarships.json").read_text(encoding="utf-8"))
+          def rows(x):
+              if isinstance(x,list): return x
+              if isinstance(x,dict):
+                  for k in ("scholarships","items","events"):
+                      if isinstance(x.get(k),list): return x[k]
+              return []
+          old_s,new_s=rows(before_s),rows(after_s)
+          sids=[str(x.get("id","")) for x in new_s]
+          if any(not x for x in sids) or len(sids)!=len(set(sids)): raise SystemExit("INTEGRITY_FAIL scholarship ids")
+          def auto(x): return x.get("sourceId")=="thu_scholarship_official" and x.get("auto") is True
+          mb={str(x.get("id","")):x for x in old_s if not auto(x)}
+          ma={str(x.get("id","")):x for x in new_s if not auto(x)}
+          if mb!=ma: raise SystemExit("INTEGRITY_FAIL manual scholarships changed")
+          print(f"INTEGRITY_OK activities={len(new_a)} scholarships={len(new_s)}")
           PY
-
       - name: Existing QA
         shell: bash
         run: |
           set -euo pipefail
-          if [ -f qa_static.py ]; then python qa_static.py; fi
+          python qa_static.py
           git diff --check
-
-      - name: Detect production-data change
+      - name: Detect data changes
         id: data_change
         shell: bash
         run: |
-          set -euo pipefail
-          if git diff --quiet -- data/activities.json; then
+          if git diff --quiet -- data/activities.json data/scholarships.json; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "DATA_UNCHANGED"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "DATA_CHANGED"
-            git diff --stat -- data/activities.json
           fi
-
-      - name: Persist updated activity data
+      - name: Persist refreshed catalog data
         if: steps.data_change.outputs.changed == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          git config user.name "goal-manager-autofetch[bot]"
+          git config user.name "thu-goal-manager-autofetch[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/activities.json
-          git commit -m "chore(activity-radar): daily autofetch ${GITHUB_RUN_ID} [skip ci]"
+          git add data/activities.json data/scholarships.json
+          git commit -m "chore(data): zero-config autofetch ${GITHUB_RUN_ID} [skip ci]"
           git push origin "HEAD:${GITHUB_REF_NAME}"
-
-      - name: Build site
+      - name: Assemble site
         shell: bash
         run: |
           set -euo pipefail
-          if [ -f tools_build_preview.py ]; then
-            python tools_build_preview.py
-          fi
-
-          if [ -d _site ]; then
-            echo "SITE_DIR=_site" >> "$GITHUB_ENV"
-          elif [ -d dist ]; then
-            echo "SITE_DIR=dist" >> "$GITHUB_ENV"
-          else
-            # Package the repository without copying the destination into itself.
-            rm -rf _autofetch_site
-            mkdir -p _autofetch_site/repo
-            tar               --exclude='./.git'               --exclude='./.github'               --exclude='./data/staging'               --exclude='./_autofetch_site'               -cf - . | tar -xf - -C _autofetch_site/repo
-            test -f _autofetch_site/repo/index.html
-            echo "SITE_DIR=_autofetch_site/repo" >> "$GITHUB_ENV"
-          fi
-
-      - name: Upload AutoFetch audit report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: autofetch-audit-${{ github.run_id }}
-          path: |
-            data/staging/autofetch-report.json
-            data/staging/autofetch-candidates.json
-          if-no-files-found: ignore
-          retention-days: 14
-
+          rm -rf _site
+          mkdir -p _site
+          cp index.html 404.html manifest.webmanifest sw.js icon.svg README.md _site/
+          cp -r css js config data _site/
+          test -f _site/data/activities.json
+          test -f _site/data/scholarships.json
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: ${{ env.SITE_DIR }}
-
+          path: _site
       - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
       - name: Verify deployed site
         shell: bash
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           set -euo pipefail
-          echo "Verifying $PAGE_URL"
-          curl -fL             --retry 6             --retry-delay 5             --retry-all-errors             --max-time 30             "$PAGE_URL" >/dev/null
-          echo "PRODUCTION_DEPLOY_VERIFY_OK"
+          curl -fL --retry 6 --retry-delay 5 --retry-all-errors --max-time 30 "$PAGE_URL" >/dev/null
+          curl -fL --retry 4 --retry-delay 3 --retry-all-errors --max-time 30 "${PAGE_URL%/}/data/activities.json" >/dev/null
+          curl -fL --retry 4 --retry-delay 3 --retry-all-errors --max-time 30 "${PAGE_URL%/}/data/scholarships.json" >/dev/null
+          echo "ZERO_CONFIG_AUTOFETCH_DEPLOY_OK"

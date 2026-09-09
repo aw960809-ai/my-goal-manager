@@ -1,9 +1,13 @@
-/* V96.8.2.3 PWA lifecycle */
+/* V97.3.0 THU personal automatic update lifecycle */
 window.PWA=(function(){
+  const CURRENT_VERSION=String(window.AppConfig?.version||'V97.3.0').replace(/^V/i,'');
+  const CHECK_INTERVAL=5*60*1000;
+  const CHECK_MIN_GAP=60*1000;
   let deferredPrompt=null;
   let registration=null;
   let reloading=false;
   let lastUpdateCheck=0;
+  let periodicTimer=null;
 
   function isStandalone(){
     return window.matchMedia?.('(display-mode: standalone)').matches===true ||
@@ -14,7 +18,7 @@ window.PWA=(function(){
   function toastSafe(msg){
     try{
       if(typeof window.toast==='function')window.toast(msg);
-      else console.info('[PWA]',msg);
+      else console.info('[THU PWA]',msg);
     }catch(_){}
   }
   function refreshSettings(){
@@ -33,18 +37,31 @@ window.PWA=(function(){
     const s=status();
     const installText=s.kind==='installed'?'已安裝':s.kind==='ios'?'加入主畫面說明':'安裝到桌面';
     return `<div class="settings-section pwa-settings-section">
-      <div class="settings-section-head"><div><h3>桌面應用程式</h3><p>把這個網站安裝成獨立 App；資料仍保存在本機，AutoFetch 與 GitHub Pages 照常更新。</p></div></div>
+      <div class="settings-section-head"><div><h3>桌面應用程式與自動更新</h3><p>程式更新會自動檢查並套用；你的目標、紀錄與本機資料不會因更新而清除。</p></div></div>
       <div class="pwa-settings-status ${s.kind}">
         <div><b>${s.label}</b><small>${s.detail}</small></div>
         <span>${isOnline()?'● 線上':'○ 離線'}</span>
       </div>
       <div class="settings-action-grid">
         <button class="btn primary" type="button" onclick="pwaInstall()" ${s.kind==='installed'?'disabled':''}>⌂ ${installText}</button>
-        <button id="pwaUpdateCheckBtn" class="btn" type="button" onclick="pwaCheckForUpdate()">↻ 檢查程式更新</button>
+        <button id="pwaUpdateCheckBtn" class="btn" type="button" onclick="pwaCheckForUpdate()">↻ 立即檢查更新</button>
       </div>
-      <div id="pwaUpdateStatus" class="pwa-update-status idle" aria-live="polite"><span>●</span><b>尚未檢查更新</b></div>
-      <div class="pwa-settings-note">版本 V96.8.2.3｜支援離線啟動；活動資料在有網路時採網路優先，以避免桌面 App 長期停留在舊資料。</div>
+      <div id="pwaUpdateStatus" class="pwa-update-status idle" aria-live="polite"><span>●</span><b>系統會自動檢查更新</b></div>
+      <div class="pwa-settings-note">版本 V${CURRENT_VERSION}｜啟動、回到前景、網路恢復及每 5 分鐘自動檢查；更新只處理東海系統自己的 Service Worker 與快取。</div>
     </div>`;
+  }
+  function setUpdateUI(state,message){
+    const box=document.getElementById('pwaUpdateStatus');
+    const btn=document.getElementById('pwaUpdateCheckBtn');
+    if(box){
+      const icon=state==='checking'?'◌':state==='ok'?'✓':state==='update'?'↑':'!';
+      box.className='pwa-update-status '+state;
+      box.innerHTML=`<span>${icon}</span><b>${message}</b>`;
+    }
+    if(btn){
+      btn.disabled=state==='checking';
+      btn.textContent=state==='checking'?'◌ 檢查中…':'↻ 立即檢查更新';
+    }
   }
   function ensureUpdateBar(){
     let bar=document.getElementById('pwaUpdateBar');
@@ -54,50 +71,79 @@ window.PWA=(function(){
     bar.className='pwa-update-bar';
     bar.setAttribute('role','status');
     bar.setAttribute('aria-live','polite');
-    bar.innerHTML='<div><b>有新的程式版本</b><span>更新不會刪除你的本機目標與紀錄。</span></div><button type="button" onclick="pwaApplyUpdate()">立即更新</button>';
+    bar.innerHTML='<div><b>正在套用新的程式版本</b><span>本機目標與紀錄會保留。</span></div>';
     document.body.appendChild(bar);
     return bar;
   }
   function showUpdate(){ensureUpdateBar().classList.add('show')}
   function hideUpdate(){document.getElementById('pwaUpdateBar')?.classList.remove('show')}
+
+  async function remoteMeta(){
+    const url=new URL('./sw.js',location.href);
+    url.searchParams.set('update_probe',Date.now());
+    const res=await fetch(url.href,{cache:'no-store',headers:{'Cache-Control':'no-cache'}});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const source=await res.text();
+    const vm=source.match(/const\s+PWA_VERSION\s*=\s*['"]([^'"]+)['"]/);
+    const sm=source.match(/const\s+PWA_SIGNATURE\s*=\s*['"]([^'"]+)['"]/);
+    if(!vm)throw new Error('找不到遠端版本號');
+    return {version:vm[1],signature:sm?.[1]||''};
+  }
+  async function currentWorkerMeta(){
+    try{
+      const sw=navigator.serviceWorker.controller;
+      if(!sw)return null;
+      const channel=new MessageChannel();
+      return await new Promise(resolve=>{
+        const timer=setTimeout(()=>resolve(null),900);
+        channel.port1.onmessage=e=>{clearTimeout(timer);resolve(e.data||null)};
+        sw.postMessage({type:'GET_VERSION'},[channel.port2]);
+      });
+    }catch(_){return null}
+  }
   function observeRegistration(reg){
     registration=reg;
-    if(reg.waiting&&navigator.serviceWorker.controller)showUpdate();
     reg.addEventListener('updatefound',()=>{
       const worker=reg.installing;
       if(!worker)return;
       worker.addEventListener('statechange',()=>{
-        if(worker.state==='installed'&&navigator.serviceWorker.controller)showUpdate();
+        if(worker.state==='installed'&&navigator.serviceWorker.controller){
+          setUpdateUI('update','新版本已下載，正在自動套用…');
+          showUpdate();
+          worker.postMessage({type:'SKIP_WAITING'});
+        }
       });
     });
+    if(reg.waiting&&navigator.serviceWorker.controller){
+      setUpdateUI('update','新版本已下載，正在自動套用…');
+      showUpdate();
+      reg.waiting.postMessage({type:'SKIP_WAITING'});
+    }
   }
   async function register(){
     if(!('serviceWorker' in navigator))return null;
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'});
       observeRegistration(reg);
-      setTimeout(()=>reg.update().catch(()=>{}),1500);
+      setTimeout(()=>checkForUpdate({silent:true,force:true}),1800);
+      startPeriodicChecks();
       return reg;
     }catch(e){
-      console.warn('PWA service worker registration failed',e);
+      console.warn('THU service worker registration failed',e);
       return null;
     }
   }
   async function install(){
     if(isStandalone()){toastSafe('目前已經是桌面應用程式');return true}
     if(deferredPrompt){
-      const prompt=deferredPrompt;
-      deferredPrompt=null;
+      const prompt=deferredPrompt;deferredPrompt=null;
       try{
         await prompt.prompt();
         const choice=await prompt.userChoice;
         refreshSettings();
         if(choice?.outcome==='accepted'){toastSafe('正在安裝到桌面');return true}
-        toastSafe('已取消安裝');
-        return false;
-      }catch(e){
-        console.warn(e);toastSafe('目前無法叫出安裝視窗');return false;
-      }
+        toastSafe('已取消安裝');return false;
+      }catch(e){console.warn(e);toastSafe('目前無法叫出安裝視窗');return false}
     }
     if(isIOS()){
       alert('iPhone／iPad 安裝方式：\n\n1. 使用 Safari 開啟本網站\n2. 點「分享」\n3. 選「加入主畫面」\n4. 點「加入」');
@@ -106,101 +152,88 @@ window.PWA=(function(){
     toastSafe('請使用 Chrome／Edge 選單中的「安裝應用程式」或「新增至主畫面」');
     return false;
   }
-  /* V96.8.2.3.1 update feedback hotfix */
-  function setUpdateCheckUI(state,message){
-    const box=document.getElementById('pwaUpdateStatus');
-    const btn=document.getElementById('pwaUpdateCheckBtn');
-    if(box){
-      box.className='pwa-update-status '+state;
-      box.innerHTML=`<span>${state==='checking'?'◌':state==='ok'?'✓':state==='update'?'↑':'!'}</span><b>${message}</b>`;
-    }
-    if(btn){
-      btn.disabled=state==='checking';
-      btn.textContent=state==='checking'?'◌ 檢查中…':'↻ 檢查程式更新';
-    }
-  }
-  async function checkForUpdate(){
-    if(!('serviceWorker' in navigator)){
-      setUpdateCheckUI('error','此瀏覽器不支援程式更新檢查');
-      toastSafe('此瀏覽器不支援 Service Worker');
-      return false;
-    }
-    setUpdateCheckUI('checking','正在向伺服器檢查新版本…');
+  async function checkForUpdate(options={}){
+    const silent=options.silent===true,force=options.force===true;
+    if(!('serviceWorker' in navigator))return false;
+    if(!isOnline())return false;
+    if(!force&&Date.now()-lastUpdateCheck<CHECK_MIN_GAP)return true;
+    lastUpdateCheck=Date.now();
+    if(!silent)setUpdateUI('checking','正在檢查新版本…');
     try{
       registration=registration||await navigator.serviceWorker.getRegistration('./')||await register();
-      if(!registration){
-        setUpdateCheckUI('error','尚未建立離線服務，請重新整理後再試');
-        toastSafe('尚未建立離線服務');
-        return false;
+      if(!registration)throw new Error('找不到 Service Worker registration');
+
+      const [remote,current]=await Promise.all([remoteMeta(),currentWorkerMeta()]);
+      const currentVersion=current?.version||CURRENT_VERSION;
+      const currentSignature=current?.signature||'';
+      const changed=remote.version!==currentVersion ||
+        (remote.signature&&currentSignature&&remote.signature!==currentSignature);
+
+      if(!changed){
+        if(!silent){
+          const time=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+          setUpdateUI('ok',`目前已是最新版本 V${remote.version} · ${time}`);
+        }
+        return true;
       }
+
+      setUpdateUI('update',`發現 V${remote.version}，正在自動下載與套用…`);
+      showUpdate();
       await registration.update();
-      lastUpdateCheck=Date.now();
-      await new Promise(resolve=>setTimeout(resolve,450));
+
       if(registration.waiting){
-        showUpdate();
-        setUpdateCheckUI('update','發現新版本，可以立即更新');
-        toastSafe('發現新版本，可以立即更新');
+        registration.waiting.postMessage({type:'SKIP_WAITING'});
         return true;
       }
-      if(registration.installing){
-        setUpdateCheckUI('update','發現新版本，正在下載…');
-        const worker=registration.installing;
-        worker.addEventListener('statechange',()=>{
-          if(worker.state==='installed'){
-            if(navigator.serviceWorker.controller){
-              showUpdate();
-              setUpdateCheckUI('update','新版本已下載，可以立即更新');
-            }else{
-              setUpdateCheckUI('ok','程式已準備完成');
-            }
-          }
-        });
-        return true;
-      }
-      const time=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-      setUpdateCheckUI('ok',`目前已是最新版本 · ${time}`);
-      toastSafe('目前已是最新程式版本');
+      if(registration.installing)return true;
+
+      setTimeout(()=>registration?.update().catch(()=>{}),800);
       return true;
     }catch(e){
-      console.warn(e);
-      setUpdateCheckUI('error',isOnline()?'檢查更新失敗，請稍後再試':'目前離線，無法檢查更新');
-      toastSafe(isOnline()?'檢查更新失敗':'目前離線，無法檢查更新');
+      console.warn('THU auto update check failed',e);
+      if(!silent)setUpdateUI('error',isOnline()?'檢查更新失敗，稍後會自動重試':'目前離線，恢復連線後會自動檢查');
       return false;
     }
+  }
+  function startPeriodicChecks(){
+    if(periodicTimer)return;
+    periodicTimer=setInterval(()=>checkForUpdate({silent:true}),CHECK_INTERVAL);
   }
   function applyUpdate(){
     if(registration?.waiting){
+      showUpdate();
       registration.waiting.postMessage({type:'SKIP_WAITING'});
-      hideUpdate();
-      return;
+      return true;
     }
-    checkForUpdate();
+    return checkForUpdate({force:true});
   }
 
   window.addEventListener('beforeinstallprompt',e=>{
-    e.preventDefault();
-    deferredPrompt=e;
-    refreshSettings();
+    e.preventDefault();deferredPrompt=e;refreshSettings();
   });
   window.addEventListener('appinstalled',()=>{
-    deferredPrompt=null;
-    refreshSettings();
-    toastSafe('已安裝到桌面');
+    deferredPrompt=null;refreshSettings();toastSafe('已安裝到桌面');
   });
-  window.addEventListener('online',()=>{refreshSettings();toastSafe('網路已恢復')});
-  window.addEventListener('offline',()=>{refreshSettings();toastSafe('目前離線，將使用已快取內容')});
+  window.addEventListener('online',()=>{
+    refreshSettings();
+    setTimeout(()=>checkForUpdate({silent:true,force:true}),500);
+  });
+  window.addEventListener('offline',()=>refreshSettings());
 
   if('serviceWorker' in navigator){
     navigator.serviceWorker.addEventListener('controllerchange',()=>{
       if(reloading)return;
       reloading=true;
+      const key='thuPwaReload:'+CURRENT_VERSION;
+      try{
+        if(sessionStorage.getItem(key)==='1'){hideUpdate();return}
+        sessionStorage.setItem(key,'1');
+      }catch(_){}
       location.reload();
     });
   }
   document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState!=='visible')return;
-    if(Date.now()-lastUpdateCheck<30*60*1000)return;
-    checkForUpdate();
+    if(document.visibilityState==='visible')checkForUpdate({silent:true});
   });
 
   return {register,install,checkForUpdate,applyUpdate,isStandalone,status,settingsPanelHTML};
@@ -208,5 +241,5 @@ window.PWA=(function(){
 
 function pwaSettingsPanelHTML(){return window.PWA.settingsPanelHTML()}
 function pwaInstall(){return window.PWA.install()}
-function pwaCheckForUpdate(){return window.PWA.checkForUpdate()}
+function pwaCheckForUpdate(){return window.PWA.checkForUpdate({force:true})}
 function pwaApplyUpdate(){return window.PWA.applyUpdate()}

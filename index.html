@@ -1,10 +1,16 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
+<!-- V97 PERSONAL PROFILE BOUNDARY START -->
+<script src="./config/profiles/personal-thu.js"></script>
+<script src="./js/core/runtime-profile.js"></script>
+<script src="./js/core/data-boundary.js"></script>
+<!-- V97 PERSONAL PROFILE BOUNDARY END -->
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="base-uri 'self'; object-src 'none'">
-<title>個人目標與學習行動管理系統 V96.8.2.3</title>
+<title>個人目標與學習行動管理系統 V97.3.0</title>
 <link rel="stylesheet" href="./css/base.css">
 <link rel="stylesheet" href="./css/app-ui.css">
 
@@ -112,6 +118,7 @@
     </div>
     <div id="scholarshipStats" class="context"></div>
     <div id="scholarshipList" class="list"></div>
+    <div id="scholarshipPagination" class="activity-pagination scholarship-pagination" aria-label="獎學金分頁"></div>
     <div class="notice">判斷只使用學校、科系、年級、成績／專業條件及公告中的客觀要求；家庭收入、家境與身分條件不納入排序。</div>
   </div>
 </section>
@@ -223,7 +230,6 @@
 <script src="./js/autofetch-health.js" defer></script>
 <script src="./js/navigation.js" defer></script>
 <script src="./js/pwa.js" defer></script>
-<script src="./js/pwa-update-fix.js" defer></script>
 <script src="./js/bootstrap.js" defer></script>
 
 <script>
