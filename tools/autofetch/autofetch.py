@@ -11,6 +11,7 @@ from datetime import date, datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import parse_qs, urljoin, urlparse
+from lifecycle_archive import archive_document, atomic_write_json, reconcile_activity_catalog
 
 USER_AGENT = 'GoalManager-AutoFetch/96.6.11.1 (+https://github.com/aw960809-ai/my-goal-manager)'
 MAX_BYTES = 2_000_000
@@ -2417,6 +2418,16 @@ def run(repo, limit, apply):
 
         merged = list({str(e.get('id', '')): e for e in merged}.values())
 
+        activity_archive_file = repo / 'data/activity-archive.json'
+        activity_archive_payload = read_json(activity_archive_file) if activity_archive_file.exists() else {'meta': {}, 'archive': []}
+        merged, activity_archive_rows, lifecycle_meta = reconcile_activity_catalog(
+            old_rows=list(payload.get('events', [])),
+            candidate_rows=merged,
+            source_results=results,
+            archive_rows=activity_archive_payload.get('archive', []) if isinstance(activity_archive_payload, dict) else [],
+            now=now_iso(),
+        )
+
         backup_dir = staging / 'backups'
         backup_dir.mkdir(parents=True, exist_ok=True)
         shutil.copy2(
@@ -2449,8 +2460,19 @@ def run(repo, limit, apply):
                 for x in (r['rejected'] + r['fetchFailures'])
             ][:20],
             'generator': 'V96.6.11.1.1 Multi-Source AutoFetch + Activity Radar',
+            'retiredThisRun': lifecycle_meta['retiredThisRun'],
+            'revivedThisRun': lifecycle_meta['revivedThisRun'],
+            'archiveCount': lifecycle_meta['archiveCount'],
+            'retainedOnFailure': lifecycle_meta['retainedOnFailure'],
+            'carriedMissing': lifecycle_meta['carriedMissing'],
+            'needsReview': lifecycle_meta['needsReview'],
+            'lifecyclePolicy': 'expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive',
         })
-        write_json(activities_file, {'meta': meta, 'events': merged})
+        atomic_write_json(activities_file, {'meta': meta, 'events': merged})
+        atomic_write_json(
+            activity_archive_file,
+            archive_document(activity_archive_payload, activity_archive_rows, lifecycle_meta, 'activity', now=meta['updatedAt']),
+        )
         log(
             f'AUTOFETCH_APPLY_OK sources={totals["sources"]} healthySources={totals["healthySources"]} '
             f'discovered={totals["discovered"]} parsed={totals["parsedOk"]} '

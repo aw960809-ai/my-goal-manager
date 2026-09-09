@@ -28,6 +28,6 @@ for p,src in js_texts.items():
 assert not dup_by_file, f'duplicate functions in same file: {dup_by_file}'
 preview=(root/'preview.html').read_text(encoding='utf-8')
 assert '__PREVIEW_CATALOG' in preview and not re.search(r'<(?:script|link)[^>]+(?:src|href)=["\']\./(?:css|js)/',preview), 'preview still depends on sibling assets'
-for fn in ['activities.json','scholarships.json','events.json']:
+for fn in ['activities.json','scholarships.json','events.json','activity-archive.json','scholarship-archive.json']:
  json.loads((root/'data'/fn).read_text(encoding='utf-8'))
 print('OK: 7 views, IDs, onclick handlers, function uniqueness, preview independence, JSON')

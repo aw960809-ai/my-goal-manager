@@ -1,6 +1,6 @@
 /* V97.3.0 THU personal service worker */
-const PWA_VERSION='97.3.0';
-const PWA_SIGNATURE='thu-personal-97.3.0-auto-update-v1';
+const PWA_VERSION='97.4.0';
+const PWA_SIGNATURE='thu-personal-97.4.0-lifecycle-archive-v1';
 const CACHE_PREFIX='thu-goal-personal-v';
 const LEGACY_CACHE_PREFIX='law-goal-web-v';
 const CACHE=CACHE_PREFIX+PWA_VERSION;
@@ -11,9 +11,12 @@ const APP_SHELL=[
   './config/profiles/personal-thu.js','./js/core/runtime-profile.js','./js/core/data-boundary.js',
   './js/security.js','./js/store.js','./js/settings.js','./js/activity.js',
   './js/scholarship.js','./js/app.js','./js/scholarship-lifecycle.js',
-  './js/autofetch-health.js','./js/navigation.js','./js/pwa.js','./js/bootstrap.js'
+  './js/autofetch-health.js',
+  './js/catalog-lifecycle.js','./js/navigation.js','./js/pwa.js','./js/bootstrap.js'
 ];
-const MUTABLE_DATA=['./data/events.json','./data/activities.json','./data/scholarships.json'];
+const MUTABLE_DATA=['./data/events.json','./data/activities.json','./data/scholarships.json',
+  './data/activity-archive.json',
+  './data/scholarship-archive.json'];
 
 async function cacheResponse(request,response){
   if(!response||!response.ok||response.type==='opaque')return;
@@ -74,7 +77,7 @@ self.addEventListener('fetch',event=>{
   const url=new URL(request.url);
   if(url.origin!==self.location.origin)return;
   if(request.mode==='navigate'){event.respondWith(networkFirst(request,'./index.html'));return}
-  if(/\/data\/(?:activities|scholarships|events)\.json$/.test(url.pathname)){event.respondWith(networkFirst(request));return}
+  if(/\/data\/(?:activities|scholarships|events|activity-archive|scholarship-archive)\.json$/.test(url.pathname)){event.respondWith(networkFirst(request));return}
   if(/\.(?:js|css|webmanifest|svg|png)$/.test(url.pathname)){event.respondWith(staleWhileRevalidate(request));return}
   event.respondWith(networkFirst(request));
 });

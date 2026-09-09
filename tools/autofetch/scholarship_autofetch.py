@@ -4,6 +4,7 @@ import argparse, json, os, re, ssl, tempfile, urllib.request
 from datetime import date, datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
+from lifecycle_archive import archive_document, atomic_write_json, reconcile_scholarship_catalog
 
 BASE="https://tscholarship.thu.edu.tw/wwwstud/frontend/Scholarship.php"
 SOURCE_ID="thu_scholarship_official"
@@ -166,6 +167,13 @@ def run(repo,check):
         k=str(x.get("id") or "")
         if k:by[k]=x
     rows=list(by.values())
+    scholarship_archive_file=repo/"data"/"scholarship-archive.json"
+    scholarship_archive_payload=load(scholarship_archive_file) if scholarship_archive_file.exists() else {"meta":{},"archive":[]}
+    rows,scholarship_archive_rows,lifecycle_meta=reconcile_scholarship_catalog(
+      old_rows=old_rows,candidate_rows=rows,healthy_categories=healthy,
+      archive_rows=scholarship_archive_payload.get("archive",[]) if isinstance(scholarship_archive_payload,dict) else [],
+      source_id=SOURCE_ID,now=now_iso()
+    )
     meta={
       "updatedAt":now_iso(),"sourceId":SOURCE_ID,
       "categories":len(CATEGORIES),
@@ -176,13 +184,21 @@ def run(repo,check):
       "preservedFailedAuto":preserved_failed,
       "failClosedUndated":True,
       "preserveOnFailure":True,
-      "atomicWrite":True
+      "atomicWrite":True,
+      "retiredThisRun":lifecycle_meta["retiredThisRun"],
+      "revivedThisRun":lifecycle_meta["revivedThisRun"],
+      "archiveCount":lifecycle_meta["archiveCount"],
+      "carriedMissing":lifecycle_meta["carriedMissing"],
+      "needsReview":lifecycle_meta["needsReview"],
+      "lifecycleRetainedOnFailure":lifecycle_meta["retainedOnFailure"],
+      "lifecyclePolicy":"expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
     }
     result=output_shape(old,rows,meta)
     if check:
         print(json.dumps({"ok":True,"meta":meta,"categories":report,"sample":new_auto[:8]},ensure_ascii=False,indent=2))
         return
     atomic(target,result)
+    atomic_write_json(scholarship_archive_file,archive_document(scholarship_archive_payload,scholarship_archive_rows,lifecycle_meta,"scholarship",now=meta["updatedAt"]))
     print(json.dumps({"ok":True,"meta":meta,"categories":report},ensure_ascii=False,indent=2))
 
 def main():

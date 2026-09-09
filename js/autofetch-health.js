@@ -84,7 +84,7 @@
     const activeAuto=n(first(meta.activeAuto,summary.activeAuto),rowsOf(payload).filter(x=>x?.auto).length);
     const retained=n(first(meta.preservedFailedAuto,summary.preservedFailedAuto,meta.retainedOnFailure),0);
     const lifecycle=window.GoalManagerScholarshipLifecycle?.status?.()||{};
-    const pruned=n(lifecycle.expired,0)+n(lifecycle.undated,0)+n(lifecycle.disabled,0);
+    const pruned=n(first(meta.retiredThisRun,summary.retiredThisRun),n(lifecycle.expired,0)+n(lifecycle.undated,0)+n(lifecycle.disabled,0));
     const duplicates=n(lifecycle.duplicates,0);
     const count=rowsOf(payload).length;
     const age=ageHours(updated),stale=age!==null&&age>STALE_HOURS;

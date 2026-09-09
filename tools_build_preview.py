@@ -31,6 +31,7 @@ body=re.sub(r'<script src="\./js/app\.js" defer></script>\s*','',body)
 body=re.sub(r'<script src="\./js/navigation\.js" defer></script>\s*','',body)
 body=re.sub(r'<script src="\./js/pwa\.js" defer></script>\s*','',body)
 body=re.sub(r'<script src="\./js/bootstrap\.js" defer></script>\s*','',body)
+body=re.sub(r'<script src="\./js/catalog-lifecycle\.js" defer></script>\s*','',body)
 # Inject CSS and preview data before scripts, then modules in production order.
 css_tag='<style id="preview-inline-css">\n'+css+'\n'+ui_css+'\n</style>'
 data_tag='<script>window.__DEV_PREVIEW__=true;window.__PREVIEW_CATALOG='+json.dumps(payload,ensure_ascii=False,separators=(',',':'))+';</script>'
