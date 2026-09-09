@@ -128,7 +128,6 @@ function activityFit(a){
   const score=Math.max(0,Math.min(100,goal+action+knowledge+proximity+freshness+institutional)),tier=activityFitTier(score),time=activityTimeState(a);
   return {score,priority:score,tier,matchPercent:Math.max(0,Math.min(100,Math.round((goal/45)*100))),task:rel.task,eligible:time.eligible,timeState:time.state,timeReason:time.reason,circleLevel:circle.level,circleLabel:circle.label,circleKey:circle.key,reasons:[],goalMatches:[],sourceMode:'local'};
 }
-function activityRingLabel(r){return String(r||'')}
 function activityCircleLabel(level){return ({1:'① 東海校內',2:'② 台中',3:'③ 全國',4:'④ 海外／國際'})[Number(level)]||'③ 全國'}
 function activitySort(a,b){return (b.fit.score-a.fit.score)||(a.fit.circleLevel-b.fit.circleLevel)||((a.date||'9999-12-31').localeCompare(b.date||'9999-12-31'))||a.title.localeCompare(b.title,'zh-Hant')}
 let activityPage=1;
@@ -138,7 +137,6 @@ function bindActivitySearch(){const e=document.getElementById('activitySearch');
 function applyActivitySearch(){bindActivitySearch();activityPage=1;const b=document.getElementById('activitySearchButton');if(b){b.classList.add('searching');setTimeout(()=>b.classList.remove('searching'),180)}renderActivities();updateActivitySearchUI();toast('已套用活動搜尋')}
 function activityIsEligible(a){return activityTimeState(a).eligible}
 function activityExternalUrl(a){return String(a?.url||a?.externalUrl||a?.sourceUrl||'').trim()}
-function activityDateLabel(a,today){if(a.date)return `${esc(a.date)}${a.time?' · '+esc(a.time):''}`;return `<span class="muted">${esc(a.time||'持續資訊／依公告')}</span>`}
 let remoteActivityCatalog=[];
 let activityAutoMeta={updatedAt:'',sources:0,events:0,ok:0,failed:0};
 function normalizeRemoteActivity(a,i){
@@ -149,7 +147,6 @@ function normalizeRemoteActivity(a,i){
   x.fitReasons=Array.isArray(x.fitReasons)?x.fitReasons.filter(Boolean):[];x.goalMatches=Array.isArray(x.goalMatches)?x.goalMatches.filter(Boolean):[];x.radarEligible=x.radarEligible!==false;x.audience=String(x.audience||'').trim();x.organizer=String(x.organizer||'').trim();x.durationMinutes=Number(x.durationMinutes||x.duration||0)||0;if(x.scholarship)x.type='獎學金／助學金';return x;
 }
 function hashCode(str){let h=0;for(let i=0;i<str.length;i++)h=((h<<5)-h)+str.charCodeAt(i)|0;return h}
-function mergeRemoteActivities(base,remote){const map=new Map((Array.isArray(base)?base:[]).map(a=>[String(a.id),a]));(Array.isArray(remote)?remote:[]).forEach((a,i)=>{const x=normalizeRemoteActivity(a,i);map.set(String(x.id),{...(map.get(String(x.id))||{}),...x})});return [...map.values()]}
 async function loadRemoteActivities(){
  try{
   // Standalone preview mode: local content:// / file:// pages cannot reliably fetch sibling JSON.
