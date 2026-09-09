@@ -1,13 +1,17 @@
-/* V96.8.1 service worker */
-const PWA_VERSION='96.8.1';
-const CACHE_PREFIX='law-goal-web-v';
+/* V97.3.0 THU personal service worker */
+const PWA_VERSION='97.3.0';
+const PWA_SIGNATURE='thu-personal-97.3.0-auto-update-v1';
+const CACHE_PREFIX='thu-goal-personal-v';
+const LEGACY_CACHE_PREFIX='law-goal-web-v';
 const CACHE=CACHE_PREFIX+PWA_VERSION;
 const APP_SHELL=[
   './','./index.html','./manifest.webmanifest','./icon.svg',
   './icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png',
   './404.html','./css/base.css','./css/app-ui.css','./config/system-config.js',
+  './config/profiles/personal-thu.js','./js/core/runtime-profile.js','./js/core/data-boundary.js',
   './js/security.js','./js/store.js','./js/settings.js','./js/activity.js',
-  './js/scholarship.js','./js/app.js','./js/navigation.js','./js/pwa.js','./js/bootstrap.js'
+  './js/scholarship.js','./js/app.js','./js/scholarship-lifecycle.js',
+  './js/autofetch-health.js','./js/navigation.js','./js/pwa.js','./js/bootstrap.js'
 ];
 const MUTABLE_DATA=['./data/events.json','./data/activities.json','./data/scholarships.json'];
 
@@ -40,7 +44,6 @@ async function staleWhileRevalidate(request){
     }).catch(()=>null);
   return cached||await fresh||Response.error();
 }
-
 self.addEventListener('install',event=>{
   event.waitUntil((async()=>{
     const cache=await caches.open(CACHE);
@@ -51,13 +54,19 @@ self.addEventListener('install',event=>{
 self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{
     const keys=await caches.keys();
-    await Promise.all(keys.filter(k=>k.startsWith(CACHE_PREFIX)&&k!==CACHE).map(k=>caches.delete(k)));
+    await Promise.all(
+      keys
+        .filter(k=>(k.startsWith(CACHE_PREFIX)||k.startsWith(LEGACY_CACHE_PREFIX))&&k!==CACHE)
+        .map(k=>caches.delete(k))
+    );
     await self.clients.claim();
   })());
 });
 self.addEventListener('message',event=>{
   if(event.data?.type==='SKIP_WAITING')self.skipWaiting();
-  if(event.data?.type==='GET_VERSION'&&event.ports?.[0])event.ports[0].postMessage({version:PWA_VERSION});
+  if(event.data?.type==='GET_VERSION'&&event.ports?.[0]){
+    event.ports[0].postMessage({version:PWA_VERSION,signature:PWA_SIGNATURE});
+  }
 });
 self.addEventListener('fetch',event=>{
   const request=event.request;

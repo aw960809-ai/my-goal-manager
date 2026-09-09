@@ -220,13 +220,12 @@
     };
   }
 
-  const observer=new MutationObserver(()=>{
-    if(document.getElementById("settingsModal")?.classList.contains("show"))injectSettings();
-  });
+  /* V97 P3 hotfix:
+     renderSettings() is already wrapped above and schedules injectSettings().
+     Do not observe settingsModal subtree: injectSettings() itself changes
+     childList, which would retrigger a subtree MutationObserver indefinitely. */
   function boot(){
     ensureStyles();
-    const modal=document.getElementById("settingsModal");
-    if(modal)observer.observe(modal,{attributes:true,subtree:true,childList:true,attributeFilter:["class"]});
     refresh().catch(e=>{
       state.error=String(e?.message||e);state.overall="error";renderEverywhere();
     });
