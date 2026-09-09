@@ -130,7 +130,10 @@ def atomic(path,obj):
 
 def run(repo,check):
     target=repo/"data"/"scholarships.json"
+    archive_target=repo/"data"/"scholarship-archive.json"
     old=load(target);old_rows=rows_of(old)
+    old_archive=load(archive_target)
+    archive_rows=(old_archive.get("archive",[]) if isinstance(old_archive,dict) else [])
     healthy=set();fresh={};report=[]
     for sid,url,name in CATEGORIES:
         info={"id":sid,"name":name,"url":url,"ok":False}
@@ -145,7 +148,6 @@ def run(repo,check):
         except Exception as e:
             info["error"]=f"{type(e).__name__}: {e}"
         report.append(info)
-
     if not healthy:
         print(json.dumps({"ok":False,"preservedPrevious":True,"categories":report},ensure_ascii=False,indent=2))
         raise SystemExit(2)
@@ -159,47 +161,55 @@ def run(repo,check):
                 replaced+=1;continue
             preserved_failed+=1
         keep.append(x)
-
     new_auto=[]
     for sid in healthy:new_auto.extend(fresh[sid])
     by={}
     for x in keep+new_auto:
         k=str(x.get("id") or "")
         if k:by[k]=x
-    rows=list(by.values())
-    scholarship_archive_file=repo/"data"/"scholarship-archive.json"
-    scholarship_archive_payload=load(scholarship_archive_file) if scholarship_archive_file.exists() else {"meta":{},"archive":[]}
-    rows,scholarship_archive_rows,lifecycle_meta=reconcile_scholarship_catalog(
-      old_rows=old_rows,candidate_rows=rows,healthy_categories=healthy,
-      archive_rows=scholarship_archive_payload.get("archive",[]) if isinstance(scholarship_archive_payload,dict) else [],
-      source_id=SOURCE_ID,now=now_iso()
+    candidate_rows=list(by.values())
+
+    stamp=now_iso()
+    rows,archive_rows,lifecycle=reconcile_scholarship_catalog(
+        old_rows=old_rows,
+        candidate_rows=candidate_rows,
+        healthy_categories=healthy,
+        archive_rows=archive_rows,
+        source_id=SOURCE_ID,
+        now=stamp,
     )
+    active_auto=sum(1 for x in rows if isinstance(x,dict) and x.get("sourceId")==SOURCE_ID and x.get("auto") is True)
     meta={
-      "updatedAt":now_iso(),"sourceId":SOURCE_ID,
+      "updatedAt":stamp,"sourceId":SOURCE_ID,
       "categories":len(CATEGORIES),
       "healthyCategories":len(healthy),
       "failedCategories":len(CATEGORIES)-len(healthy),
-      "activeAuto":len(new_auto),
+      "freshAuto":len(new_auto),
+      "activeAuto":active_auto,
       "replacedPreviousAuto":replaced,
-      "preservedFailedAuto":preserved_failed,
+      "preservedFailedAuto":int(lifecycle.get("retainedOnFailure") or preserved_failed),
       "failClosedUndated":True,
       "preserveOnFailure":True,
       "atomicWrite":True,
-      "retiredThisRun":lifecycle_meta["retiredThisRun"],
-      "revivedThisRun":lifecycle_meta["revivedThisRun"],
-      "archiveCount":lifecycle_meta["archiveCount"],
-      "carriedMissing":lifecycle_meta["carriedMissing"],
-      "needsReview":lifecycle_meta["needsReview"],
-      "lifecycleRetainedOnFailure":lifecycle_meta["retainedOnFailure"],
+      "lifecycleArchive":True,
+      "retiredThisRun":int(lifecycle.get("retiredThisRun") or 0),
+      "revivedThisRun":int(lifecycle.get("revivedThisRun") or 0),
+      "archiveCount":int(lifecycle.get("archiveCount") or 0),
+      "carriedMissing":int(lifecycle.get("carriedMissing") or 0),
+      "needsReview":int(lifecycle.get("needsReview") or 0),
       "lifecyclePolicy":"expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
     }
     result=output_shape(old,rows,meta)
+    archive_doc=archive_document(old_archive if isinstance(old_archive,dict) else {},archive_rows,lifecycle,"scholarship",now=stamp)
     if check:
-        print(json.dumps({"ok":True,"meta":meta,"categories":report,"sample":new_auto[:8]},ensure_ascii=False,indent=2))
+        print(json.dumps({"ok":True,"meta":meta,"lifecycle":lifecycle,"categories":report,"sample":new_auto[:8]},ensure_ascii=False,indent=2))
         return
+
+    # Write archive first: if the second atomic write fails, history is preserved and the
+    # next successful run will automatically reconcile/remove any active/archive overlap.
+    atomic_write_json(archive_target,archive_doc)
     atomic(target,result)
-    atomic_write_json(scholarship_archive_file,archive_document(scholarship_archive_payload,scholarship_archive_rows,lifecycle_meta,"scholarship",now=meta["updatedAt"]))
-    print(json.dumps({"ok":True,"meta":meta,"categories":report},ensure_ascii=False,indent=2))
+    print(json.dumps({"ok":True,"meta":meta,"lifecycle":lifecycle,"categories":report},ensure_ascii=False,indent=2))
 
 def main():
     ap=argparse.ArgumentParser()

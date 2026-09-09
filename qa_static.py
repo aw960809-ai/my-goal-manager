@@ -30,4 +30,12 @@ preview=(root/'preview.html').read_text(encoding='utf-8')
 assert '__PREVIEW_CATALOG' in preview and not re.search(r'<(?:script|link)[^>]+(?:src|href)=["\']\./(?:css|js)/',preview), 'preview still depends on sibling assets'
 for fn in ['activities.json','scholarships.json','events.json','activity-archive.json','scholarship-archive.json']:
  json.loads((root/'data'/fn).read_text(encoding='utf-8'))
+
+# V97.4 scholarship lifecycle wiring guard
+for fn in ['activity-archive.json','scholarship-archive.json']:
+ json.loads((root/'data'/fn).read_text(encoding='utf-8'))
+sch=(root/'tools'/'autofetch'/'scholarship_autofetch.py').read_text(encoding='utf-8')
+for needle in ['reconcile_scholarship_catalog','archive_document','scholarship-archive.json','lifecycleArchive']:
+ assert needle in sch, f'scholarship lifecycle wiring missing: {needle}'
+
 print('OK: 7 views, IDs, onclick handlers, function uniqueness, preview independence, JSON')
