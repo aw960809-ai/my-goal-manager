@@ -100,6 +100,10 @@ function scholarshipMandatoryMention(text,rx){
 
 /* V97.5.4 fixed regional policy: Chiayi County household + Taichung study */
 function scholarshipRegionRestricted(a,c){
+  /* V97.5.5 regional title fallback */
+  const regionTitle=String(c?.title||a?.title||'').replace(/\s+/g,' ').trim();
+  const localIndigenousTitle=/(?:基隆|臺北|台北|新北|桃園|新竹|苗栗|臺中|台中|彰化|南投|雲林|嘉義市|臺南|台南|高雄|屏東|宜蘭|花蓮|臺東|台東|澎湖|金門|連江|恆春|[\u4e00-\u9fff]{1,4}(?:縣|市|鄉|鎮|區)).{0,16}(?:原住民|原住民族)|(?:原住民|原住民族).{0,16}(?:縣|市|鄉|鎮|區)/;
+  if(localIndigenousTitle.test(regionTitle))return true;
   if(!SCHOLARSHIP_HARD_POLICY.excludeAnyMandatoryRegion)return false;
 
   const raw=[
@@ -156,6 +160,10 @@ function scholarshipMilitaryPublicRestricted(c){
 
 /* V97.5.3 health/treatment prerequisite hard filter */
 function scholarshipHealthRestricted(c){
+  /* V97.5.5 health title fallback */
+  const healthTitle=String(c?.title||'').replace(/\s+/g,' ').trim();
+  const explicitHealthScheme=/(?:心臟病兒童|先天性心臟病|病童|癌症病友|癌友|罕見疾病|罕病患者|重大傷病患者|洗腎患者|透析患者)/;
+  if(explicitHealthScheme.test(healthTitle))return true;
   if(!SCHOLARSHIP_HARD_POLICY.excludeMandatoryHealthRestricted)return false;
 
   const identityRx=/(?:身心障礙|身障|重大傷病|罕見疾病|癌症|癌友|病友|病患|患者|慢性病|特殊疾病|疾病患者|傷病患者|病患子女|患者子女)/;
