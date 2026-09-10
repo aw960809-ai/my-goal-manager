@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+import urllib.parse
 import argparse, json, os, re, ssl, tempfile, urllib.request
 from datetime import date, datetime, timezone
 from html.parser import HTMLParser
@@ -128,6 +129,66 @@ def atomic(path,obj):
         p.replace(path)
     finally:p.unlink(missing_ok=True)
 
+# V97.4.9 THU specialty scholarship/reward source
+SPECIALTY_NEWS_URL="https://teach.thu.edu.tw/web/news/list.php?cid=4&lang=zh_tw"
+SPECIALTY_TITLE_RX=re.compile(r"(專業證照.*?(?:獎勵|獎勵|補助).*?申請公告|外語能力檢定.*?(?:獎勵|獎勵|補助).*?申請公告)",re.I)
+SPECIALTY_DEADLINE_RX=re.compile(r"(?<!\d)(\d{1,2})\s*/\s*(\d{1,2})\s*截止")
+
+class SpecialtyNewsParser(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=True);self.href=None;self.parts=[];self.links=[];self.all_text=[]
+    def handle_starttag(self,tag,attrs):
+        if tag.lower()=="a":self.href=dict(attrs).get("href");self.parts=[]
+    def handle_data(self,data):
+        value=clean(data)
+        if not value:return
+        self.all_text.append(value)
+        if self.href is not None:self.parts.append(value)
+    def handle_endtag(self,tag):
+        if tag.lower()=="a" and self.href is not None:
+            text=clean(" ".join(self.parts))
+            if text:self.links.append((self.href,text))
+            self.href=None;self.parts=[]
+
+def specialty_deadline(text,today=None):
+    today=today or date.today();m=SPECIALTY_DEADLINE_RX.search(clean(text))
+    if not m:return ""
+    try:d=date(today.year,int(m.group(1)),int(m.group(2)))
+    except ValueError:return ""
+    if d<today and today.month>=11:d=date(today.year+1,d.month,d.day)
+    return d.isoformat()
+
+def specialty_kind(title):
+    return "professional" if "專業證照" in title else "language"
+
+def parse_specialty_news(html,today=None):
+    today=today or date.today();p=SpecialtyNewsParser();p.feed(html)
+    recognized=bool(re.search(r"專業證照|外語能力檢定"," ".join(p.all_text)));by_kind={}
+    for href,title in p.links:
+        if not SPECIALTY_TITLE_RX.search(title):continue
+        kind=specialty_kind(title);deadline=specialty_deadline(title,today);detail=urllib.parse.urljoin(SPECIALTY_NEWS_URL,href)
+        if not deadline:
+            try:
+                detail_text=fetch(detail);tp=SpecialtyNewsParser();tp.feed(detail_text);deadline=specialty_deadline(" ".join(tp.all_text),today)
+            except Exception:deadline=""
+        if not deadline or deadline<today.isoformat():continue
+        label="專業考照" if kind=="professional" else "外語能力"
+        row={
+          "id":"auto-thu-sch-specialty-"+("professional-certificate" if kind=="professional" else "foreign-language"),
+          "title":title,"date":deadline,"deadline":deadline,"time":"",
+          "scope":"東海校內","type":"獎學金／助學金","kind":"scholarship",
+          "url":detail,"detailUrl":detail,
+          "keywords":f"{title} 東海大學 教務處 教學發展中心 {label} 獎勵 補助",
+          "description":f"東海大學教務處教學發展中心官方{label}獎勵申請公告",
+          "direct":True,"team":False,"available":True,"source":"東海大學教務處｜教學發展中心",
+          "sourceId":SOURCE_ID,"sourceSubId":"specialty","sourcePriority":"core","scholarship":True,"auto":True,
+          "category":label,"specialtyKind":kind,"eligibilityTarget":"general_student",
+          "statusText":f"東海官方{label}獎勵；申請期限 {deadline}","fetchedAt":now_iso()
+        }
+        old=by_kind.get(kind)
+        if old is None or row["deadline"]<old["deadline"]:by_kind[kind]=row
+    return sorted(by_kind.values(),key=lambda x:(x["deadline"],x["title"])),recognized,len(p.links)
+
 def run(repo,check):
     target=repo/"data"/"scholarships.json"
     archive_target=repo/"data"/"scholarship-archive.json"
@@ -148,6 +209,19 @@ def run(repo,check):
         except Exception as e:
             info["error"]=f"{type(e).__name__}: {e}"
         report.append(info)
+# V97.4.9 specialty source: professional certification + foreign-language rewards.
+    specialty_info={"id":"specialty","name":"教發中心｜專業證照／外語檢定","url":SPECIALTY_NEWS_URL,"ok":False}
+    try:
+        specialty_body=fetch(SPECIALTY_NEWS_URL)
+        specialty_rows,specialty_recognized,specialty_total=parse_specialty_news(specialty_body)
+        specialty_info.update({"recognized":specialty_recognized,"parsedTotal":specialty_total,"active":len(specialty_rows)})
+        if specialty_recognized:
+            specialty_info["ok"]=True;healthy.add("specialty");fresh["specialty"]=specialty_rows
+        else:specialty_info["error"]="structure_not_trusted"
+    except Exception as e:
+        specialty_info["error"]=f"{type(e).__name__}: {e}"
+    report.append(specialty_info)
+
     if not healthy:
         print(json.dumps({"ok":False,"preservedPrevious":True,"categories":report},ensure_ascii=False,indent=2))
         raise SystemExit(2)
@@ -181,9 +255,9 @@ def run(repo,check):
     active_auto=sum(1 for x in rows if isinstance(x,dict) and x.get("sourceId")==SOURCE_ID and x.get("auto") is True)
     meta={
       "updatedAt":stamp,"sourceId":SOURCE_ID,
-      "categories":len(CATEGORIES),
+      "categories":len(CATEGORIES)+1,
       "healthyCategories":len(healthy),
-      "failedCategories":len(CATEGORIES)-len(healthy),
+      "failedCategories":len(CATEGORIES)+1-len(healthy),
       "freshAuto":len(new_auto),
       "activeAuto":active_auto,
       "replacedPreviousAuto":replaced,

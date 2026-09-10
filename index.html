@@ -112,14 +112,14 @@
 
 <section id="scholarship" class="view">
   <div class="panel scholarship-panel">
-    <div class="section-title"><div><h2>獎學金</h2></div><span class="muted">不判斷家境／身分</span></div>
+    <div class="section-title"><div><h2>獎學金</h2></div><span class="muted">排除特定資格｜優先考照與外語</span></div>
     <div class="activity-filter-row visual-filters">
-      <label class="filter-control"><span>▦ 類型</span><select id="scholarshipFilter" onchange="renderScholarships()"><option value="全部">全部</option><option value="高度符合">高度符合</option><option value="可能符合">可能符合</option><option value="近期截止">近期截止</option></select></label>
+      <label class="filter-control"><span>▦ 類型</span><select id="scholarshipFilter" onchange="renderScholarships()"><option value="全部">全部</option><option value="高度符合">高度符合</option><option value="可能符合">可能符合</option><option value="近期截止">近期截止</option><option value="專業考照">專業考照</option><option value="外語能力">外語能力</option></select></label>
     </div>
     <div id="scholarshipStats" class="context"></div>
     <div id="scholarshipList" class="list"></div>
     <div id="scholarshipPagination" class="activity-pagination scholarship-pagination" aria-label="獎學金分頁"></div>
-    <div class="notice">判斷只使用學校、科系、年級、成績／專業條件及公告中的客觀要求；家庭收入、家境與身分條件不納入排序。</div>
+    <div class="notice">判斷會排除明確限定清寒／低收入／經濟弱勢或軍公教身分的方案；若弱勢身分只是額外補助而一般學生仍可申請基本獎勵，則保留。專業考照與外語能力獎勵優先顯示。</div>
   </div>
 </section>
 
