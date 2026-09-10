@@ -85,8 +85,12 @@ async function idbMirrorSave(){try{const dbx=await idbOpen();const tx=dbx.transa
 let db=loadDB();
 removeLegacyStandaloneToeicGoals();
 ensureSchoolCalendar();
+const thu1151LawPlanMigration=ensureThu1151LawPreviewPlan();
 ensureToeicPlan();
-save({backup:false});
+const initialPersonalSaveOk=save({backup:!!(thu1151LawPlanMigration&&thu1151LawPlanMigration.applied)});
+if(initialPersonalSaveOk&&thu1151LawPlanMigration&&thu1151LawPlanMigration.applied){
+ try{storeSet(THU_1151_LAW_PLAN_MARKER,'1')}catch(_){}
+}
 cleanupLegacyStorage();
 setTimeout(()=>idbMirrorSave(),500);
 function seed(){const d={tasks:[
@@ -258,6 +262,121 @@ function removeLegacyStandaloneToeicGoals(){
  legacyRoots.forEach(t=>walk(t.id));
  db.tasks=db.tasks.filter(t=>!remove.has(t.id));
  return true;
+}
+
+/* V97.4.2 THU 115-1 law preview plan migration */
+const THU_1151_LAW_PLAN_MARKER='thuPersonalMigration:1151-law-preview:v1';
+function ensureThu1151LawPreviewPlan(){
+ if(storeGet(THU_1151_LAW_PLAN_MARKER)==='1')return {applied:false,reason:'already-migrated'};
+ if(!Array.isArray(db.tasks))return {applied:false,reason:'tasks-unavailable'};
+
+ const exact=(x,y)=>String(x||'').trim()===String(y||'').trim();
+ const byId=id=>db.tasks.find(t=>String(t.id)===String(id))||null;
+ const under=(parent,level,names)=>db.tasks.find(t=>
+   Number(t.level)===level&&String(t.parent||'')===String(parent||'')&&
+   names.some(n=>exact(t.name,n))
+ )||null;
+ const preserve=t=>({
+   status:['未開始','進行中','已完成','已封存'].includes(t?.status)?t.status:'未開始',
+   progress:Math.max(0,Math.min(100,+t?.progress||0))
+ });
+
+ const root=byId('g1')||db.tasks.find(t=>
+   Number(t.level)===1&&['台大及政大轉學考','台政大轉學考'].some(n=>exact(t.name,n))
+ );
+ if(!root)return {applied:false,reason:'transfer-root-missing'};
+
+ const stageAliases=['115-1 法律專業科目預習','115學年度第一學期法律專業科目預習','校內學科預習','上學期法律專業科目預習'];
+ let stage=byId('g1-1')||under(root.id,2,stageAliases);
+ if(!stage){
+   stage=mk('g1-1','115-1 法律專業科目預習',2,root.id,'未開始',0);
+   db.tasks.push(stage);
+ }else{
+   const keep=preserve(stage);
+   stage.name='115-1 法律專業科目預習';
+   stage.level=2;stage.parent=root.id;stage.weeklyMinutes=0;stage.start='';stage.due='';
+   stage.status=keep.status;stage.progress=keep.progress;
+ }
+
+ const subjects=[
+  {
+   sid:'g1-1-1151-debt',aid:'g1-1-1151-debt-action',
+   subject:'債法總論預習',
+   subjectAliases:['債法總論預習','債總預習','債法預習','債法總論'],
+   action:'每週債總體系預習與案例整理',
+   actionAliases:['每週債總體系預習與案例整理','債總體系預習與案例整理'],
+   weekly:90
+  },
+  {
+   sid:'g1-1-1151-criminal',aid:'g1-1-1151-criminal-action',
+   subject:'刑法分則預習',
+   subjectAliases:['刑法分則預習','刑分預習','刑法分則'],
+   action:'刑分構成要件與刑總連動整理',
+   actionAliases:['刑分構成要件與刑總連動整理','刑法分則構成要件與刑總連動整理'],
+   weekly:90
+  },
+  {
+   sid:'g1-1-1151-admin',aid:'g1-1-1151-admin-action',
+   subject:'行政法預習',
+   subjectAliases:['行政法預習','行政法'],
+   action:'行政法體系與案例前導',
+   actionAliases:['行政法體系與案例前導','行政法體系與案例預習'],
+   weekly:75
+  },
+  {
+   sid:'g1-1-1151-property',aid:'g1-1-1151-property-action',
+   subject:'物權法預習',
+   subjectAliases:['物權法預習','物權預習','物權法'],
+   action:'物權變動與案例圖像化預習',
+   actionAliases:['物權變動與案例圖像化預習','物權法案例圖像化預習'],
+   weekly:60
+  },
+  {
+   sid:'g1-1-1151-family',aid:'g1-1-1151-family-action',
+   subject:'親屬法預習',
+   subjectAliases:['親屬法預習','親屬法'],
+   action:'身分關係與法律效果整理',
+   actionAliases:['身分關係與法律效果整理','親屬法身分關係與法律效果整理'],
+   weekly:45
+  },
+  {
+   sid:'g1-1-1151-commonlaw',aid:'g1-1-1151-commonlaw-action',
+   subject:'英美法預習',
+   subjectAliases:['英美法預習','英美法'],
+   action:'英美法案例閱讀與法律英文',
+   actionAliases:['英美法案例閱讀與法律英文','英美法案例閱讀'],
+   weekly:30
+  }
+ ];
+
+ const added=[],reused=[];
+ for(const s of subjects){
+   let sub=byId(s.sid)||under(stage.id,3,s.subjectAliases);
+   if(!sub){
+     sub=mk(s.sid,s.subject,3,stage.id,'未開始',0,'2026-09-14','2026-12-31');
+     db.tasks.push(sub);added.push(s.subject);
+   }else{
+     const keep=preserve(sub);
+     sub.name=s.subject;sub.level=3;sub.parent=stage.id;sub.weeklyMinutes=0;
+     sub.start='2026-09-14';sub.due='2026-12-31';
+     sub.status=keep.status;sub.progress=keep.progress;reused.push(s.subject);
+   }
+
+   let action=byId(s.aid)||under(sub.id,4,s.actionAliases);
+   if(!action){
+     action=mk(s.aid,s.action,4,sub.id,'未開始',s.weekly);
+     db.tasks.push(action);
+   }else{
+     const keep=preserve(action);
+     action.name=s.action;action.level=4;action.parent=sub.id;
+     action.weeklyMinutes=s.weekly;action.start='';action.due='';
+     action.status=keep.status;action.progress=keep.progress;
+   }
+   try{storeSet('o'+sub.id,'1')}catch(_){}
+ }
+ try{storeSet('o'+stage.id,'1')}catch(_){}
+
+ return {applied:true,stageId:stage.id,added,reused,weeklyTotal:subjects.reduce((n,s)=>n+s.weekly,0)};
 }
 
 function ensureToeicPlan(){
