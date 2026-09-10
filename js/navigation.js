@@ -66,3 +66,35 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});
   else setup();
 })();
+
+/* V97.4.5 modal/nav ownership guard */
+(function(){
+  'use strict';
+  const OVERLAY_SELECTOR='.settings-modal.show,.modal.show,.edit-modal.show,.developer-modal[style*="display: flex"]';
+
+  function syncOverlayNav(){
+    const open=!!document.querySelector(OVERLAY_SELECTOR);
+    document.body.classList.toggle('nav-overlay-open',open);
+    if(open) document.body.classList.add('nav-hidden');
+  }
+
+  function setupOverlayNavGuard(){
+    const nodes=document.querySelectorAll('.settings-modal,.modal,.edit-modal,.developer-modal');
+    const observer=new MutationObserver(syncOverlayNav);
+    nodes.forEach(node=>observer.observe(node,{
+      attributes:true,
+      attributeFilter:['class','style','aria-hidden']
+    }));
+
+    document.addEventListener('click',()=>requestAnimationFrame(syncOverlayNav),true);
+    document.addEventListener('keydown',()=>requestAnimationFrame(syncOverlayNav),true);
+    window.addEventListener('pageshow',syncOverlayNav,{passive:true});
+    syncOverlayNav();
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',setupOverlayNavGuard,{once:true});
+  }else{
+    setupOverlayNavGuard();
+  }
+})();

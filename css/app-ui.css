@@ -309,3 +309,41 @@ html.app-dark .pwa-settings-status{background:#1e2a26;border-color:#34433e}
 .pwa-update-status.update{border-color:rgba(197,160,89,.45);background:rgba(197,160,89,.12);color:#8a681a}
 .pwa-update-status.error{border-color:rgba(160,60,60,.3);background:rgba(160,60,60,.07);color:#9a3838}
 html.app-dark .pwa-update-status{background:#1e2a26;border-color:#34433e}
+
+/* V97.4.5 modal/nav layering guard */
+.edit-modal.show,
+.modal.show,
+.settings-modal.show,
+.developer-modal[style*="display: flex"]{
+  z-index:2200!important;
+}
+body.nav-overlay-open .bottom-nav{
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  transform:translate3d(-50%,calc(100% + env(safe-area-inset-bottom) + 18px),0)!important;
+}
+body.nav-overlay-open .pwa-update-bar{
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+@media(max-width:700px){
+  .edit-modal.show,
+  .modal.show,
+  .settings-modal.show,
+  .developer-modal[style*="display: flex"]{
+    z-index:2200!important;
+  }
+  body.nav-overlay-open .bottom-nav{
+    opacity:0!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+    transform:translate3d(-50%,calc(100% + env(safe-area-inset-bottom) + 18px),0)!important;
+  }
+  .edit-modal.show .edit-modal-box,
+  .modal.show .modalbox{
+    max-height:calc(100dvh - 20px);
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+}
