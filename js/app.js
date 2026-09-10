@@ -581,21 +581,28 @@ function renderWeeklyReview(date=todayKey()){
 function executionAnalysis(date=todayKey()){
  const d=new Date(date+'T00:00:00'),day=d.getDay(),diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);const ws=dateKey(d),we=weekEndKey(ws);
  const plans=(Array.isArray(db.executionPlans)?db.executionPlans:[]).filter(p=>p&&p.date>=ws&&p.date<=we);
- // 「有效計畫」與「歷史實際」分離：取消的安排不再占用目前計畫量，但其已發生的實際時數仍保留。
  const scheduledPlans=plans.filter(p=>p.status!=='已取消');
  const activePlans=plans.filter(activeExecutionPlan);
  const cancelledPlans=plans.filter(p=>p.status==='已取消');
  const actualLogs=(Array.isArray(db.logs)?db.logs:[]).filter(l=>isCountableActualLog(l)&&logDate(l.time)>=ws&&logDate(l.time)<=we);
  const actualMinutes=actualLogs.reduce((s,l)=>s+Math.max(0,+l.minutes||0),0);
- // 目前有效計畫的實際投入：取消安排不再算入「計畫實際」，但仍會留在整體 actualMinutes。
+
  const scheduledMap=new Map(scheduledPlans.map(p=>[String(p.id),p]));
  const historicalPlanMap=new Map(plans.map(p=>[String(p.id),p]));
- const planActualMap=new Map(), historicalPlanActualMap=new Map();
+ const cancelledPlanIds=new Set(cancelledPlans.map(p=>String(p.id)));
+ const planActualMap=new Map(),historicalPlanActualMap=new Map();
+ let unplannedActualMinutes=0;
+
  actualLogs.forEach(l=>{
-   const mins=Math.max(0,+l.minutes||0); if(!l.planId)return;
-   if(historicalPlanMap.has(String(l.planId))) historicalPlanActualMap.set(String(l.planId),(historicalPlanActualMap.get(String(l.planId))||0)+mins);
-   if(scheduledMap.has(String(l.planId))) planActualMap.set(String(l.planId),(planActualMap.get(String(l.planId))||0)+mins);
+   const mins=Math.max(0,+l.minutes||0),pid=String(l?.planId||'');
+   if(!pid||!historicalPlanMap.has(pid)){
+     unplannedActualMinutes+=mins;
+     return;
+   }
+   historicalPlanActualMap.set(pid,(historicalPlanActualMap.get(pid)||0)+mins);
+   if(scheduledMap.has(pid))planActualMap.set(pid,(planActualMap.get(pid)||0)+mins);
  });
+
  let livePlanActualMinutes=0;
  planActualMap.forEach(v=>{livePlanActualMinutes+=v});
  if(timer.running&&timer.planId&&scheduledMap.has(String(timer.planId))){
@@ -603,7 +610,7 @@ function executionAnalysis(date=todayKey()){
    livePlanActualMinutes+=live;
    planActualMap.set(String(timer.planId),(planActualMap.get(String(timer.planId))||0)+live);
  }
- // 本週計畫只統計未取消的安排；已取消的計畫保留在 cancelledPlans 作為歷史，但不再占用計畫量。
+
  const plannedMinutes=scheduledPlans.reduce((s,p)=>s+Math.max(0,+p.minutes||0),0);
  const fulfilledPlans=scheduledPlans.filter(p=>(planActualMap.get(String(p.id))||0)>=Math.max(1,+p.minutes||0));
  const startedPlans=scheduledPlans.filter(p=>(planActualMap.get(String(p.id))||0)>0);
@@ -611,14 +618,26 @@ function executionAnalysis(date=todayKey()){
  const timeRate=plannedMinutes?Math.round(Math.min(100,livePlanActualMinutes/plannedMinutes*100)*10)/10:null;
  const executionRate=scheduledPlans.length?Math.round(startedPlans.length/scheduledPlans.length*1000)/10:null;
  const completionRate=scheduledPlans.length?Math.round(fulfilledPlans.length/scheduledPlans.length*1000)/10:null;
- // 估時吻合度只對「已達成且未取消」的計畫評估；取消安排不應影響目前的估時能力。
  const completedForEstimate=fulfilledPlans.filter(p=>planActualMap.has(String(p.id)));
- const estimateAccuracy=completedForEstimate.length?Math.round(completedForEstimate.reduce((s,p)=>{const planned=Math.max(1,+p.minutes||0),actual=Math.max(0,planActualMap.get(String(p.id))||0);return s+Math.max(0,100-Math.abs(actual-planned)/planned*100)},0)/completedForEstimate.length*10)/10:null;
+ const estimateAccuracy=completedForEstimate.length?Math.round(completedForEstimate.reduce((s,p)=>{
+   const planned=Math.max(1,+p.minutes||0),actual=Math.max(0,planActualMap.get(String(p.id))||0);
+   return s+Math.max(0,100-Math.abs(actual-planned)/planned*100);
+ },0)/completedForEstimate.length*10)/10:null;
  const historicalPlanActualMinutes=[...historicalPlanActualMap.values()].reduce((s,v)=>s+v,0);
- return {ws,we,plans,scheduledPlans,activePlans,cancelledPlans,fulfilledPlans,startedPlans,expiredPlans,plannedMinutes,actualMinutes,planActualMinutes:livePlanActualMinutes,historicalPlanActualMinutes,timeRate,executionRate,completionRate,estimateAccuracy,planActualMap,historicalPlanActualMap,completedForEstimate};
+ const cancelledPlanActualMinutes=[...historicalPlanActualMap.entries()].reduce(
+   (s,[id,v])=>s+(cancelledPlanIds.has(String(id))?Math.max(0,+v||0):0),0
+ );
+
+ return {
+   ws,we,plans,scheduledPlans,activePlans,cancelledPlans,fulfilledPlans,startedPlans,expiredPlans,
+   plannedMinutes,actualMinutes,planActualMinutes:livePlanActualMinutes,historicalPlanActualMinutes,
+   cancelledPlanActualMinutes,unplannedActualMinutes,timeRate,executionRate,completionRate,
+   estimateAccuracy,planActualMap,historicalPlanActualMap,completedForEstimate
+ };
 }
 function renderExecutionAnalysis(date=todayKey()){
- const el=document.getElementById('executionAnalysis');if(!el)return;const a=executionAnalysis(date),fmt=m=>{const h=Math.floor(m/60),mm=m%60;return h?`${h}h ${mm}m`:`${mm}m`};
+ const el=document.getElementById('executionAnalysis');if(!el)return;
+ const a=executionAnalysis(date),fmt=m=>{const n=Math.max(0,Math.round(+m||0)),h=Math.floor(n/60),mm=n%60;return h?`${h}h ${mm}m`:`${mm}m`};
  const gap=a.planActualMinutes-a.plannedMinutes;
  const executionRateValue=a.executionRate===null?'—':a.executionRate+'%';
  const timeRateValue=a.timeRate===null?'—':a.timeRate+'%';
@@ -626,8 +645,24 @@ function renderExecutionAnalysis(date=todayKey()){
  const timeRateText=a.timeRate===null?'目前沒有有效執行安排可計算':`計畫實際 ${fmt(a.planActualMinutes)} ／有效計畫 ${fmt(a.plannedMinutes)}${timer.running&&timer.planId?' · 計時中即時計入':''}`;
  const estimateValue=a.estimateAccuracy===null?'—':a.estimateAccuracy+'%';
  const estimateText=a.estimateAccuracy===null?'待至少一筆有效計畫達成後評估':'以已達成有效計畫的預計／實際差距計算';
- const unpaired=Math.max(0,a.actualMinutes-a.planActualMinutes);
- el.innerHTML=`<div class="execution-analysis-group-title">計畫 × 實際執行 <small>未取消安排才屬目前有效計畫；已取消安排的歷史實際仍保留</small></div><div class="execution-analysis-kpis"><div><small>計畫實際執行率</small><b>${executionRateValue}</b><span>${a.startedPlans.length} / ${a.scheduledPlans.length} 次 · ${executionRateText}</span></div><div><small>時間達成率</small><b>${timeRateValue}</b><span>${timeRateText}</span></div><div><small>逾期未達計畫</small><b>${a.expiredPlans.length}</b><span>取消不列入失敗 · 已達成 ${a.fulfilledPlans.length} 次</span></div><div><small>估時吻合度</small><b>${estimateValue}</b><span>${estimateText}</span></div></div><div class="execution-analysis-detail"><span>本週有效執行安排 <b>${fmt(a.plannedMinutes)}</b></span><span>有效安排實際 <b>${fmt(a.planActualMinutes)}</b></span><span>歷史實際投入 <b>${fmt(a.actualMinutes)}</b></span><span>已取消安排 <b>${a.cancelledPlans.length}</b></span><span>取消後未配對實際 <b>${fmt(unpaired)}</b></span><span>安排差額 <b>${gap>=0?'+':''}${fmt(Math.abs(gap))}</b></span><span>已達安排 <b>${a.fulfilledPlans.length}/${a.scheduledPlans.length}</b></span></div>`;
+ const cancelledActual=Math.max(0,+a.cancelledPlanActualMinutes||0);
+ el.innerHTML=`<div class="execution-analysis-group-title">計畫 × 實際執行 <small>未取消安排才屬目前有效計畫；直接投入與取消安排的歷史實際分開統計</small></div>
+ <div class="execution-analysis-kpis">
+   <div><small>計畫實際執行率</small><b>${executionRateValue}</b><span>${a.startedPlans.length} / ${a.scheduledPlans.length} 次 · ${executionRateText}</span></div>
+   <div><small>時間達成率</small><b>${timeRateValue}</b><span>${timeRateText}</span></div>
+   <div><small>逾期未達計畫</small><b>${a.expiredPlans.length}</b><span>取消不列入失敗 · 已達成 ${a.fulfilledPlans.length} 次</span></div>
+   <div><small>估時吻合度</small><b>${estimateValue}</b><span>${estimateText}</span></div>
+ </div>
+ <div class="execution-analysis-detail">
+   <span>本週有效執行安排 <b>${fmt(a.plannedMinutes)}</b></span>
+   <span>有效安排實際 <b>${fmt(a.planActualMinutes)}</b></span>
+   <span>本週實際投入 <b>${fmt(a.actualMinutes)}</b></span>
+   <span>未配對安排之實際投入 <b>${fmt(a.unplannedActualMinutes)}</b></span>
+   <span>已取消安排 <b>${a.cancelledPlans.length}</b></span>
+   ${cancelledActual?`<span>已取消安排之歷史實際 <b>${fmt(cancelledActual)}</b></span>`:''}
+   <span>安排差額 <b>${gap>=0?'+':''}${fmt(Math.abs(gap))}</b></span>
+   <span>已達安排 <b>${a.fulfilledPlans.length}/${a.scheduledPlans.length}</b></span>
+ </div>`;
 }
 function deleteActualLog(id){
  const log=(Array.isArray(db.logs)?db.logs:[]).find(x=>String(x.id)===String(id));
@@ -803,11 +838,22 @@ function renderActualLogHistory(){
  body.innerHTML=filters+summary+`<div class="actual-history-groups">${grouped}</div>`;
 }
 
+/* V97.4.8.1 analysis KPI source repair */
+function analysisValidLeafTasks(){
+ return (Array.isArray(db.tasks)?db.tasks:[]).filter(t=>{
+   if(!t||Number(t.level)!==4||t.status==='已封存')return false;
+   const parent=getTask(t.parent);
+   if(!parent||Number(parent.level)!==3||parent.status==='已封存')return false;
+   const p=periodForTask(t);
+   return !!(p?.start&&p?.due&&p.start<=p.due);
+ });
+}
+
 function stats(){
- const leaves=db.tasks.filter(t=>!kids(t.id)&&t.status!=='已封存'&&t.level===4);
+ const leaves=analysisValidLeafTasks();
  leaves.forEach(t=>calc(t));
  const done=leaves.filter(t=>calc(t)===100).length;
- const avg=leaves.length?Math.round(leaves.reduce((sum,t)=>sum+calc(t),0)/leaves.length):0;
+ const avg=leaves.length?Math.round((leaves.reduce((sum,t)=>sum+calc(t),0)/leaves.length)*10)/10:0;
  const planAnalysis=executionAnalysis();
  // 分析頁的「本週整體投入」看的是目標系統本身的週投入目標；
  // 計畫 × 實際區塊則另外看「提前安排的執行計畫」，兩者不可混為一談。
