@@ -82,6 +82,7 @@ const IDB_NAME='lawLangGoalSystemPersistentV87';
 const IDB_STORE='snapshots';
 function idbOpen(){return new Promise((resolve,reject)=>{try{if(!window.indexedDB)return reject(new Error('IndexedDB unavailable'));const r=indexedDB.open(IDB_NAME,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(IDB_STORE))r.result.createObjectStore(IDB_STORE)};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)}catch(e){reject(e)}})}
 async function idbMirrorSave(){try{const dbx=await idbOpen();const tx=dbx.transaction(IDB_STORE,'readwrite');tx.objectStore(IDB_STORE).put(storeGet(KEY)||'',KEY);await new Promise((res,rej)=>{tx.oncomplete=res;tx.onerror=()=>rej(tx.error)});dbx.close()}catch(e){}}
+const THU_1151_LAW_PLAN_MARKER='thuPersonalMigration:1151-law-preview:v1';
 let db=loadDB();
 removeLegacyStandaloneToeicGoals();
 ensureSchoolCalendar();
@@ -265,7 +266,6 @@ function removeLegacyStandaloneToeicGoals(){
 }
 
 /* V97.4.2 THU 115-1 law preview plan migration */
-const THU_1151_LAW_PLAN_MARKER='thuPersonalMigration:1151-law-preview:v1';
 function ensureThu1151LawPreviewPlan(){
  if(storeGet(THU_1151_LAW_PLAN_MARKER)==='1')return {applied:false,reason:'already-migrated'};
  if(!Array.isArray(db.tasks))return {applied:false,reason:'tasks-unavailable'};
