@@ -62,17 +62,54 @@ function scholarshipSpecialtyKind(a){
  return '一般獎學金';
 }
 function scholarshipEligibility(a){
- const text=scholarshipPolicyText(a),title=String(a?.title||''),specialty=scholarshipSpecialtyKind(a);
- const supplementalPoverty=specialty!=='一般獎學金'&&(
-   /(?:清寒|低收入戶|中低收入戶|弱勢學生)[^。；\n]{0,90}(?:另|額外|可申請|報名費|全額補助)/.test(text)||
-   /(?:另|額外|報名費|全額補助)[^。；\n]{0,90}(?:清寒|低收入戶|中低收入戶|弱勢學生)/.test(text)
+ const text=scholarshipPolicyText(a);
+ const title=String(a?.title||'');
+ const targetText=[
+   a?.eligibility,a?.audience,a?.target,a?.eligibilityTarget,
+   a?.description,a?.statusText,title
+ ].map(x=>String(x||'')).join(' ').replace(/\s+/g,' ').trim();
+ const specialty=scholarshipSpecialtyKind(a);
+
+ const poverty=/(?:清寒家庭|清寒學生|家境清寒|低收入戶|中低收入戶|經濟弱勢|弱勢家庭|弱勢學生|家庭經濟困難)/;
+ const militaryPublic=/(?:軍公教|軍警消|現役軍人|軍人子女|軍人遺族|軍眷|公務人員|公務員子女|公教人員|教職員子女|榮民|榮眷|遺族)/;
+
+ const mandatoryLead=/(?:僅限|限|限定|必須|須具備|申請資格|申請對象|補助對象|受獎對象|資格條件|專供|提供予|發給)/;
+ const optionalLead=/(?:另|另外|額外|加發|加碼|得另申請|可另申請|另可申請|報名費補助|考試費補助|費用補助|補助報名費|補助考試費)/;
+
+ const titleRestricted=new RegExp(
+   '(?:'+poverty.source+'|'+militaryPublic.source+').{0,28}(?:獎學金|助學金|獎助|補助)|'+
+   '(?:獎學金|助學金|獎助|補助).{0,28}(?:'+poverty.source+'|'+militaryPublic.source+')'
  );
- const povertyTitle=/(?:清寒|低收入戶|中低收入戶|經濟弱勢|家境清寒|弱勢學生).{0,16}(?:獎學金|助學金|獎助|補助)|(?:獎學金|助學金|獎助|補助).{0,16}(?:清寒|低收入戶|中低收入戶|經濟弱勢|家境清寒)/.test(title);
- const povertyRestricted=/(?:僅限|限|限定|申請資格|申請對象|補助對象|補助資格|受獎對象|資格條件)[^。；\n]{0,70}(?:清寒|低收入戶|中低收入戶|經濟弱勢|家境清寒|弱勢學生)/.test(text);
- const militaryTitle=/(?:軍公教|軍人|公務人員|公教人員).{0,24}(?:獎學金|助學金|獎助|補助|子女|遺族|眷屬)|(?:獎學金|助學金|獎助|補助).{0,24}(?:軍公教|軍人|公務人員|公教人員)/.test(title);
- const militaryRestricted=/(?:僅限|限|限定|申請資格|申請對象|補助對象|補助資格|受獎對象|資格條件)[^。；\n]{0,70}(?:軍公教|軍人|公務人員|公教人員)/.test(text);
- if((povertyTitle||povertyRestricted)&&!supplementalPoverty)return {eligible:false,excluded:true,reason:'限定清寒／低收入／經濟弱勢資格',specialty};
- if(militaryTitle||militaryRestricted)return {eligible:false,excluded:true,reason:'限定軍公教／相關特定身分資格',specialty};
+
+ const povertyMandatory=
+   titleRestricted.test(title) ||
+   new RegExp(mandatoryLead.source+'[^。；\\n]{0,90}'+poverty.source).test(targetText) ||
+   new RegExp(poverty.source+'[^。；\\n]{0,45}(?:始得申請|方可申請|才可申請|為必要條件|為申請資格|為受獎資格)').test(targetText);
+
+ const militaryMandatory=
+   titleRestricted.test(title) ||
+   new RegExp(mandatoryLead.source+'[^。；\\n]{0,90}'+militaryPublic.source).test(targetText) ||
+   new RegExp(militaryPublic.source+'[^。；\\n]{0,45}(?:始得申請|方可申請|才可申請|為必要條件|為申請資格|為受獎資格)').test(targetText);
+
+ const povertyOptional=
+   new RegExp(optionalLead.source+'[^。；\\n]{0,100}'+poverty.source).test(targetText) ||
+   new RegExp(poverty.source+'[^。；\\n]{0,100}'+optionalLead.source).test(targetText);
+
+ const militaryOptional=
+   new RegExp(optionalLead.source+'[^。；\\n]{0,100}'+militaryPublic.source).test(targetText) ||
+   new RegExp(militaryPublic.source+'[^。；\\n]{0,100}'+optionalLead.source).test(targetText);
+
+ if(povertyMandatory&&!povertyOptional){
+   return {eligible:false,excluded:true,reason:'清寒／低收入／經濟弱勢身分為必要申請或受獎條件',specialty};
+ }
+ if(militaryMandatory&&!militaryOptional){
+   return {eligible:false,excluded:true,reason:'軍公教／軍警消等身分為必要申請或受獎條件',specialty};
+ }
+
+ if((povertyMandatory&&povertyOptional)||(militaryMandatory&&militaryOptional)){
+   return {eligible:true,excluded:false,reason:'特定身分僅屬額外補助條件，不是基本申請必要條件',specialty};
+ }
+
  return {eligible:true,excluded:false,reason:'可列入個人判斷',specialty};
 }
 function scholarshipAssessment(a){
@@ -150,7 +187,7 @@ function openScholarshipInfo(id){
   ${number?`<div class="info-kv"><small>獎助學金編號</small><b>${esc(number)}</b></div>`:''}
   ${life?.state?`<div class="info-kv"><small>期限狀態</small><b>${esc(life.state)}</b></div>`:''}
  </div><div class="notice">${assessment.eligible
- ?'判斷會排除明確限定清寒／低收入／經濟弱勢或軍公教身分的方案；若弱勢身分只是額外報名費補助，而一般學生仍可領基本獎勵，則不排除。專業考照與外語能力獎勵會提高排序。'
+ ?'只有在清寒／低收入／經濟弱勢或軍公教／軍警消等身分是基本申請或受獎必要條件時才排除；若只是額外補助、加發或報名費補助而一般學生仍可申請基本獎勵，則保留。專業考照與外語能力獎勵仍提高排序。'
  :'此項因公告呈現明確的特定資格限制而不列入個人推薦；最終資格仍以官方簡章為準。'
  }</div><div class="goal-info-actions">${official?`<a class="btn primary" href="${esc(safeExternalUrl(official))}" target="_blank" rel="noopener noreferrer">${number?'開啟官方詳細辦法／申請書':'查看官方資訊'}</a>`:''}${assessment.eligible&&(a.date||a.deadline)?`<button class="btn dark" type="button" onclick="addActivityToCalendar('${String(a.id).replace(/'/g,"\\'")}');closeScholarshipInfoModal()">加入申請截止日</button>`:''}<button class="btn" type="button" onclick="closeScholarshipInfoModal()">關閉</button></div>`;
  document.getElementById('scholarshipInfoModal').classList.add('show');document.body.style.overflow='hidden';bindInteractionFeedback();
