@@ -75,8 +75,57 @@ window.PWA=(function(){
     document.body.appendChild(bar);
     return bar;
   }
-  function showUpdate(){ensureUpdateBar().classList.add('show')}
-  function hideUpdate(){document.getElementById('pwaUpdateBar')?.classList.remove('show')}
+  /* V97.4.9.5 PWA update settlement watchdog */
+  let updateWatchdog=null;
+  function clearUpdateWatchdog(){
+    if(updateWatchdog){clearTimeout(updateWatchdog);updateWatchdog=null}
+  }
+  async function settleUpdateState(){
+    try{
+      registration=registration||await navigator.serviceWorker.getRegistration('./')||null;
+      const [remote,current]=await Promise.all([remoteMeta(),currentWorkerMeta()]);
+      const sameVersion=!!(remote&&current&&remote.version===current.version);
+      const sameSignature=!remote?.signature||!current?.signature||remote.signature===current.signature;
+      if(sameVersion&&sameSignature){
+        hideUpdate();
+        if(remote.version!==CURRENT_VERSION){
+          setUpdateUI('update',`V${remote.version} 已接管，正在重新載入…`);
+          setTimeout(()=>location.reload(),80);
+        }else{
+          const time=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+          setUpdateUI('ok',`目前已是最新版本 V${remote.version} · ${time}`);
+        }
+        return;
+      }
+      if(registration?.waiting){
+        registration.waiting.postMessage({type:'SKIP_WAITING'});
+        armUpdateWatchdog();
+        return;
+      }
+      if(registration?.installing){
+        armUpdateWatchdog();
+        return;
+      }
+      hideUpdate();
+      setUpdateUI('error','更新尚未完成，請按「立即檢查更新」重試');
+    }catch(e){
+      console.warn('THU update settlement check failed',e);
+      hideUpdate();
+      setUpdateUI('error',isOnline()?'更新確認逾時，請按「立即檢查更新」重試':'目前離線，恢復連線後再更新');
+    }
+  }
+  function armUpdateWatchdog(){
+    clearUpdateWatchdog();
+    updateWatchdog=setTimeout(()=>{updateWatchdog=null;settleUpdateState()},12000);
+  }
+  function showUpdate(){
+    ensureUpdateBar().classList.add('show');
+    armUpdateWatchdog();
+  }
+  function hideUpdate(){
+    clearUpdateWatchdog();
+    document.getElementById('pwaUpdateBar')?.classList.remove('show');
+  }
 
   async function remoteMeta(){
     const url=new URL('./sw.js',location.href);
@@ -170,6 +219,7 @@ window.PWA=(function(){
         (remote.signature&&currentSignature&&remote.signature!==currentSignature);
 
       if(!changed){
+        hideUpdate();
         if(!silent){
           const time=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
           setUpdateUI('ok',`目前已是最新版本 V${remote.version} · ${time}`);
@@ -191,6 +241,7 @@ window.PWA=(function(){
       return true;
     }catch(e){
       console.warn('THU auto update check failed',e);
+      hideUpdate();
       if(!silent)setUpdateUI('error',isOnline()?'檢查更新失敗，稍後會自動重試':'目前離線，恢復連線後會自動檢查');
       return false;
     }
@@ -221,19 +272,31 @@ window.PWA=(function(){
   window.addEventListener('offline',()=>refreshSettings());
 
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.addEventListener('controllerchange',()=>{
+    navigator.serviceWorker.addEventListener('controllerchange',async()=>{
       if(reloading)return;
-      reloading=true;
-      const key='thuPwaReload:'+CURRENT_VERSION;
+      let next=null;
+      try{next=await currentWorkerMeta()}catch(_){}
+      const token=(next?.version||'unknown')+':'+(next?.signature||'');
+      const key='thuPwaReload:'+token;
       try{
-        if(sessionStorage.getItem(key)==='1'){hideUpdate();return}
+        if(sessionStorage.getItem(key)==='1'){
+          hideUpdate();
+          const v=next?.version||CURRENT_VERSION;
+          setUpdateUI('ok',`目前已由 V${v} 接管`);
+          return;
+        }
         sessionStorage.setItem(key,'1');
       }catch(_){}
-      location.reload();
+      reloading=true;
+      hideUpdate();
+      setTimeout(()=>location.reload(),80);
     });
   }
   document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState==='visible')checkForUpdate({silent:true});
+    if(document.visibilityState==='visible'){
+      settleUpdateState();
+      checkForUpdate({silent:true});
+    }
   });
 
   return {register,install,checkForUpdate,applyUpdate,isStandalone,status,settingsPanelHTML};
