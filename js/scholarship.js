@@ -121,12 +121,32 @@ function scholarshipMilitaryPublicRestricted(c){
   return scholarshipMandatoryMention([c.target,c.restrictions,c.academic].join(' '),rx);
 }
 
+/* V97.5.3 health/treatment prerequisite hard filter */
 function scholarshipHealthRestricted(c){
   if(!SCHOLARSHIP_HARD_POLICY.excludeMandatoryHealthRestricted)return false;
-  const rx=/(?:身心障礙|身障|重大傷病|罕見疾病|癌症|癌友|病友|慢性病|特殊疾病|疾病患者|傷病患者|病患子女|患者子女)/;
+
+  const identityRx=/(?:身心障礙|身障|重大傷病|罕見疾病|癌症|癌友|病友|病患|患者|慢性病|特殊疾病|疾病患者|傷病患者|病患子女|患者子女)/;
+  const treatmentRx=/(?:手術|開刀|治療|化療|放射治療|心導管|心臟導管|器官移植|洗腎|透析|住院|醫師診斷|診斷證明|病歷證明)/;
+  const conditionRx=/(?:罹患|患有|曾患|曾於|曾接受|接受過|經診斷|診斷為|治療者|手術者|病史)/;
+  const optional=/(?:另|另外|額外|加發|加碼|優先|酌予加分|得另申請|可另申請|另可申請)/;
   const award=/(?:獎學金|助學金|獎助學金|獎助|補助)/;
-  if(rx.test(c.title)&&award.test(c.title))return true;
-  return scholarshipMandatoryMention([c.target,c.restrictions,c.academic].join(' '),rx);
+
+  if(identityRx.test(c.title)&&award.test(c.title)&&!optional.test(c.title))return true;
+
+  const structured=[c.target,c.academic].join(' ');
+  if(scholarshipMandatoryMention(structured,identityRx))return true;
+
+  const restrictions=String(c.restrictions||'').replace(/\s+/g,' ').trim();
+  if(restrictions&&!optional.test(restrictions)){
+    if(identityRx.test(restrictions))return true;
+    if(treatmentRx.test(restrictions)&&conditionRx.test(restrictions))return true;
+  }
+
+  const fallback=[c.target,c.academic,restrictions].join(' ');
+  return scholarshipMandatoryMention(
+    fallback,
+    /(?:身心障礙|重大傷病|罕見疾病|癌症|患者|病患|手術|治療|心導管|心臟導管|器官移植|洗腎|透析)/
+  );
 }
 
 function scholarshipStudentLevelMismatch(c){
