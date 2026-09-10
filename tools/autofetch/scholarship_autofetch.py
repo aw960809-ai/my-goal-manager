@@ -101,7 +101,7 @@ def parse(html,sub_id,sub_name,url,today=None):
     return sorted(uniq.values(),key=lambda x:(x["deadline"],x["title"])),recognized,parsed_total
 
 # V97.4.9.4 official detail eligibility enrichment
-DETAIL_ENRICH_VERSION=2
+DETAIL_ENRICH_VERSION=3
 DETAIL_LABELS=(
     "獎助學金代號","獎助學金名稱","學生申請日期","預計名額","獎助學金提供單位",
     "申請辦法下載","申請書下載","申請說明","獎助學門","獎助對象","成績條件",
@@ -171,6 +171,9 @@ def parse_scholarship_detail(html):
       "eligibilityTarget":detail_field(p.lines,"獎助對象"),
       "restrictions":detail_field(p.lines,"其他限制條件"),
       "academicScope":detail_field(p.lines,"獎助學門"),
+      "requiredDocuments":detail_field(p.lines,"應繳證件或附件"),
+      "scoreCondition":detail_field(p.lines,"成績條件"),
+      "applicationNote":detail_field(p.lines,"申請說明"),
     }
 
 # V97.5.2 widen detail enrichment to every THU scholarship category
@@ -217,7 +220,7 @@ def enrich_scholarship_eligibility(rows,old_rows,today=None):
         old=old_by.get(str(x.get("id") or ""),{})
         same_window=(str(old.get("applicationWindow") or "")==str(x.get("applicationWindow") or ""))
         if same_window and old.get("eligibilityEnrichmentVersion")==DETAIL_ENRICH_VERSION and "eligibilityVerified" in old:
-            for k in ("number","detailUrl","eligibilityTarget","restrictions","academicScope",
+            for k in ("number","detailUrl","eligibilityTarget","restrictions","academicScope","requiredDocuments","scoreCondition","applicationNote",
                       "eligibilityVerified","eligibilityEnrichmentVersion","eligibilityFetchedAt"):
                 if k in old:x[k]=old[k]
             stats["detailReused"]+=1
@@ -238,12 +241,15 @@ def enrich_scholarship_eligibility(rows,old_rows,today=None):
             x["eligibilityTarget"]=clean(info.get("eligibilityTarget"))
             x["restrictions"]=clean(info.get("restrictions"))
             x["academicScope"]=clean(info.get("academicScope"))
+            x["requiredDocuments"]=clean(info.get("requiredDocuments"))
+            x["scoreCondition"]=clean(info.get("scoreCondition"))
+            x["applicationNote"]=clean(info.get("applicationNote"))
             x["eligibilityVerified"]=True
             x["eligibilityFetchedAt"]=now_iso()
             stats["detailVerified"]+=1
         except Exception as e:
             if old.get("eligibilityVerified") is True:
-                for k in ("number","detailUrl","eligibilityTarget","restrictions","academicScope",
+                for k in ("number","detailUrl","eligibilityTarget","restrictions","academicScope","requiredDocuments","scoreCondition","applicationNote",
                           "eligibilityVerified","eligibilityEnrichmentVersion","eligibilityFetchedAt"):
                     if k in old:x[k]=old[k]
                 stats["detailReused"]+=1

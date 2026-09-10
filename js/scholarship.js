@@ -63,179 +63,194 @@ function scholarshipSpecialtyKind(a){
 }
 /* V97.4.9.4 detail-level scholarship eligibility enforcement */
 /* V97.5.1 Scholarship Eligibility Engine */
-const SCHOLARSHIP_HARD_POLICY=Object.freeze({
-  excludeAnyMandatoryRegion:true,
-  excludeMandatoryEconomic:true,
-  excludeMandatoryMilitaryPublic:true,
-  excludeMandatoryHealthRestricted:true,
-  currentStudentLevel:'undergraduate',
-  currentMajor:'law',
-  householdRegion:'chiayi-county',
-  studyRegion:'taichung',
-  excludeOtherRegionalIdentitySchemes:true
+/* V97.6.0 Strict Scholarship Eligibility Engine */
+const SCHOLARSHIP_STRICT_POLICY=Object.freeze({
+  householdWhitelist:['嘉義縣'],
+  studyWhitelist:['臺中','台中'],
+  currentSchool:'東海大學',
+  currentLevel:'大學部',
+  currentMajor:'法律',
+  requireVerifiedThuDetail:true,
+  specialIdentityMode:'general-student-only'
 });
 
-function scholarshipEligibilityCorpus(a){
-  const all=[
-    a?.title,a?.eligibilityTarget,a?.eligibility,a?.audience,a?.target,
-    a?.restrictions,a?.description,a?.statusText,a?.academicScope,
-    a?.keywords,a?.source,a?.org
-  ].map(x=>String(x||'').replace(/\s+/g,' ').trim()).filter(Boolean);
-  return {
-    title:String(a?.title||'').replace(/\s+/g,' ').trim(),
-    target:String(a?.eligibilityTarget||a?.audience||a?.target||'').replace(/\s+/g,' ').trim(),
-    restrictions:String(a?.restrictions||'').replace(/\s+/g,' ').trim(),
-    academic:String(a?.academicScope||a?.eligibility||'').replace(/\s+/g,' ').trim(),
-    text:all.join(' ')
-  };
+function scholarshipStrictCorpus(a){
+  const norm=x=>String(x||'').replace(/\s+/g,' ').trim();
+  const title=norm(a?.title);
+  const target=norm(a?.eligibilityTarget||a?.audience||a?.target);
+  const restrictions=norm(a?.restrictions);
+  const academic=norm(a?.academicScope||a?.eligibility);
+  const documents=norm(a?.requiredDocuments||a?.documents||a?.attachments);
+  const note=norm(a?.applicationNote||a?.description||a?.statusText);
+  return {title,target,restrictions,academic,documents,note,text:[title,target,restrictions,academic,documents,note].join(' ')};
 }
 
-function scholarshipMandatoryMention(text,rx){
-  if(!text||!rx.test(text))return false;
-  const mandatory=/(?:僅限|限|限定|必須|須具備|需具備|申請資格|申請對象|獎助對象|補助對象|受獎對象|資格條件|專供|提供予|發給|限於|限設籍|設籍於|戶籍(?:設於|位於|在)|原籍|籍設)/;
+function scholarshipStrictClauses(text){
+  return String(text||'').split(/[。；;\n]/).map(x=>x.trim()).filter(Boolean);
+}
+
+function scholarshipStrictPositiveClause(text,rx){
+  const mandatory=/(?:僅限|限|限定|必須|須具備|需具備|申請資格|申請對象|獎助對象|補助對象|受獎對象|資格條件|專供|提供予|發給|限於|須檢附|需檢附|應檢附|證明)/;
   const optional=/(?:另|另外|額外|加發|加碼|優先|酌予加分|得另申請|可另申請|另可申請|報名費補助|考試費補助|費用補助)/;
-  const clauses=String(text).split(/[。；;\n]/).map(x=>x.trim()).filter(Boolean);
-  return clauses.some(c=>rx.test(c)&&mandatory.test(c)&&!optional.test(c));
+  const negative=/(?:不得領|不得同時|不可同時|未享|未領|未曾領|不具|不含|除外|排除|非屬|非為)/;
+  return scholarshipStrictClauses(text).some(c=>rx.test(c)&&mandatory.test(c)&&!optional.test(c)&&!negative.test(c));
 }
 
-/* V97.5.4 fixed regional policy: Chiayi County household + Taichung study */
-function scholarshipRegionRestricted(a,c){
-  /* V97.5.5 regional title fallback */
-  const regionTitle=String(c?.title||a?.title||'').replace(/\s+/g,' ').trim();
-  const localIndigenousTitle=/(?:基隆|臺北|台北|新北|桃園|新竹|苗栗|臺中|台中|彰化|南投|雲林|嘉義市|臺南|台南|高雄|屏東|宜蘭|花蓮|臺東|台東|澎湖|金門|連江|恆春|[\u4e00-\u9fff]{1,4}(?:縣|市|鄉|鎮|區)).{0,16}(?:原住民|原住民族)|(?:原住民|原住民族).{0,16}(?:縣|市|鄉|鎮|區)/;
-  if(localIndigenousTitle.test(regionTitle))return true;
-  if(!SCHOLARSHIP_HARD_POLICY.excludeAnyMandatoryRegion)return false;
-
-  const raw=[
-    c?.target,c?.restrictions,c?.academic,
-    a?.eligibility,a?.audience,a?.description,a?.statusText
-  ].map(x=>String(x||'').replace(/\s+/g,' ').trim()).filter(Boolean).join(' ');
-
-  if(!raw)return false;
-
-  const hasRegionRequirement=/(?:戶籍|設籍|原籍|籍貫|居住地|居住於|居住滿|本縣|本市|本鄉|本鎮|本區|地方學生|當地學生|縣市學生|地區學生|原住民|原住民族)/.test(raw);
-  if(!hasRegionRequirement)return false;
-
-  // Only these regional conditions are allowed in the personal profile.
-  const chiayiCountyHousehold=/(?:嘉義縣).{0,30}(?:戶籍|設籍|原籍|籍貫)|(?:戶籍|設籍|原籍|籍貫).{0,30}(?:嘉義縣)/;
-  const taichungStudy=/(?:臺中|台中).{0,35}(?:就讀|在學|大專校院|大專院校|學校學生|學生)|(?:就讀|在學|大專校院|大專院校).{0,35}(?:臺中|台中)/;
-  const nationwide=/(?:全國|不限地區|不限戶籍|不限縣市|各縣市|全臺|全台|全國大專|全國學生)/;
-
-  if(nationwide.test(raw))return false;
-  if(chiayiCountyHousehold.test(raw))return false;
-  if(taichungStudy.test(raw))return false;
-
-  // Important distinction: Taichung household registration is NOT the same
-  // as studying in Taichung. Any other locality-based requirement is excluded.
-  const anyLocality=/(?:臺北|台北|新北|桃園|新竹|苗栗|臺中|台中|彰化|南投|雲林|嘉義市|臺南|台南|高雄|屏東|宜蘭|花蓮|臺東|台東|澎湖|金門|連江|基隆|恆春|鄉|鎮|區)/;
-  const regionGate=/(?:限|僅限|限定|須|需|必須|申請對象|獎助對象|資格條件|設籍|戶籍|原籍|籍貫|居住)/;
-
-  if(regionGate.test(raw)&&anyLocality.test(raw))return true;
-
-  // Local indigenous / tribal scholarship schemes are always excluded,
-  // even when the detailed household wording is omitted.
-  if(/(?:原住民|原住民族)/.test(raw)&&anyLocality.test(raw))return true;
-
-  // Any remaining explicit local condition that is not one of the two allowed
-  // regional routes is treated as incompatible with the personal profile.
-  return /(?:本縣|本市|本鄉|本鎮|本區|地方學生|當地學生|縣市學生|地區學生)/.test(raw);
+function scholarshipStrictGeneralAccess(target){
+  return /(?:一般學生|一般優秀學生|一般在學生|全校學生|本校學生|各系學生|各學系學生|不限科系|不限學系|不限身分|全體學生)/.test(String(target||''));
 }
 
-function scholarshipEconomicRestricted(c){
-  if(!SCHOLARSHIP_HARD_POLICY.excludeMandatoryEconomic)return false;
-  const rx=/(?:清寒家庭|清寒學生|清寒|低收入戶|中低收入戶|經濟弱勢|弱勢家庭|弱勢學生|家庭經濟困難|家境困難)/;
-  const award=/(?:獎學金|助學金|獎助學金|獎助|補助)/;
-  const optional=/(?:另|另外|額外|加發|加碼|優先|報名費補助|考試費補助)/;
-  if(rx.test(c.title)&&award.test(c.title)&&!optional.test(c.title))return true;
-  return scholarshipMandatoryMention([c.target,c.restrictions,c.academic].join(' '),rx);
-}
+function scholarshipStrictRegion(c){
+  const title=c.title;
+  const scope=[c.target,c.restrictions,c.academic,c.documents,c.note].join(' ');
+  const nationwide=/(?:全國|不限地區|不限戶籍|不限縣市|全臺|全台|各縣市)/;
+  if(nationwide.test(scope))return null;
 
-function scholarshipMilitaryPublicRestricted(c){
-  if(!SCHOLARSHIP_HARD_POLICY.excludeMandatoryMilitaryPublic)return false;
-  const rx=/(?:軍公教|軍警消|現役軍人|軍人子女|軍人遺族|軍眷|公務人員|公務員子女|公教人員|教職員子女|榮民|榮眷)/;
-  const award=/(?:獎學金|助學金|獎助學金|獎助|補助)/;
-  if(rx.test(c.title)&&award.test(c.title))return true;
-  return scholarshipMandatoryMention([c.target,c.restrictions,c.academic].join(' '),rx);
-}
+  const chiayiHousehold=/(?:嘉義縣).{0,32}(?:戶籍|設籍|原籍|籍貫)|(?:戶籍|設籍|原籍|籍貫).{0,32}(?:嘉義縣)/;
+  const taichungStudy=/(?:臺中|台中).{0,40}(?:就讀|在學|大專校院|大專院校|學校學生|學生)|(?:就讀|在學|大專校院|大專院校).{0,40}(?:臺中|台中)/;
+  const hasChiayi=chiayiHousehold.test(scope);
+  const hasTaichungStudy=taichungStudy.test(scope);
 
-/* V97.5.3 health/treatment prerequisite hard filter */
-function scholarshipHealthRestricted(c){
-  /* V97.5.5 health title fallback */
-  const healthTitle=String(c?.title||'').replace(/\s+/g,' ').trim();
-  const explicitHealthScheme=/(?:心臟病兒童|先天性心臟病|病童|癌症病友|癌友|罕見疾病|罕病患者|重大傷病患者|洗腎患者|透析患者)/;
-  if(explicitHealthScheme.test(healthTitle))return true;
-  if(!SCHOLARSHIP_HARD_POLICY.excludeMandatoryHealthRestricted)return false;
-
-  const identityRx=/(?:身心障礙|身障|重大傷病|罕見疾病|癌症|癌友|病友|病患|患者|慢性病|特殊疾病|疾病患者|傷病患者|病患子女|患者子女)/;
-  const treatmentRx=/(?:手術|開刀|治療|化療|放射治療|心導管|心臟導管|器官移植|洗腎|透析|住院|醫師診斷|診斷證明|病歷證明)/;
-  const conditionRx=/(?:罹患|患有|曾患|曾於|曾接受|接受過|經診斷|診斷為|治療者|手術者|病史)/;
-  const optional=/(?:另|另外|額外|加發|加碼|優先|酌予加分|得另申請|可另申請|另可申請)/;
-  const award=/(?:獎學金|助學金|獎助學金|獎助|補助)/;
-
-  if(identityRx.test(c.title)&&award.test(c.title)&&!optional.test(c.title))return true;
-
-  const structured=[c.target,c.academic].join(' ');
-  if(scholarshipMandatoryMention(structured,identityRx))return true;
-
-  const restrictions=String(c.restrictions||'').replace(/\s+/g,' ').trim();
-  if(restrictions&&!optional.test(restrictions)){
-    if(identityRx.test(restrictions))return true;
-    if(treatmentRx.test(restrictions)&&conditionRx.test(restrictions))return true;
+  const taichungHousehold=/(?:臺中|台中).{0,28}(?:戶籍|設籍|原籍|籍貫)|(?:戶籍|設籍|原籍|籍貫).{0,28}(?:臺中|台中)/;
+  if(taichungHousehold.test(scope)){
+    const clearOr=/(?:或|任一|擇一|其中之一)/.test(scope);
+    if(!(clearOr&&hasTaichungStudy))return '臺中就讀不等於臺中設籍，地域必要資格不符';
   }
 
-  const fallback=[c.target,c.academic,restrictions].join(' ');
-  return scholarshipMandatoryMention(
-    fallback,
-    /(?:身心障礙|重大傷病|罕見疾病|癌症|患者|病患|手術|治療|心導管|心臟導管|器官移植|洗腎|透析)/
+  const otherPlaces=/(?:基隆|臺北|台北|新北|桃園|新竹|苗栗|臺中|台中|彰化|南投|雲林|嘉義市|臺南|台南|高雄|屏東|宜蘭|花蓮|臺東|台東|澎湖|金門|連江|恆春)/;
+  const otherRegionRequirement=new RegExp(
+    '(?:限|僅限|限定|須|需|必須|申請對象|獎助對象|資格條件|戶籍|設籍|原籍|籍貫|居住)[^。；\\n]{0,48}'+otherPlaces.source+
+    '|'+otherPlaces.source+'[^。；\\n]{0,48}(?:戶籍|設籍|原籍|籍貫|居住|本縣|本市|學生)'
   );
+  if(otherRegionRequirement.test(scope)){
+    if(hasChiayi||hasTaichungStudy){
+      const clearOr=/(?:或|任一|擇一|其中之一)/.test(scope);
+      const clearAnd=/(?:且|並且|同時|以及|及須|並須)/.test(scope);
+      if(clearOr&&!clearAnd)return null;
+    }
+    const withoutChiayi=scope.replace(/嘉義縣/g,'');
+    const onlyAllowed=hasChiayi&&!otherPlaces.test(withoutChiayi);
+    if(onlyAllowed)return null;
+    return '具有嘉義縣設籍／臺中就讀以外的地域必要資格';
+  }
+
+  if(/(?:本縣|本市|本鄉|本鎮|本區)/.test(scope)){
+    if(/嘉義縣/.test(title)&&!/(?:原住民|原住民族)/.test(title))return null;
+    return '具有地方性本縣／本市／本鄉鎮區限制';
+  }
+  return null;
 }
 
-function scholarshipStudentLevelMismatch(c){
-  if(SCHOLARSHIP_HARD_POLICY.currentStudentLevel!=='undergraduate')return false;
+function scholarshipStrictEconomic(c){
+  const rx=/(?:清寒|低收入戶|中低收入戶|經濟弱勢|弱勢家庭|弱勢學生|家庭經濟困難|家境困難|家境清寒|經濟困難|需工讀|須工讀|工讀者|家庭收入|家戶所得)/;
+  if(rx.test(c.title))return '獎助名稱即限定清寒／低收入／經濟困難對象';
+  const targetGeneral=scholarshipStrictGeneralAccess(c.target);
+  if(!targetGeneral&&rx.test(c.target))return '獎助對象限定清寒／低收入／經濟困難身分';
+  if(scholarshipStrictPositiveClause([c.restrictions,c.documents,c.academic].join(' '),rx))return '清寒／低收入／經濟條件為必要資格';
+  if(/(?:清寒證明|低收入戶證明|中低收入戶證明|所得證明|家庭收入證明)/.test(c.documents))return '申請必備文件要求經濟弱勢證明';
+  return null;
+}
+
+function scholarshipStrictIdentity(c){
+  const rx=/(?:原住民|原住民族|新住民|新住民子女|僑生|外籍生|境外生|陸生|蒙藏生|特殊境遇家庭)/;
+  if(rx.test(c.title))return '獎助名稱限定特定族群／身分';
+  const targetGeneral=scholarshipStrictGeneralAccess(c.target);
+  if(!targetGeneral&&rx.test(c.target))return '獎助對象限定特定族群／身分';
+  if(scholarshipStrictPositiveClause([c.restrictions,c.documents,c.academic].join(' '),rx))return '特定族群／身分為必要資格';
+  if(/(?:原住民身分證明|原住民族身分證明|僑生證明|外籍生證明|新住民證明)/.test(c.documents))return '申請必備文件要求特定身分證明';
+  return null;
+}
+
+function scholarshipStrictMilitaryPublic(c){
+  const rx=/(?:軍公教|軍警消|現役軍人|軍人子女|軍人遺族|軍眷|公務人員|公務員子女|公教人員|榮民|榮眷)/;
+  if(rx.test(c.title))return '獎助名稱限定軍公教／軍警消等身分';
+  const targetGeneral=scholarshipStrictGeneralAccess(c.target);
+  if(!targetGeneral&&rx.test(c.target))return '獎助對象限定軍公教／軍警消等身分';
+  if(scholarshipStrictPositiveClause([c.restrictions,c.documents,c.academic].join(' '),rx))return '軍公教／軍警消等為必要資格';
+  return null;
+}
+
+function scholarshipStrictHealth(c){
+  const identity=/(?:身心障礙|身障|重大傷病|罕見疾病|癌症|癌友|病友|病患|患者|慢性病|特殊疾病|病童|心臟病兒童|先天性心臟病)/;
+  const treatment=/(?:手術|開刀|治療|化療|放射治療|心導管|心臟導管|器官移植|洗腎|透析|住院|醫師診斷|診斷證明|病歷證明)/;
+  const history=/(?:罹患|患有|曾患|曾於|曾接受|接受過|經診斷|診斷為|治療者|手術者|病史)/;
+  if(identity.test(c.title))return '獎助名稱限定疾病／傷病／身心障礙身分';
+  const targetGeneral=scholarshipStrictGeneralAccess(c.target);
+  if(!targetGeneral&&identity.test(c.target))return '獎助對象限定疾病／傷病／身心障礙身分';
+  if(identity.test(c.restrictions))return '疾病／傷病／身心障礙為必要限制條件';
+  if(treatment.test(c.restrictions)&&history.test(c.restrictions))return '特定手術／治療經歷為必要資格';
+  if(/(?:身心障礙證明|重大傷病卡|診斷證明|病歷證明|手術證明)/.test(c.documents))return '申請必備文件要求醫療／身障證明';
+  return null;
+}
+
+function scholarshipStrictSpecialCircumstance(c){
+  const rx=/(?:天然災害|重大災害|受災|災區|火災|水災|震災|風災|急難|家庭重大變故|家中突遭變故|失親|孤兒|遺孤|父母雙亡|單親|家暴|家庭暴力|特殊事故)/;
+  if(rx.test(c.title))return '獎助名稱限定受災／急難／特殊家庭遭遇';
+  const targetGeneral=scholarshipStrictGeneralAccess(c.target);
+  if(!targetGeneral&&rx.test(c.target))return '獎助對象限定受災／急難／特殊家庭遭遇';
+  if(scholarshipStrictPositiveClause([c.restrictions,c.documents].join(' '),rx))return '受災／急難／特殊家庭遭遇為必要資格';
+  if(/(?:受災證明|災害證明|村里長證明|死亡證明|切結書)/.test(c.documents)&&rx.test(c.text))return '申請必備文件要求特殊遭遇證明';
+  return null;
+}
+
+function scholarshipStrictAffiliation(c){
+  const rx=/(?:員工子女|職員子女|教職員子女|會員子女|校友子女|宗親|宗族|同鄉會|獅子會|扶輪社|青商會|工會會員|協會會員|公司員工|企業員工|眷屬|信徒|教友|特定姓氏)/;
+  if(rx.test(c.title))return '獎助名稱限定特定組織／親屬／宗親身分';
+  const targetGeneral=scholarshipStrictGeneralAccess(c.target);
+  if(!targetGeneral&&rx.test(c.target))return '獎助對象限定特定組織／親屬身分';
+  if(scholarshipStrictPositiveClause([c.restrictions,c.documents].join(' '),rx))return '特定組織／親屬身分為必要資格';
+  return null;
+}
+
+function scholarshipStrictStudentLevel(c){
   const s=[c.title,c.target,c.academic,c.restrictions].join(' ');
-  const acceptsUniversity=/(?:大學部|學士班|大專校院|大專院校|大學生|大專生|各級學生|在學學生)/.test(s);
-  if(acceptsUniversity)return false;
-  return /(?:僅限|限|限定|專供|申請對象).{0,18}(?:國小|國中|高中|高職|高中職|五專前三年|碩士班|博士班|研究生)/.test(s) ||
-         /(?:國小生|國中生|高中生|高職生|高中職學生|碩士生|博士生|研究生)(?:專用|專屬|獎學金|助學金)/.test(s);
+  const acceptsUndergrad=/(?:大學部|學士班|大專校院|大專院校|大學生|大專生|日間學士班|各級學生|全校學生)/.test(s);
+  if(acceptsUndergrad)return null;
+  if(/(?:僅限|限|限定|專供|申請對象|獎助對象).{0,24}(?:國小|國中|高中|高職|高中職|五專前三年|碩士班|博士班|研究生|在職專班)/.test(s))return '限定其他教育階段／學制';
+  if(/(?:國小生|國中生|高中生|高職生|高中職學生|碩士生|博士生|研究生)(?:專用|專屬|獎學金|助學金)/.test(s))return '獎助名稱限定其他教育階段';
+  return null;
 }
 
-function scholarshipMajorMismatch(c){
-  if(SCHOLARSHIP_HARD_POLICY.currentMajor!=='law')return false;
-  const s=[c.target,c.academic,c.restrictions,String(c.text||'')].join(' ');
-  if(/(?:法律|法學|不限科系|不限學系|各系|各學系|全校學生|全校各系)/.test(s))return false;
-  const explicit=/((?:僅限|限|限定|專供|申請對象|獎助對象).{0,45}(?:學系|系所|科系|學門))/;
-  if(!explicit.test(s))return false;
-  // Conservative: only exclude when a clearly named non-law field is present.
-  return /(?:醫學|牙醫|護理|藥學|工程|電機|資訊|資工|機械|土木|化工|材料|農業|農學|獸醫|生命科學|生物|化學|物理|數學|商學|會計|財金|管理|建築|設計|藝術|音樂|體育|教育|師培|外文|中文|歷史|地理|社工|心理)/.test(s);
+function scholarshipStrictMajor(c){
+  const s=[c.target,c.academic,c.restrictions].join(' ');
+  if(!s)return null;
+  if(/(?:法律|法學|不限科系|不限學系|各系|各學系|全校學生|全校各系)/.test(s))return null;
+  const hasDepartmentSignal=/(?:學院|學系|科系|系所|學門)/.test(s);
+  if(!hasDepartmentSignal)return null;
+  const nonLaw=/(?:管理學院|國貿|國際經營與貿易|企管|企業管理|財金|財務金融|會計|經濟|醫學|牙醫|護理|藥學|工程|工學院|電機|資訊|資工|機械|土木|化工|材料|建築|農業|農學|獸醫|生命科學|生物|化學|物理|數學|理學院|文學院|外文|中文|歷史|地理|社工|社會工作|心理|教育|師培|音樂|美術|藝術|體育|餐旅|觀光)/;
+  if(nonLaw.test(s))return '限定非法律系之特定科系／學門';
+  if(/(?:僅限|限|限定|專供|申請對象|獎助對象).{0,45}(?:學院|學系|科系|系所|學門)/.test(s))return '存在特定科系／學門限制，未證明法律系可申請';
+  return null;
+}
+
+function scholarshipStrictRequiresVerifiedDetail(a){
+  const id=String(a?.id||'');
+  const specialty=String(a?.sourceSubId||'')==='specialty'||id.startsWith('auto-thu-sch-specialty-');
+  return SCHOLARSHIP_STRICT_POLICY.requireVerifiedThuDetail&&id.startsWith('auto-thu-sch-')&&!specialty;
 }
 
 function scholarshipEligibility(a){
-  const c=scholarshipEligibilityCorpus(a);
+  const c=scholarshipStrictCorpus(a);
   const specialty=typeof scholarshipSpecialtyKind==='function'?scholarshipSpecialtyKind(a):null;
-
-  if(scholarshipRegionRestricted(a,c))
-    return {eligible:false,excluded:true,code:'REGION',reason:'具有必要地域／戶籍／居住地限制',specialty};
-
-  if(scholarshipEconomicRestricted(c))
-    return {eligible:false,excluded:true,code:'ECONOMIC',reason:'清寒／低收入／經濟弱勢為必要資格',specialty};
-
-  if(scholarshipMilitaryPublicRestricted(c))
-    return {eligible:false,excluded:true,code:'MILITARY_PUBLIC',reason:'軍公教／軍警消等身分為必要資格',specialty};
-
-  if(scholarshipHealthRestricted(c))
-    return {eligible:false,excluded:true,code:'HEALTH',reason:'疾病／重大傷病／身心障礙等為必要資格',specialty};
-
-  if(scholarshipStudentLevelMismatch(c))
-    return {eligible:false,excluded:true,code:'STUDENT_LEVEL',reason:'限定其他教育階段，與目前大學部學籍不符',specialty};
-
-  if(scholarshipMajorMismatch(c))
-    return {eligible:false,excluded:true,code:'MAJOR',reason:'限定其他科系／學門，法律系不符',specialty};
-
-  if(a?.eligibilityVerified===false)
-    return {eligible:false,excluded:true,code:'UNVERIFIED',reason:'官方詳細資格尚未成功驗證，暫不列入推薦',specialty};
-
-  return {eligible:true,excluded:false,code:'PASS',reason:'通過硬性資格篩選',specialty};
+  const checks=[
+    ['REGION',scholarshipStrictRegion(c)],
+    ['ECONOMIC',scholarshipStrictEconomic(c)],
+    ['IDENTITY',scholarshipStrictIdentity(c)],
+    ['MILITARY_PUBLIC',scholarshipStrictMilitaryPublic(c)],
+    ['HEALTH',scholarshipStrictHealth(c)],
+    ['SPECIAL_CIRCUMSTANCE',scholarshipStrictSpecialCircumstance(c)],
+    ['AFFILIATION',scholarshipStrictAffiliation(c)],
+    ['STUDENT_LEVEL',scholarshipStrictStudentLevel(c)],
+    ['MAJOR',scholarshipStrictMajor(c)]
+  ];
+  for(const [code,reason] of checks){
+    if(reason)return {eligible:false,excluded:true,code,reason,specialty};
+  }
+  if(scholarshipStrictRequiresVerifiedDetail(a)&&a?.eligibilityVerified!==true)
+    return {eligible:false,excluded:true,code:'UNVERIFIED',reason:'東海獎學金官方詳細資格尚未完成驗證，嚴格模式暫不推薦',specialty};
+  return {eligible:true,excluded:false,code:'PASS',reason:'通過嚴格硬性資格審查',specialty};
 }
+
 function scholarshipAssessment(a){
  const eligibility=scholarshipEligibility(a),text=scholarshipPolicyText(a).toLowerCase();
  let score=45;if(!eligibility.eligible)return {...eligibility,score:0,priority:-1};
