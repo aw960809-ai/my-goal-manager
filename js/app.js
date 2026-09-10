@@ -82,7 +82,7 @@ const IDB_NAME='lawLangGoalSystemPersistentV87';
 const IDB_STORE='snapshots';
 function idbOpen(){return new Promise((resolve,reject)=>{try{if(!window.indexedDB)return reject(new Error('IndexedDB unavailable'));const r=indexedDB.open(IDB_NAME,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(IDB_STORE))r.result.createObjectStore(IDB_STORE)};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)}catch(e){reject(e)}})}
 async function idbMirrorSave(){try{const dbx=await idbOpen();const tx=dbx.transaction(IDB_STORE,'readwrite');tx.objectStore(IDB_STORE).put(storeGet(KEY)||'',KEY);await new Promise((res,rej)=>{tx.oncomplete=res;tx.onerror=()=>rej(tx.error)});dbx.close()}catch(e){}}
-const THU_1151_LAW_PLAN_MARKER='thuPersonalMigration:1151-law-preview:v1';
+const THU_1151_LAW_PLAN_MARKER='thuPersonalMigration:1151-law-preview:v2';
 let db=loadDB();
 removeLegacyStandaloneToeicGoals();
 ensureSchoolCalendar();
@@ -267,7 +267,6 @@ function removeLegacyStandaloneToeicGoals(){
 
 /* V97.4.2 THU 115-1 law preview plan migration */
 function ensureThu1151LawPreviewPlan(){
- if(storeGet(THU_1151_LAW_PLAN_MARKER)==='1')return {applied:false,reason:'already-migrated'};
  if(!Array.isArray(db.tasks))return {applied:false,reason:'tasks-unavailable'};
 
  const exact=(x,y)=>String(x||'').trim()===String(y||'').trim();
@@ -288,6 +287,51 @@ function ensureThu1151LawPreviewPlan(){
 
  const stageAliases=['115-1 法律專業科目預習','115學年度第一學期法律專業科目預習','校內學科預習','上學期法律專業科目預習'];
  let stage=byId('g1-1')||under(root.id,2,stageAliases);
+
+ const subjects=[
+  {sid:'g1-1-1151-debt',aid:'g1-1-1151-debt-action',subject:'債法總論預習',
+   subjectAliases:['債法總論預習','債總預習','債法預習','債法總論'],
+   action:'每週債總體系預習與案例整理',
+   actionAliases:['每週債總體系預習與案例整理','債總體系預習與案例整理'],weekly:90},
+  {sid:'g1-1-1151-criminal',aid:'g1-1-1151-criminal-action',subject:'刑法分則預習',
+   subjectAliases:['刑法分則預習','刑分預習','刑法分則'],
+   action:'刑分構成要件與刑總連動整理',
+   actionAliases:['刑分構成要件與刑總連動整理','刑法分則構成要件與刑總連動整理'],weekly:90},
+  {sid:'g1-1-1151-admin',aid:'g1-1-1151-admin-action',subject:'行政法預習',
+   subjectAliases:['行政法預習','行政法'],
+   action:'行政法體系與案例前導',
+   actionAliases:['行政法體系與案例前導','行政法體系與案例預習'],weekly:75},
+  {sid:'g1-1-1151-property',aid:'g1-1-1151-property-action',subject:'物權法預習',
+   subjectAliases:['物權法預習','物權預習','物權法'],
+   action:'物權變動與案例圖像化預習',
+   actionAliases:['物權變動與案例圖像化預習','物權法案例圖像化預習'],weekly:60},
+  {sid:'g1-1-1151-family',aid:'g1-1-1151-family-action',subject:'親屬法預習',
+   subjectAliases:['親屬法預習','親屬法'],
+   action:'身分關係與法律效果整理',
+   actionAliases:['身分關係與法律效果整理','親屬法身分關係與法律效果整理'],weekly:45},
+  {sid:'g1-1-1151-commonlaw',aid:'g1-1-1151-commonlaw-action',subject:'英美法預習',
+   subjectAliases:['英美法預習','英美法'],
+   action:'英美法案例閱讀與法律英文',
+   actionAliases:['英美法案例閱讀與法律英文','英美法案例閱讀'],weekly:30}
+ ];
+
+ const structurallyComplete=()=>{
+   const s=byId('g1-1')||under(root.id,2,stageAliases);
+   if(!s||String(s.parent)!==String(root.id)||Number(s.level)!==2)return false;
+   return subjects.every(x=>{
+     const sub=byId(x.sid)||under(s.id,3,x.subjectAliases);
+     if(!sub||String(sub.parent)!==String(s.id)||Number(sub.level)!==3)return false;
+     if(sub.start!=='2026-09-14'||sub.due!=='2026-12-31')return false;
+     const action=byId(x.aid)||under(sub.id,4,x.actionAliases);
+     return !!action&&String(action.parent)===String(sub.id)&&Number(action.level)===4&&
+       Number(action.weeklyMinutes)===Number(x.weekly);
+   });
+ };
+
+ if(storeGet(THU_1151_LAW_PLAN_MARKER)==='1'&&structurallyComplete()){
+   return {applied:false,reason:'already-complete',weeklyTotal:390};
+ }
+
  if(!stage){
    stage=mk('g1-1','115-1 法律專業科目預習',2,root.id,'未開始',0);
    db.tasks.push(stage);
@@ -298,85 +342,37 @@ function ensureThu1151LawPreviewPlan(){
    stage.status=keep.status;stage.progress=keep.progress;
  }
 
- const subjects=[
-  {
-   sid:'g1-1-1151-debt',aid:'g1-1-1151-debt-action',
-   subject:'債法總論預習',
-   subjectAliases:['債法總論預習','債總預習','債法預習','債法總論'],
-   action:'每週債總體系預習與案例整理',
-   actionAliases:['每週債總體系預習與案例整理','債總體系預習與案例整理'],
-   weekly:90
-  },
-  {
-   sid:'g1-1-1151-criminal',aid:'g1-1-1151-criminal-action',
-   subject:'刑法分則預習',
-   subjectAliases:['刑法分則預習','刑分預習','刑法分則'],
-   action:'刑分構成要件與刑總連動整理',
-   actionAliases:['刑分構成要件與刑總連動整理','刑法分則構成要件與刑總連動整理'],
-   weekly:90
-  },
-  {
-   sid:'g1-1-1151-admin',aid:'g1-1-1151-admin-action',
-   subject:'行政法預習',
-   subjectAliases:['行政法預習','行政法'],
-   action:'行政法體系與案例前導',
-   actionAliases:['行政法體系與案例前導','行政法體系與案例預習'],
-   weekly:75
-  },
-  {
-   sid:'g1-1-1151-property',aid:'g1-1-1151-property-action',
-   subject:'物權法預習',
-   subjectAliases:['物權法預習','物權預習','物權法'],
-   action:'物權變動與案例圖像化預習',
-   actionAliases:['物權變動與案例圖像化預習','物權法案例圖像化預習'],
-   weekly:60
-  },
-  {
-   sid:'g1-1-1151-family',aid:'g1-1-1151-family-action',
-   subject:'親屬法預習',
-   subjectAliases:['親屬法預習','親屬法'],
-   action:'身分關係與法律效果整理',
-   actionAliases:['身分關係與法律效果整理','親屬法身分關係與法律效果整理'],
-   weekly:45
-  },
-  {
-   sid:'g1-1-1151-commonlaw',aid:'g1-1-1151-commonlaw-action',
-   subject:'英美法預習',
-   subjectAliases:['英美法預習','英美法'],
-   action:'英美法案例閱讀與法律英文',
-   actionAliases:['英美法案例閱讀與法律英文','英美法案例閱讀'],
-   weekly:30
-  }
- ];
-
- const added=[],reused=[];
- for(const s of subjects){
-   let sub=byId(s.sid)||under(stage.id,3,s.subjectAliases);
+ const added=[],repaired=[];
+ for(const x of subjects){
+   let sub=byId(x.sid)||under(stage.id,3,x.subjectAliases);
    if(!sub){
-     sub=mk(s.sid,s.subject,3,stage.id,'未開始',0,'2026-09-14','2026-12-31');
-     db.tasks.push(sub);added.push(s.subject);
+     sub=mk(x.sid,x.subject,3,stage.id,'未開始',0,'2026-09-14','2026-12-31');
+     db.tasks.push(sub);added.push(x.subject);
    }else{
      const keep=preserve(sub);
-     sub.name=s.subject;sub.level=3;sub.parent=stage.id;sub.weeklyMinutes=0;
+     sub.name=x.subject;sub.level=3;sub.parent=stage.id;sub.weeklyMinutes=0;
      sub.start='2026-09-14';sub.due='2026-12-31';
-     sub.status=keep.status;sub.progress=keep.progress;reused.push(s.subject);
+     sub.status=keep.status;sub.progress=keep.progress;repaired.push(x.subject);
    }
 
-   let action=byId(s.aid)||under(sub.id,4,s.actionAliases);
+   let action=byId(x.aid)||under(sub.id,4,x.actionAliases);
    if(!action){
-     action=mk(s.aid,s.action,4,sub.id,'未開始',s.weekly);
+     action=mk(x.aid,x.action,4,sub.id,'未開始',x.weekly);
      db.tasks.push(action);
    }else{
      const keep=preserve(action);
-     action.name=s.action;action.level=4;action.parent=sub.id;
-     action.weeklyMinutes=s.weekly;action.start='';action.due='';
+     action.name=x.action;action.level=4;action.parent=sub.id;
+     action.weeklyMinutes=x.weekly;action.start='';action.due='';
      action.status=keep.status;action.progress=keep.progress;
    }
    try{storeSet('o'+sub.id,'1')}catch(_){}
  }
  try{storeSet('o'+stage.id,'1')}catch(_){}
 
- return {applied:true,stageId:stage.id,added,reused,weeklyTotal:subjects.reduce((n,s)=>n+s.weekly,0)};
+ if(!structurallyComplete()){
+   throw new Error('115-1 法律預習結構修復後驗證失敗');
+ }
+ return {applied:true,reason:'repaired-or-added',stageId:stage.id,added,repaired,weeklyTotal:390};
 }
 
 function ensureToeicPlan(){
