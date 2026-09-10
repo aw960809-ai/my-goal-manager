@@ -2,6 +2,7 @@ name: THU Goal Manager Zero-Config AutoFetch
 on:
   schedule:
     - cron: "17 1 * * *"
+    - cron: "47 2 * * *"
   workflow_dispatch:
 permissions:
   contents: write
@@ -32,7 +33,52 @@ jobs:
           set -euo pipefail
           DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
           test "$GITHUB_REF_NAME" = "$DEFAULT_BRANCH"
+      - name: Scheduled freshness gate
+        id: freshness
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from datetime import datetime
+          from pathlib import Path
+          from zoneinfo import ZoneInfo
+
+          if os.environ.get("EVENT_NAME") != "schedule":
+              with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+                  f.write("skip=false\n")
+              print("MANUAL_OR_NON_SCHEDULE skip=false")
+              raise SystemExit(0)
+
+          tz = ZoneInfo("Asia/Taipei")
+          today = datetime.now(tz).date()
+
+          def meta_date(path):
+              try:
+                  obj = json.loads(Path(path).read_text(encoding="utf-8"))
+                  raw = str((obj.get("meta") or {}).get("updatedAt") or "").strip()
+                  if not raw:
+                      return None
+                  dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+                  if dt.tzinfo is None:
+                      dt = dt.replace(tzinfo=tz)
+                  return dt.astimezone(tz).date()
+              except Exception:
+                  return None
+
+          a = meta_date("data/activities.json")
+          s = meta_date("data/scholarships.json")
+          fresh = (a == today and s == today)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+              f.write(f"skip={'true' if fresh else 'false'}\n")
+
+          print(f"TAIPEI_TODAY={today} activity={a} scholarship={s} skip={fresh}")
+          PY
       - name: Validate engines and production data
+        if: steps.freshness.outputs.skip != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -44,11 +90,13 @@ jobs:
           python -m json.tool data/activity-archive.json >/dev/null
           python -m json.tool data/scholarship-archive.json >/dev/null
       - name: Snapshot production data
+        if: steps.freshness.outputs.skip != 'true'
         shell: bash
         run: |
           cp data/activities.json "$RUNNER_TEMP/activities-before.json"
           cp data/scholarships.json "$RUNNER_TEMP/scholarships-before.json"
       - name: Refresh scholarships
+        if: steps.freshness.outputs.skip != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -57,6 +105,7 @@ jobs:
           python -m json.tool data/activity-archive.json >/dev/null
           python -m json.tool data/scholarship-archive.json >/dev/null
       - name: Refresh activity radar
+        if: steps.freshness.outputs.skip != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -64,6 +113,7 @@ jobs:
           python tools/autofetch/public_source_registry_bridge.py --apply
           python -m json.tool data/activities.json >/dev/null
       - name: Production integrity guard
+        if: steps.freshness.outputs.skip != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -102,12 +152,14 @@ jobs:
           print(f"INTEGRITY_OK activities={len(new_a)} scholarships={len(new_s)}")
           PY
       - name: Existing QA
+        if: steps.freshness.outputs.skip != 'true'
         shell: bash
         run: |
           set -euo pipefail
           python qa_static.py
           git diff --check
       - name: Detect data changes
+        if: steps.freshness.outputs.skip != 'true'
         id: data_change
         shell: bash
         run: |
@@ -117,7 +169,7 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
       - name: Persist refreshed catalog data
-        if: steps.data_change.outputs.changed == 'true'
+        if: steps.freshness.outputs.skip != 'true' && (steps.data_change.outputs.changed == 'true')
         shell: bash
         run: |
           set -euo pipefail
@@ -127,6 +179,7 @@ jobs:
           git commit -m "chore(data): zero-config autofetch ${GITHUB_RUN_ID} [skip ci]"
           git push origin "HEAD:${GITHUB_REF_NAME}"
       - name: Assemble site
+        if: steps.freshness.outputs.skip != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -137,15 +190,19 @@ jobs:
           test -f _site/data/activities.json
           test -f _site/data/scholarships.json
       - name: Configure GitHub Pages
+        if: steps.freshness.outputs.skip != 'true'
         uses: actions/configure-pages@v5
       - name: Upload Pages artifact
+        if: steps.freshness.outputs.skip != 'true'
         uses: actions/upload-pages-artifact@v4
         with:
           path: _site
       - name: Deploy GitHub Pages
+        if: steps.freshness.outputs.skip != 'true'
         id: deployment
         uses: actions/deploy-pages@v4
       - name: Verify deployed site
+        if: steps.freshness.outputs.skip != 'true'
         shell: bash
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
