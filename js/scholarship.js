@@ -62,77 +62,118 @@ function scholarshipSpecialtyKind(a){
  return '一般獎學金';
 }
 /* V97.4.9.4 detail-level scholarship eligibility enforcement */
+/* V97.5.1 Scholarship Eligibility Engine */
+const SCHOLARSHIP_HARD_POLICY=Object.freeze({
+  excludeAnyMandatoryRegion:true,
+  excludeMandatoryEconomic:true,
+  excludeMandatoryMilitaryPublic:true,
+  excludeMandatoryHealthRestricted:true,
+  currentStudentLevel:'undergraduate',
+  currentMajor:'law'
+});
+
+function scholarshipEligibilityCorpus(a){
+  const all=[
+    a?.title,a?.eligibilityTarget,a?.eligibility,a?.audience,a?.target,
+    a?.restrictions,a?.description,a?.statusText,a?.academicScope,
+    a?.keywords,a?.source,a?.org
+  ].map(x=>String(x||'').replace(/\s+/g,' ').trim()).filter(Boolean);
+  return {
+    title:String(a?.title||'').replace(/\s+/g,' ').trim(),
+    target:String(a?.eligibilityTarget||a?.audience||a?.target||'').replace(/\s+/g,' ').trim(),
+    restrictions:String(a?.restrictions||'').replace(/\s+/g,' ').trim(),
+    academic:String(a?.academicScope||a?.eligibility||'').replace(/\s+/g,' ').trim(),
+    text:all.join(' ')
+  };
+}
+
+function scholarshipMandatoryMention(text,rx){
+  if(!text||!rx.test(text))return false;
+  const mandatory=/(?:僅限|限|限定|必須|須具備|需具備|申請資格|申請對象|獎助對象|補助對象|受獎對象|資格條件|專供|提供予|發給|限於|限設籍|設籍於|戶籍(?:設於|位於|在)|原籍|籍設)/;
+  const optional=/(?:另|另外|額外|加發|加碼|優先|酌予加分|得另申請|可另申請|另可申請|報名費補助|考試費補助|費用補助)/;
+  const clauses=String(text).split(/[。；;\n]/).map(x=>x.trim()).filter(Boolean);
+  return clauses.some(c=>rx.test(c)&&mandatory.test(c)&&!optional.test(c));
+}
+
+function scholarshipRegionRestricted(a,c){
+  if(!SCHOLARSHIP_HARD_POLICY.excludeAnyMandatoryRegion)return false;
+  // Do not use the organization/title place-name alone. Only explicit eligibility/restriction language counts.
+  const scope=[c.target,c.restrictions,c.academic,String(a?.eligibility||'')].join(' ');
+  const regionRule=/(?:戶籍|設籍|籍設|原籍|籍貫|居住(?:地|於)?|本縣|本市|本鄉|本鎮|本區|本縣市|縣市籍|地區學生|當地學生)/;
+  const explicitPlaceRestriction=/(?:限|限定|僅限|須|必須|需).{0,28}(?:設籍|戶籍|居住|原籍|籍貫).{0,35}(?:縣|市|鄉|鎮|區)|(?:設籍|戶籍|居住|原籍|籍貫).{0,35}(?:縣|市|鄉|鎮|區).{0,18}(?:以上|滿|方可|始得|學生)/;
+  return explicitPlaceRestriction.test(scope)||scholarshipMandatoryMention(scope,regionRule);
+}
+
+function scholarshipEconomicRestricted(c){
+  if(!SCHOLARSHIP_HARD_POLICY.excludeMandatoryEconomic)return false;
+  const rx=/(?:清寒家庭|清寒學生|清寒|低收入戶|中低收入戶|經濟弱勢|弱勢家庭|弱勢學生|家庭經濟困難|家境困難)/;
+  const award=/(?:獎學金|助學金|獎助學金|獎助|補助)/;
+  const optional=/(?:另|另外|額外|加發|加碼|優先|報名費補助|考試費補助)/;
+  if(rx.test(c.title)&&award.test(c.title)&&!optional.test(c.title))return true;
+  return scholarshipMandatoryMention([c.target,c.restrictions,c.academic].join(' '),rx);
+}
+
+function scholarshipMilitaryPublicRestricted(c){
+  if(!SCHOLARSHIP_HARD_POLICY.excludeMandatoryMilitaryPublic)return false;
+  const rx=/(?:軍公教|軍警消|現役軍人|軍人子女|軍人遺族|軍眷|公務人員|公務員子女|公教人員|教職員子女|榮民|榮眷)/;
+  const award=/(?:獎學金|助學金|獎助學金|獎助|補助)/;
+  if(rx.test(c.title)&&award.test(c.title))return true;
+  return scholarshipMandatoryMention([c.target,c.restrictions,c.academic].join(' '),rx);
+}
+
+function scholarshipHealthRestricted(c){
+  if(!SCHOLARSHIP_HARD_POLICY.excludeMandatoryHealthRestricted)return false;
+  const rx=/(?:身心障礙|身障|重大傷病|罕見疾病|癌症|癌友|病友|慢性病|特殊疾病|疾病患者|傷病患者|病患子女|患者子女)/;
+  const award=/(?:獎學金|助學金|獎助學金|獎助|補助)/;
+  if(rx.test(c.title)&&award.test(c.title))return true;
+  return scholarshipMandatoryMention([c.target,c.restrictions,c.academic].join(' '),rx);
+}
+
+function scholarshipStudentLevelMismatch(c){
+  if(SCHOLARSHIP_HARD_POLICY.currentStudentLevel!=='undergraduate')return false;
+  const s=[c.title,c.target,c.academic,c.restrictions].join(' ');
+  const acceptsUniversity=/(?:大學部|學士班|大專校院|大專院校|大學生|大專生|各級學生|在學學生)/.test(s);
+  if(acceptsUniversity)return false;
+  return /(?:僅限|限|限定|專供|申請對象).{0,18}(?:國小|國中|高中|高職|高中職|五專前三年|碩士班|博士班|研究生)/.test(s) ||
+         /(?:國小生|國中生|高中生|高職生|高中職學生|碩士生|博士生|研究生)(?:專用|專屬|獎學金|助學金)/.test(s);
+}
+
+function scholarshipMajorMismatch(c){
+  if(SCHOLARSHIP_HARD_POLICY.currentMajor!=='law')return false;
+  const s=[c.target,c.academic,c.restrictions,String(c.text||'')].join(' ');
+  if(/(?:法律|法學|不限科系|不限學系|各系|各學系|全校學生|全校各系)/.test(s))return false;
+  const explicit=/((?:僅限|限|限定|專供|申請對象|獎助對象).{0,45}(?:學系|系所|科系|學門))/;
+  if(!explicit.test(s))return false;
+  // Conservative: only exclude when a clearly named non-law field is present.
+  return /(?:醫學|牙醫|護理|藥學|工程|電機|資訊|資工|機械|土木|化工|材料|農業|農學|獸醫|生命科學|生物|化學|物理|數學|商學|會計|財金|管理|建築|設計|藝術|音樂|體育|教育|師培|外文|中文|歷史|地理|社工|心理)/.test(s);
+}
+
 function scholarshipEligibility(a){
- const text=scholarshipPolicyText(a)+' '+String(a?.restrictions||'');
- const title=String(a?.title||'').replace(/\s+/g,' ').trim();
- const explicitTarget=String(a?.eligibilityTarget||a?.scholarshipTarget||a?.audience||'').replace(/\s+/g,' ').trim();
- const specialty=scholarshipSpecialtyKind(a);
+  const c=scholarshipEligibilityCorpus(a);
+  const specialty=typeof scholarshipSpecialtyKind==='function'?scholarshipSpecialtyKind(a):null;
 
- const poverty=/(?:清寒家庭|清寒學生|清寒|家境清寒|低收入戶|中低收入戶|經濟弱勢|弱勢家庭|弱勢學生|家庭經濟困難)/;
- const militaryPublic=/(?:軍公教|軍警消|現役軍人|軍人子女|軍人遺族|軍眷|公務人員|公務員子女|公教人員|教職員子女|榮民|榮眷|遺族)/;
- const awardWords=/(?:獎學金|助學金|獎助學金|獎助|補助)/;
- const optionalWords=/(?:另|另外|額外|加發|加碼|得另申請|可另申請|另可申請|報名費補助|考試費補助|費用補助|補助報名費|補助考試費)/;
+  if(scholarshipRegionRestricted(a,c))
+    return {eligible:false,excluded:true,code:'REGION',reason:'具有必要地域／戶籍／居住地限制',specialty};
 
- // V97.4.9.6: the scholarship title itself is a high-confidence target signal.
- // "清寒優秀學生獎學金" / "軍公教子女獎學金" are inherently restricted schemes.
- const titlePovertyTarget=poverty.test(title)&&awardWords.test(title)&&!optionalWords.test(title);
- const titleMilitaryTarget=militaryPublic.test(title)&&awardWords.test(title)&&!optionalWords.test(title);
+  if(scholarshipEconomicRestricted(c))
+    return {eligible:false,excluded:true,code:'ECONOMIC',reason:'清寒／低收入／經濟弱勢為必要資格',specialty};
 
- if(titlePovertyTarget){
-   return {eligible:false,excluded:true,reason:'獎助名稱已明確限定清寒／低收入／經濟弱勢對象',specialty};
- }
- if(titleMilitaryTarget){
-   return {eligible:false,excluded:true,reason:'獎助名稱已明確限定軍公教／軍警消等特定身分',specialty};
- }
+  if(scholarshipMilitaryPublicRestricted(c))
+    return {eligible:false,excluded:true,code:'MILITARY_PUBLIC',reason:'軍公教／軍警消等身分為必要資格',specialty};
 
- // Highest-confidence structured field from the official detail page.
- if(explicitTarget){
-   if(poverty.test(explicitTarget)){
-     return {eligible:false,excluded:true,reason:'官方「獎助對象」明列清寒／低收入／經濟弱勢身分',specialty};
-   }
-   if(militaryPublic.test(explicitTarget)){
-     return {eligible:false,excluded:true,reason:'官方「獎助對象」明列軍公教／軍警消等特定身分',specialty};
-   }
- }
+  if(scholarshipHealthRestricted(c))
+    return {eligible:false,excluded:true,code:'HEALTH',reason:'疾病／重大傷病／身心障礙等為必要資格',specialty};
 
- if(a?.eligibilityVerified===false){
-   return {eligible:false,excluded:true,reason:'官方詳細資格尚未成功驗證，暫不列入推薦',specialty};
- }
+  if(scholarshipStudentLevelMismatch(c))
+    return {eligible:false,excluded:true,code:'STUDENT_LEVEL',reason:'限定其他教育階段，與目前大學部學籍不符',specialty};
 
- const targetText=[
-   a?.eligibility,a?.audience,a?.target,a?.eligibilityTarget,
-   a?.description,a?.statusText,title,a?.restrictions
- ].map(x=>String(x||'')).join(' ').replace(/\s+/g,' ').trim();
+  if(scholarshipMajorMismatch(c))
+    return {eligible:false,excluded:true,code:'MAJOR',reason:'限定其他科系／學門，法律系不符',specialty};
 
- const mandatoryLead=/(?:僅限|限|限定|必須|須具備|申請資格|申請對象|補助對象|獎助對象|受獎對象|資格條件|專供|提供予|發給)/;
- const optionalLead=optionalWords;
+  if(a?.eligibilityVerified===false)
+    return {eligible:false,excluded:true,code:'UNVERIFIED',reason:'官方詳細資格尚未成功驗證，暫不列入推薦',specialty};
 
- const povertyMandatory=
-   new RegExp(mandatoryLead.source+'[^。；\\n]{0,90}'+poverty.source).test(targetText) ||
-   new RegExp(poverty.source+'[^。；\\n]{0,45}(?:始得申請|方可申請|才可申請|為必要條件|為申請資格|為受獎資格)').test(targetText);
-
- const militaryMandatory=
-   new RegExp(mandatoryLead.source+'[^。；\\n]{0,90}'+militaryPublic.source).test(targetText) ||
-   new RegExp(militaryPublic.source+'[^。；\\n]{0,45}(?:始得申請|方可申請|才可申請|為必要條件|為申請資格|為受獎資格)').test(targetText);
-
- const povertyOptional=
-   new RegExp(optionalLead.source+'[^。；\\n]{0,100}'+poverty.source).test(targetText) ||
-   new RegExp(poverty.source+'[^。；\\n]{0,100}'+optionalLead.source).test(targetText);
-
- const militaryOptional=
-   new RegExp(optionalLead.source+'[^。；\\n]{0,100}'+militaryPublic.source).test(targetText) ||
-   new RegExp(militaryPublic.source+'[^。；\\n]{0,100}'+optionalLead.source).test(targetText);
-
- if(povertyMandatory&&!povertyOptional){
-   return {eligible:false,excluded:true,reason:'清寒／低收入／經濟弱勢身分為必要申請或受獎條件',specialty};
- }
- if(militaryMandatory&&!militaryOptional){
-   return {eligible:false,excluded:true,reason:'軍公教／軍警消等身分為必要申請或受獎條件',specialty};
- }
- if((povertyMandatory&&povertyOptional)||(militaryMandatory&&militaryOptional)){
-   return {eligible:true,excluded:false,reason:'特定身分僅屬額外補助條件，不是基本申請必要條件',specialty};
- }
- return {eligible:true,excluded:false,reason:'可列入個人判斷',specialty};
+  return {eligible:true,excluded:false,code:'PASS',reason:'通過硬性資格篩選',specialty};
 }
 function scholarshipAssessment(a){
  const eligibility=scholarshipEligibility(a),text=scholarshipPolicyText(a).toLowerCase();
