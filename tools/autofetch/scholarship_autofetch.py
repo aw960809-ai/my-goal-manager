@@ -100,6 +100,138 @@ def parse(html,sub_id,sub_name,url,today=None):
     uniq={x["id"]:x for x in rows}
     return sorted(uniq.values(),key=lambda x:(x["deadline"],x["title"])),recognized,parsed_total
 
+# V97.4.9.4 official detail eligibility enrichment
+DETAIL_ENRICH_VERSION=1
+DETAIL_LABELS=(
+    "獎助學金代號","獎助學金名稱","學生申請日期","預計名額","獎助學金提供單位",
+    "申請辦法下載","申請書下載","申請說明","獎助學門","獎助對象","成績條件",
+    "其他限制條件","給予獎助金額","應繳證件或附件","若有疑問請洽",
+)
+
+class ScholarshipDetailTextParser(HTMLParser):
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.lines=[]
+        self.skip=0
+    def handle_starttag(self,tag,attrs):
+        if tag.lower() in ("script","style","noscript"):
+            self.skip+=1
+    def handle_endtag(self,tag):
+        if tag.lower() in ("script","style","noscript") and self.skip:
+            self.skip-=1
+    def handle_data(self,data):
+        if self.skip:return
+        v=clean(data)
+        if v and (not self.lines or self.lines[-1]!=v):
+            self.lines.append(v)
+
+def scholarship_academic_params(today=None):
+    today=today or date.today()
+    if today.month>=8:
+        return today.year-1911,1
+    if today.month==1:
+        return today.year-1912,1
+    return today.year-1912,2
+
+def scholarship_number_from_row(row):
+    raw=str(row.get("number") or "").strip()
+    if raw.isdigit():return raw
+    m=re.search(r"-(\d+)$",str(row.get("id") or ""))
+    return m.group(1) if m else ""
+
+def scholarship_detail_url(number,today=None):
+    if not number:return ""
+    year,term=scholarship_academic_params(today)
+    base=BASE.rsplit("/",1)[0]+"/Scholarship_detail.php"
+    return f"{base}?schno={number}&term={term}&year={year}"
+
+def detail_field(lines,label):
+    for i,raw in enumerate(lines):
+        line=clean(raw)
+        if label not in line:continue
+        pos=line.find(label)
+        tail=line[pos+len(label):].lstrip(" ：:｜|").strip()
+        if tail:return tail
+        vals=[]
+        for nxt in lines[i+1:i+14]:
+            nxt=clean(nxt)
+            if not nxt:continue
+            if any(nxt.startswith(x) for x in DETAIL_LABELS):
+                break
+            vals.append(nxt)
+        return clean(" ".join(vals))
+    return ""
+
+def parse_scholarship_detail(html):
+    p=ScholarshipDetailTextParser();p.feed(html)
+    joined=" ".join(p.lines)
+    recognized=("獎助對象" in joined and "獎助學金" in joined)
+    return {
+      "recognized":recognized,
+      "eligibilityTarget":detail_field(p.lines,"獎助對象"),
+      "restrictions":detail_field(p.lines,"其他限制條件"),
+      "academicScope":detail_field(p.lines,"獎助學門"),
+    }
+
+def enrich_scholarship_eligibility(rows,old_rows,today=None):
+    today=today or date.today()
+    old_by={str(x.get("id") or ""):x for x in old_rows if isinstance(x,dict)}
+    stats={"detailCandidates":0,"detailFetched":0,"detailReused":0,"detailVerified":0,"detailUnverified":0}
+    out=[]
+    for raw in rows:
+        x=dict(raw)
+        if x.get("sourceSubId")=="specialty":
+            x["eligibilityVerified"]=True
+            x["eligibilityEnrichmentVersion"]=DETAIL_ENRICH_VERSION
+            x.setdefault("eligibilityTarget","general_student")
+            stats["detailVerified"]+=1
+            out.append(x)
+            continue
+        if x.get("sourceId")!=SOURCE_ID:
+            out.append(x);continue
+
+        stats["detailCandidates"]+=1
+        old=old_by.get(str(x.get("id") or ""),{})
+        same_window=(str(old.get("applicationWindow") or "")==str(x.get("applicationWindow") or ""))
+        if same_window and old.get("eligibilityEnrichmentVersion")==DETAIL_ENRICH_VERSION and "eligibilityVerified" in old:
+            for k in ("number","detailUrl","eligibilityTarget","restrictions","academicScope",
+                      "eligibilityVerified","eligibilityEnrichmentVersion","eligibilityFetchedAt"):
+                if k in old:x[k]=old[k]
+            stats["detailReused"]+=1
+            stats["detailVerified" if x.get("eligibilityVerified") else "detailUnverified"]+=1
+            out.append(x);continue
+
+        number=scholarship_number_from_row(x)
+        detail_url=scholarship_detail_url(number,today)
+        x["number"]=number
+        x["detailUrl"]=detail_url
+        x["eligibilityEnrichmentVersion"]=DETAIL_ENRICH_VERSION
+        try:
+            if not detail_url:raise RuntimeError("missing_scholarship_number")
+            info=parse_scholarship_detail(fetch(detail_url))
+            stats["detailFetched"]+=1
+            if not info.get("recognized"):
+                raise RuntimeError("detail_structure_not_trusted")
+            x["eligibilityTarget"]=clean(info.get("eligibilityTarget"))
+            x["restrictions"]=clean(info.get("restrictions"))
+            x["academicScope"]=clean(info.get("academicScope"))
+            x["eligibilityVerified"]=True
+            x["eligibilityFetchedAt"]=now_iso()
+            stats["detailVerified"]+=1
+        except Exception as e:
+            if old.get("eligibilityVerified") is True:
+                for k in ("number","detailUrl","eligibilityTarget","restrictions","academicScope",
+                          "eligibilityVerified","eligibilityEnrichmentVersion","eligibilityFetchedAt"):
+                    if k in old:x[k]=old[k]
+                stats["detailReused"]+=1
+                stats["detailVerified"]+=1
+            else:
+                x["eligibilityVerified"]=False
+                x["eligibilityError"]=f"{type(e).__name__}: {e}"[:300]
+                stats["detailUnverified"]+=1
+        out.append(x)
+    return out,stats
+
 def load(path):
     try:return json.loads(path.read_text(encoding="utf-8"))
     except Exception:return {"scholarships":[],"meta":{}}
@@ -237,6 +369,7 @@ def run(repo,check):
         keep.append(x)
     new_auto=[]
     for sid in healthy:new_auto.extend(fresh[sid])
+    new_auto,eligibility_detail_stats=enrich_scholarship_eligibility(new_auto,old_rows)
     by={}
     for x in keep+new_auto:
         k=str(x.get("id") or "")
@@ -255,6 +388,7 @@ def run(repo,check):
     active_auto=sum(1 for x in rows if isinstance(x,dict) and x.get("sourceId")==SOURCE_ID and x.get("auto") is True)
     meta={
       "updatedAt":stamp,"sourceId":SOURCE_ID,
+      "eligibilityDetail":eligibility_detail_stats,
       "categories":len(CATEGORIES)+1,
       "healthyCategories":len(healthy),
       "failedCategories":len(CATEGORIES)+1-len(healthy),

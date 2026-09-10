@@ -1,6 +1,6 @@
 /* V97.3.0 THU personal service worker */
-const PWA_VERSION='97.4.9.3';
-const PWA_SIGNATURE='thu-personal-97.4.9.3-optional-subsidy-exception';
+const PWA_VERSION='97.4.9.4';
+const PWA_SIGNATURE='thu-personal-97.4.9.4-scholarship-detail-eligibility';
 const CACHE_PREFIX='thu-goal-personal-v';
 const LEGACY_CACHE_PREFIX='law-goal-web-v';
 const CACHE=CACHE_PREFIX+PWA_VERSION;

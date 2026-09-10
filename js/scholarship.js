@@ -61,33 +61,42 @@ function scholarshipSpecialtyKind(a){
  if(/外語能力|外語檢定|英語檢定|日語檢定|語言檢定|語言證照|toeic|toefl|ielts|gept|jlpt|delf|goethe|topik|cefr|linguaskill|bestep/.test(text))return '外語能力';
  return '一般獎學金';
 }
+/* V97.4.9.4 detail-level scholarship eligibility enforcement */
 function scholarshipEligibility(a){
- const text=scholarshipPolicyText(a);
+ const text=scholarshipPolicyText(a)+' '+String(a?.restrictions||'');
  const title=String(a?.title||'');
- const targetText=[
-   a?.eligibility,a?.audience,a?.target,a?.eligibilityTarget,
-   a?.description,a?.statusText,title
- ].map(x=>String(x||'')).join(' ').replace(/\s+/g,' ').trim();
+ const explicitTarget=String(a?.eligibilityTarget||a?.scholarshipTarget||a?.audience||'').replace(/\s+/g,' ').trim();
  const specialty=scholarshipSpecialtyKind(a);
 
  const poverty=/(?:清寒家庭|清寒學生|家境清寒|低收入戶|中低收入戶|經濟弱勢|弱勢家庭|弱勢學生|家庭經濟困難)/;
  const militaryPublic=/(?:軍公教|軍警消|現役軍人|軍人子女|軍人遺族|軍眷|公務人員|公務員子女|公教人員|教職員子女|榮民|榮眷|遺族)/;
 
- const mandatoryLead=/(?:僅限|限|限定|必須|須具備|申請資格|申請對象|補助對象|受獎對象|資格條件|專供|提供予|發給)/;
+ if(explicitTarget){
+   if(poverty.test(explicitTarget)){
+     return {eligible:false,excluded:true,reason:'官方「獎助對象」明列清寒／低收入／經濟弱勢身分',specialty};
+   }
+   if(militaryPublic.test(explicitTarget)){
+     return {eligible:false,excluded:true,reason:'官方「獎助對象」明列軍公教／軍警消等特定身分',specialty};
+   }
+ }
+
+ if(a?.eligibilityVerified===false){
+   return {eligible:false,excluded:true,reason:'官方詳細資格尚未成功驗證，暫不列入推薦',specialty};
+ }
+
+ const targetText=[
+   a?.eligibility,a?.audience,a?.target,a?.eligibilityTarget,
+   a?.description,a?.statusText,title,a?.restrictions
+ ].map(x=>String(x||'')).join(' ').replace(/\s+/g,' ').trim();
+
+ const mandatoryLead=/(?:僅限|限|限定|必須|須具備|申請資格|申請對象|補助對象|獎助對象|受獎對象|資格條件|專供|提供予|發給)/;
  const optionalLead=/(?:另|另外|額外|加發|加碼|得另申請|可另申請|另可申請|報名費補助|考試費補助|費用補助|補助報名費|補助考試費)/;
 
- const titleRestricted=new RegExp(
-   '(?:'+poverty.source+'|'+militaryPublic.source+').{0,28}(?:獎學金|助學金|獎助|補助)|'+
-   '(?:獎學金|助學金|獎助|補助).{0,28}(?:'+poverty.source+'|'+militaryPublic.source+')'
- );
-
  const povertyMandatory=
-   titleRestricted.test(title) ||
    new RegExp(mandatoryLead.source+'[^。；\\n]{0,90}'+poverty.source).test(targetText) ||
    new RegExp(poverty.source+'[^。；\\n]{0,45}(?:始得申請|方可申請|才可申請|為必要條件|為申請資格|為受獎資格)').test(targetText);
 
  const militaryMandatory=
-   titleRestricted.test(title) ||
    new RegExp(mandatoryLead.source+'[^。；\\n]{0,90}'+militaryPublic.source).test(targetText) ||
    new RegExp(militaryPublic.source+'[^。；\\n]{0,45}(?:始得申請|方可申請|才可申請|為必要條件|為申請資格|為受獎資格)').test(targetText);
 
@@ -105,11 +114,9 @@ function scholarshipEligibility(a){
  if(militaryMandatory&&!militaryOptional){
    return {eligible:false,excluded:true,reason:'軍公教／軍警消等身分為必要申請或受獎條件',specialty};
  }
-
  if((povertyMandatory&&povertyOptional)||(militaryMandatory&&militaryOptional)){
    return {eligible:true,excluded:false,reason:'特定身分僅屬額外補助條件，不是基本申請必要條件',specialty};
  }
-
  return {eligible:true,excluded:false,reason:'可列入個人判斷',specialty};
 }
 function scholarshipAssessment(a){
