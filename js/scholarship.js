@@ -47,7 +47,7 @@ function scholarshipScrollTop(){document.getElementById('scholarshipStats')?.scr
 function scholarshipPrevPage(){if(scholarshipPage>1){scholarshipPage--;renderScholarships();scholarshipScrollTop()}}
 function scholarshipNextPage(){scholarshipPage++;renderScholarships();scholarshipScrollTop()}
 
-/* V97.4.9 scholarship eligibility + specialty priority */
+/* scholarship eligibility + specialty priority */
 function scholarshipPolicyText(a){
  return [a?.title,a?.keywords,a?.description,a?.statusText,a?.category,a?.amount,a?.eligibility,a?.audience,a?.target,a?.eligibilityTarget]
   .map(x=>String(x||'')).join(' ').replace(/\s+/g,' ').trim();
@@ -61,8 +61,8 @@ function scholarshipSpecialtyKind(a){
  if(/外語能力|外語檢定|英語檢定|日語檢定|語言檢定|語言證照|toeic|toefl|ielts|gept|jlpt|delf|goethe|topik|cefr|linguaskill|bestep/.test(text))return '外語能力';
  return '一般獎學金';
 }
-/* V97.4.9.4 detail-level scholarship eligibility enforcement */
-/* V97.5.1 Scholarship Eligibility Engine */
+/* detail-level scholarship eligibility enforcement */
+/* Scholarship Eligibility Engine */
 /* V97.6.0 Strict Scholarship Eligibility Engine */
 const SCHOLARSHIP_STRICT_POLICY=Object.freeze({
   householdWhitelist:['嘉義縣'],

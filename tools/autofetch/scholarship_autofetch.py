@@ -102,7 +102,7 @@ def parse(html,sub_id,sub_name,url,today=None):
     uniq={x["id"]:x for x in rows}
     return sorted(uniq.values(),key=lambda x:(x["deadline"],x["title"])),recognized,parsed_total
 
-# V97.4.9.4 official detail eligibility enrichment
+# official detail eligibility enrichment
 DETAIL_ENRICH_VERSION=3
 DETAIL_LABELS=(
     "獎助學金代號","獎助學金名稱","學生申請日期","預計名額","獎助學金提供單位",
@@ -178,7 +178,7 @@ def parse_scholarship_detail(html):
       "applicationNote":detail_field(p.lines,"申請說明"),
     }
 
-# V97.5.2 widen detail enrichment to every THU scholarship category
+# widen detail enrichment to every THU scholarship category
 def scholarship_detail_candidate(row):
     rid=str(row.get("id") or "")
     source_id=str(row.get("sourceId") or "")
@@ -351,7 +351,7 @@ def atomic(path,obj):
         p.replace(path)
     finally:p.unlink(missing_ok=True)
 
-# V97.4.9 THU specialty scholarship/reward source
+# THU specialty scholarship/reward source
 SPECIALTY_NEWS_URL="https://teach.thu.edu.tw/web/news/list.php?cid=4&lang=zh_tw"
 SPECIALTY_TITLE_RX=re.compile(r"(專業證照.*?(?:獎勵|獎勵|補助).*?申請公告|外語能力檢定.*?(?:獎勵|獎勵|補助).*?申請公告)",re.I)
 SPECIALTY_DEADLINE_RX=re.compile(r"(?<!\d)(\d{1,2})\s*/\s*(\d{1,2})\s*截止")
@@ -431,7 +431,7 @@ def run(repo,check):
         except Exception as e:
             info["error"]=f"{type(e).__name__}: {e}"
         report.append(info)
-# V97.4.9 specialty source: professional certification + foreign-language rewards.
+# specialty source: professional certification + foreign-language rewards.
     specialty_info={"id":"specialty","name":"教發中心｜專業證照／外語檢定","url":SPECIALTY_NEWS_URL,"ok":False}
     try:
         specialty_body=fetch(SPECIALTY_NEWS_URL)

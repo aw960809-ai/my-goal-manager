@@ -1,4 +1,4 @@
-/* V97.4.0 THU personal catalog lifecycle archive viewer */
+/* THU personal catalog lifecycle archive viewer */
 (function(){
   "use strict";
   const CATALOG_LIFECYCLE_VERSION="97.4.0";

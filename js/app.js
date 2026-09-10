@@ -265,7 +265,7 @@ function removeLegacyStandaloneToeicGoals(){
  return true;
 }
 
-/* V97.4.2 THU 115-1 law preview plan migration */
+/* THU 115-1 law preview plan migration */
 function ensureThu1151LawPreviewPlan(){
  if(!Array.isArray(db.tasks))return {applied:false,reason:'tasks-unavailable'};
 
@@ -682,7 +682,7 @@ function renderDeletedLogs(){
  const logs=(Array.isArray(db.logs)?db.logs:[]).filter(l=>l.status==='已刪除').slice(0,20);
  el.innerHTML=logs.length?logs.map(l=>`<div class="listitem deleted-log-row"><div><b>${esc(l.name||getTask(l.taskId)?.name||'未命名行動')}</b><small class="muted" style="display:block">${esc((l.time||'').slice(0,16).replace('T',' · '))} · ${+l.minutes||0} 分 · 已刪除</small></div><button class="btn" type="button" onclick="restoreActualLog('${esc(l.id)}')">恢復紀錄</button></div>`).join(''):'<div class="empty">尚無已刪除的實際紀錄。</div>';
 }
-/* V97.4.6 compact actual-log history */
+/* compact actual-log history */
 let actualHistoryRange='7';
 let actualHistoryTask='all';
 
@@ -838,7 +838,7 @@ function renderActualLogHistory(){
  body.innerHTML=filters+summary+`<div class="actual-history-groups">${grouped}</div>`;
 }
 
-/* V97.4.8.1 analysis KPI source repair */
+/* analysis KPI source repair */
 function analysisValidLeafTasks(){
  return (Array.isArray(db.tasks)?db.tasks:[]).filter(t=>{
    if(!t||Number(t.level)!==4||t.status==='已封存')return false;

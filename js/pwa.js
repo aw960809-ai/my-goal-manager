@@ -75,7 +75,7 @@ window.PWA=(function(){
     document.body.appendChild(bar);
     return bar;
   }
-  /* V97.4.9.5 PWA update settlement watchdog */
+ /* PWA update settlement watchdog */
   let updateWatchdog=null;
   function clearUpdateWatchdog(){
     if(updateWatchdog){clearTimeout(updateWatchdog);updateWatchdog=null}
@@ -201,7 +201,7 @@ window.PWA=(function(){
     toastSafe('請使用 Chrome／Edge 選單中的「安裝應用程式」或「新增至主畫面」');
     return false;
   }
-/* V97.4.9.7 page-worker version coherence */
+/* page-worker version coherence */
   async function checkForUpdate(options={}){
     const silent=options.silent===true,force=options.force===true;
     if(!('serviceWorker' in navigator))return false;

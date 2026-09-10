@@ -67,7 +67,7 @@
   else setup();
 })();
 
-/* V97.4.5 modal/nav ownership guard */
+/* modal/nav ownership guard */
 (function(){
   'use strict';
   const OVERLAY_SELECTOR='.settings-modal.show,.modal.show,.edit-modal.show,.developer-modal[style*="display: flex"]';
