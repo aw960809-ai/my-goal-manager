@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+import concurrent.futures
+import time
 import urllib.parse
 import argparse, json, os, re, ssl, tempfile, urllib.request
 from datetime import date, datetime, timezone
@@ -199,45 +201,93 @@ def scholarship_detail_candidate(row):
 
     return False
 
+# V97.6.1 bounded concurrent scholarship detail enrichment
+DETAIL_ENRICH_WORKERS=6
+DETAIL_ENRICH_BUDGET_SECONDS=480
+
 def enrich_scholarship_eligibility(rows,old_rows,today=None):
     today=today or date.today()
+    started=time.monotonic()
     old_by={str(x.get("id") or ""):x for x in old_rows if isinstance(x,dict)}
-    stats={"detailCandidates":0,"detailFetched":0,"detailReused":0,"detailVerified":0,"detailUnverified":0}
-    out=[]
-    for raw in rows:
-        x=dict(raw)
+    result=[None]*len(rows)
+    stats={
+        "detailCandidates":0,"detailQueued":0,"detailFetched":0,"detailReused":0,
+        "detailVerified":0,"detailUnverified":0,"detailBudgetExpired":0,
+        "detailWorkers":DETAIL_ENRICH_WORKERS,"detailBudgetSeconds":DETAIL_ENRICH_BUDGET_SECONDS
+    }
+    carry_fields=(
+        "number","detailUrl","eligibilityTarget","restrictions","academicScope",
+        "requiredDocuments","scoreCondition","applicationNote",
+        "eligibilityVerified","eligibilityEnrichmentVersion","eligibilityFetchedAt"
+    )
+
+    def preserve_last_good(x,old):
+        if old.get("eligibilityVerified") is True:
+            for k in carry_fields:
+                if k in old:x[k]=old[k]
+            stats["detailReused"]+=1
+            stats["detailVerified"]+=1
+            return True
+        return False
+
+    def detail_job(index,x,old):
+        number=scholarship_number_from_row(x)
+        detail_url=scholarship_detail_url(number,today)
+        if not detail_url:return index,None,"missing_scholarship_number"
+        try:
+            info=parse_scholarship_detail(fetch(detail_url))
+            if not info.get("recognized"):
+                raise RuntimeError("detail_structure_not_trusted")
+            return index,info,None
+        except Exception as e:
+            return index,None,f"{type(e).__name__}: {e}"[:300]
+
+    jobs=[]
+    for index,raw in enumerate(rows):
+        x=dict(raw);result[index]=x
         if x.get("sourceSubId")=="specialty" or str(x.get("id") or "").startswith("auto-thu-sch-specialty-"):
             x["eligibilityVerified"]=True
             x["eligibilityEnrichmentVersion"]=DETAIL_ENRICH_VERSION
             x.setdefault("eligibilityTarget","general_student")
             stats["detailVerified"]+=1
-            out.append(x)
             continue
         if not scholarship_detail_candidate(x):
-            out.append(x);continue
-
+            continue
         stats["detailCandidates"]+=1
         old=old_by.get(str(x.get("id") or ""),{})
         same_window=(str(old.get("applicationWindow") or "")==str(x.get("applicationWindow") or ""))
-        if same_window and old.get("eligibilityEnrichmentVersion")==DETAIL_ENRICH_VERSION and "eligibilityVerified" in old:
-            for k in ("number","detailUrl","eligibilityTarget","restrictions","academicScope","requiredDocuments","scoreCondition","applicationNote",
-                      "eligibilityVerified","eligibilityEnrichmentVersion","eligibilityFetchedAt"):
+        if same_window and old.get("eligibilityEnrichmentVersion")==DETAIL_ENRICH_VERSION and old.get("eligibilityVerified") is True:
+            for k in carry_fields:
                 if k in old:x[k]=old[k]
             stats["detailReused"]+=1
-            stats["detailVerified" if x.get("eligibilityVerified") else "detailUnverified"]+=1
-            out.append(x);continue
-
-        number=scholarship_number_from_row(x)
-        detail_url=scholarship_detail_url(number,today)
-        x["number"]=number
-        x["detailUrl"]=detail_url
+            stats["detailVerified"]+=1
+            continue
+        x["number"]=scholarship_number_from_row(x)
+        x["detailUrl"]=scholarship_detail_url(x["number"],today)
         x["eligibilityEnrichmentVersion"]=DETAIL_ENRICH_VERSION
-        try:
-            if not detail_url:raise RuntimeError("missing_scholarship_number")
-            info=parse_scholarship_detail(fetch(detail_url))
-            stats["detailFetched"]+=1
-            if not info.get("recognized"):
-                raise RuntimeError("detail_structure_not_trusted")
+        jobs.append((index,x,old))
+
+    stats["detailQueued"]=len(jobs)
+    if not jobs:
+        stats["detailElapsedSeconds"]=round(time.monotonic()-started,2)
+        return result,stats
+
+    executor=concurrent.futures.ThreadPoolExecutor(
+        max_workers=min(DETAIL_ENRICH_WORKERS,max(1,len(jobs))),
+        thread_name_prefix="scholarship-detail"
+    )
+    future_map={executor.submit(detail_job,index,x,old):(index,x,old) for index,x,old in jobs}
+    done,not_done=concurrent.futures.wait(
+        future_map,timeout=DETAIL_ENRICH_BUDGET_SECONDS,
+        return_when=concurrent.futures.ALL_COMPLETED
+    )
+
+    for future in done:
+        index,x,old=future_map[future]
+        try:_,info,error=future.result()
+        except Exception as e:
+            info=None;error=f"{type(e).__name__}: {e}"[:300]
+        if info is not None:
             x["eligibilityTarget"]=clean(info.get("eligibilityTarget"))
             x["restrictions"]=clean(info.get("restrictions"))
             x["academicScope"]=clean(info.get("academicScope"))
@@ -246,21 +296,32 @@ def enrich_scholarship_eligibility(rows,old_rows,today=None):
             x["applicationNote"]=clean(info.get("applicationNote"))
             x["eligibilityVerified"]=True
             x["eligibilityFetchedAt"]=now_iso()
-            stats["detailVerified"]+=1
-        except Exception as e:
-            if old.get("eligibilityVerified") is True:
-                for k in ("number","detailUrl","eligibilityTarget","restrictions","academicScope","requiredDocuments","scoreCondition","applicationNote",
-                          "eligibilityVerified","eligibilityEnrichmentVersion","eligibilityFetchedAt"):
-                    if k in old:x[k]=old[k]
-                stats["detailReused"]+=1
-                stats["detailVerified"]+=1
-            else:
-                x["eligibilityVerified"]=False
-                x["eligibilityError"]=f"{type(e).__name__}: {e}"[:300]
-                stats["detailUnverified"]+=1
-        out.append(x)
-    return out,stats
+            x.pop("eligibilityError",None)
+            stats["detailFetched"]+=1;stats["detailVerified"]+=1
+        elif not preserve_last_good(x,old):
+            x["eligibilityVerified"]=False
+            x["eligibilityError"]=error or "detail_fetch_failed"
+            stats["detailUnverified"]+=1
 
+    for future in not_done:
+        index,x,old=future_map[future]
+        future.cancel()
+        if not preserve_last_good(x,old):
+            x["eligibilityVerified"]=False
+            x["eligibilityError"]="detail_budget_expired"
+            stats["detailUnverified"]+=1
+        stats["detailBudgetExpired"]+=1
+
+    executor.shutdown(wait=False,cancel_futures=True)
+    stats["detailElapsedSeconds"]=round(time.monotonic()-started,2)
+    print(
+        "SCHOLARSHIP_DETAIL_ENRICH "
+        f"candidates={stats['detailCandidates']} queued={stats['detailQueued']} "
+        f"fetched={stats['detailFetched']} reused={stats['detailReused']} "
+        f"unverified={stats['detailUnverified']} budgetExpired={stats['detailBudgetExpired']} "
+        f"workers={stats['detailWorkers']} elapsed={stats['detailElapsedSeconds']}s"
+    )
+    return result,stats
 def load(path):
     try:return json.loads(path.read_text(encoding="utf-8"))
     except Exception:return {"scholarships":[],"meta":{}}
