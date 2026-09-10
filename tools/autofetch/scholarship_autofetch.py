@@ -101,7 +101,7 @@ def parse(html,sub_id,sub_name,url,today=None):
     return sorted(uniq.values(),key=lambda x:(x["deadline"],x["title"])),recognized,parsed_total
 
 # V97.4.9.4 official detail eligibility enrichment
-DETAIL_ENRICH_VERSION=1
+DETAIL_ENRICH_VERSION=2
 DETAIL_LABELS=(
     "獎助學金代號","獎助學金名稱","學生申請日期","預計名額","獎助學金提供單位",
     "申請辦法下載","申請書下載","申請說明","獎助學門","獎助對象","成績條件",
@@ -173,6 +173,29 @@ def parse_scholarship_detail(html):
       "academicScope":detail_field(p.lines,"獎助學門"),
     }
 
+# V97.5.2 widen detail enrichment to every THU scholarship category
+def scholarship_detail_candidate(row):
+    rid=str(row.get("id") or "")
+    source_id=str(row.get("sourceId") or "")
+    sub_id=str(row.get("sourceSubId") or "")
+    category=str(row.get("category") or "")
+
+    specialty=(
+        sub_id=="specialty" or
+        category=="specialty" or
+        rid.startswith("auto-thu-sch-specialty-")
+    )
+    if specialty:
+        return False
+
+    if rid.startswith("auto-thu-sch-"):
+        return True
+
+    if source_id==SOURCE_ID:
+        return True
+
+    return False
+
 def enrich_scholarship_eligibility(rows,old_rows,today=None):
     today=today or date.today()
     old_by={str(x.get("id") or ""):x for x in old_rows if isinstance(x,dict)}
@@ -180,14 +203,14 @@ def enrich_scholarship_eligibility(rows,old_rows,today=None):
     out=[]
     for raw in rows:
         x=dict(raw)
-        if x.get("sourceSubId")=="specialty":
+        if x.get("sourceSubId")=="specialty" or str(x.get("id") or "").startswith("auto-thu-sch-specialty-"):
             x["eligibilityVerified"]=True
             x["eligibilityEnrichmentVersion"]=DETAIL_ENRICH_VERSION
             x.setdefault("eligibilityTarget","general_student")
             stats["detailVerified"]+=1
             out.append(x)
             continue
-        if x.get("sourceId")!=SOURCE_ID:
+        if not scholarship_detail_candidate(x):
             out.append(x);continue
 
         stats["detailCandidates"]+=1
