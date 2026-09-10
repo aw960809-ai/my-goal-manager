@@ -13,7 +13,7 @@
     error:""
   };
 
-  function esc(v){
+  function autofetchHealthEsc(v){
     return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   }
   function n(v,fallback=0){
@@ -117,13 +117,13 @@
   }
   function card(title,info,extra){
     if(!info||info.error){
-      return `<div class="gm-health-card"><div class="gm-health-head"><b>${esc(title)}</b><span class="gm-health-pill bad">無法讀取</span></div><div class="gm-health-muted">${esc(info?.error||"尚未檢查")}</div></div>`;
+      return `<div class="gm-health-card"><div class="gm-health-head"><b>${autofetchHealthEsc(title)}</b><span class="gm-health-pill bad">無法讀取</span></div><div class="gm-health-muted">${autofetchHealthEsc(info?.error||"尚未檢查")}</div></div>`;
     }
     const badge=healthLabel(info.ok,info.stale||info.warning);
     return `<div class="gm-health-card">
-      <div class="gm-health-head"><b>${esc(title)}</b><span class="gm-health-pill ${badge.cls}">${badge.text}</span></div>
+      <div class="gm-health-head"><b>${autofetchHealthEsc(title)}</b><span class="gm-health-pill ${badge.cls}">${badge.text}</span></div>
       <div class="gm-health-grid">
-        <span>最後更新<b>${esc(fmtTime(info.updated))}</b></span>
+        <span>最後更新<b>${autofetchHealthEsc(fmtTime(info.updated))}</b></span>
         <span>資料筆數<b>${info.count}</b></span>
         <span>來源健康<b>${info.healthy}/${info.sources||info.healthy+info.failed||0}</b></span>
         <span>來源失敗<b>${info.failed}</b></span>
@@ -158,7 +158,7 @@
       </div>
       <div class="gm-health-actions">
         <button class="btn" type="button" onclick="GoalManagerAutoFetchHealth.refresh()">重新讀取狀態</button>
-        <span class="gm-health-muted">檢查：${esc(fmtTime(state.checkedAt))}${navigator.onLine?"":" · 目前離線，可能顯示快取"}</span>
+        <span class="gm-health-muted">檢查：${autofetchHealthEsc(fmtTime(state.checkedAt))}${navigator.onLine?"":" · 目前離線，可能顯示快取"}</span>
       </div>
     </section>`;
   }
@@ -220,7 +220,7 @@
     };
   }
 
-  function boot(){
+  function autofetchHealthBoot(){
     ensureStyles();
     // V96.8.2.1: renderSettings wrapper is sufficient.
     // Do not observe settingsBody/subtree: injecting the health panel itself would
@@ -238,6 +238,6 @@
     render:renderEverywhere
   });
 
-  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot,{once:true});
-  else boot();
+  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",autofetchHealthBoot,{once:true});
+  else autofetchHealthBoot();
 })();

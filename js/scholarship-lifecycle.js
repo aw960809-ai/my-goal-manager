@@ -7,7 +7,7 @@
   const originalMerge=typeof window.mergeScholarshipCatalog==="function"?window.mergeScholarshipCatalog:null;
   const state={expired:0,undated:0,disabled:0,duplicates:0,lastScan:""};
 
-  function dateKey(){
+  function scholarshipLifecycleDateKey(){
     try{
       if(typeof window.todayKey==="function")return window.todayKey();
     }catch(_){}
@@ -17,7 +17,7 @@
   function isDate(v){return /^\d{4}-\d{2}-\d{2}$/.test(String(v||""))}
   function deadlineOf(a){return String(a?.deadline||a?.date||"").trim()}
   function isReference(a){return a?.kind==="reference"||a?.reference===true}
-  function lifecycle(a,today=dateKey()){
+  function lifecycle(a,today=scholarshipLifecycleDateKey()){
     if(!a||typeof a!=="object")return {keep:false,state:"invalid"};
     if(a.available===false)return {keep:false,state:"disabled"};
     if(isReference(a))return {keep:true,state:"reference"};
@@ -39,7 +39,7 @@
     return n;
   }
   function filterRows(rows){
-    const today=dateKey(),out=[],by=new Map();
+    const today=scholarshipLifecycleDateKey(),out=[],by=new Map();
     let expired=0,undated=0,disabled=0,duplicates=0;
     (Array.isArray(rows)?rows:[]).forEach(a=>{
       const x=lifecycle(a,today);
