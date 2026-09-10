@@ -1,6 +1,6 @@
 /* V97.3.0 THU personal service worker */
-const PWA_VERSION='97.4.9.5';
-const PWA_SIGNATURE='thu-personal-97.4.9.5-update-watchdog';
+const PWA_VERSION='97.4.9.6';
+const PWA_SIGNATURE='thu-personal-97.4.9.6-scholarship-title-target-filter';
 const CACHE_PREFIX='thu-goal-personal-v';
 const LEGACY_CACHE_PREFIX='law-goal-web-v';
 const CACHE=CACHE_PREFIX+PWA_VERSION;

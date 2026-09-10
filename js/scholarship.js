@@ -64,13 +64,28 @@ function scholarshipSpecialtyKind(a){
 /* V97.4.9.4 detail-level scholarship eligibility enforcement */
 function scholarshipEligibility(a){
  const text=scholarshipPolicyText(a)+' '+String(a?.restrictions||'');
- const title=String(a?.title||'');
+ const title=String(a?.title||'').replace(/\s+/g,' ').trim();
  const explicitTarget=String(a?.eligibilityTarget||a?.scholarshipTarget||a?.audience||'').replace(/\s+/g,' ').trim();
  const specialty=scholarshipSpecialtyKind(a);
 
- const poverty=/(?:清寒家庭|清寒學生|家境清寒|低收入戶|中低收入戶|經濟弱勢|弱勢家庭|弱勢學生|家庭經濟困難)/;
+ const poverty=/(?:清寒家庭|清寒學生|清寒|家境清寒|低收入戶|中低收入戶|經濟弱勢|弱勢家庭|弱勢學生|家庭經濟困難)/;
  const militaryPublic=/(?:軍公教|軍警消|現役軍人|軍人子女|軍人遺族|軍眷|公務人員|公務員子女|公教人員|教職員子女|榮民|榮眷|遺族)/;
+ const awardWords=/(?:獎學金|助學金|獎助學金|獎助|補助)/;
+ const optionalWords=/(?:另|另外|額外|加發|加碼|得另申請|可另申請|另可申請|報名費補助|考試費補助|費用補助|補助報名費|補助考試費)/;
 
+ // V97.4.9.6: the scholarship title itself is a high-confidence target signal.
+ // "清寒優秀學生獎學金" / "軍公教子女獎學金" are inherently restricted schemes.
+ const titlePovertyTarget=poverty.test(title)&&awardWords.test(title)&&!optionalWords.test(title);
+ const titleMilitaryTarget=militaryPublic.test(title)&&awardWords.test(title)&&!optionalWords.test(title);
+
+ if(titlePovertyTarget){
+   return {eligible:false,excluded:true,reason:'獎助名稱已明確限定清寒／低收入／經濟弱勢對象',specialty};
+ }
+ if(titleMilitaryTarget){
+   return {eligible:false,excluded:true,reason:'獎助名稱已明確限定軍公教／軍警消等特定身分',specialty};
+ }
+
+ // Highest-confidence structured field from the official detail page.
  if(explicitTarget){
    if(poverty.test(explicitTarget)){
      return {eligible:false,excluded:true,reason:'官方「獎助對象」明列清寒／低收入／經濟弱勢身分',specialty};
@@ -90,7 +105,7 @@ function scholarshipEligibility(a){
  ].map(x=>String(x||'')).join(' ').replace(/\s+/g,' ').trim();
 
  const mandatoryLead=/(?:僅限|限|限定|必須|須具備|申請資格|申請對象|補助對象|獎助對象|受獎對象|資格條件|專供|提供予|發給)/;
- const optionalLead=/(?:另|另外|額外|加發|加碼|得另申請|可另申請|另可申請|報名費補助|考試費補助|費用補助|補助報名費|補助考試費)/;
+ const optionalLead=optionalWords;
 
  const povertyMandatory=
    new RegExp(mandatoryLead.source+'[^。；\\n]{0,90}'+poverty.source).test(targetText) ||
