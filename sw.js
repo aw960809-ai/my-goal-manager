@@ -1,6 +1,6 @@
 /* V97.3.0 THU personal service worker */
-const PWA_VERSION='97.4.9.6';
-const PWA_SIGNATURE='thu-personal-97.4.9.6-scholarship-title-target-filter';
+const PWA_VERSION='97.4.9.7';
+const PWA_SIGNATURE='thu-personal-97.4.9.7-version-coherence';
 const CACHE_PREFIX='thu-goal-personal-v';
 const LEGACY_CACHE_PREFIX='law-goal-web-v';
 const CACHE=CACHE_PREFIX+PWA_VERSION;
@@ -78,6 +78,7 @@ self.addEventListener('fetch',event=>{
   if(url.origin!==self.location.origin)return;
   if(request.mode==='navigate'){event.respondWith(networkFirst(request,'./index.html'));return}
   if(/\/data\/(?:activities|scholarships|events|activity-archive|scholarship-archive)\.json$/.test(url.pathname)){event.respondWith(networkFirst(request));return}
-  if(/\.(?:js|css|webmanifest|svg|png)$/.test(url.pathname)){event.respondWith(staleWhileRevalidate(request));return}
+  if(/\.(?:js|css|webmanifest)$/.test(url.pathname)){event.respondWith(networkFirst(request));return}
+  if(/\.(?:svg|png)$/.test(url.pathname)){event.respondWith(staleWhileRevalidate(request));return}
   event.respondWith(networkFirst(request));
 });

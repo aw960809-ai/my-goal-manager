@@ -47,7 +47,7 @@ window.PWA=(function(){
         <button id="pwaUpdateCheckBtn" class="btn" type="button" onclick="pwaCheckForUpdate()">↻ 立即檢查更新</button>
       </div>
       <div id="pwaUpdateStatus" class="pwa-update-status idle" aria-live="polite"><span>●</span><b>系統會自動檢查更新</b></div>
-      <div class="pwa-settings-note">版本 V${CURRENT_VERSION}｜啟動、回到前景、網路恢復及每 5 分鐘自動檢查；更新只處理東海系統自己的 Service Worker 與快取。</div>
+      <div class="pwa-settings-note">頁面版本 V${String(CURRENT_VERSION).replace(/^V/,'')}｜啟動、回到前景、網路恢復及每 5 分鐘自動檢查；若 Service Worker 與頁面版本不同，系統會強制完成頁面切換。</div>
     </div>`;
   }
   function setUpdateUI(state,message){
@@ -201,6 +201,7 @@ window.PWA=(function(){
     toastSafe('請使用 Chrome／Edge 選單中的「安裝應用程式」或「新增至主畫面」');
     return false;
   }
+/* V97.4.9.7 page-worker version coherence */
   async function checkForUpdate(options={}){
     const silent=options.silent===true,force=options.force===true;
     if(!('serviceWorker' in navigator))return false;
@@ -215,7 +216,11 @@ window.PWA=(function(){
       const [remote,current]=await Promise.all([remoteMeta(),currentWorkerMeta()]);
       const currentVersion=current?.version||CURRENT_VERSION;
       const currentSignature=current?.signature||'';
-      const changed=remote.version!==currentVersion ||
+      const pageVersion=String(CURRENT_VERSION||'').replace(/^V/,'');
+      const remoteVersion=String(remote.version||'').replace(/^V/,'');
+      const workerVersion=String(currentVersion||'').replace(/^V/,'');
+      const changed=remoteVersion!==workerVersion ||
+        remoteVersion!==pageVersion ||
         (remote.signature&&currentSignature&&remote.signature!==currentSignature);
 
       if(!changed){
@@ -224,6 +229,15 @@ window.PWA=(function(){
           const time=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
           setUpdateUI('ok',`目前已是最新版本 V${remote.version} · ${time}`);
         }
+        return true;
+      }
+
+      // If the worker is already current but this page is stale, reloading is the
+      // only correct settlement action. Do not falsely report "latest".
+      if(remoteVersion===workerVersion && remoteVersion!==pageVersion){
+        setUpdateUI('update',`程式頁面仍是 V${pageVersion}，正在切換至 V${remoteVersion}…`);
+        showUpdate();
+        setTimeout(()=>location.reload(),120);
         return true;
       }
 
