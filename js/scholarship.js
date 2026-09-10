@@ -69,7 +69,10 @@ const SCHOLARSHIP_HARD_POLICY=Object.freeze({
   excludeMandatoryMilitaryPublic:true,
   excludeMandatoryHealthRestricted:true,
   currentStudentLevel:'undergraduate',
-  currentMajor:'law'
+  currentMajor:'law',
+  householdRegion:'chiayi-county',
+  studyRegion:'taichung',
+  excludeOtherRegionalIdentitySchemes:true
 });
 
 function scholarshipEligibilityCorpus(a){
@@ -95,13 +98,43 @@ function scholarshipMandatoryMention(text,rx){
   return clauses.some(c=>rx.test(c)&&mandatory.test(c)&&!optional.test(c));
 }
 
+/* V97.5.4 fixed regional policy: Chiayi County household + Taichung study */
 function scholarshipRegionRestricted(a,c){
   if(!SCHOLARSHIP_HARD_POLICY.excludeAnyMandatoryRegion)return false;
-  // Do not use the organization/title place-name alone. Only explicit eligibility/restriction language counts.
-  const scope=[c.target,c.restrictions,c.academic,String(a?.eligibility||'')].join(' ');
-  const regionRule=/(?:戶籍|設籍|籍設|原籍|籍貫|居住(?:地|於)?|本縣|本市|本鄉|本鎮|本區|本縣市|縣市籍|地區學生|當地學生)/;
-  const explicitPlaceRestriction=/(?:限|限定|僅限|須|必須|需).{0,28}(?:設籍|戶籍|居住|原籍|籍貫).{0,35}(?:縣|市|鄉|鎮|區)|(?:設籍|戶籍|居住|原籍|籍貫).{0,35}(?:縣|市|鄉|鎮|區).{0,18}(?:以上|滿|方可|始得|學生)/;
-  return explicitPlaceRestriction.test(scope)||scholarshipMandatoryMention(scope,regionRule);
+
+  const raw=[
+    c?.target,c?.restrictions,c?.academic,
+    a?.eligibility,a?.audience,a?.description,a?.statusText
+  ].map(x=>String(x||'').replace(/\s+/g,' ').trim()).filter(Boolean).join(' ');
+
+  if(!raw)return false;
+
+  const hasRegionRequirement=/(?:戶籍|設籍|原籍|籍貫|居住地|居住於|居住滿|本縣|本市|本鄉|本鎮|本區|地方學生|當地學生|縣市學生|地區學生|原住民|原住民族)/.test(raw);
+  if(!hasRegionRequirement)return false;
+
+  // Only these regional conditions are allowed in the personal profile.
+  const chiayiCountyHousehold=/(?:嘉義縣).{0,30}(?:戶籍|設籍|原籍|籍貫)|(?:戶籍|設籍|原籍|籍貫).{0,30}(?:嘉義縣)/;
+  const taichungStudy=/(?:臺中|台中).{0,35}(?:就讀|在學|大專校院|大專院校|學校學生|學生)|(?:就讀|在學|大專校院|大專院校).{0,35}(?:臺中|台中)/;
+  const nationwide=/(?:全國|不限地區|不限戶籍|不限縣市|各縣市|全臺|全台|全國大專|全國學生)/;
+
+  if(nationwide.test(raw))return false;
+  if(chiayiCountyHousehold.test(raw))return false;
+  if(taichungStudy.test(raw))return false;
+
+  // Important distinction: Taichung household registration is NOT the same
+  // as studying in Taichung. Any other locality-based requirement is excluded.
+  const anyLocality=/(?:臺北|台北|新北|桃園|新竹|苗栗|臺中|台中|彰化|南投|雲林|嘉義市|臺南|台南|高雄|屏東|宜蘭|花蓮|臺東|台東|澎湖|金門|連江|基隆|恆春|鄉|鎮|區)/;
+  const regionGate=/(?:限|僅限|限定|須|需|必須|申請對象|獎助對象|資格條件|設籍|戶籍|原籍|籍貫|居住)/;
+
+  if(regionGate.test(raw)&&anyLocality.test(raw))return true;
+
+  // Local indigenous / tribal scholarship schemes are always excluded,
+  // even when the detailed household wording is omitted.
+  if(/(?:原住民|原住民族)/.test(raw)&&anyLocality.test(raw))return true;
+
+  // Any remaining explicit local condition that is not one of the two allowed
+  // regional routes is treated as incompatible with the personal profile.
+  return /(?:本縣|本市|本鄉|本鎮|本區|地方學生|當地學生|縣市學生|地區學生)/.test(raw);
 }
 
 function scholarshipEconomicRestricted(c){
