@@ -647,6 +647,162 @@ function renderDeletedLogs(){
  const logs=(Array.isArray(db.logs)?db.logs:[]).filter(l=>l.status==='已刪除').slice(0,20);
  el.innerHTML=logs.length?logs.map(l=>`<div class="listitem deleted-log-row"><div><b>${esc(l.name||getTask(l.taskId)?.name||'未命名行動')}</b><small class="muted" style="display:block">${esc((l.time||'').slice(0,16).replace('T',' · '))} · ${+l.minutes||0} 分 · 已刪除</small></div><button class="btn" type="button" onclick="restoreActualLog('${esc(l.id)}')">恢復紀錄</button></div>`).join(''):'<div class="empty">尚無已刪除的實際紀錄。</div>';
 }
+/* V97.4.6 compact actual-log history */
+let actualHistoryRange='7';
+let actualHistoryTask='all';
+
+function actualHistorySource(){
+ return (Array.isArray(db.logs)?db.logs:[])
+  .filter(isCountableActualLog)
+  .slice()
+  .sort((a,b)=>String(b.time||'').localeCompare(String(a.time||'')));
+}
+function actualHistoryDateKey(log){
+ return String(log?.time||'').slice(0,10)||'無日期';
+}
+function actualHistoryTimeLabel(log){
+ const raw=String(log?.time||'');
+ const date=raw.slice(0,10)||'—';
+ const time=raw.slice(11,16)||'';
+ return time?date+' · '+time:date;
+}
+function actualHistoryFiltered(){
+ const now=Date.now();
+ const days=actualHistoryRange==='all'?null:Number(actualHistoryRange||7);
+ return actualHistorySource().filter(log=>{
+   if(actualHistoryTask!=='all'&&String(log.taskId||'')!==String(actualHistoryTask))return false;
+   if(days===null)return true;
+   const ms=Date.parse(log.time||'');
+   return Number.isFinite(ms)&&(now-ms)<=days*24*60*60*1000;
+ });
+}
+function ensureActualHistoryModal(){
+ let modal=document.getElementById('actualHistoryModal');
+ if(modal)return modal;
+ modal=document.createElement('div');
+ modal.id='actualHistoryModal';
+ modal.className='edit-modal actual-history-modal';
+ modal.setAttribute('role','dialog');
+ modal.setAttribute('aria-modal','true');
+ modal.setAttribute('aria-labelledby','actualHistoryTitle');
+ modal.innerHTML=`<div class="edit-modal-box actual-history-box">
+  <div class="edit-modal-head">
+    <div><h2 id="actualHistoryTitle">實際投入歷程</h2><p>完整紀錄仍參與完成度與分析；此處只改變瀏覽方式。</p></div>
+    <button class="edit-modal-close" type="button" onclick="closeActualLogHistory()" aria-label="關閉實際投入歷程">×</button>
+  </div>
+  <div id="actualHistoryBody"></div>
+ </div>`;
+ modal.addEventListener('click',e=>{if(e.target===modal)closeActualLogHistory()});
+ document.body.appendChild(modal);
+ return modal;
+}
+function openActualLogHistory(){
+ const modal=ensureActualHistoryModal();
+ modal.classList.add('show');
+ document.body.style.overflow='hidden';
+ renderActualLogHistory();
+}
+function closeActualLogHistory(){
+ const modal=document.getElementById('actualHistoryModal');
+ if(modal)modal.classList.remove('show');
+ document.body.style.overflow='';
+}
+function setActualHistoryRange(value){
+ actualHistoryRange=value;
+ renderActualLogHistory();
+}
+function setActualHistoryTask(value){
+ actualHistoryTask=value||'all';
+ renderActualLogHistory();
+}
+function deleteActualLogFromHistory(id){
+ deleteActualLog(id);
+ requestAnimationFrame(()=>renderActualLogHistory());
+}
+function renderRecentActualLogs(){
+ const el=document.getElementById('recentLogs');
+ if(!el)return;
+ const all=actualHistorySource();
+ if(!all.length){
+   el.innerHTML='<div class="empty">尚無實際投入紀錄</div>';
+   return;
+ }
+ const recent=all.slice(0,5);
+ el.innerHTML=recent.map(l=>`<div class="actual-log-compact-row">
+   <div class="actual-log-compact-main">
+     <b>${esc(l.name||getTask(l.taskId)?.name||'未命名行動')}</b>
+     <small>${esc(actualHistoryTimeLabel(l))} · ${Math.max(0,+l.minutes||0)} 分</small>
+   </div>
+ </div>`).join('')+
+ `<button class="actual-history-open" type="button" onclick="openActualLogHistory()">
+   查看全部紀錄（共 ${all.length} 筆） <span>→</span>
+ </button>`;
+}
+function renderActualLogHistory(){
+ const modal=document.getElementById('actualHistoryModal');
+ const body=document.getElementById('actualHistoryBody');
+ if(!modal||!body||!modal.classList.contains('show'))return;
+
+ const source=actualHistorySource();
+ const taskRows=[];
+ const seen=new Set();
+ source.forEach(l=>{
+   const id=String(l.taskId||'');
+   if(!id||seen.has(id))return;
+   seen.add(id);
+   taskRows.push([id,l.name||getTask(id)?.name||'未命名行動']);
+ });
+ const filtered=actualHistoryFiltered();
+ const totalMinutes=filtered.reduce((s,l)=>s+Math.max(0,+l.minutes||0),0);
+
+ const groups=new Map();
+ filtered.forEach(l=>{
+   const d=actualHistoryDateKey(l);
+   if(!groups.has(d))groups.set(d,[]);
+   groups.get(d).push(l);
+ });
+
+ const filters=`<div class="actual-history-controls">
+   <div class="actual-history-range" role="group" aria-label="歷程期間">
+     <button type="button" class="${actualHistoryRange==='7'?'active':''}" onclick="setActualHistoryRange('7')">近 7 日</button>
+     <button type="button" class="${actualHistoryRange==='30'?'active':''}" onclick="setActualHistoryRange('30')">近 30 日</button>
+     <button type="button" class="${actualHistoryRange==='all'?'active':''}" onclick="setActualHistoryRange('all')">全部</button>
+   </div>
+   <label class="actual-history-task-filter">具體實現方式
+     <select onchange="setActualHistoryTask(this.value)">
+       <option value="all"${actualHistoryTask==='all'?' selected':''}>全部</option>
+       ${taskRows.map(([id,name])=>`<option value="${esc(id)}"${actualHistoryTask===id?' selected':''}>${esc(name)}</option>`).join('')}
+     </select>
+   </label>
+ </div>`;
+
+ const summary=`<div class="actual-history-summary">
+   <span>目前顯示 <b>${filtered.length}</b> 筆</span>
+   <span>合計 <b>${totalMinutes}</b> 分</span>
+ </div>`;
+
+ const grouped=filtered.length?[...groups.entries()].map(([date,logs])=>{
+   const mins=logs.reduce((s,l)=>s+Math.max(0,+l.minutes||0),0);
+   return `<details class="actual-history-day" open>
+    <summary><span>${esc(date)}</span><small>${logs.length} 筆 · ${mins} 分</small></summary>
+    <div class="actual-history-day-list">
+      ${logs.map(l=>`<div class="actual-history-row">
+        <div class="actual-history-row-main">
+          <b>${esc(l.name||getTask(l.taskId)?.name||'未命名行動')}</b>
+          <small>${esc(actualHistoryTimeLabel(l))} · ${Math.max(0,+l.minutes||0)} 分</small>
+        </div>
+        <details class="actual-log-menu">
+          <summary aria-label="紀錄操作">⋯</summary>
+          <div><button type="button" onclick="deleteActualLogFromHistory('${esc(l.id)}')">刪除紀錄</button></div>
+        </details>
+      </div>`).join('')}
+    </div>
+   </details>`;
+ }).join(''):'<div class="empty">這個篩選條件下沒有實際投入紀錄。</div>';
+
+ body.innerHTML=filters+summary+`<div class="actual-history-groups">${grouped}</div>`;
+}
+
 function stats(){
  const leaves=db.tasks.filter(t=>!kids(t.id)&&t.status!=='已封存'&&t.level===4);
  leaves.forEach(t=>calc(t));
@@ -673,8 +829,7 @@ function stats(){
  leaves.forEach(t=>{const p=calc(t);if(p===100)buckets[3][1]++;else if(p>=70)buckets[2][1]++;else if(p>0)buckets[1][1]++;else buckets[0][1]++;});
  document.getElementById('progressDistribution').innerHTML=buckets.map(b=>{const pct=leaves.length?Math.round(b[1]/leaves.length*100):0;return `<div class="distribution-row"><div class="distribution-head"><span>${b[0]}</span><b>${pct}%</b></div><div class="distribution-track"><div class="distribution-fill" style="width:${pct}%"></div></div><div class="distribution-meta">${b[1]} 個具體行動</div></div>`}).join('');
  renderExecutionAnalysis();
- const logs=db.logs.filter(isCountableActualLog).slice(0,6);
- document.getElementById('recentLogs').innerHTML=logs.length?logs.map(l=>`<div class="listitem"><div><b>${esc(l.name||getTask(l.taskId)?.name||'未命名行動')}</b><small class="muted" style="display:block">${esc((l.time||'').slice(0,16).replace('T',' · '))} · ${+l.minutes||0} 分</small></div><button class="dangerbtn" type="button" onclick="deleteActualLog('${esc(l.id)}')">刪除紀錄</button></div>`).join(''):'<div class="empty">尚無實際投入紀錄</div>'; renderDeletedLogs(); renderWeeklyReview();
+  renderRecentActualLogs(); renderDeletedLogs(); renderWeeklyReview();
 }
 function descAll(id){let out=[],stack=[id];while(stack.length){const x=stack.pop();kids(x).forEach(c=>{out.push(c);stack.push(c.id)})}const root=getTask(id);if(root)out.unshift(root);return out}
 function openAdd(parent=null){document.getElementById('modal').style.display='flex';document.getElementById('aName').value='';document.getElementById('aLevel').value=parent?Math.min(4,(getTask(parent)?.level||1)+1):1;document.getElementById('aParent').value='';document.getElementById('aStart').value='';document.getElementById('aDue').value='';document.getElementById('aWeekly').value=0;document.getElementById('aWeeklyUnit').value='hour';syncAddParents();if(parent)document.getElementById('aParent').value=parent;syncAddFields()}
@@ -698,11 +853,11 @@ function moveTask(id){const t=getTask(id);if(!t)return;const names=db.tasks.filt
 function safeRemove(id){const t=getTask(id);if(!t)return;const c=kids(id);if(c.length){const choice=prompt(`「${t.name}」有 ${c.length} 個直接下層。\n輸入 1：刪除自己＋全部下層，但保留歷程\n輸入 2：只刪除自己，把直接下層接到原上層\n輸入 3：取消`);if(choice==='1'){deleteCascade(id);return}if(choice==='2'){const old=t.parent,newLevel=t.level;c.forEach(x=>{x.parent=old;x.level=newLevel});db.tasks=db.tasks.filter(x=>x.id!==id);selected=null;save();renderAll();toast('已刪除，上層任務已保留');return}return}if(confirm(`確定刪除「${t.name}」嗎？\n歷程紀錄會保留。`))deleteCascade(id)}
 function deleteCascade(id){const ids=descAll(id).map(x=>x.id);db.tasks=db.tasks.filter(t=>!ids.includes(t.id));if(selected&&ids.includes(selected))selected=null;save();renderAll();toast('目標已刪除；歷程紀錄保留')}
 function toggleKids(id){storeSet('o'+id,storeGet('o'+id)==='0'?'1':'0');renderTree();updateExpandToggle()}
-function closeTransientOverlays(){try{closeSettings()}catch(e){}try{closeEditModal()}catch(e){}try{closeGoalInfoModal()}catch(e){}try{closeScholarshipInfoModal()}catch(e){}try{closeModal()}catch(e){}try{closeTest()}catch(e){}document.body.style.overflow='';}
+function closeTransientOverlays(){try{closeActualLogHistory()}catch(e){}try{closeSettings()}catch(e){}try{closeEditModal()}catch(e){}try{closeGoalInfoModal()}catch(e){}try{closeScholarshipInfoModal()}catch(e){}try{closeModal()}catch(e){}try{closeTest()}catch(e){}document.body.style.overflow='';}
 function go(id){const view=document.getElementById(id);if(!view)return;closeTransientOverlays();document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));view.classList.add('active');document.querySelectorAll('.bottom-nav button').forEach(x=>{const active=x.dataset.view===id;x.classList.toggle('active',active);x.setAttribute('aria-current',active?'page':'false')});window.scrollTo({top:0,behavior:'smooth'});if(id==='activity')renderActivities();if(id==='scholarship')renderScholarships();if(id==='calendar')renderCalendar();if(id==='dash'){dashboard();updateHubContext();bindInteractionFeedback()}}
 document.querySelectorAll('.bottom-nav button').forEach(b=>b.onclick=()=>go(b.dataset.view));bindInteractionFeedback();
 try{if(document.activeElement&&/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))document.activeElement.blur();}catch(e){}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeGoalInfoModal();closeEditModal()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeActualLogHistory();closeGoalInfoModal();closeEditModal()}});
 
 function selectTodayExecution(id,planId=null){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中，請先完成或暫停');return}timer.id=id;timer.planId=planId||null;timer.elapsed=0;timer.running=false;timer.start=0;document.getElementById('timerTask').textContent='待執行：'+t.name;document.getElementById('timerTaskCancel').style.display='block';updateClock();updateTimerButtons();today();toast('已選取今日欲執行項目；尚未開始計時')}
 function cancelTodaySelection(){if(timer.running){toast('計時進行中，請先暫停或完成後再取消');return}timer={id:null,start:0,elapsed:0,running:false,planId:null};document.getElementById('timerTask').textContent='尚未選擇任務';updateClock();updateTimerButtons();today();toast('已取消今日執行選取')}
