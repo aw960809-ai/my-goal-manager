@@ -1,6 +1,6 @@
 /* V97.3.0 THU personal service worker */
-const PWA_VERSION='97.8.1';
-const PWA_SIGNATURE='thu-personal-97.8.1-unified-autofetch-health-ui';
+const PWA_VERSION='97.8.2';
+const PWA_SIGNATURE='thu-personal-97.8.2-autofetch-ui-semantic-polish';
 const CACHE_PREFIX='thu-goal-personal-v';
 const LEGACY_CACHE_PREFIX='law-goal-web-v';
 const CACHE=CACHE_PREFIX+PWA_VERSION;

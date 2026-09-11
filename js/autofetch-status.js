@@ -48,6 +48,13 @@
     }).format(d);
   }
 
+  function durationLabel(seconds){
+    const s=Math.max(0,Math.round(Number(seconds)||0));
+    if(s<60)return `${s}秒`;
+    const m=Math.floor(s/60),r=s%60;
+    return r?`${m}分${r}秒`:`${m}分`;
+  }
+
   function ageLabel(value){
     if(!value)return "無更新時間";
     const t=new Date(value).getTime();
@@ -207,41 +214,57 @@
   function activityCard(item){
     if(!item)return `<div class="gm-af-card warn"><div class="gm-af-card-head"><h4>活動雷達</h4><span>待讀取</span></div></div>`;
     const st=statusInfo(item),life=lifecycleFor("activity");
-    const retired=pickNumber(life||item.meta,["retiredThisRun"],pickNumber(item.meta,["retiredThisRun"],0));
+    const retiredThisRun=pickNumber(life||item.meta,["retiredThisRun"],pickNumber(item.meta,["retiredThisRun"],0));
+    const archivedNow=pickNumber(life||{},["count"],0);
+
+    const secondary=[
+      archivedNow>0?metric("目前封存總數",archivedNow):"",
+      retiredThisRun>0?metric("本次 AutoFetch 封存",retiredThisRun):"",
+      item.sources.failed>0?metric("來源失敗",item.sources.failed):"",
+      item.failedRetained>0?metric("失敗保留",item.failedRetained):""
+    ].filter(Boolean).join("");
+
     return `<div class="gm-af-card ${st.cls}">
       <div class="gm-af-card-head"><h4>活動雷達</h4><span>${esc(st.text)}</span></div>
       <div class="gm-af-grid">
         ${metric("最後更新",formatTime(item.updatedAt))}
         ${metric("資料筆數",item.count)}
         ${metric("來源健康",sourceText(item))}
-        ${metric("來源失敗",item.sources.failed)}
-        ${metric("本輪汰除",retired)}
-        ${metric("失敗保留",item.failedRetained)}
+        ${secondary}
       </div>
-      <p>${esc(ageLabel(item.updatedAt))}${item.failures.length?` · 最近問題：${esc(item.failures.join("；"))}`:""}</p>
+      <p class="gm-af-relative-time">${esc(ageLabel(item.updatedAt))}</p>
+      ${item.failures.length?`<div class="gm-af-issue">最近問題：${esc(item.failures.join("；"))}</div>`:""}
     </div>`;
   }
 
   function scholarshipCard(item){
     if(!item)return `<div class="gm-af-card warn"><div class="gm-af-card-head"><h4>獎學金</h4><span>待讀取</span></div></div>`;
     const st=statusInfo(item),life=lifecycleFor("scholarship"),d=item.detail||{};
-    const retired=pickNumber(life||item.meta,["retiredThisRun"],pickNumber(item.meta,["retiredThisRun"],0));
+    const retiredThisRun=pickNumber(life||item.meta,["retiredThisRun"],pickNumber(item.meta,["retiredThisRun"],0));
+    const archivedNow=pickNumber(life||{},["count"],0);
+
+    const secondary=[
+      archivedNow>0?metric("目前封存總數",archivedNow):"",
+      retiredThisRun>0?metric("本次 AutoFetch 封存",retiredThisRun):"",
+      item.sources.failed>0?metric("來源失敗",item.sources.failed):"",
+      item.failedRetained>0?metric("失敗保留",item.failedRetained):"",
+      item.duplicates>0?metric("重複合併",item.duplicates):""
+    ].filter(Boolean).join("");
+
     return `<div class="gm-af-card ${st.cls}">
       <div class="gm-af-card-head"><h4>獎學金</h4><span>${esc(st.text)}</span></div>
       <div class="gm-af-grid">
         ${metric("最後更新",formatTime(item.updatedAt))}
         ${metric("資料筆數",item.count)}
         ${metric("來源健康",sourceText(item))}
-        ${metric("來源失敗",item.sources.failed)}
         ${metric("官方自動資料",item.activeAuto)}
-        ${metric("本輪汰除",retired)}
         ${metric("資格已驗證",d.verified||0)}
         ${metric("詳細資格待補抓",d.unverified||0)}
-        ${metric("失敗保留",item.failedRetained)}
-        ${metric("重複合併",item.duplicates)}
+        ${secondary}
       </div>
-      <div class="gm-af-detail">本輪詳細資格：抓取 ${d.fetched||0} · 沿用 ${d.reused||0}${d.budgetExpired?` · 逾時 ${d.budgetExpired}`:""}${d.elapsed?` · ${d.elapsed.toFixed(1)} 秒`:""}</div>
-      <p>${esc(ageLabel(item.updatedAt))}${item.failures.length?` · 最近問題：${esc(item.failures.join("；"))}`:""}</p>
+      <div class="gm-af-detail">本輪詳細資格：抓取 ${d.fetched||0} · 沿用 ${d.reused||0}${d.budgetExpired?` · 逾時 ${d.budgetExpired}`:""}${d.elapsed?` · 約 ${durationLabel(d.elapsed)}`:""}</div>
+      <p class="gm-af-relative-time">${esc(ageLabel(item.updatedAt))}</p>
+      ${item.failures.length?`<div class="gm-af-issue">最近問題：${esc(item.failures.join("；"))}</div>`:""}
     </div>`;
   }
 
@@ -308,6 +331,8 @@
       .gm-af-card-head span{padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800}
       .gm-af-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
       .gm-af-card p,.gm-af-detail{margin:9px 0 0;font-size:11px;line-height:1.55;color:#6d7975}
+      .gm-af-relative-time{opacity:.72}
+      .gm-af-issue{margin-top:7px;font-size:11px;line-height:1.5;color:#8a6500}
       .gm-af-error{margin-top:10px;padding:9px;border-radius:12px;background:#fff4d8;color:#8a6500;font-size:11px}
       .gm-af-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:11px;font-size:11px;color:#7b8783}
       html.app-dark .gm-af-summary span,html.app-dark .gm-af-grid span{background:#17211e}
@@ -321,6 +346,30 @@
     document.getElementById("gmAutoFetchHealth")?.remove();
   }
 
+  function reorderSettingsSections(){
+    const body=document.getElementById("settingsBody");
+    const panel=document.getElementById(PANEL_ID);
+    if(!body||!panel)return;
+
+    const sections=[...body.querySelectorAll(".settings-section")];
+    const headingText=section=>String(section.querySelector("h2,h3")?.textContent||"").trim();
+    const findSection=rx=>sections.find(section=>rx.test(headingText(section)));
+
+    const update=findSection(/桌面應用程式與自動更新|程式更新/);
+    const lifecycle=findSection(/機會汰除歷程/);
+    const about=findSection(/關於系統/);
+
+    if(update&&update!==panel){
+      update.insertAdjacentElement("afterend",panel);
+    }else if(lifecycle&&lifecycle!==panel){
+      body.insertBefore(panel,lifecycle);
+    }
+
+    if(about&&about!==panel){
+      body.appendChild(about);
+    }
+  }
+
   function unifiedRender(){
     ensureStyles();
     removeLegacyPanel();
@@ -331,6 +380,7 @@
     const html=panelHtml();
     if(lifecycle)lifecycle.insertAdjacentHTML("afterend",html);
     else body.insertAdjacentHTML("beforeend",html);
+    reorderSettingsSections();
   }
 
   function installRenderHook(){
