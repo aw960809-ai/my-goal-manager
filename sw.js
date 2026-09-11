@@ -1,6 +1,6 @@
 /* V97.3.0 THU personal service worker */
-const PWA_VERSION='97.8.2';
-const PWA_SIGNATURE='thu-personal-97.8.2-autofetch-ui-semantic-polish';
+const PWA_VERSION='97.9.1';
+const PWA_SIGNATURE='thu-personal-97.9.1-toeic-goal-sync';
 const CACHE_PREFIX='thu-goal-personal-v';
 const LEGACY_CACHE_PREFIX='law-goal-web-v';
 const CACHE=CACHE_PREFIX+PWA_VERSION;
@@ -13,7 +13,8 @@ const APP_SHELL=[
   './js/scholarship.js','./js/app.js','./js/scholarship-lifecycle.js',
   './js/autofetch-health.js',
   './js/catalog-lifecycle.js',
-  './js/autofetch-status.js','./js/navigation.js','./js/pwa.js','./js/bootstrap.js'
+  './js/autofetch-status.js',
+  './js/toeic-goal-sync.js','./js/navigation.js','./js/pwa.js','./js/bootstrap.js'
 ];
 const MUTABLE_DATA=['./data/events.json','./data/activities.json','./data/scholarships.json',
   './data/activity-archive.json',
