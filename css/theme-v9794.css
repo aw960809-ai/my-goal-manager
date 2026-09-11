@@ -865,3 +865,53 @@ body .gm-toeic-head .warn{
     border-radius:20px!important;
   }
 }
+
+/* ===== V97.9.4.2 Analysis Border Alignment ===== */
+
+@media(max-width:700px){
+
+  /* Analysis page has one authoritative horizontal gutter */
+  #stats{
+    box-sizing:border-box!important;
+    padding-left:10px!important;
+    padding-right:10px!important;
+  }
+
+  /* Remove mixed legacy margins */
+  #stats>.panel,
+  #stats>.stats-grid,
+  #stats>.stats-progress-panel,
+  #stats>.stats-progress-grid{
+    width:100%!important;
+    max-width:100%!important;
+    margin-left:0!important;
+    margin-right:0!important;
+    box-sizing:border-box!important;
+  }
+
+  /* Nested major panels must align to the same outer edge */
+  #stats .stats-grid>.panel,
+  #stats .stats-progress-panel>.panel,
+  #stats .stats-progress-grid>.panel{
+    width:100%!important;
+    max-width:100%!important;
+    margin-left:0!important;
+    margin-right:0!important;
+    box-sizing:border-box!important;
+  }
+
+  /* One consistent frame system */
+  #stats .panel{
+    border:1px solid var(--ui-line)!important;
+    border-radius:20px!important;
+    box-sizing:border-box!important;
+  }
+
+  /* KPI grid stays inside the same gutter */
+  #stats .stats-kpi{
+    width:100%!important;
+    margin-left:0!important;
+    margin-right:0!important;
+    box-sizing:border-box!important;
+  }
+}
