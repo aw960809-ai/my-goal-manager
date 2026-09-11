@@ -185,12 +185,8 @@
     document.head.appendChild(s);
   }
   function injectSettings(){
-    ensureStyles();
-    const body=document.getElementById("settingsBody");
-    if(!body)return;
-    const old=document.getElementById("gmAutoFetchHealth");
-    if(old)old.remove();
-    body.insertAdjacentHTML("beforeend",panelHTML());
+    document.getElementById('gmAutoFetchHealth')?.remove();
+    if(window.GoalManagerAutoFetchStatus?.render)setTimeout(()=>window.GoalManagerAutoFetchStatus.render(),0);
   }
   function compactHTML(){
     const a=state.activities,s=state.scholarships;
