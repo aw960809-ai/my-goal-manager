@@ -1,8 +1,9 @@
 /* THU Goal Manager - News x TOEIC Goal Sync */
 (function(){
   "use strict";
-  const VERSION="97.9.1";
-  const API="https://news-toeic-epmqi2.v2.appdeploy.ai/api/goal-events";
+  const VERSION="97.9.2";
+  const BRIDGE_ORIGIN="https://news-toeic-epmqi2.v2.appdeploy.ai";
+  const BRIDGE_URL=BRIDGE_ORIGIN+"/?goalSyncBridge=1";
   const KEY="GoalManagerToeicSync::channel";
   const PROCESSED_KEY="GoalManagerToeicSync::processed";
   const STATUS_KEY="GoalManagerToeicSync::status";
@@ -92,12 +93,63 @@
     };
   }
 
+  function bridgeFrame(){
+    let frame=document.getElementById("gmToeicBridgeFrame");
+    if(frame)return frame;
+    frame=document.createElement("iframe");
+    frame.id="gmToeicBridgeFrame";
+    frame.src=BRIDGE_URL;
+    frame.tabIndex=-1;
+    frame.setAttribute("aria-hidden","true");
+    frame.style.cssText="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;border:0;left:-9999px;top:-9999px";
+    document.body.appendChild(frame);
+    return frame;
+  }
+
   async function fetchEvents(code){
-    const r=await fetch(API+"?channelId="+encodeURIComponent(code)+"&_="+Date.now(),{cache:"no-store",mode:"cors"});
-    if(!r.ok)throw new Error("Goal Sync HTTP "+r.status);
-    const d=await r.json();
-    if(!d?.ok||!Array.isArray(d.events))throw new Error(d?.error||"Goal Sync 回傳格式錯誤");
-    return d.events;
+    const requestId="gmreq-"+Date.now()+"-"+Math.random().toString(36).slice(2);
+    const frame=bridgeFrame();
+    return new Promise((resolve,reject)=>{
+      let sent=false;
+      const cleanup=()=>{
+        clearTimeout(timer);
+        window.removeEventListener("message",onMessage);
+      };
+      const send=()=>{
+        if(sent||!frame.contentWindow)return;
+        sent=true;
+        frame.contentWindow.postMessage({
+          type:"news-toeic-goal-sync-request",
+          requestId,
+          channelId:code
+        },BRIDGE_ORIGIN);
+      };
+      const onMessage=event=>{
+        if(event.origin!==BRIDGE_ORIGIN)return;
+        const d=event.data||{};
+        if(d.type==="news-toeic-goal-sync-ready"){
+          frame.dataset.ready="1";
+          send();
+          return;
+        }
+        if(d.type!=="news-toeic-goal-sync-response"||d.requestId!==requestId)return;
+        cleanup();
+        if(!d.ok){reject(new Error(d.error||"Goal Sync Bridge 失敗"));return}
+        const payload=d.data;
+        if(!payload?.ok||!Array.isArray(payload.events)){
+          reject(new Error(payload?.error||"Goal Sync Bridge 回傳格式錯誤"));
+          return;
+        }
+        resolve(payload.events);
+      };
+      const timer=setTimeout(()=>{
+        cleanup();
+        reject(new Error("Goal Sync Bridge 連線逾時"));
+      },15000);
+      window.addEventListener("message",onMessage);
+      if(frame.dataset.ready==="1")send();
+      else frame.addEventListener("load",()=>setTimeout(send,250),{once:true});
+    });
   }
 
   async function sync(options={}){
