@@ -1,6 +1,6 @@
 /* V97.3.0 THU personal service worker */
-const PWA_VERSION='97.7.2';
-const PWA_SIGNATURE='thu-personal-97.7.2-runtime-collision-cleanup';
+const PWA_VERSION='97.8.0';
+const PWA_SIGNATURE='thu-personal-97.8.0-autofetch-health-center';
 const CACHE_PREFIX='thu-goal-personal-v';
 const LEGACY_CACHE_PREFIX='law-goal-web-v';
 const CACHE=CACHE_PREFIX+PWA_VERSION;
@@ -12,7 +12,8 @@ const APP_SHELL=[
   './js/security.js','./js/store.js','./js/settings.js','./js/activity.js',
   './js/scholarship.js','./js/app.js','./js/scholarship-lifecycle.js',
   './js/autofetch-health.js',
-  './js/catalog-lifecycle.js','./js/navigation.js','./js/pwa.js','./js/bootstrap.js'
+  './js/catalog-lifecycle.js',
+  './js/autofetch-status.js','./js/navigation.js','./js/pwa.js','./js/bootstrap.js'
 ];
 const MUTABLE_DATA=['./data/events.json','./data/activities.json','./data/scholarships.json',
   './data/activity-archive.json',

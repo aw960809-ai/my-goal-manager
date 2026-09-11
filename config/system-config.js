@@ -1,6 +1,6 @@
 /* V96 central policy configuration. Adjust policy here without touching UI rendering. */
 window.AppConfig = Object.freeze({
-  version: 'V97.7.2',
+  version: 'V97.8.0',
   data: {
     activities: './data/activities.json',
     scholarships: './data/scholarships.json',
