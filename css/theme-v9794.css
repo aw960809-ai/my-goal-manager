@@ -826,3 +826,42 @@ body .gm-toeic-head .warn{
     min-height:100px!important;
   }
 }
+
+/* ===== V97.9.4.1 Dashboard Border Alignment ===== */
+
+@media(max-width:700px){
+
+  /* Dashboard uses one authoritative horizontal gutter */
+  #dash{
+    padding-left:10px!important;
+    padding-right:10px!important;
+  }
+
+  /* Direct dashboard panels must not add a second margin */
+  #dash>.panel{
+    margin-left:0!important;
+    margin-right:0!important;
+    width:100%!important;
+  }
+
+  /* Nested overview panels follow exactly the same outer boundary */
+  #dash .overview-main{
+    width:100%!important;
+    margin-left:0!important;
+    margin-right:0!important;
+  }
+
+  #dash .overview-main>.panel{
+    width:100%!important;
+    margin-left:0!important;
+    margin-right:0!important;
+  }
+
+  /* All major dashboard frames share one border system */
+  #dash .overview-main>.panel,
+  #dash>.decision-panel,
+  #dash>.panel{
+    border:1px solid var(--ui-line)!important;
+    border-radius:20px!important;
+  }
+}
