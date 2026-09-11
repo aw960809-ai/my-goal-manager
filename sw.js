@@ -1,13 +1,13 @@
 /* V97.3.0 THU personal service worker */
-const PWA_VERSION='97.9.2';
-const PWA_SIGNATURE='thu-personal-97.9.2-toeic-goal-sync-bridge';
+const PWA_VERSION='97.9.3';
+const PWA_SIGNATURE='thu-personal-97.9.3-ui-refresh';
 const CACHE_PREFIX='thu-goal-personal-v';
 const LEGACY_CACHE_PREFIX='law-goal-web-v';
 const CACHE=CACHE_PREFIX+PWA_VERSION;
 const APP_SHELL=[
   './','./index.html','./manifest.webmanifest','./icon.svg',
   './icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png',
-  './404.html','./css/base.css','./css/app-ui.css','./config/system-config.js',
+  './404.html','./css/base.css','./css/app-ui.css','./css/theme-v9793.css','./config/system-config.js',
   './config/profiles/personal-thu.js','./js/core/runtime-profile.js','./js/core/data-boundary.js',
   './js/security.js','./js/store.js','./js/settings.js','./js/activity.js',
   './js/scholarship.js','./js/app.js','./js/scholarship-lifecycle.js',

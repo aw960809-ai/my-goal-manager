@@ -1,0 +1,314 @@
+/* V97.9.3 THU Goal Manager UI Refresh */
+:root{
+  --ui-green:#0D5C46;
+  --ui-green-2:#14735A;
+  --ui-gold:#C8A96B;
+  --ui-ink:#263B34;
+  --ui-muted:#71817A;
+  --ui-bg:#F5F7F4;
+  --ui-surface:#FFFFFF;
+  --ui-soft:#F1F5F2;
+  --ui-line:#DCE5E0;
+  --ui-focus:rgba(13,92,70,.18);
+  --ui-shadow:0 10px 30px rgba(27,61,50,.065);
+  --ui-shadow-hover:0 15px 38px rgba(27,61,50,.11);
+}
+
+body{
+  background:
+    radial-gradient(circle at 10% 0,rgba(13,92,70,.055),transparent 28rem),
+    linear-gradient(180deg,#F8FAF8 0%,#F5F7F4 45%,#F2F5F3 100%);
+}
+
+.panel,.card,.activity-card,.scholarship-card,
+.goal-tree-panel,.calendar-month-grid{
+  border-color:var(--ui-line)!important;
+  box-shadow:var(--ui-shadow)!important;
+}
+
+.panel,.card{
+  background:rgba(255,255,255,.97);
+}
+
+.overview-head::before,
+.stats-hero::before{
+  background:linear-gradient(180deg,var(--ui-green),var(--ui-gold))!important;
+}
+
+.overview-head h2,
+.stats-hero h2,
+.big,
+.calendar-title b{
+  color:var(--ui-green)!important;
+}
+
+.section-title h2,
+.panel h2,
+.panel h3{
+  letter-spacing:-.018em;
+}
+
+.btn,.softbtn,.dangerbtn,.calendar-nav button{
+  min-height:44px;
+  border-radius:13px!important;
+  font-weight:760;
+}
+
+.btn.primary{
+  background:linear-gradient(135deg,#14735A,#0D5C46)!important;
+  border-color:#0D5C46!important;
+  box-shadow:0 7px 18px rgba(13,92,70,.16);
+}
+
+.btn.gold{
+  color:#493916!important;
+  background:linear-gradient(135deg,#DEC58E,#C8A96B)!important;
+  border-color:#C5A45F!important;
+}
+
+.dangerbtn{
+  color:#B85C55!important;
+  background:#FFF8F7!important;
+  border-color:#E8C4C0!important;
+}
+
+.badge,.tier-chip{
+  border-radius:999px!important;
+  font-weight:800!important;
+}
+
+/* Dashboard */
+#dash .cards .card{
+  position:relative;
+  overflow:hidden;
+}
+
+#dash .cards .card::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:3px;
+  background:linear-gradient(90deg,#0D5C46,#C8A96B);
+  opacity:.72;
+}
+
+#dash .decision-panel{
+  border-color:#D7E4DE!important;
+  background:linear-gradient(135deg,#FFFFFF,#F7FAF8)!important;
+}
+
+/* Goal map */
+#goals .goal-tree-panel{
+  background:linear-gradient(180deg,#FFFFFF,#FBFCFB)!important;
+}
+
+#goals .goal-search{
+  border-color:#D6E2DC!important;
+  background:#F8FAF9!important;
+}
+
+/* Activity */
+#activity .activity-card.fit-high{
+  border-left-color:#0D5C46!important;
+}
+
+#activity .activity-card.fit-mid{
+  border-left-color:#C8A96B!important;
+}
+
+#activity .activity-score-block{
+  background:#F6F9F7!important;
+  border-color:#DCE5E0!important;
+}
+
+/* Scholarship */
+#scholarship .scholarship-card{
+  background:linear-gradient(180deg,#FFFFFF,#FCFDFB)!important;
+}
+
+#scholarship .notice{
+  border-color:#E5D8BA!important;
+  background:#FCF8EF!important;
+  color:#725A28!important;
+}
+
+
+/* ===== V97.9.3 Settings ===== */
+.settings-modal{
+  background:rgba(13,35,29,.38)!important;
+  backdrop-filter:blur(8px);
+}
+
+.settings-box{
+  border:1px solid rgba(13,92,70,.12)!important;
+  border-radius:28px!important;
+  background:#F8FAF8!important;
+  box-shadow:0 30px 90px rgba(20,50,42,.23)!important;
+}
+
+.settings-head{
+  border-bottom:1px solid #DCE5E0!important;
+  background:linear-gradient(180deg,#FFFFFF,#FAFCFB)!important;
+}
+
+.settings-head h2,
+.settings-section-head h3{
+  color:#0D5C46!important;
+}
+
+.settings-section{
+  margin-bottom:14px!important;
+  padding:17px!important;
+  border:1px solid #DCE5E0!important;
+  border-radius:20px!important;
+  background:#FFFFFF!important;
+  box-shadow:0 5px 20px rgba(20,50,42,.035)!important;
+}
+
+.settings-row select,
+.settings-row input{
+  border-color:#D9E4DF!important;
+  border-radius:12px!important;
+  background:#F8FAF9!important;
+}
+
+.about-version{
+  border:1px solid #DFE8E4!important;
+  border-radius:16px!important;
+  background:linear-gradient(
+    135deg,
+    #F7FAF8,
+    #F9F4E8
+  )!important;
+}
+
+.about-version b{
+  color:#0D5C46!important;
+}
+
+/* ===== News × TOEIC Goal Sync ===== */
+body .gm-toeic-sync{
+  margin-top:16px!important;
+  padding:18px!important;
+  border:1px solid #D5E3DC!important;
+  border-radius:21px!important;
+  background:linear-gradient(
+    135deg,
+    rgba(13,92,70,.055),
+    #FFFFFF 52%,
+    rgba(200,169,107,.08)
+  )!important;
+  box-shadow:0 10px 28px rgba(20,50,42,.055)!important;
+}
+
+body .gm-toeic-head h3{
+  color:#0D5C46!important;
+  font-size:20px!important;
+}
+
+body .gm-toeic-head p{
+  color:#71817A!important;
+  line-height:1.55;
+}
+
+body .gm-toeic-head .ok{
+  display:inline-flex;
+  align-items:center;
+  min-height:28px;
+  padding:5px 10px;
+  border:1px solid #C8DED3;
+  border-radius:999px;
+  color:#0C6B4F!important;
+  background:#EDF7F2;
+}
+
+body .gm-toeic-head .warn{
+  display:inline-flex;
+  align-items:center;
+  min-height:28px;
+  padding:5px 10px;
+  border:1px solid #E4D3AE;
+  border-radius:999px;
+  color:#8C681B!important;
+  background:#FBF5E8;
+}
+
+body .gm-toeic-sync input{
+  min-height:47px;
+  border:1px solid #D9E4DF!important;
+  border-radius:13px!important;
+  background:#F7FAF8!important;
+  color:#29433A!important;
+}
+
+body .gm-toeic-actions{
+  display:grid!important;
+  grid-template-columns:1.15fr 1fr 1fr;
+  gap:8px!important;
+}
+
+body .gm-toeic-actions .btn{
+  min-height:46px!important;
+}
+
+body .gm-toeic-status{
+  margin-top:12px!important;
+  padding:11px 12px!important;
+  border:1px solid #E2E9E6;
+  border-radius:13px!important;
+  background:#F5F8F6!important;
+  color:#355047!important;
+}
+
+/* ===== Bottom Navigation ===== */
+.bottom-nav{
+  border-top:1px solid rgba(13,92,70,.1)!important;
+  background:rgba(255,255,255,.94)!important;
+  box-shadow:0 -10px 34px rgba(25,55,45,.085)!important;
+  backdrop-filter:blur(18px) saturate(130%);
+}
+
+.bottom-nav button{
+  border-radius:14px!important;
+}
+
+.bottom-nav button.active{
+  color:#0D5C46!important;
+  background:#EDF5F1!important;
+}
+
+.bottom-nav button.active .bn-icon{
+  color:#C8A96B!important;
+}
+
+.settings-trigger{
+  color:#0D5C46!important;
+  background:rgba(255,255,255,.94)!important;
+  box-shadow:0 8px 24px rgba(20,50,42,.09)!important;
+}
+
+/* ===== Mobile ===== */
+@media(max-width:700px){
+  .settings-box{
+    border-radius:24px 24px 0 0!important;
+  }
+
+  .settings-section{
+    padding:15px!important;
+    border-radius:18px!important;
+  }
+
+  body .gm-toeic-sync{
+    padding:16px!important;
+  }
+
+  body .gm-toeic-actions{
+    grid-template-columns:1fr 1fr!important;
+  }
+
+  body .gm-toeic-actions .btn:last-child{
+    grid-column:1/-1;
+  }
+}

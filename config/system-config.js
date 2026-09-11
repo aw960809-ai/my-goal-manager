@@ -1,6 +1,6 @@
 /* V96 central policy configuration. Adjust policy here without touching UI rendering. */
 window.AppConfig = Object.freeze({
-  version: 'V97.9.2',
+  version: 'V97.9.3',
   data: {
     activities: './data/activities.json',
     scholarships: './data/scholarships.json',
@@ -19,3 +19,17 @@ window.AppConfig = Object.freeze({
 });
 window.ActivityRules = window.AppConfig.activity;
 window.ScholarshipRules = window.AppConfig.scholarship;
+
+
+/* V97.9.3 visual theme loader */
+(() => {
+  const id = 'thu-theme-v9793';
+  if (document.getElementById(id)) return;
+
+  const link = document.createElement('link');
+  link.id = id;
+  link.rel = 'stylesheet';
+  link.href = './css/theme-v9793.css';
+
+  document.head.appendChild(link);
+})();
