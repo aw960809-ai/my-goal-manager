@@ -1,6 +1,6 @@
 {
   "meta": {
-    "updatedAt": "2026-09-12T05:55:00.124799+00:00",
+    "updatedAt": "2026-09-13T06:17:56.439765+00:00",
     "sources": 5,
     "events": 22,
     "ok": 11,
@@ -14,15 +14,15 @@
     "failedSources": 0,
     "rejectedItems": 0,
     "fetchFailedItems": 0,
-    "skippedPast": 18,
+    "skippedPast": 17,
     "fitFiltered": 23,
     "semanticDuplicates": 0,
-    "retiredThisRun": 1,
+    "retiredThisRun": 0,
     "revivedThisRun": 0,
     "archiveCount": 2,
     "retainedOnFailure": 0,
     "carriedMissing": 5,
-    "needsReview": 3,
+    "needsReview": 5,
     "lifecyclePolicy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "events": [
@@ -156,7 +156,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026080015",
-        "fetchedAt": "2026-09-12T05:53:16.264795+00:00"
+        "fetchedAt": "2026-09-13T06:16:15.905350+00:00"
       },
       "fitScore": 96,
       "fitTier": "高適配",
@@ -178,7 +178,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-09-12T05:55:00.124382+00:00",
+      "lastSeen": "2026-09-13T06:17:56.439273+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -232,7 +232,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090016",
-        "fetchedAt": "2026-09-12T05:53:19.072102+00:00"
+        "fetchedAt": "2026-09-13T06:16:19.531493+00:00"
       },
       "fitScore": 78,
       "fitTier": "高適配",
@@ -254,7 +254,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-09-12T05:55:00.124382+00:00",
+      "lastSeen": "2026-09-13T06:17:56.439273+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -308,7 +308,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026080023",
-        "fetchedAt": "2026-09-12T05:53:20.145052+00:00"
+        "fetchedAt": "2026-09-13T06:16:20.595507+00:00"
       },
       "fitScore": 73,
       "fitTier": "高適配",
@@ -331,7 +331,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-09-12T05:55:00.124382+00:00",
+      "lastSeen": "2026-09-13T06:17:56.439273+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -385,7 +385,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026070017",
-        "fetchedAt": "2026-09-12T05:53:21.551502+00:00"
+        "fetchedAt": "2026-09-13T06:16:22.005943+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -408,7 +408,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-09-12T05:55:00.124382+00:00",
+      "lastSeen": "2026-09-13T06:17:56.439273+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -462,7 +462,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026070016",
-        "fetchedAt": "2026-09-12T05:53:22.992468+00:00"
+        "fetchedAt": "2026-09-13T06:16:23.409608+00:00"
       },
       "fitScore": 48,
       "fitTier": "探索",
@@ -486,7 +486,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-10T06:03:37.274328+00:00",
-      "lastSeen": "2026-09-12T05:55:00.124382+00:00",
+      "lastSeen": "2026-09-13T06:17:56.439273+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -540,7 +540,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090035",
-        "fetchedAt": "2026-09-12T05:53:30.166657+00:00"
+        "fetchedAt": "2026-09-13T06:16:30.694096+00:00"
       },
       "fitScore": 62,
       "fitTier": "中適配",
@@ -562,7 +562,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-10T06:03:37.274328+00:00",
-      "lastSeen": "2026-09-12T05:55:00.124382+00:00",
+      "lastSeen": "2026-09-13T06:17:56.439273+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -616,7 +616,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090018",
-        "fetchedAt": "2026-09-12T05:53:31.169113+00:00"
+        "fetchedAt": "2026-09-13T06:16:31.719435+00:00"
       },
       "fitScore": 39,
       "fitTier": "探索",
@@ -637,7 +637,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-10T06:03:37.274328+00:00",
-      "lastSeen": "2026-09-12T05:55:00.124382+00:00",
+      "lastSeen": "2026-09-13T06:17:56.439273+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -691,7 +691,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090003",
-        "fetchedAt": "2026-09-12T05:53:33.273613+00:00"
+        "fetchedAt": "2026-09-13T06:16:33.800410+00:00"
       },
       "fitScore": 39,
       "fitTier": "探索",
@@ -712,7 +712,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-10T06:03:37.274328+00:00",
-      "lastSeen": "2026-09-12T05:55:00.124382+00:00",
+      "lastSeen": "2026-09-13T06:17:56.439273+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -766,7 +766,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090024",
-        "fetchedAt": "2026-09-12T05:53:36.981534+00:00"
+        "fetchedAt": "2026-09-13T06:16:37.509348+00:00"
       },
       "fitScore": 62,
       "fitTier": "中適配",
@@ -788,7 +788,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-09-12T05:55:00.124382+00:00",
+      "lastSeen": "2026-09-13T06:17:56.439273+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -842,7 +842,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "taichung_job",
         "act": "5583",
-        "fetchedAt": "2026-09-12T05:53:50.421453+00:00"
+        "fetchedAt": "2026-09-13T06:16:51.046771+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -865,7 +865,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-09-12T05:55:00.124382+00:00",
+      "lastSeen": "2026-09-13T06:17:56.439273+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "taichung_job",
@@ -913,7 +913,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-09-12T05:55:00.116732+00:00"
+        "fetchedAt": "2026-09-13T06:17:56.429356+00:00"
       },
       "fitScore": 94,
       "fitTier": "高適配",
@@ -935,7 +935,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-09-12T05:55:00.124382+00:00",
+      "lastSeen": "2026-09-13T06:17:56.439273+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "mofa_working_holiday",
@@ -1003,8 +1003,8 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
       "lastSeen": "2026-09-10T17:03:47.493023+00:00",
-      "missCount": 1,
-      "needsReview": false,
+      "missCount": 2,
+      "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
         "legal_academic",
@@ -1081,8 +1081,8 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
       "lastSeen": "2026-09-10T17:03:47.493023+00:00",
-      "missCount": 1,
-      "needsReview": false,
+      "missCount": 2,
+      "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
         "legal_academic",
@@ -1155,7 +1155,7 @@
       "hardFilterReason": "",
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
-      "missCount": 5,
+      "missCount": 6,
       "needsReview": true,
       "lastSeen": "2026-09-09T12:50:00.937440+00:00",
       "sourceId": "thu_official",
@@ -1229,7 +1229,7 @@
       "hardFilterReason": "",
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
-      "missCount": 5,
+      "missCount": 6,
       "needsReview": true,
       "lastSeen": "2026-09-09T12:50:00.937440+00:00",
       "sourceId": "thu_official",
@@ -1305,7 +1305,7 @@
       "hardFilterReason": "",
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
-      "missCount": 5,
+      "missCount": 6,
       "needsReview": true,
       "lastSeen": "2026-09-09T12:50:00.937440+00:00",
       "sourceId": "thu_official",
