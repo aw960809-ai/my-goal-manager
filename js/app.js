@@ -1022,13 +1022,19 @@ function getTodayItems(){
  });
  const planned=base.filter(t=>plannedIds.has(String(t.id)));
  const rest=base.filter(t=>!plannedIds.has(String(t.id))).sort((a,b)=>{const ar=currentWeekSummary(a),br=currentWeekSummary(b);return br.remaining-ar.remaining||ar.target-br.target||calc(a)-calc(b)});
- return [...planned,...rest].slice(0,8);
+ return [...planned,...rest];
 }
+/* V97.9.6 execution five-item preview */
+let todayItemsExpanded=false;
 function today(){
- const a=getTodayItems();
- document.getElementById('todayList').innerHTML=a.map(t=>{const isSel=String(timer.id)===String(t.id),w=currentWeekSummary(t),plans=(Array.isArray(db.executionPlans)?db.executionPlans:[]).filter(x=>String(x.taskId)===String(t.id)&&activeExecutionPlan(x)).sort((x,y)=>(x.date+' '+x.time).localeCompare(y.date+' '+y.time)),todayPlan=plans.find(x=>x.date===todayKey());return `<div class="listitem ${isSel?'today-item-selected':''}"><div style="display:flex;gap:9px;align-items:flex-start"><span class="today-select-icon" aria-hidden="true">${isSel?'✓':'○'}</span><div><b>${esc(t.name)}</b><small class="muted" style="display:block">${todayPlan?`今日 ${esc(todayPlan.time)} · 預計 ${esc(todayPlan.minutes)} 分 · `:''}本週 ${w.actual}/${w.target} 分 · 剩餘 ${w.remaining} 分 · 累計 ${calc(t)}% · ${esc(ancestors(t.id).map(x=>x.name).join(' → '))}</small></div></div><div class="today-actions">${isSel?'<span class="today-selected-label">● 已選取</span>':''}<button class="btn" onclick="selectTodayExecution('${t.id}','${todayPlan?esc(todayPlan.id):''}')">${isSel?'重新選取':'選取'}</button><button class="btn gold" onclick="startTodayExecution('${t.id}','${todayPlan?esc(todayPlan.id):''}')">開始</button></div></div>`}).join('')||'<div class="empty">目前沒有可投入的具體實現方式。</div>';
+ const all=getTodayItems(),a=todayItemsExpanded?all:all.slice(0,5);
+ const list=document.getElementById('todayList');if(!list)return;
+ list.innerHTML=a.map(t=>{const isSel=String(timer.id)===String(t.id),w=currentWeekSummary(t),plans=(Array.isArray(db.executionPlans)?db.executionPlans:[]).filter(x=>String(x.taskId)===String(t.id)&&activeExecutionPlan(x)).sort((x,y)=>(x.date+' '+x.time).localeCompare(y.date+' '+y.time)),todayPlan=plans.find(x=>x.date===todayKey());return `<div class="listitem ${isSel?'today-item-selected':''}"><div style="display:flex;gap:9px;align-items:flex-start"><span class="today-select-icon" aria-hidden="true">${isSel?'✓':'○'}</span><div><b>${esc(t.name)}</b><small class="muted" style="display:block">${todayPlan?`今日 ${esc(todayPlan.time)} · 預計 ${esc(todayPlan.minutes)} 分 · `:''}本週 ${w.actual}/${w.target} 分 · 剩餘 ${w.remaining} 分 · 累計 ${calc(t)}% · ${esc(ancestors(t.id).map(x=>x.name).join(' → '))}</small></div></div><div class="today-actions">${isSel?'<span class="today-selected-label">● 已選取</span>':''}<button class="btn" onclick="selectTodayExecution('${t.id}','${todayPlan?esc(todayPlan.id):''}')">${isSel?'重新選取':'選取'}</button><button class="btn gold" onclick="startTodayExecution('${t.id}','${todayPlan?esc(todayPlan.id):''}')">開始</button></div></div>`}).join('')||'<div class="empty">目前沒有可投入的具體實現方式。</div>';
+ if(all.length>5)list.insertAdjacentHTML('beforeend',`<div style="display:flex;justify-content:center;padding:10px 0 2px"><button class="btn" type="button" onclick="toggleTodayItemsPreview()">${todayItemsExpanded?'收合為 5 項':`顯示全部（${all.length} 項）`}</button></div>`);
  renderPlannedQueue();
 }
+function toggleTodayItemsPreview(){todayItemsExpanded=!todayItemsExpanded;today()}
+
 function timerLoop(){if(timer.running){updateClock();if(document.getElementById('executionAnalysis'))renderExecutionAnalysis();setTimeout(timerLoop,500)}}
 function updateClock(){const ms=timer.elapsed+(timer.running?Date.now()-timer.start:0),ss=Math.floor(ms/1000),h=Math.floor(ss/3600),m=Math.floor((ss%3600)/60),s=ss%60;document.getElementById('clock').textContent=[h,m,s].map(x=>String(x).padStart(2,'0')).join(':')}
 async function exportDB(){
