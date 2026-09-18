@@ -187,6 +187,7 @@ jobs:
           mkdir -p _site
           cp index.html 404.html manifest.webmanifest sw.js icon.svg README.md _site/
           cp -r css js config data _site/
+          cp -r apps _site/
           test -f _site/data/activities.json
           test -f _site/data/scholarships.json
       - name: Configure GitHub Pages
