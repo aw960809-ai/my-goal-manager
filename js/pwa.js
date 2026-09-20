@@ -88,13 +88,8 @@ window.PWA=(function(){
       const sameSignature=!remote?.signature||!current?.signature||remote.signature===current.signature;
       if(sameVersion&&sameSignature){
         hideUpdate();
-        if(remote.version!==CURRENT_VERSION){
-          setUpdateUI('update',`V${remote.version} 已接管，正在重新載入…`);
-          setTimeout(()=>location.reload(),80);
-        }else{
-          const time=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
-          setUpdateUI('ok',`目前已是最新版本 V${remote.version} · ${time}`);
-        }
+        const time=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+        setUpdateUI('ok',`目前已是最新版本 V${remote.version} · ${time}`);
         return;
       }
       if(registration?.waiting){
@@ -220,7 +215,6 @@ window.PWA=(function(){
       const remoteVersion=String(remote.version||'').replace(/^V/,'');
       const workerVersion=String(currentVersion||'').replace(/^V/,'');
       const changed=remoteVersion!==workerVersion ||
-        remoteVersion!==pageVersion ||
         (remote.signature&&currentSignature&&remote.signature!==currentSignature);
 
       if(!changed){
@@ -229,15 +223,6 @@ window.PWA=(function(){
           const time=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
           setUpdateUI('ok',`目前已是最新版本 V${remote.version} · ${time}`);
         }
-        return true;
-      }
-
-      // If the worker is already current but this page is stale, reloading is the
-      // only correct settlement action. Do not falsely report "latest".
-      if(remoteVersion===workerVersion && remoteVersion!==pageVersion){
-        setUpdateUI('update',`程式頁面仍是 V${pageVersion}，正在切換至 V${remoteVersion}…`);
-        showUpdate();
-        setTimeout(()=>location.reload(),120);
         return true;
       }
 
