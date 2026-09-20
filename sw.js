@@ -1,6 +1,6 @@
 /* V97.3.0 THU personal service worker */
-const PWA_VERSION='97.9.8';
-const PWA_SIGNATURE='thu-personal-97.9.8-update-loop-fix';
+const PWA_VERSION='97.9.9';
+const PWA_SIGNATURE='thu-personal-97.9.9-icon-refresh';
 const CACHE_PREFIX='thu-goal-personal-v';
 const LEGACY_CACHE_PREFIX='law-goal-web-v';
 const CACHE=CACHE_PREFIX+PWA_VERSION;
