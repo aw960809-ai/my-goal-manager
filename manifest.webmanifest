@@ -1,11 +1,11 @@
 {
-  "id": "./",
+  "id": "/my-goal-manager/",
   "name": "個人目標與學習行動管理系統",
   "short_name": "目標管理",
   "description": "個人目標、學習、活動、行事曆與執行管理系統",
   "lang": "zh-Hant",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/my-goal-manager/",
+  "scope": "/my-goal-manager/",
   "display": "standalone",
   "display_override": [
     "window-controls-overlay",
