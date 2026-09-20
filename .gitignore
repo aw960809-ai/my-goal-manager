@@ -15,3 +15,6 @@ __pycache__/
 
 # Local build output
 _site/
+migration/incoming/*.json
+migration/incoming/*.zip
+migration/incoming/*.bak
