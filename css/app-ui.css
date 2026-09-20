@@ -443,3 +443,15 @@ html.app-dark .actual-history-summary{background:#1e2a26}
  .actual-history-day>summary{padding:12px}
  .actual-history-row{padding:11px 10px}
 }
+
+/* V97.10.3 UI feedback hardening — CSS only, no image-based button feedback. */
+button,.btn,.softbtn,.dangerbtn,.settings-trigger,.bottom-nav button,[role="button"]{
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  transition:transform .08s ease,filter .12s ease,box-shadow .12s ease,background-color .12s ease!important;
+}
+button:not(:disabled):active,.btn:not(:disabled):active,.softbtn:not(:disabled):active,.dangerbtn:not(:disabled):active,
+.settings-trigger:not(:disabled):active,.bottom-nav button:not(:disabled):active,.is-pressed{
+  transform:scale(.975);filter:brightness(.96)
+}
+.tap-flash{box-shadow:inset 0 0 0 999px rgba(0,86,59,.055)!important}
+button:disabled,.btn:disabled{opacity:.48;cursor:default;transform:none!important;filter:none!important}

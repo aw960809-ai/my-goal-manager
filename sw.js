@@ -1,11 +1,11 @@
 /* V97.3.0 THU personal service worker */
-const PWA_VERSION='97.10.2';
-const PWA_SIGNATURE='thu-personal-97.10.2-original-icons';
+const PWA_VERSION='97.10.3';
+const PWA_SIGNATURE='thu-personal-97.10.3-ui-update';
 const CACHE_PREFIX='thu-goal-personal-v';
 const LEGACY_CACHE_PREFIX='law-goal-web-v';
 const CACHE=CACHE_PREFIX+PWA_VERSION;
 const APP_SHELL=[
-  './','./index.html','./manifest.webmanifest','./icon.svg',
+  './','./index.html','./manifest-original.webmanifest','./icon.svg','./icon-original-192.png','./icon-original-512.png','./apple-touch-original.png',
   './icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png',
   './404.html','./css/base.css','./css/app-ui.css','./css/theme-v9793.css','./css/theme-v9794.css','./css/theme-v9795.css','./config/system-config.js',
   './config/profiles/personal-thu.js','./js/core/runtime-profile.js','./js/core/data-boundary.js',
@@ -14,7 +14,7 @@ const APP_SHELL=[
   './js/autofetch-health.js',
   './js/catalog-lifecycle.js',
   './js/autofetch-status.js',
-  './js/toeic-goal-sync.js','./js/navigation.js','./js/pwa.js','./js/bootstrap.js'
+  './js/toeic-goal-sync.js','./js/navigation.js','./js/pwa.js','./js/ui-feedback.js','./js/bootstrap.js'
 ];
 const MUTABLE_DATA=['./data/events.json','./data/activities.json','./data/scholarships.json',
   './data/activity-archive.json',
