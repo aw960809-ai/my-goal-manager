@@ -47,13 +47,18 @@ function wordCount(t=''){return(t.match(/\b[\w'-]+\b/g)||[]).length}
 function speech(text,lang='en-US'){if(!('speechSynthesis'in window))return toast('此裝置不支援語音播放');speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=lang;u.rate=.94;speechSynthesis.speak(u)}
 function generated(){return load(KEYS.generated,[])}
 function sessions(){return load(KEYS.sessions,[])}
+function analyticsSessions(){
+ const rows=sessions(),seen=new Set();
+ return rows.filter(row=>{const id=String(row?.id||'');if(!id)return true;if(seen.has(id))return false;seen.add(id);return true});
+}
+function displayWpm(value){const n=Number(value);return n>=40&&n<=450?`${Math.round(n)} WPM`:'未計入'}
 function newsMistakes(){return load(KEYS.mistakes,[])}
 function partSessions(){return load(KEYS.partSessions,[])}
 function partMistakes(){return load(KEYS.partMistakes,[])}
 function mockHistory(){return load(KEYS.mockHistory,[])}
 function allLessons(){return[offlineLesson,...generated()]}
-function accuracy(){const ss=sessions(),t=ss.reduce((n,s)=>n+(Number(s.total)||0),0);return t?Math.round(ss.reduce((n,s)=>n+(Number(s.correct)||0),0)/t*100):0}
-function avgWpm(){const v=sessions().map(s=>Number(s.wpm)).filter(x=>x>=40&&x<=450);return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0}
+function accuracy(){const ss=analyticsSessions(),t=ss.reduce((n,s)=>n+(Number(s.total)||0),0);return t?Math.round(ss.reduce((n,s)=>n+(Number(s.correct)||0),0)/t*100):0}
+function avgWpm(){const v=analyticsSessions().map(s=>Number(s.wpm)).filter(x=>x>=40&&x<=450);return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0}
 function targetWords(){const a=accuracy(),w=avgWpm();if(!w)return'250–400';if(w<95||a<65)return'180–250';if(w<120||a<75)return'250–350';if(w<140||a<85)return'300–450';return'450–650'}
 
 async function loadNews(){
@@ -161,9 +166,9 @@ function reviewPage(){
  const active=all.filter(x=>x.status!=='mastered');
  return`<section class="hero"><p class="eyebrow">SPACED REVIEW</p><h2>錯題與複習</h2><p>既有 AppDeploy 錯題匯入後會保留狀態。GitHub 版新錯題同樣採 1 → 3 → 7 日複習節奏。</p></section><div class="section-head"><h3>待處理</h3><span class="badge">${active.length} 題</span></div><section class="grid">${active.length?active.slice(-30).reverse().map((m,i)=>`<article class="card review-row"><div><span class="badge">${esc(m.question?.part||`Part ${m.part||''}`)}</span> <span class="badge">${esc(m.status||'unmastered')}</span></div><strong>${esc(m.question?.q||'錯題')}</strong><button class="secondary review-mark" data-kind="${m._kind}" data-id="${esc(m.id)}">本次已複習並答對</button></article>`).join(''):'<div class="card"><p class="muted">目前沒有待複習錯題。</p></div>'}</section>`}
 function progressPage(){
- const ss=sessions(),ps=partSessions(),mh=mockHistory();
+ const ss=analyticsSessions(),ps=partSessions(),mh=mockHistory();
  const mins=ss.reduce((a,b)=>a+(Number(b.durationMinutes)||0),0)+ps.reduce((a,b)=>a+(Number(b.durationMinutes)||0),0);
- return`<section class="hero"><p class="eyebrow">PROGRESS</p><h2>${settings.currentLevel} → ${settings.targetScore}</h2><p>所有歷史資料都保存在此 GitHub 網域的瀏覽器儲存空間。</p></section><section class="kpis"><div class="card kpi"><small>新聞訓練</small><strong>${ss.length}</strong></div><div class="card kpi"><small>Part 練習</small><strong>${ps.length}</strong></div><div class="card kpi"><small>模考</small><strong>${mh.length}</strong></div></section><div class="section-head"><h3>近期新聞訓練</h3><span class="badge">${Math.round(mins)} 分</span></div><section class="grid">${ss.length?ss.slice(-8).reverse().map(s=>`<div class="card"><strong>${esc(s.title||'訓練')}</strong><p class="muted">${esc(s.date||'')} · ${s.correct||0}/${s.total||0} · ${s.wpm||0} WPM</p></div>`).join(''):'<div class="card"><p class="muted">尚無紀錄。</p></div>'}</section>`}
+ return`<section class="hero"><p class="eyebrow">PROGRESS</p><h2>${settings.currentLevel} → ${settings.targetScore}</h2><p>所有歷史資料都保存在此 GitHub 網域的瀏覽器儲存空間。</p></section><section class="kpis"><div class="card kpi"><small>新聞訓練</small><strong>${ss.length}</strong></div><div class="card kpi"><small>Part 練習</small><strong>${ps.length}</strong></div><div class="card kpi"><small>模考</small><strong>${mh.length}</strong></div></section><div class="section-head"><h3>近期新聞訓練</h3><span class="badge">${Math.round(mins)} 分</span></div><section class="grid">${ss.length?ss.slice(-8).reverse().map(s=>`<div class="card"><strong>${esc(s.title||'訓練')}</strong><p class="muted">${esc(s.date||'')} · ${s.correct||0}/${s.total||0} · ${displayWpm(s.wpm)}</p></div>`).join(''):'<div class="card"><p class="muted">尚無紀錄。</p></div>'}</section>`}
 
 const MIGRATION_PREFIXES=['toeic','dailyMain','goalSync'];
 const MIGRATION_EXACT=new Set(['generated','sessions','mistakes','settings']);
