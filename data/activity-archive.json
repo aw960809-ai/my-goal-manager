@@ -2,18 +2,180 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-09-23T06:04:32.175238+00:00",
-    "count": 6,
-    "retiredThisRun": 0,
+    "updatedAt": "2026-09-24T06:19:41.020111+00:00",
+    "count": 8,
+    "retiredThisRun": 2,
     "revivedThisRun": 0,
-    "retiredTotal": 6,
+    "retiredTotal": 8,
     "revivedTotal": 0,
     "retainedOnFailure": 0,
-    "carriedMissing": 20,
-    "needsReview": 18,
+    "carriedMissing": 21,
+    "needsReview": 15,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
+    {
+      "id": "auto-thu-2026090001",
+      "title": "【免費論壇】2026SDGs文化x表演藝術論壇－當藝術與創生行動走入地方",
+      "date": "2026-09-23",
+      "time": "",
+      "scope": "東海校內",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026090001",
+      "keywords": "【免費論壇】2026SDGs文化x表演藝術論壇－當藝術與創生行動走入地方 東海大學 企業管理學系 學術活動 教職員，費用：0；學生，費用：0；校外人士，費用：0 學術／講座 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 企業管理學系；活動日 2026-09-23；截止 2026-09-23",
+      "government": false,
+      "deadline": "2026-09-23",
+      "eventEndDate": "2026-09-23",
+      "location": "東海大學 (詳細地點將另行通知，請確保報名資訊填寫無誤)",
+      "organizer": "企業管理學系",
+      "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090001",
+        "fetchedAt": "2026-09-08T09:29:32.536334+00:00"
+      },
+      "fitScore": 42,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "職涯／實習+20",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "職涯／實習"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "missCount": 16,
+      "needsReview": true,
+      "lastSeen": "2026-09-09T12:50:00.937440+00:00",
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-09-24T06:19:41.019607+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-09-09T12:50:00.937440+00:00"
+    },
+    {
+      "id": "auto-thu-2026070016",
+      "title": "【線上學生增能工作坊X勵學基金】Canva 結合AI 設計力：從版面配置到視覺表現",
+      "date": "2026-09-24",
+      "time": "",
+      "scope": "東海校內",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026070016",
+      "keywords": "【線上學生增能工作坊X勵學基金】Canva 結合AI 設計力：從版面配置到視覺表現 東海大學 教學發展中心 學術活動 教職員，費用：0；學生，費用：0 學術／講座 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 教學發展中心；活動日 2026-09-24；截止 2026-09-23",
+      "government": false,
+      "deadline": "2026-09-23",
+      "eventEndDate": "2026-09-24",
+      "location": "Teams會議連結：",
+      "organizer": "教學發展中心",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026070016",
+        "fetchedAt": "2026-09-23T06:03:26.337950+00:00"
+      },
+      "fitScore": 48,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "職涯／實習+5",
+        "通用能力／AI工具+14",
+        "明確以大學生／學生為對象+7",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "職涯／實習",
+        "通用能力／AI工具"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-10T06:03:37.274328+00:00",
+      "lastSeen": "2026-09-23T06:04:32.174585+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-09-24T06:19:41.019607+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-09-23T06:04:32.174585+00:00"
+    },
     {
       "id": "auto-thu-2026090018",
       "title": "道路交通安全講座",
