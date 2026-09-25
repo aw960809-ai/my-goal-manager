@@ -2,18 +2,97 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-09-24T06:19:41.020111+00:00",
-    "count": 8,
-    "retiredThisRun": 2,
+    "updatedAt": "2026-09-25T06:14:22.672415+00:00",
+    "count": 9,
+    "retiredThisRun": 1,
     "revivedThisRun": 0,
-    "retiredTotal": 8,
+    "retiredTotal": 9,
     "revivedTotal": 0,
     "retainedOnFailure": 0,
-    "carriedMissing": 21,
-    "needsReview": 15,
+    "carriedMissing": 20,
+    "needsReview": 19,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
+    {
+      "id": "auto-thu-2026090057",
+      "title": "【學期實習招募說明會】元大證券理財菁英實習專案&合作金庫銀行",
+      "date": "2026-09-29",
+      "time": "",
+      "scope": "東海校內",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026090057",
+      "keywords": "【學期實習招募說明會】元大證券理財菁英實習專案&合作金庫銀行 東海大學 財務金融學系 學術活動 教職員，費用：0；學生，費用：0 學術／講座 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 財務金融學系；活動日 2026-09-29；截止 2026-09-24",
+      "government": false,
+      "deadline": "2026-09-24",
+      "eventEndDate": "2026-09-29",
+      "location": "",
+      "organizer": "財務金融學系",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090057",
+        "fetchedAt": "2026-09-23T06:03:21.937251+00:00"
+      },
+      "fitScore": 40,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "職涯／實習+20",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "職涯／實習"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-21T06:32:35.703147+00:00",
+      "lastSeen": "2026-09-23T06:04:32.174585+00:00",
+      "missCount": 1,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-09-25T06:14:22.671590+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-09-23T06:04:32.174585+00:00"
+    },
     {
       "id": "auto-thu-2026090001",
       "title": "【免費論壇】2026SDGs文化x表演藝術論壇－當藝術與創生行動走入地方",
