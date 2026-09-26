@@ -1,30 +1,38 @@
 {
   "meta": {
-    "updatedAt": "2026-09-25T06:14:22.672415+00:00",
-    "sources": 5,
+    "updatedAt": "2026-09-26T06:15:11.620646+00:00",
+    "sources": 4,
     "events": 47,
-    "ok": 21,
-    "failed": 1,
+    "ok": 11,
+    "failed": 9,
     "errors": [
-      "curl: (28) Operation timed out after 30003 milliseconds with 0 bytes received"
+      "curl: (28) SSL connection timeout",
+      "curl: (28) SSL connection timeout",
+      "curl: (28) SSL connection timeout",
+      "curl: (28) SSL connection timeout",
+      "curl: (28) Operation timed out after 30001 milliseconds with 0 bytes received",
+      "curl: (28) SSL connection timeout",
+      "curl: (28) SSL connection timeout",
+      "curl: (28) SSL connection timeout",
+      "curl: (28) SSL connection timeout"
     ],
     "generator": "V96.6.11.1.1 Multi-Source AutoFetch + Activity Radar",
     "sourcePolicy": "政府資訊為主；東海官方活動為活動核心；獎學金獨立資料集合與獨立判斷",
     "scholarships": 7,
     "totalSources": 5,
-    "healthySources": 5,
-    "failedSources": 0,
+    "healthySources": 4,
+    "failedSources": 1,
     "rejectedItems": 0,
-    "fetchFailedItems": 1,
-    "skippedPast": 14,
-    "fitFiltered": 27,
+    "fetchFailedItems": 9,
+    "skippedPast": 13,
+    "fitFiltered": 26,
     "semanticDuplicates": 0,
-    "retiredThisRun": 1,
+    "retiredThisRun": 0,
     "revivedThisRun": 0,
     "archiveCount": 9,
-    "retainedOnFailure": 0,
-    "carriedMissing": 20,
-    "needsReview": 19,
+    "retainedOnFailure": 37,
+    "carriedMissing": 0,
+    "needsReview": 0,
     "lifecyclePolicy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "events": [
@@ -1428,283 +1436,6 @@
       "city": "臺中市",
       "schoolName": "東海大學",
       "category": "legal_academic"
-    },
-    {
-      "id": "auto-tcjob-5634",
-      "title": "◎晴天花藝 × 花藝服務業職場體驗 ◎",
-      "date": "2026-10-22",
-      "time": "09:30",
-      "scope": "台中",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://1catchjob.taichung.gov.tw/detail.aspx?act=5634",
-      "keywords": "◎晴天花藝 × 花藝服務業職場體驗 ◎ 台中 臺中市 青年 職涯 職涯／實習",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "臺中市就業服務一鍵Catch",
-      "statusText": "臺中市就業服務處官方活動；活動日 2026-10-22；截止 2026-10-21",
-      "government": true,
-      "deadline": "2026-10-21",
-      "eventEndDate": "",
-      "location": "",
-      "organizer": "臺中市就業服務處",
-      "audience": "有限制",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "taichung_job",
-        "act": "5634",
-        "fetchedAt": "2026-09-25T06:12:49.536702+00:00"
-      },
-      "fitScore": 44,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第2圈：台中+4",
-        "青少年／營隊／教學+8",
-        "職涯／實習+20",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "青少年／營隊／教學",
-        "職涯／實習"
-      ],
-      "circleLevel": 2,
-      "circleLabel": "台中",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
-      "lastSeen": "2026-09-25T06:14:22.671590+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "taichung_job",
-      "sourceCategories": [
-        "career_internship",
-        "lecture"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 2,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": []
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "category": "career_internship"
-    },
-    {
-      "id": "auto-tcjob-5633",
-      "title": "◎ 走進麥當勞 × 餐飲服務業職場體驗 ◎",
-      "date": "2026-10-19",
-      "time": "09:30",
-      "scope": "台中",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://1catchjob.taichung.gov.tw/detail.aspx?act=5633",
-      "keywords": "◎ 走進麥當勞 × 餐飲服務業職場體驗 ◎ 台中 臺中市 青年 職涯 職涯／實習",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "臺中市就業服務一鍵Catch",
-      "statusText": "臺中市就業服務處官方活動；活動日 2026-10-19；截止 2026-10-16",
-      "government": true,
-      "deadline": "2026-10-16",
-      "eventEndDate": "",
-      "location": "麥當勞-麥當勞-太平中山餐廳（臺中市太平區中山路三段45號）",
-      "organizer": "臺中市就業服務處",
-      "audience": "有限制",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "taichung_job",
-        "act": "5633",
-        "fetchedAt": "2026-09-25T06:12:51.602806+00:00"
-      },
-      "fitScore": 46,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第2圈：台中+4",
-        "青少年／營隊／教學+8",
-        "職涯／實習+20",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "青少年／營隊／教學",
-        "職涯／實習"
-      ],
-      "circleLevel": 2,
-      "circleLabel": "台中",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
-      "lastSeen": "2026-09-25T06:14:22.671590+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "taichung_job",
-      "sourceCategories": [
-        "career_internship",
-        "lecture"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 2,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": []
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "category": "career_internship"
-    },
-    {
-      "id": "auto-tcjob-5632",
-      "title": "◎7-ELEVEN × 零售服務業職場體驗 ◎",
-      "date": "2026-10-12",
-      "time": "09:30",
-      "scope": "台中",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://1catchjob.taichung.gov.tw/detail.aspx?act=5632",
-      "keywords": "◎7-ELEVEN × 零售服務業職場體驗 ◎ 台中 臺中市 青年 職涯 職涯／實習",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "臺中市就業服務一鍵Catch",
-      "statusText": "臺中市就業服務處官方活動；活動日 2026-10-12；截止 2026-10-09",
-      "government": true,
-      "deadline": "2026-10-09",
-      "eventEndDate": "",
-      "location": "",
-      "organizer": "臺中市就業服務處",
-      "audience": "有限制",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "taichung_job",
-        "act": "5632",
-        "fetchedAt": "2026-09-25T06:12:52.291646+00:00"
-      },
-      "fitScore": 44,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第2圈：台中+4",
-        "青少年／營隊／教學+8",
-        "職涯／實習+20",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "青少年／營隊／教學",
-        "職涯／實習"
-      ],
-      "circleLevel": 2,
-      "circleLabel": "台中",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
-      "lastSeen": "2026-09-25T06:14:22.671590+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "taichung_job",
-      "sourceCategories": [
-        "career_internship",
-        "lecture"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 2,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": []
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "category": "career_internship"
-    },
-    {
-      "id": "auto-mofa-wh-portal",
-      "title": "青年度假打工｜外交部官方計畫入口",
-      "date": "",
-      "time": "",
-      "scope": "海外／國際",
-      "type": "語言／國際",
-      "kind": "program",
-      "url": "https://youthtaiwan.mofa.gov.tw/WorkingHoliday/",
-      "keywords": "青年度假打工 海外工作 國際交流 海外生活 外語 澳洲 日本 加拿大 紐西蘭 英國 德國 韓國",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "中華民國外交部｜臺灣青年FUN眼世界",
-      "statusText": "外交部常設青年度假打工官方入口；各國年齡、名額、簽證與保險條件依官方國別資訊",
-      "government": true,
-      "deadline": "",
-      "eventEndDate": "",
-      "location": "海外／依度假打工協定國",
-      "organizer": "中華民國外交部",
-      "audience": "青年；實際年齡與簽證資格依各協定國規定",
-      "openEnded": true,
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-09-25T06:14:22.656305+00:00"
-      },
-      "fitScore": 94,
-      "fitTier": "高適配",
-      "fitReasons": [
-        "同心圓第4圈：海外／國際+0",
-        "語言／國際／海外+40",
-        "青少年／營隊／教學+34",
-        "直接連結海外／國際經驗目標+18",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "語言／國際／海外",
-        "青少年／營隊／教學"
-      ],
-      "circleLevel": 4,
-      "circleLabel": "海外／國際",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-09-25T06:14:22.671590+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "mofa_working_holiday",
-      "sourceCategories": [
-        "international",
-        "career_internship",
-        "youth_program"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 4,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [],
-        "schoolNames": []
-      },
-      "country": "TW",
-      "category": "international"
     },
     {
       "id": "auto-thu-2026060032",
@@ -3240,6 +2971,283 @@
       "city": "臺中市",
       "schoolName": "東海大學",
       "category": "legal_academic"
+    },
+    {
+      "id": "auto-tcjob-5634",
+      "title": "◎晴天花藝 × 花藝服務業職場體驗 ◎",
+      "date": "2026-10-22",
+      "time": "09:30",
+      "scope": "台中",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://1catchjob.taichung.gov.tw/detail.aspx?act=5634",
+      "keywords": "◎晴天花藝 × 花藝服務業職場體驗 ◎ 台中 臺中市 青年 職涯 職涯／實習",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "臺中市就業服務一鍵Catch",
+      "statusText": "臺中市就業服務處官方活動；活動日 2026-10-22；截止 2026-10-21",
+      "government": true,
+      "deadline": "2026-10-21",
+      "eventEndDate": "",
+      "location": "",
+      "organizer": "臺中市就業服務處",
+      "audience": "有限制",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "taichung_job",
+        "act": "5634",
+        "fetchedAt": "2026-09-26T06:13:54.523312+00:00"
+      },
+      "fitScore": 44,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第2圈：台中+4",
+        "青少年／營隊／教學+8",
+        "職涯／實習+20",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "青少年／營隊／教學",
+        "職涯／實習"
+      ],
+      "circleLevel": 2,
+      "circleLabel": "台中",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
+      "lastSeen": "2026-09-26T06:15:11.620226+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "taichung_job",
+      "sourceCategories": [
+        "career_internship",
+        "lecture"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 2,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": []
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "category": "career_internship"
+    },
+    {
+      "id": "auto-tcjob-5633",
+      "title": "◎ 走進麥當勞 × 餐飲服務業職場體驗 ◎",
+      "date": "2026-10-19",
+      "time": "09:30",
+      "scope": "台中",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://1catchjob.taichung.gov.tw/detail.aspx?act=5633",
+      "keywords": "◎ 走進麥當勞 × 餐飲服務業職場體驗 ◎ 台中 臺中市 青年 職涯 職涯／實習",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "臺中市就業服務一鍵Catch",
+      "statusText": "臺中市就業服務處官方活動；活動日 2026-10-19；截止 2026-10-16",
+      "government": true,
+      "deadline": "2026-10-16",
+      "eventEndDate": "",
+      "location": "麥當勞-麥當勞-太平中山餐廳（臺中市太平區中山路三段45號）",
+      "organizer": "臺中市就業服務處",
+      "audience": "有限制",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "taichung_job",
+        "act": "5633",
+        "fetchedAt": "2026-09-26T06:13:56.758738+00:00"
+      },
+      "fitScore": 46,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第2圈：台中+4",
+        "青少年／營隊／教學+8",
+        "職涯／實習+20",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "青少年／營隊／教學",
+        "職涯／實習"
+      ],
+      "circleLevel": 2,
+      "circleLabel": "台中",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
+      "lastSeen": "2026-09-26T06:15:11.620226+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "taichung_job",
+      "sourceCategories": [
+        "career_internship",
+        "lecture"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 2,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": []
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "category": "career_internship"
+    },
+    {
+      "id": "auto-tcjob-5632",
+      "title": "◎7-ELEVEN × 零售服務業職場體驗 ◎",
+      "date": "2026-10-12",
+      "time": "09:30",
+      "scope": "台中",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://1catchjob.taichung.gov.tw/detail.aspx?act=5632",
+      "keywords": "◎7-ELEVEN × 零售服務業職場體驗 ◎ 台中 臺中市 青年 職涯 職涯／實習",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "臺中市就業服務一鍵Catch",
+      "statusText": "臺中市就業服務處官方活動；活動日 2026-10-12；截止 2026-10-09",
+      "government": true,
+      "deadline": "2026-10-09",
+      "eventEndDate": "",
+      "location": "",
+      "organizer": "臺中市就業服務處",
+      "audience": "有限制",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "taichung_job",
+        "act": "5632",
+        "fetchedAt": "2026-09-26T06:13:58.140223+00:00"
+      },
+      "fitScore": 44,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第2圈：台中+4",
+        "青少年／營隊／教學+8",
+        "職涯／實習+20",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "青少年／營隊／教學",
+        "職涯／實習"
+      ],
+      "circleLevel": 2,
+      "circleLabel": "台中",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
+      "lastSeen": "2026-09-26T06:15:11.620226+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "taichung_job",
+      "sourceCategories": [
+        "career_internship",
+        "lecture"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 2,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": []
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "category": "career_internship"
+    },
+    {
+      "id": "auto-mofa-wh-portal",
+      "title": "青年度假打工｜外交部官方計畫入口",
+      "date": "",
+      "time": "",
+      "scope": "海外／國際",
+      "type": "語言／國際",
+      "kind": "program",
+      "url": "https://youthtaiwan.mofa.gov.tw/WorkingHoliday/",
+      "keywords": "青年度假打工 海外工作 國際交流 海外生活 外語 澳洲 日本 加拿大 紐西蘭 英國 德國 韓國",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "中華民國外交部｜臺灣青年FUN眼世界",
+      "statusText": "外交部常設青年度假打工官方入口；各國年齡、名額、簽證與保險條件依官方國別資訊",
+      "government": true,
+      "deadline": "",
+      "eventEndDate": "",
+      "location": "海外／依度假打工協定國",
+      "organizer": "中華民國外交部",
+      "audience": "青年；實際年齡與簽證資格依各協定國規定",
+      "openEnded": true,
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "mofa_working_holiday",
+        "fetchedAt": "2026-09-26T06:15:11.611741+00:00"
+      },
+      "fitScore": 94,
+      "fitTier": "高適配",
+      "fitReasons": [
+        "同心圓第4圈：海外／國際+0",
+        "語言／國際／海外+40",
+        "青少年／營隊／教學+34",
+        "直接連結海外／國際經驗目標+18",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "語言／國際／海外",
+        "青少年／營隊／教學"
+      ],
+      "circleLevel": 4,
+      "circleLabel": "海外／國際",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-09T12:50:00.937440+00:00",
+      "lastSeen": "2026-09-26T06:15:11.620226+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "mofa_working_holiday",
+      "sourceCategories": [
+        "international",
+        "career_internship",
+        "youth_program"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 4,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [],
+        "schoolNames": []
+      },
+      "country": "TW",
+      "category": "international"
     }
   ]
 }

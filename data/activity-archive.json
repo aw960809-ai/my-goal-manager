@@ -2,15 +2,15 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-09-25T06:14:22.672415+00:00",
+    "updatedAt": "2026-09-26T06:15:11.620646+00:00",
     "count": 9,
-    "retiredThisRun": 1,
+    "retiredThisRun": 0,
     "revivedThisRun": 0,
     "retiredTotal": 9,
     "revivedTotal": 0,
-    "retainedOnFailure": 0,
-    "carriedMissing": 20,
-    "needsReview": 19,
+    "retainedOnFailure": 37,
+    "carriedMissing": 0,
+    "needsReview": 0,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
