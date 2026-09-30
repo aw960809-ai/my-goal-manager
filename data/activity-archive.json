@@ -2,18 +2,99 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-09-29T07:01:11.560197+00:00",
-    "count": 13,
-    "retiredThisRun": 3,
+    "updatedAt": "2026-09-30T06:49:51.581551+00:00",
+    "count": 14,
+    "retiredThisRun": 1,
     "revivedThisRun": 0,
-    "retiredTotal": 13,
+    "retiredTotal": 14,
     "revivedTotal": 0,
     "retainedOnFailure": 0,
-    "carriedMissing": 20,
-    "needsReview": 16,
+    "carriedMissing": 23,
+    "needsReview": 14,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
+    {
+      "id": "auto-thu-2026090035",
+      "title": "【勵學生與學生志工增能講座】好好說話，也照顧好自己：擺脫人際溝通的內耗與情緒調適",
+      "date": "2026-10-01",
+      "time": "",
+      "scope": "東海校內",
+      "type": "教育／青少年",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026090035",
+      "keywords": "【勵學生與學生志工增能講座】好好說話，也照顧好自己：擺脫人際溝通的內耗與情緒調適 東海大學 學生事務處 學術活動 教職員，費用：0；學生，費用：0 學術／講座 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 學生事務處；活動日 2026-10-01；截止 2026-09-29",
+      "government": false,
+      "deadline": "2026-09-29",
+      "eventEndDate": "2026-10-01",
+      "location": "暫定一校教室",
+      "organizer": "學生事務處",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090035",
+        "fetchedAt": "2026-09-29T07:00:01.350426+00:00"
+      },
+      "fitScore": 62,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "青少年／營隊／教學+34",
+        "通用能力／AI工具+14",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "青少年／營隊／教學",
+        "通用能力／AI工具"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-10T06:03:37.274328+00:00",
+      "lastSeen": "2026-09-29T07:01:11.559387+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-09-30T06:49:51.580785+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-09-29T07:01:11.559387+00:00"
+    },
     {
       "id": "auto-thu-2026090037",
       "title": "【社團人必修攻略課】辦完活動之後：用PDCA讓社團一次比一次進步",
