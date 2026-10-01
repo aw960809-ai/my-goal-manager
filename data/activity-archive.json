@@ -2,18 +2,262 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-09-30T06:49:51.581551+00:00",
-    "count": 14,
-    "retiredThisRun": 1,
+    "updatedAt": "2026-10-01T07:15:37.686417+00:00",
+    "count": 17,
+    "retiredThisRun": 3,
     "revivedThisRun": 0,
-    "retiredTotal": 14,
+    "retiredTotal": 17,
     "revivedTotal": 0,
     "retainedOnFailure": 0,
-    "carriedMissing": 23,
-    "needsReview": 14,
+    "carriedMissing": 21,
+    "needsReview": 19,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
+    {
+      "id": "auto-thu-2026090049",
+      "title": "【社團人必修攻略課】社團評鑑看什麼？組織運作資料一次搞懂",
+      "date": "2026-10-03",
+      "time": "",
+      "scope": "東海校內",
+      "type": "法律／學術",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026090049",
+      "keywords": "【社團人必修攻略課】社團評鑑看什麼？組織運作資料一次搞懂 東海大學 課外活動暨學生發展組 教育活動 學生，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 課外活動暨學生發展組；活動日 2026-10-03；截止 2026-09-30",
+      "government": false,
+      "deadline": "2026-09-30",
+      "eventEndDate": "2026-10-03",
+      "location": "社會科學學院 SS201 教室",
+      "organizer": "課外活動暨學生發展組",
+      "audience": "學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090049",
+        "fetchedAt": "2026-09-21T06:27:59.351686+00:00"
+      },
+      "fitScore": 73,
+      "fitTier": "高適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "青少年／營隊／教學+34",
+        "直接連結法律學習目標+15",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "青少年／營隊／教學"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-16T06:07:49.530864+00:00",
+      "lastSeen": "2026-09-21T06:32:35.703147+00:00",
+      "missCount": 7,
+      "needsReview": true,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-01T07:15:37.685597+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-09-21T06:32:35.703147+00:00"
+    },
+    {
+      "id": "auto-thu-2026090048",
+      "title": "【社團人必修攻略課】社團家當怎麼管？社群平台、財務與器材管理實務",
+      "date": "2026-10-03",
+      "time": "",
+      "scope": "東海校內",
+      "type": "法律／學術",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026090048",
+      "keywords": "【社團人必修攻略課】社團家當怎麼管？社群平台、財務與器材管理實務 東海大學 課外活動暨學生發展組 教育活動 學生，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 課外活動暨學生發展組；活動日 2026-10-03；截止 2026-09-30",
+      "government": false,
+      "deadline": "2026-09-30",
+      "eventEndDate": "2026-10-03",
+      "location": "社會科學學院 SS201 教室",
+      "organizer": "課外活動暨學生發展組",
+      "audience": "學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090048",
+        "fetchedAt": "2026-09-21T06:27:57.022261+00:00"
+      },
+      "fitScore": 73,
+      "fitTier": "高適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "青少年／營隊／教學+34",
+        "直接連結法律學習目標+15",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "青少年／營隊／教學"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-16T06:07:49.530864+00:00",
+      "lastSeen": "2026-09-21T06:32:35.703147+00:00",
+      "missCount": 7,
+      "needsReview": true,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-01T07:15:37.685597+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-09-21T06:32:35.703147+00:00"
+    },
+    {
+      "id": "auto-thu-2026090013",
+      "title": "115-1 揪團減重",
+      "date": "2026-10-01",
+      "time": "",
+      "scope": "東海校內",
+      "type": "法律／學術",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026090013",
+      "keywords": "115-1 揪團減重 東海大學 健康暨諮商中心 其他活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 健康暨諮商中心；活動日 2026-10-01–2026-11-30；截止 2026-09-30",
+      "government": false,
+      "deadline": "2026-09-30",
+      "eventEndDate": "2026-11-30",
+      "location": "健康中心(臨時辦公室：招待所)",
+      "organizer": "健康暨諮商中心",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090013",
+        "fetchedAt": "2026-09-29T06:59:55.291663+00:00"
+      },
+      "fitScore": 39,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "直接連結法律學習目標+15",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-24T06:19:41.019607+00:00",
+      "lastSeen": "2026-09-29T07:01:11.559387+00:00",
+      "missCount": 1,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-01T07:15:37.685597+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-09-29T07:01:11.559387+00:00"
+    },
     {
       "id": "auto-thu-2026090035",
       "title": "【勵學生與學生志工增能講座】好好說話，也照顧好自己：擺脫人際溝通的內耗與情緒調適",
