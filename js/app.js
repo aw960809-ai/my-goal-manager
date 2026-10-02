@@ -14,7 +14,7 @@ function persistEnvelope(d,{backup=true}={}){
  const verify=storeGet(KEY);const parsed=parseEnvelope(verify);if(!parsed.data||fnv1a(dataPayload(parsed.data))!==fnv1a(payload))throw new Error('寫入後驗證失敗');
  db=normalized;return true;
 }
-let calendarCursor=new Date(),selected=null,timer={id:null,start:0,elapsed:0,running:false,planId:null},goalPath={long:null,mid:null,short:null,exec:null};
+let calendarCursor=new Date(),selected=null,timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''},goalPath={long:null,mid:null,short:null,exec:null};
 function mk(id,name,level,parent,status='未開始',weeklyMinutes=180,start='',due=''){return{id,name,level,parent,status,weeklyMinutes:level===4?Math.max(0,weeklyMinutes):0,start:level===3?start:'',due:level===3?due:'',progress:status==='已完成'?100:0}}
 
 
@@ -428,10 +428,13 @@ function activeWeekCount(t){
 }
 function logDate(x){const d=new Date(x);if(Number.isNaN(d.getTime()))return '';return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function isCountableActualLog(l){return !!l&&l.actual!==false&&l.status!=='已刪除'}
+function isOtherStudyLog(l){return !!l&&l.kind==='other-study'}
+function isGoalActualLog(l){return isCountableActualLog(l)&&!isOtherStudyLog(l)&&!!getTask(l.taskId)}
+function otherStudyMinutesInRange(start,end){return (Array.isArray(db.logs)?db.logs:[]).filter(l=>isCountableActualLog(l)&&isOtherStudyLog(l)&&logDate(l.time)>=start&&logDate(l.time)<=end).reduce((sum,l)=>sum+Math.max(0,+l.minutes||0),0)}
 function rebuildExecutionPlanActuals(){
  const plans=Array.isArray(db.executionPlans)?db.executionPlans:[];
  const sums=new Map();
- (Array.isArray(db.logs)?db.logs:[]).filter(isCountableActualLog).forEach(l=>{if(l.planId)sums.set(String(l.planId),(sums.get(String(l.planId))||0)+Math.max(0,+l.minutes||0));});
+ (Array.isArray(db.logs)?db.logs:[]).filter(isGoalActualLog).forEach(l=>{if(l.planId)sums.set(String(l.planId),(sums.get(String(l.planId))||0)+Math.max(0,+l.minutes||0));});
  plans.forEach(p=>{const total=sums.get(String(p.id))||0;p.actualMinutes=total;if(p.status!=='已取消'){p.status=total>=Math.max(1,+p.minutes||0)?'已完成':total>0?'已部分完成':'待執行';if(p.status==='已完成'){if(!p.completedAt)p.completedAt=new Date().toISOString()}else delete p.completedAt}});
 }
 function actualMinutesInRange(t,start,end){
@@ -584,8 +587,11 @@ function executionAnalysis(date=todayKey()){
  const scheduledPlans=plans.filter(p=>p.status!=='已取消');
  const activePlans=plans.filter(activeExecutionPlan);
  const cancelledPlans=plans.filter(p=>p.status==='已取消');
- const actualLogs=(Array.isArray(db.logs)?db.logs:[]).filter(l=>isCountableActualLog(l)&&logDate(l.time)>=ws&&logDate(l.time)<=we);
+ const actualLogs=(Array.isArray(db.logs)?db.logs:[]).filter(l=>isGoalActualLog(l)&&logDate(l.time)>=ws&&logDate(l.time)<=we);
  const actualMinutes=actualLogs.reduce((s,l)=>s+Math.max(0,+l.minutes||0),0);
+ const otherStudyLogs=(Array.isArray(db.logs)?db.logs:[]).filter(l=>isCountableActualLog(l)&&isOtherStudyLog(l)&&logDate(l.time)>=ws&&logDate(l.time)<=we);
+ const otherStudyMinutes=otherStudyLogs.reduce((s,l)=>s+Math.max(0,+l.minutes||0),0);
+ const totalStudyMinutes=actualMinutes+otherStudyMinutes;
 
  const scheduledMap=new Map(scheduledPlans.map(p=>[String(p.id),p]));
  const historicalPlanMap=new Map(plans.map(p=>[String(p.id),p]));
@@ -630,7 +636,7 @@ function executionAnalysis(date=todayKey()){
 
  return {
    ws,we,plans,scheduledPlans,activePlans,cancelledPlans,fulfilledPlans,startedPlans,expiredPlans,
-   plannedMinutes,actualMinutes,planActualMinutes:livePlanActualMinutes,historicalPlanActualMinutes,
+   plannedMinutes,actualMinutes,otherStudyMinutes,totalStudyMinutes,planActualMinutes:livePlanActualMinutes,historicalPlanActualMinutes,
    cancelledPlanActualMinutes,unplannedActualMinutes,timeRate,executionRate,completionRate,
    estimateAccuracy,planActualMap,historicalPlanActualMap,completedForEstimate
  };
@@ -656,8 +662,10 @@ function renderExecutionAnalysis(date=todayKey()){
  <div class="execution-analysis-detail">
    <span>本週有效執行安排 <b>${fmt(a.plannedMinutes)}</b></span>
    <span>有效安排實際 <b>${fmt(a.planActualMinutes)}</b></span>
-   <span>本週實際投入 <b>${fmt(a.actualMinutes)}</b></span>
-   <span>未配對安排之實際投入 <b>${fmt(a.unplannedActualMinutes)}</b></span>
+   <span>本週目標實際 <b>${fmt(a.actualMinutes)}</b></span>
+   <span>其他讀書 <b>${fmt(a.otherStudyMinutes)}</b></span>
+   <span>總讀書時間 <b>${fmt(a.totalStudyMinutes)}</b></span>
+   <span>未配對安排之目標實際 <b>${fmt(a.unplannedActualMinutes)}</b></span>
    <span>已取消安排 <b>${a.cancelledPlans.length}</b></span>
    ${cancelledActual?`<span>已取消安排之歷史實際 <b>${fmt(cancelledActual)}</b></span>`:''}
    <span>安排差額 <b>${gap>=0?'+':''}${fmt(Math.abs(gap))}</b></span>
@@ -667,7 +675,8 @@ function renderExecutionAnalysis(date=todayKey()){
 function deleteActualLog(id){
  const log=(Array.isArray(db.logs)?db.logs:[]).find(x=>String(x.id)===String(id));
  if(!log||!isCountableActualLog(log)){toast(log?.status==='已刪除'?'這筆紀錄已刪除':'找不到可刪除的實際紀錄');return}
- if(!confirm(`確定刪除「${log.name||getTask(log.taskId)?.name||'這筆實際紀錄'}」的 ${Math.max(0,+log.minutes||0)} 分鐘實際投入紀錄？\n\n刪除後將不再計入任何完成度、實際時數與計畫×實際分析，但紀錄可恢復。`))return;
+ const impact=isOtherStudyLog(log)?'總讀書時數與其他讀書分析':'完成度、實際時數與計畫×實際分析';
+ if(!confirm(`確定刪除「${log.name||getTask(log.taskId)?.name||'這筆實際紀錄'}」的 ${Math.max(0,+log.minutes||0)} 分鐘實際投入紀錄？\n\n刪除後將不再計入${impact}，但紀錄可恢復。`))return;
  log.status='已刪除';log.deletedAt=new Date().toISOString();rebuildExecutionPlanActuals();
  save();renderAll();toast('已刪除實際紀錄；相關分析已排除');
 }
@@ -705,7 +714,8 @@ function actualHistoryFiltered(){
  const now=Date.now();
  const days=actualHistoryRange==='all'?null:Number(actualHistoryRange||7);
  return actualHistorySource().filter(log=>{
-   if(actualHistoryTask!=='all'&&String(log.taskId||'')!==String(actualHistoryTask))return false;
+   if(actualHistoryTask==='__other-study__'&&!isOtherStudyLog(log))return false;
+   if(actualHistoryTask!=='all'&&actualHistoryTask!=='__other-study__'&&(isOtherStudyLog(log)||String(log.taskId||'')!==String(actualHistoryTask)))return false;
    if(days===null)return true;
    const ms=Date.parse(log.time||'');
    return Number.isFinite(ms)&&(now-ms)<=days*24*60*60*1000;
@@ -766,7 +776,7 @@ function renderRecentActualLogs(){
  el.innerHTML=recent.map(l=>`<div class="actual-log-compact-row">
    <div class="actual-log-compact-main">
      <b>${esc(l.name||getTask(l.taskId)?.name||'未命名行動')}</b>
-     <small>${esc(actualHistoryTimeLabel(l))} · ${Math.max(0,+l.minutes||0)} 分</small>
+     <small>${esc(actualHistoryTimeLabel(l))} · ${Math.max(0,+l.minutes||0)} 分 · ${isOtherStudyLog(l)?'其他讀書':'目標執行'}</small>
    </div>
  </div>`).join('')+
  `<button class="actual-history-open" type="button" onclick="openActualLogHistory()">
@@ -781,7 +791,9 @@ function renderActualLogHistory(){
  const source=actualHistorySource();
  const taskRows=[];
  const seen=new Set();
+ if(source.some(isOtherStudyLog))taskRows.push(['__other-study__','其他讀書時間']);
  source.forEach(l=>{
+   if(isOtherStudyLog(l))return;
    const id=String(l.taskId||'');
    if(!id||seen.has(id))return;
    seen.add(id);
@@ -803,7 +815,7 @@ function renderActualLogHistory(){
      <button type="button" class="${actualHistoryRange==='30'?'active':''}" onclick="setActualHistoryRange('30')">近 30 日</button>
      <button type="button" class="${actualHistoryRange==='all'?'active':''}" onclick="setActualHistoryRange('all')">全部</button>
    </div>
-   <label class="actual-history-task-filter">具體實現方式
+   <label class="actual-history-task-filter">紀錄類型／具體實現方式
      <select onchange="setActualHistoryTask(this.value)">
        <option value="all"${actualHistoryTask==='all'?' selected':''}>全部</option>
        ${taskRows.map(([id,name])=>`<option value="${esc(id)}"${actualHistoryTask===id?' selected':''}>${esc(name)}</option>`).join('')}
@@ -824,7 +836,7 @@ function renderActualLogHistory(){
       ${logs.map(l=>`<div class="actual-history-row">
         <div class="actual-history-row-main">
           <b>${esc(l.name||getTask(l.taskId)?.name||'未命名行動')}</b>
-          <small>${esc(actualHistoryTimeLabel(l))} · ${Math.max(0,+l.minutes||0)} 分</small>
+          <small>${esc(actualHistoryTimeLabel(l))} · ${Math.max(0,+l.minutes||0)} 分 · ${isOtherStudyLog(l)?'其他讀書':'目標執行'}</small>
         </div>
         <details class="actual-log-menu">
           <summary aria-label="紀錄操作">⋯</summary>
@@ -858,17 +870,21 @@ function stats(){
  // 分析頁的「本週整體投入」看的是目標系統本身的週投入目標；
  // 計畫 × 實際區塊則另外看「提前安排的執行計畫」，兩者不可混為一談。
  const target=activeWeeklyTargetTotal(todayKey());
- const weekActual=db.logs.filter(l=>isCountableActualLog(l)&&weekStartKey(l.time?.slice(0,10)||'')===weekStartKey(todayKey())).reduce((s,l)=>s+(+l.minutes||0),0);
- const ratio=target?Math.min(100,Math.round(weekActual/target*100)):0;
+ const weekGoalActual=db.logs.filter(l=>isGoalActualLog(l)&&weekStartKey(l.time?.slice(0,10)||'')===weekStartKey(todayKey())).reduce((s,l)=>s+(+l.minutes||0),0);
+ const weekOtherStudy=db.logs.filter(l=>isCountableActualLog(l)&&isOtherStudyLog(l)&&weekStartKey(l.time?.slice(0,10)||'')===weekStartKey(todayKey())).reduce((s,l)=>s+(+l.minutes||0),0);
+ const weekTotalStudy=weekGoalActual+weekOtherStudy;
+ const ratio=target?Math.min(100,Math.round(weekGoalActual/target*100)):0;
  document.getElementById('leafDone').textContent=done+'/'+leaves.length;
  document.getElementById('avg').textContent=avg+'%';
  document.getElementById('est').textContent=planAnalysis.plannedMinutes;
  document.getElementById('logsN').textContent=db.logs.filter(isCountableActualLog).length;
  document.getElementById('statsWeekRatio').textContent=ratio+'%';
  document.getElementById('statsWeekBar').style.width=ratio+'%';
- document.getElementById('statsActual').textContent=weekActual;
+ document.getElementById('statsActual').textContent=weekGoalActual;
+ const otherEl=document.getElementById('statsOtherStudy');if(otherEl)otherEl.textContent=weekOtherStudy;
+ const totalEl=document.getElementById('statsTotalStudy');if(totalEl)totalEl.textContent=weekTotalStudy;
  document.getElementById('statsTarget').textContent=target;
- document.getElementById('statsRemaining').textContent=Math.max(0,target-weekActual);
+ document.getElementById('statsRemaining').textContent=Math.max(0,target-weekGoalActual);
  const rootsActive=roots().filter(t=>t.status!=='已封存');
  document.getElementById('domains').innerHTML=rootsActive.map(t=>{const m=currentWeekTargetForRoot(t),pct=target?Math.round(m/target*100):0;return `<div class="direction-row"><div class="direction-head"><b>${esc(t.name)}</b><span>${m} 分 · ${pct}%</span></div><div class="direction-track"><div class="direction-fill" style="width:${Math.min(100,pct)}%"></div></div></div>`}).join('')||'<div class="empty">尚無有效方向</div>';
  const buckets=[['尚未開始',0,0],['進行中',0,0],['高完成度',0,0],['已完成',0,0]];
@@ -905,15 +921,60 @@ document.querySelectorAll('.bottom-nav button').forEach(b=>b.onclick=()=>go(b.da
 try{if(document.activeElement&&/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))document.activeElement.blur();}catch(e){}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeActualLogHistory();closeGoalInfoModal();closeEditModal()}});
 
-function selectTodayExecution(id,planId=null){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中，請先完成或暫停');return}timer.id=id;timer.planId=planId||null;timer.elapsed=0;timer.running=false;timer.start=0;document.getElementById('timerTask').textContent='待執行：'+t.name;document.getElementById('timerTaskCancel').style.display='block';updateClock();updateTimerButtons();today();toast('已選取今日欲執行項目；尚未開始計時')}
-function cancelTodaySelection(){if(timer.running){toast('計時進行中，請先暫停或完成後再取消');return}timer={id:null,start:0,elapsed:0,running:false,planId:null};document.getElementById('timerTask').textContent='尚未選擇任務';updateClock();updateTimerButtons();today();toast('已取消今日執行選取')}
+function syncOtherStudyForm(){
+ const date=document.getElementById('otherStudyDate'),mins=document.getElementById('otherStudyMinutes');
+ if(date&&!date.value)date.value=todayKey();
+ if(mins&&(!mins.value||+mins.value<=0))mins.value='30';
+}
+function otherStudyInputName(){return (document.getElementById('otherStudyName')?.value||'').trim()}
+function selectOtherStudyTimer(){
+ if(timer.running){toast('目前已有計時進行中，請先完成或暫停');return}
+ const name=otherStudyInputName();if(!name){toast('請先輸入其他讀書的內容或科目');document.getElementById('otherStudyName')?.focus();return}
+ timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'other-study',label:name};
+ document.getElementById('timerTask').textContent='其他讀書：'+name;
+ document.getElementById('timerTaskCancel').style.display='block';
+ updateClock();updateTimerButtons();toast('已選取其他讀書；尚未開始計時');
+}
+function addOtherStudyLog(){
+ const name=otherStudyInputName(),date=document.getElementById('otherStudyDate')?.value||todayKey(),mins=Math.round(+document.getElementById('otherStudyMinutes')?.value||0);
+ if(!name){toast('請先輸入其他讀書的內容或科目');document.getElementById('otherStudyName')?.focus();return}
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){toast('請選擇有效日期');return}
+ if(mins<=0){toast('補登分鐘必須大於 0');return}
+ const when=date===todayKey()?new Date():new Date(date+'T12:00:00');
+ if(Number.isNaN(when.getTime())){toast('日期格式無效');return}
+ db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:null,name,time:when.toISOString(),minutes:mins,actual:true,kind:'other-study',source:'manual'});
+ save();renderAll();toast(`已補登其他讀書 ${mins} 分鐘；不影響目標完成度`);
+}
+function timerHasSelection(){return timer.kind==='other-study'?!!timer.label:!!timer.id}
+
+function selectTodayExecution(id,planId=null){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中，請先完成或暫停');return}timer={id,start:0,elapsed:0,running:false,planId:planId||null,kind:'goal',label:''};document.getElementById('timerTask').textContent='待執行：'+t.name;document.getElementById('timerTaskCancel').style.display='block';updateClock();updateTimerButtons();today();toast('已選取今日欲執行項目；尚未開始計時')}
+function cancelTodaySelection(){if(timer.running){toast('計時進行中，請先暫停或完成後再取消');return}timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};document.getElementById('timerTask').textContent='尚未選擇任務';updateClock();updateTimerButtons();today();toast('已取消今日執行選取')}
 function startTodayExecution(id,planId=null){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中');return}if(!planId){const today=todayKey();const p=(Array.isArray(db.executionPlans)?db.executionPlans:[]).find(x=>String(x.taskId)===String(id)&&x.date===today&&activeExecutionPlan(x));if(p)planId=p.id}selectTodayExecution(id,planId);startTimer()}
 function openTodayExecution(id,planId=null){go('today');selectTodayExecution(id,planId)}
-function useTimer(id){selected=id;timer.id=id;timer.planId=null;timer.elapsed=0;timer.running=false;timer.start=0;document.getElementById('timerTask').textContent=getTask(id)?.name||'';go('today');updateClock();updateTimerButtons();toast('已選擇具體行動，可開始計時')}
-function startTimer(){if(!timer.id){toast('請先選擇具體行動');return}if(timer.running){toast('計時已在進行中');return}timer.running=true;timer.start=Date.now();getTask(timer.id).status='進行中';save();updateTimerButtons();timerLoop();toast('已開始計時')}
+function useTimer(id){selected=id;timer={id,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};document.getElementById('timerTask').textContent=getTask(id)?.name||'';go('today');updateClock();updateTimerButtons();toast('已選擇具體行動，可開始計時')}
+function startTimer(){
+ if(!timerHasSelection()){toast('請先選擇具體行動或其他讀書');return}
+ if(timer.running){toast('計時已在進行中');return}
+ if(timer.kind==='goal'){const t=getTask(timer.id);if(!t){toast('找不到目前執行的具體行動');return}t.status='進行中';save()}
+ timer.running=true;timer.start=Date.now();updateTimerButtons();timerLoop();toast(timer.kind==='other-study'?'已開始其他讀書計時':'已開始計時')
+}
 function pauseTimer(){if(!timer.running){toast('目前沒有進行中的計時');return}timer.elapsed+=Date.now()-timer.start;timer.running=false;updateClock();updateTimerButtons();toast('計時已暫停')}
-function finishTimer(){if(!timer.id){toast('請先選擇具體行動');return}if(timer.running){timer.elapsed+=Date.now()-timer.start;timer.running=false}const t=getTask(timer.id);if(!t){toast('找不到目前執行的具體行動');return}const mins=Math.max(1,Math.round(timer.elapsed/60000)),planId=timer.planId||null;db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:t.id,name:t.name,time:new Date().toISOString(),minutes:mins,actual:true,planId});if(planId){const plan=(db.executionPlans||[]).find(x=>String(x.id)===String(planId));if(plan&&plan.status!=='已取消'){const planned=Math.max(1,+plan.minutes||0),previous=Math.max(0,+plan.actualMinutes||0),total=previous+mins;plan.actualMinutes=total;plan.status=total>=planned?'已完成':'已部分完成';if(plan.status==='已完成')plan.completedAt=new Date().toISOString();else delete plan.completedAt}}save();const done=timer.id;timer={id:null,start:0,elapsed:0,running:false,planId:null};renderAll();document.getElementById('timerTask').textContent='已記錄：'+(t.name||done);document.getElementById('timerTaskCancel').style.display='none';updateClock();updateTimerButtons();toast(planId?`已記錄 ${mins} 分鐘；本次安排累計已實際 ${db.executionPlans.find(x=>String(x.id)===String(planId))?.actualMinutes||mins} 分鐘`:`已記錄 ${mins} 分鐘；完成度已更新`)}
-function updateTimerButtons(){const bs=document.querySelectorAll('.timerbtns button');if(bs.length<3)return;bs[0].disabled=!!timer.running;bs[1].disabled=!timer.running;bs[2].disabled=!timer.id||timer.elapsed<=0;bs[0].textContent=timer.running?'計時中…':'開始';bs[1].textContent=timer.running?'暫停':'暫停';bs[2].textContent=timer.id&&timer.elapsed>0?'完成並記錄':'完成'}
+function finishTimer(){
+ if(!timerHasSelection()){toast('請先選擇具體行動或其他讀書');return}
+ if(timer.running){timer.elapsed+=Date.now()-timer.start;timer.running=false}
+ const mins=Math.max(1,Math.round(timer.elapsed/60000));
+ if(timer.kind==='other-study'){
+  const name=timer.label||'其他讀書';
+  db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:null,name,time:new Date().toISOString(),minutes:mins,actual:true,kind:'other-study',source:'timer'});
+  save();timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};renderAll();
+  document.getElementById('timerTask').textContent='已記錄其他讀書：'+name;document.getElementById('timerTaskCancel').style.display='none';updateClock();updateTimerButtons();toast(`已記錄其他讀書 ${mins} 分鐘；不影響目標完成度`);return;
+ }
+ const t=getTask(timer.id);if(!t){toast('找不到目前執行的具體行動');return}
+ const planId=timer.planId||null;db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:t.id,name:t.name,time:new Date().toISOString(),minutes:mins,actual:true,planId});
+ if(planId){const plan=(db.executionPlans||[]).find(x=>String(x.id)===String(planId));if(plan&&plan.status!=='已取消'){const planned=Math.max(1,+plan.minutes||0),previous=Math.max(0,+plan.actualMinutes||0),total=previous+mins;plan.actualMinutes=total;plan.status=total>=planned?'已完成':'已部分完成';if(plan.status==='已完成')plan.completedAt=new Date().toISOString();else delete plan.completedAt}}
+ save();const done=timer.id;timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};renderAll();document.getElementById('timerTask').textContent='已記錄：'+(t.name||done);document.getElementById('timerTaskCancel').style.display='none';updateClock();updateTimerButtons();toast(planId?`已記錄 ${mins} 分鐘；本次安排累計已實際 ${db.executionPlans.find(x=>String(x.id)===String(planId))?.actualMinutes||mins} 分鐘`:`已記錄 ${mins} 分鐘；完成度已更新`)
+}
+function updateTimerButtons(){const bs=document.querySelectorAll('.timerbtns button');if(bs.length<3)return;const has=timerHasSelection();bs[0].disabled=!!timer.running||!has;bs[1].disabled=!timer.running;bs[2].disabled=!has||timer.elapsed<=0;bs[0].textContent=timer.running?'計時中…':'開始';bs[1].textContent='暫停';bs[2].textContent=has&&timer.elapsed>0?'完成並記錄':'完成'}
 function selectTask(id,focusEdit=false){const t=getTask(id);if(!t)return;selected=id;const chain=ancestors(id);goalPath={long:chain.find(x=>x.level===1)?.id||null,mid:chain.find(x=>x.level===2)?.id||null,short:chain.find(x=>chain.find(y=>y.level===3)?.id===x.id)?.id||chain.find(x=>x.level===3)?.id||null,exec:chain.find(x=>x.level===4)?.id||null};renderTree();updateHubContext();if(focusEdit)openEditModal(id)}
 function editModalField(t){
  const chain=ancestors(t.id),p=periodForTask(t),hours=t.weeklyMinutes>=60&&t.weeklyMinutes%60===0?String(t.weeklyMinutes/60):String(t.weeklyMinutes||0),unit=t.weeklyMinutes>=60&&t.weeklyMinutes%60===0?'hour':'min';
@@ -960,7 +1021,7 @@ function weeklyWorkload(date=todayKey()){
  else if(hours>=35){level='偏忙';score=60+(hours-35)/7*25}
  else if(hours>=25){level='正常';score=30+(hours-25)/10*30}
  else if(hours>0){level='寬鬆';score=Math.max(0,hours/25*30)}
- const actual=db.logs.filter(isCountableActualLog).reduce((s,x)=>{const d=logDate(x.time);const ws=weekStartKey(date),we=weekEndKey(date);return s+(d>=ws&&d<=we?(+x.minutes||0):0)},0);
+ const actual=db.logs.filter(isGoalActualLog).reduce((s,x)=>{const d=logDate(x.time);const ws=weekStartKey(date),we=weekEndKey(date);return s+(d>=ws&&d<=we?(+x.minutes||0):0)},0);
  const used=target?Math.min(100,actual/target*100):0;
  const capacity=Math.max(0,100-score);
  return {target,hours,level,score:Math.round(score),actual,used:Math.round(used),capacity};
@@ -1032,6 +1093,7 @@ function today(){
  list.innerHTML=a.map(t=>{const isSel=String(timer.id)===String(t.id),w=currentWeekSummary(t),plans=(Array.isArray(db.executionPlans)?db.executionPlans:[]).filter(x=>String(x.taskId)===String(t.id)&&activeExecutionPlan(x)).sort((x,y)=>(x.date+' '+x.time).localeCompare(y.date+' '+y.time)),todayPlan=plans.find(x=>x.date===todayKey());return `<div class="listitem ${isSel?'today-item-selected':''}"><div style="display:flex;gap:9px;align-items:flex-start"><span class="today-select-icon" aria-hidden="true">${isSel?'✓':'○'}</span><div><b>${esc(t.name)}</b><small class="muted" style="display:block">${todayPlan?`今日 ${esc(todayPlan.time)} · 預計 ${esc(todayPlan.minutes)} 分 · `:''}本週 ${w.actual}/${w.target} 分 · 剩餘 ${w.remaining} 分 · 累計 ${calc(t)}% · ${esc(ancestors(t.id).map(x=>x.name).join(' → '))}</small></div></div><div class="today-actions">${isSel?'<span class="today-selected-label">● 已選取</span>':''}<button class="btn" onclick="selectTodayExecution('${t.id}','${todayPlan?esc(todayPlan.id):''}')">${isSel?'重新選取':'選取'}</button><button class="btn gold" onclick="startTodayExecution('${t.id}','${todayPlan?esc(todayPlan.id):''}')">開始</button></div></div>`}).join('')||'<div class="empty">目前沒有可投入的具體實現方式。</div>';
  if(all.length>5)list.insertAdjacentHTML('beforeend',`<div style="display:flex;justify-content:center;padding:10px 0 2px"><button class="btn" type="button" onclick="toggleTodayItemsPreview()">${todayItemsExpanded?'收合為 5 項':`顯示全部（${all.length} 項）`}</button></div>`);
  renderPlannedQueue();
+ syncOtherStudyForm();
 }
 function toggleTodayItemsPreview(){todayItemsExpanded=!todayItemsExpanded;today()}
 
@@ -1263,6 +1325,7 @@ function runSelfTest(){
   tests.push([document.querySelectorAll('script').length>=1&&document.documentElement.lang==='zh-Hant','HTML 基本結構：正常']);
   const legacyMulti='selected'+'Ids',legacyCss='goal-selection-'+'summary';tests.push([!html.includes(legacyMulti)&&!html.includes(legacyCss),'多目標選取殘留：已清除']);
   tests.push([typeof currentWeekSummary==='function'&&typeof activeWeeklyTargetTotal==='function','週時數計算核心：存在']);
+  tests.push([typeof isOtherStudyLog==='function'&&typeof isGoalActualLog==='function'&&typeof selectOtherStudyTimer==='function'&&typeof addOtherStudyLog==='function','其他讀書時間：紀錄／計時／分析分流核心存在']);
   tests.push([typeof decisionState==='function'&&typeof decisionItems==='function'&&typeof renderDecisionList==='function','決策邏輯核心：存在']);
    tests.push([typeof weeklyWorkload==='function'&&['寬鬆','正常','偏忙','忙','過載'].includes(weeklyWorkload().level),'週負荷／值得執行聯動核心：存在']);
   tests.push([Array.isArray(db.weekReviews)&&typeof renderWeeklyReview==='function'&&typeof setWeeklyReview==='function','週結算／未完成原因核心：存在']);

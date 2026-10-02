@@ -10,7 +10,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="base-uri 'self'; object-src 'none'">
-<title>個人目標與學習行動管理系統 V97.3.0</title>
+<title>個人目標與學習行動管理系統 V97.10.4</title>
 <link rel="stylesheet" href="./css/base.css">
 <link rel="stylesheet" href="./css/app-ui.css">
 
@@ -144,6 +144,19 @@
     <div class="planned-queue-head"><h3>未來已安排</h3><span id="plannedQueueCount" class="muted"></span></div>
     <div id="plannedQueue" class="list"></div>
   </div>
+  <div class="panel other-study-panel">
+    <div class="section-title"><div><h2>其他讀書時間</h2><small class="muted">臨時複習、課堂內容或未納入目標樹的學習</small></div><span class="muted">不影響目標完成度</span></div>
+    <div class="other-study-grid">
+      <label><span>內容／科目</span><input id="otherStudyName" type="text" maxlength="60" placeholder="例如：刑法分則課後複習"></label>
+      <label><span>日期</span><input id="otherStudyDate" type="date"></label>
+      <label><span>補登分鐘</span><input id="otherStudyMinutes" type="number" min="1" step="1" value="30"></label>
+    </div>
+    <div class="other-study-actions">
+      <button class="btn primary" type="button" onclick="selectOtherStudyTimer()">選取並計時</button>
+      <button class="btn gold" type="button" onclick="addOtherStudyLog()">直接補登</button>
+    </div>
+    <div class="other-study-note">會納入總讀書時數與實際投入歷程；不會抵扣任何 Level 4 週目標，也不會改變目標完成度。</div>
+  </div>
   <div class="panel compact-timer-panel">
     <div class="section-title"><div><h2>⏱ 執行計時</h2></div></div>
     <div id="timerTask" class="timer-task">尚未選擇任務</div>
@@ -162,7 +175,7 @@
     <div class="card stat-kpi"><small>實際紀錄</small><div class="big" id="logsN">0</div><div class="mini-label">次</div></div>
   </div>
   <div class="panel execution-analysis-panel"><div class="section-title"><div><h2>計畫 × 實際執行</h2><small class="muted">行動成果、計畫履行與實際時數分開統計；只有實際計時才累計投入。取消不視為失敗。</small></div></div><div id="executionAnalysis"></div></div>
-  <div class="panel stats-progress-panel"><div class="section-title"><div><h2>本週整體投入</h2></div><b id="statsWeekRatio">0%</b></div><div class="progress-track"><div id="statsWeekBar" class="progress-fill"></div></div><div class="stats-progress-meta"><span>實際 <b id="statsActual">0</b> 分</span><span>目標 <b id="statsTarget">0</b> 分</span><span>剩餘 <b id="statsRemaining">0</b> 分</span></div></div>
+  <div class="panel stats-progress-panel"><div class="section-title"><div><h2>本週整體投入</h2><small class="muted">進度條僅以目標實際／目標計算；其他讀書另外列入總讀書時間</small></div><b id="statsWeekRatio">0%</b></div><div class="progress-track"><div id="statsWeekBar" class="progress-fill"></div></div><div class="stats-progress-meta"><span>目標實際 <b id="statsActual">0</b> 分</span><span>其他讀書 <b id="statsOtherStudy">0</b> 分</span><span>總讀書 <b id="statsTotalStudy">0</b> 分</span><span>目標 <b id="statsTarget">0</b> 分</span><span>剩餘 <b id="statsRemaining">0</b> 分</span></div></div>
   <div class="grid2 stats-grid">
     <div class="panel"><div class="section-title"><div><h2>本週方向投入</h2></div></div><div id="domains" class="direction-bars"></div></div>
     <div class="panel"><div class="section-title"><div><h2>目前進度分布</h2></div></div><div id="progressDistribution" class="distribution-list"></div></div>
