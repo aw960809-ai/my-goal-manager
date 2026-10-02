@@ -1,7 +1,8 @@
-const APP_VERSION='V96.5';
-const SCHEMA_VERSION=5; // V96 keeps the V95 data schema for backward compatibility
+const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'97.11.0')));
+const SCHEMA_VERSION=Number(globalThis.GOAL_MANAGER_SCHEMA_VERSION||6);
 const KEY='lawLangGoalSystemV92';
 const BACKUP_KEYS=['lawLangGoalSystemV92_backup1','lawLangGoalSystemV92_backup2','lawLangGoalSystemV92_backup3'];
+const ACTIVE_TIMER_KEY='lawLangGoalActiveTimerV1';
 const L={1:'方向／重要目標',2:'階段目標',3:'子任務',4:'具體行動'};
 let recoveryNotice='';
 function isUsableData(d){return !!d&&Array.isArray(d.tasks)&&Array.isArray(d.logs)}
@@ -10,11 +11,28 @@ function persistEnvelope(d,{backup=true}={}){
  const payload=dataPayload(normalized), next=JSON.stringify(makeEnvelope(normalized));
  const old=storeGet(KEY);
  if(backup&&old&&old!==next){for(let i=BACKUP_KEYS.length-1;i>0;i--){const prev=storeGet(BACKUP_KEYS[i-1]);if(prev)storeSet(BACKUP_KEYS[i],prev)}storeSet(BACKUP_KEYS[0],old)}
- if(!storeSet(KEY,next))throw new Error('無法寫入本機儲存空間');
+ const writeOk=storeSet(KEY,next),writeState=typeof storeWriteStatus==='function'?storeWriteStatus():{persistent:true};
+ if(!writeOk||writeState.persistent===false)throw new Error('無法永久寫入本機儲存空間；已停止保存以避免誤判成功');
  const verify=storeGet(KEY);const parsed=parseEnvelope(verify);if(!parsed.data||fnv1a(dataPayload(parsed.data))!==fnv1a(payload))throw new Error('寫入後驗證失敗');
  db=normalized;return true;
 }
 let calendarCursor=new Date(),selected=null,timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''},goalPath={long:null,mid:null,short:null,exec:null};
+
+function timerPayload(){return {id:timer.id,start:+timer.start||0,elapsed:+timer.elapsed||0,running:!!timer.running,planId:timer.planId||null,kind:timer.kind||'goal',label:String(timer.label||'')}}
+function saveActiveTimer(){try{storeSet(ACTIVE_TIMER_KEY,JSON.stringify(timerPayload()))}catch(e){console.warn('active timer persistence failed',e)}}
+function clearActiveTimer(){try{localStorage.removeItem(ACTIVE_TIMER_KEY)}catch(e){try{delete memoryStore[ACTIVE_TIMER_KEY]}catch(_){}}}
+function restoreActiveTimer(){
+ try{
+  const raw=storeGet(ACTIVE_TIMER_KEY);if(!raw)return false;
+  const saved=JSON.parse(raw);if(!saved||typeof saved!=='object')return false;
+  const kind=saved.kind==='other-study'?'other-study':'goal';
+  timer={id:saved.id||null,start:Math.max(0,+saved.start||0),elapsed:Math.max(0,+saved.elapsed||0),running:!!saved.running,planId:saved.planId||null,kind,label:String(saved.label||'')};
+  if(timer.running&&!timer.start)timer.start=Date.now();
+  return true;
+ }catch(e){clearActiveTimer();return false}
+}
+restoreActiveTimer();
+
 function mk(id,name,level,parent,status='未開始',weeklyMinutes=180,start='',due=''){return{id,name,level,parent,status,weeklyMinutes:level===4?Math.max(0,weeklyMinutes):0,start:level===3?start:'',due:level===3?due:'',progress:status==='已完成'?100:0}}
 
 
@@ -185,9 +203,24 @@ function repairKnownHierarchy(tasks){
  return list;
 }
 
+
+const STUDY_LOG_KIND=Object.freeze({GOAL:'goal-study',OTHER:'other-study',SYSTEM:'system'});
+function normalizeLog(l){
+ if(!l||typeof l!=='object')return null;
+ const out={...l};
+ if(out.kind==='other-study')out.kind=STUDY_LOG_KIND.OTHER;
+ else if(out.kind==='system'||out.type==='auto')out.kind=STUDY_LOG_KIND.SYSTEM;
+ else out.kind=STUDY_LOG_KIND.GOAL;
+ out.minutes=Math.max(0,Number.isFinite(+out.minutes)?+out.minutes:0);
+ if(out.taskId!==null&&out.taskId!==undefined)out.taskId=String(out.taskId);
+ if(out.kind===STUDY_LOG_KIND.SYSTEM)out.actual=false;
+ else if(out.actual===undefined)out.actual=true;
+ return out;
+}
+
 function normalize(d){
  d=d&&Array.isArray(d.tasks)?d:{tasks:[],logs:[]};
- d.logs=Array.isArray(d.logs)?d.logs:[];
+ d.logs=(Array.isArray(d.logs)?d.logs:[]).map(normalizeLog).filter(Boolean);
  d.tasks=d.tasks.map(t=>{
   const level=Math.max(1,Math.min(4,+t.level||1));
   let weekly=0;
@@ -427,8 +460,8 @@ function activeWeekCount(t){
  while(d<=end&&n<520){n++;d.setDate(d.getDate()+7)}return n;
 }
 function logDate(x){const d=new Date(x);if(Number.isNaN(d.getTime()))return '';return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
-function isCountableActualLog(l){return !!l&&l.actual!==false&&l.status!=='已刪除'}
-function isOtherStudyLog(l){return !!l&&l.kind==='other-study'}
+function isCountableActualLog(l){return !!l&&l.actual!==false&&l.status!=='已刪除'&&l.kind!==STUDY_LOG_KIND.SYSTEM&&l.type!=='auto'}
+function isOtherStudyLog(l){return !!l&&l.kind===STUDY_LOG_KIND.OTHER}
 function isGoalActualLog(l){return isCountableActualLog(l)&&!isOtherStudyLog(l)&&!!getTask(l.taskId)}
 function otherStudyMinutesInRange(start,end){return (Array.isArray(db.logs)?db.logs:[]).filter(l=>isCountableActualLog(l)&&isOtherStudyLog(l)&&logDate(l.time)>=start&&logDate(l.time)<=end).reduce((sum,l)=>sum+Math.max(0,+l.minutes||0),0)}
 function rebuildExecutionPlanActuals(){
@@ -460,7 +493,7 @@ function inPeriod(date,period){return !!(date&&period?.start&&period?.due&&date>
 function periodLabel(t){const p=periodForTask(t);if(!p?.start||!p?.due)return '尚未設定子任務期間';return `${p.start} ～ ${p.due}`}
 function calc(t,stack=new Set()){if(!t)return 0;if(stack.has(t.id))return 0;const c=kids(t.id).filter(x=>x.status!=='已封存');const oldStatus=t.status;if(!c.length){if(t.level===4)t.progress=leafProgress(t);else t.progress=0;t.status=autoStatus(t.progress,t.status==='已封存');if(t.status==='已完成'&&oldStatus!=='已完成'&&t.status!=='已封存')completion(t);return t.progress}stack.add(t.id);const p=Math.round(c.reduce((s,x)=>s+calc(x,stack),0)/c.length);stack.delete(t.id);t.progress=p;t.status=autoStatus(p,t.status==='已封存');if(t.status==='已完成'&&oldStatus!=='已完成'&&t.status!=='已封存')completion(t);return p}
 function recalcAllStatuses(){const rs=roots();const rid=new Set(rs.map(r=>r.id));rs.forEach(t=>calc(t));db.tasks.filter(t=>t.level>1&&t.status!=='已封存'&&!rid.has(t.id)).forEach(t=>calc(t));return db.tasks}
-function completion(t){if(!db.logs.some(x=>x.type==='auto'&&x.taskId===t.id)){db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:t.id,name:t.name,time:new Date().toISOString(),minutes:0,type:'auto'})}}
+function completion(t){if(!db.logs.some(x=>(x.kind===STUDY_LOG_KIND.SYSTEM||x.type==='auto')&&x.taskId===t.id)){db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:t.id,name:t.name,time:new Date().toISOString(),minutes:0,type:'auto',kind:STUDY_LOG_KIND.SYSTEM,actual:false})}}
 function ancestors(id){const out=[];let cur=getTask(id),guard=0;while(cur&&guard++<5){out.unshift(cur);cur=getTask(cur.parent)}return out}
 function taskHTML(t){
  const p=calc(t),c=kids(t.id),open=storeGet('o'+t.id)!=='0',isHit=goalSearchMatch(t),es=t.level===4?executionSummary(t):null;
@@ -930,7 +963,7 @@ function otherStudyInputName(){return (document.getElementById('otherStudyName')
 function selectOtherStudyTimer(){
  if(timer.running){toast('目前已有計時進行中，請先完成或暫停');return}
  const name=otherStudyInputName();if(!name){toast('請先輸入其他讀書的內容或科目');document.getElementById('otherStudyName')?.focus();return}
- timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'other-study',label:name};
+ timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:STUDY_LOG_KIND.OTHER,label:name};saveActiveTimer();
  document.getElementById('timerTask').textContent='其他讀書：'+name;
  document.getElementById('timerTaskCancel').style.display='block';
  updateClock();updateTimerButtons();toast('已選取其他讀書；尚未開始計時');
@@ -942,37 +975,47 @@ function addOtherStudyLog(){
  if(mins<=0){toast('補登分鐘必須大於 0');return}
  const when=date===todayKey()?new Date():new Date(date+'T12:00:00');
  if(Number.isNaN(when.getTime())){toast('日期格式無效');return}
- db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:null,name,time:when.toISOString(),minutes:mins,actual:true,kind:'other-study',source:'manual'});
+ db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:null,name,time:when.toISOString(),minutes:mins,actual:true,kind:STUDY_LOG_KIND.OTHER,source:'manual'});
  save();renderAll();toast(`已補登其他讀書 ${mins} 分鐘；不影響目標完成度`);
 }
 function timerHasSelection(){return timer.kind==='other-study'?!!timer.label:!!timer.id}
 
-function selectTodayExecution(id,planId=null){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中，請先完成或暫停');return}timer={id,start:0,elapsed:0,running:false,planId:planId||null,kind:'goal',label:''};document.getElementById('timerTask').textContent='待執行：'+t.name;document.getElementById('timerTaskCancel').style.display='block';updateClock();updateTimerButtons();today();toast('已選取今日欲執行項目；尚未開始計時')}
-function cancelTodaySelection(){if(timer.running){toast('計時進行中，請先暫停或完成後再取消');return}timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};document.getElementById('timerTask').textContent='尚未選擇任務';updateClock();updateTimerButtons();today();toast('已取消今日執行選取')}
+
+function renderTimerState(){
+ const taskEl=document.getElementById('timerTask'),cancel=document.getElementById('timerTaskCancel');if(!taskEl)return;
+ const has=timerHasSelection();
+ if(!has){taskEl.textContent='尚未選擇任務';if(cancel)cancel.style.display='none';updateClock();updateTimerButtons();return}
+ if(timer.kind==='other-study')taskEl.textContent=(timer.running?'進行中：':'待執行：')+'其他讀書：'+(timer.label||'未命名');
+ else{const t=getTask(timer.id);if(!t){timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};clearActiveTimer();taskEl.textContent='尚未選擇任務';if(cancel)cancel.style.display='none';updateClock();updateTimerButtons();return}taskEl.textContent=(timer.running?'進行中：':'待執行：')+t.name}
+ if(cancel)cancel.style.display='block';updateClock();updateTimerButtons();if(timer.running)timerLoop();
+}
+
+function selectTodayExecution(id,planId=null){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中，請先完成或暫停');return}timer={id,start:0,elapsed:0,running:false,planId:planId||null,kind:'goal',label:''};saveActiveTimer();document.getElementById('timerTask').textContent='待執行：'+t.name;document.getElementById('timerTaskCancel').style.display='block';updateClock();updateTimerButtons();today();toast('已選取今日欲執行項目；尚未開始計時')}
+function cancelTodaySelection(){if(timer.running){toast('計時進行中，請先暫停或完成後再取消');return}timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};clearActiveTimer();document.getElementById('timerTask').textContent='尚未選擇任務';updateClock();updateTimerButtons();today();toast('已取消今日執行選取')}
 function startTodayExecution(id,planId=null){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中');return}if(!planId){const today=todayKey();const p=(Array.isArray(db.executionPlans)?db.executionPlans:[]).find(x=>String(x.taskId)===String(id)&&x.date===today&&activeExecutionPlan(x));if(p)planId=p.id}selectTodayExecution(id,planId);startTimer()}
 function openTodayExecution(id,planId=null){go('today');selectTodayExecution(id,planId)}
-function useTimer(id){selected=id;timer={id,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};document.getElementById('timerTask').textContent=getTask(id)?.name||'';go('today');updateClock();updateTimerButtons();toast('已選擇具體行動，可開始計時')}
+function useTimer(id){selected=id;timer={id,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};saveActiveTimer();document.getElementById('timerTask').textContent=getTask(id)?.name||'';go('today');updateClock();updateTimerButtons();toast('已選擇具體行動，可開始計時')}
 function startTimer(){
  if(!timerHasSelection()){toast('請先選擇具體行動或其他讀書');return}
  if(timer.running){toast('計時已在進行中');return}
  if(timer.kind==='goal'){const t=getTask(timer.id);if(!t){toast('找不到目前執行的具體行動');return}t.status='進行中';save()}
- timer.running=true;timer.start=Date.now();updateTimerButtons();timerLoop();toast(timer.kind==='other-study'?'已開始其他讀書計時':'已開始計時')
+ timer.running=true;timer.start=Date.now();saveActiveTimer();updateTimerButtons();timerLoop();toast(timer.kind==='other-study'?'已開始其他讀書計時':'已開始計時')
 }
-function pauseTimer(){if(!timer.running){toast('目前沒有進行中的計時');return}timer.elapsed+=Date.now()-timer.start;timer.running=false;updateClock();updateTimerButtons();toast('計時已暫停')}
+function pauseTimer(){if(!timer.running){toast('目前沒有進行中的計時');return}timer.elapsed+=Date.now()-timer.start;timer.running=false;saveActiveTimer();updateClock();updateTimerButtons();toast('計時已暫停')}
 function finishTimer(){
  if(!timerHasSelection()){toast('請先選擇具體行動或其他讀書');return}
  if(timer.running){timer.elapsed+=Date.now()-timer.start;timer.running=false}
  const mins=Math.max(1,Math.round(timer.elapsed/60000));
  if(timer.kind==='other-study'){
   const name=timer.label||'其他讀書';
-  db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:null,name,time:new Date().toISOString(),minutes:mins,actual:true,kind:'other-study',source:'timer'});
-  save();timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};renderAll();
+  db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:null,name,time:new Date().toISOString(),minutes:mins,actual:true,kind:STUDY_LOG_KIND.OTHER,source:'timer'});
+  save();timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};clearActiveTimer();renderAll();
   document.getElementById('timerTask').textContent='已記錄其他讀書：'+name;document.getElementById('timerTaskCancel').style.display='none';updateClock();updateTimerButtons();toast(`已記錄其他讀書 ${mins} 分鐘；不影響目標完成度`);return;
  }
  const t=getTask(timer.id);if(!t){toast('找不到目前執行的具體行動');return}
  const planId=timer.planId||null;db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:t.id,name:t.name,time:new Date().toISOString(),minutes:mins,actual:true,planId});
  if(planId){const plan=(db.executionPlans||[]).find(x=>String(x.id)===String(planId));if(plan&&plan.status!=='已取消'){const planned=Math.max(1,+plan.minutes||0),previous=Math.max(0,+plan.actualMinutes||0),total=previous+mins;plan.actualMinutes=total;plan.status=total>=planned?'已完成':'已部分完成';if(plan.status==='已完成')plan.completedAt=new Date().toISOString();else delete plan.completedAt}}
- save();const done=timer.id;timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};renderAll();document.getElementById('timerTask').textContent='已記錄：'+(t.name||done);document.getElementById('timerTaskCancel').style.display='none';updateClock();updateTimerButtons();toast(planId?`已記錄 ${mins} 分鐘；本次安排累計已實際 ${db.executionPlans.find(x=>String(x.id)===String(planId))?.actualMinutes||mins} 分鐘`:`已記錄 ${mins} 分鐘；完成度已更新`)
+ save();const done=timer.id;timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};clearActiveTimer();renderAll();document.getElementById('timerTask').textContent='已記錄：'+(t.name||done);document.getElementById('timerTaskCancel').style.display='none';updateClock();updateTimerButtons();toast(planId?`已記錄 ${mins} 分鐘；本次安排累計已實際 ${db.executionPlans.find(x=>String(x.id)===String(planId))?.actualMinutes||mins} 分鐘`:`已記錄 ${mins} 分鐘；完成度已更新`)
 }
 function updateTimerButtons(){const bs=document.querySelectorAll('.timerbtns button');if(bs.length<3)return;const has=timerHasSelection();bs[0].disabled=!!timer.running||!has;bs[1].disabled=!timer.running;bs[2].disabled=!has||timer.elapsed<=0;bs[0].textContent=timer.running?'計時中…':'開始';bs[1].textContent='暫停';bs[2].textContent=has&&timer.elapsed>0?'完成並記錄':'完成'}
 function selectTask(id,focusEdit=false){const t=getTask(id);if(!t)return;selected=id;const chain=ancestors(id);goalPath={long:chain.find(x=>x.level===1)?.id||null,mid:chain.find(x=>x.level===2)?.id||null,short:chain.find(x=>chain.find(y=>y.level===3)?.id===x.id)?.id||chain.find(x=>x.level===3)?.id||null,exec:chain.find(x=>x.level===4)?.id||null};renderTree();updateHubContext();if(focusEdit)openEditModal(id)}
@@ -1097,7 +1140,7 @@ function today(){
 }
 function toggleTodayItemsPreview(){todayItemsExpanded=!todayItemsExpanded;today()}
 
-function timerLoop(){if(timer.running){updateClock();if(document.getElementById('executionAnalysis'))renderExecutionAnalysis();setTimeout(timerLoop,500)}}
+let timerLoopActive=false;function timerLoop(){if(timerLoopActive)return;timerLoopActive=true;const tick=()=>{if(!timer.running){timerLoopActive=false;return}updateClock();if(document.getElementById('executionAnalysis'))renderExecutionAnalysis();setTimeout(tick,500)};tick()}
 function updateClock(){const ms=timer.elapsed+(timer.running?Date.now()-timer.start:0),ss=Math.floor(ms/1000),h=Math.floor(ss/3600),m=Math.floor((ss%3600)/60),s=ss%60;document.getElementById('clock').textContent=[h,m,s].map(x=>String(x).padStart(2,'0')).join(':')}
 async function exportDB(){
  const envelope=typeof makeSecureBackupEnvelope==='function'?await makeSecureBackupEnvelope(db):makeEnvelope(normalize(db));const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(envelope,null,2)],{type:'application/json'}));a.download=`個人目標與學習行動管理系統_${APP_VERSION}_備份.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
@@ -1197,7 +1240,7 @@ function calendarGoToPickedDate(){const input=document.getElementById('calendarD
 function syncCalendarDatePicker(){const input=document.getElementById('calendarDatePicker');if(input)input.value=db.calendarSelected||todayKey()}
 function calendarShift(months){const d=calendarBaseDate();calendarCursor=new Date(d.getFullYear(),d.getMonth()+months,1);renderCalendar()}
 function calendarToday(){calendarCursor=new Date();db.calendarSelected=todayKey();save();renderCalendar();toast('已回到今天')}
-function renderAll(){db=normalize(db);rebuildExecutionPlanActuals();removeLegacyStandaloneToeicGoals();ensureActivities();ensureToeicPlan();recalcAllStatuses();renderTree();dashboard();today();renderActivities();renderScholarships();renderCalendar();stats();bindInteractionFeedback();bindActivitySearch()}
+function renderAll(){db=normalize(db);rebuildExecutionPlanActuals();removeLegacyStandaloneToeicGoals();ensureActivities();ensureToeicPlan();recalcAllStatuses();renderTree();dashboard();today();renderTimerState();renderActivities();renderScholarships();renderCalendar();stats();bindInteractionFeedback();bindActivitySearch()}
 function validateData(data){
  const errors=[],ids=new Set();const tasks=Array.isArray(data?.tasks)?data.tasks:[];
  for(const t of tasks){

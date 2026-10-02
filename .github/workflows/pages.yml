@@ -25,7 +25,14 @@ jobs:
         uses: actions/configure-pages@v5
 
       - name: Static QA
-        run: python3 qa_static.py
+        run: |
+          set -euo pipefail
+          node --check js/app.js
+          node --check js/store.js
+          node --check js/settings.js
+          node --check js/pwa.js
+          python3 qa_static.py
+          git diff --check
 
       - name: Assemble site
         run: |

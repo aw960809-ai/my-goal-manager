@@ -1,7 +1,21 @@
-/* V96.3 Store layer: isolated local persistence + integrity envelope. */
+/* Persistent store + integrity envelope. */
 let memoryStore={};
+let storeHealth={persistent:true,mode:'persistent',lastError:'',lastWriteAt:''};
 function storeGet(k){try{return localStorage.getItem(k)}catch(e){return memoryStore[k]??null}}
-function storeSet(k,v){try{localStorage.setItem(k,v);return localStorage.getItem(k)===v}catch(e){memoryStore[k]=v;return memoryStore[k]===v}}
+function storeSet(k,v){
+ try{
+  localStorage.setItem(k,v);
+  const ok=localStorage.getItem(k)===v;
+  storeHealth={persistent:ok,mode:ok?'persistent':'memory',lastError:ok?'':'localStorage verification failed',lastWriteAt:new Date().toISOString()};
+  if(!ok)memoryStore[k]=v;
+  return ok;
+ }catch(e){
+  memoryStore[k]=v;
+  storeHealth={persistent:false,mode:'memory',lastError:String(e?.message||e||'localStorage unavailable'),lastWriteAt:new Date().toISOString()};
+  return memoryStore[k]===v;
+ }
+}
+function storeWriteStatus(){return {...storeHealth}}
 function fnv1a(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return (h>>>0).toString(16).padStart(8,'0')}
 function stableSerialize(value){if(value===null||typeof value!=='object')return JSON.stringify(value);if(Array.isArray(value))return '['+value.map(stableSerialize).join(',')+']';return '{'+Object.keys(value).sort().map(k=>JSON.stringify(k)+':'+stableSerialize(value[k])).join(',')+'}'}
 function dataPayload(d){return stableSerialize(d)}

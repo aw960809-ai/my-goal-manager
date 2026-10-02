@@ -18,3 +18,5 @@ _site/
 migration/incoming/*.json
 migration/incoming/*.zip
 migration/incoming/*.bak
+
+.termux-backup-*/

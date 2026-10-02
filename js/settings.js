@@ -98,7 +98,7 @@ function renderSettings(){
 }
 async function updateSettingsDataStatus(){
  const el=document.getElementById('settingsDataStatus');if(!el)return;
- let storage='不可用';try{storage=localStorage?'可用':'不可用'}catch(e){}
+ const storeState=typeof storeWriteStatus==='function'?storeWriteStatus():null;let storage='不可用';try{storage=storeState?.persistent===false?'⚠ 暫存模式（關閉後可能遺失）':(localStorage?'✓ 永久儲存可用':'不可用')}catch(e){storage='⚠ 暫存模式'}
  const size=(()=>{try{return Math.round(new Blob([storeGet(KEY)||'']).size/1024)}catch(e){return 0}})();
  const backups=BACKUP_KEYS.filter(k=>!!storeGet(k)).length;
  const errs=typeof validateDB==='function'?validateDB():[];

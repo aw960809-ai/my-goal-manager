@@ -1,13 +1,14 @@
-/* V97.3.0 THU personal service worker */
-const PWA_VERSION='97.10.4';
-const PWA_SIGNATURE='thu-personal-97.10.4-other-study';
+/* THU personal service worker */
+importScripts('./config/version.js');
+const PWA_VERSION=String(globalThis.GOAL_MANAGER_VERSION||'97.11.0');
+const PWA_SIGNATURE='thu-personal-'+PWA_VERSION+'-core';
 const CACHE_PREFIX='thu-goal-personal-v';
 const LEGACY_CACHE_PREFIX='law-goal-web-v';
 const CACHE=CACHE_PREFIX+PWA_VERSION;
 const APP_SHELL=[
   './','./index.html','./manifest-original.webmanifest','./icon.svg','./icon-original-192.png','./icon-original-512.png','./apple-touch-original.png',
   './icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png',
-  './404.html','./css/base.css','./css/app-ui.css','./css/theme-v9793.css','./css/theme-v9794.css','./css/theme-v9795.css','./config/system-config.js',
+  './404.html','./css/base.css','./css/app-ui.css','./css/theme-v9793.css','./css/theme-v9794.css','./css/theme-v9795.css','./config/version.js','./config/system-config.js',
   './config/profiles/personal-thu.js','./js/core/runtime-profile.js','./js/core/data-boundary.js',
   './js/security.js','./js/store.js','./js/settings.js','./js/activity.js',
   './js/scholarship.js','./js/app.js','./js/scholarship-lifecycle.js',
