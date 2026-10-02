@@ -55,3 +55,12 @@ V96.5 是「七模組 UI 一致性＋運行穩定性」修正版。優先原則�
 - localStorage 永久寫入失敗時不再誤報保存成功。
 - AutoFetch／TOEIC 只更新資料；自動 push 後以 `workflow_dispatch` 明確呼叫 `pages.yml`，GitHub Pages 僅由 `pages.yml` 部署。
 - 自動寫入 main 的工作共用 concurrency，push 前先 rebase。
+
+
+## V97.12.0｜Design System 收斂
+- 正式視覺改為「暖霧灰 × 霧藍灰 × 灰莓果 × 石墨文字」。
+- 新增 `css/tokens.css` 作為唯一視覺 token 來源。
+- 新增 `css/design-system.css` 作為正式視覺規則層。
+- 退役 `theme-v9793.css`、`theme-v9794.css`、`theme-v9795.css`，不再動態疊加。
+- 正文基準提升為 16px；採 4px spacing system、統一控制高度與圓角。
+- PWA theme/background 顏色與新版視覺同步。

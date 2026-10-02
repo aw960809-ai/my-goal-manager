@@ -5,8 +5,8 @@
   "start_url": "/my-goal-manager/",
   "scope": "/my-goal-manager/",
   "display": "standalone",
-  "background_color": "#f4f6f5",
-  "theme_color": "#00563B",
+  "background_color": "#F3F1EE",
+  "theme_color": "#596A85",
   "icons": [
     {
       "src": "./icon-original-192.png",

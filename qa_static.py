@@ -62,5 +62,24 @@ assert 'git pull --rebase origin' in autofetch and 'git pull --rebase origin' in
 assert 'actions: write' in autofetch and 'actions: write' in toeic, 'main-writer workflows need actions: write for explicit Pages dispatch'
 assert 'gh workflow run pages.yml' in autofetch and 'gh workflow run pages.yml' in toeic, 'automated main writers must explicitly dispatch Pages after GITHUB_TOKEN push'
 assert '[skip ci]' not in autofetch and '[skip ci]' not in toeic, 'automated deploy commits must not carry skip-ci markers'
+assert './css/tokens.css' in html and './css/design-system.css' in html, 'design system CSS must load explicitly'
+assert all(x not in html for x in ['theme-v9793.css','theme-v9794.css','theme-v9795.css']), 'retired theme CSS must not load from HTML'
+cfg=(root/'config'/'system-config.js').read_text(encoding='utf-8')
+assert all(x not in cfg for x in ['theme-v9793.css','theme-v9794.css','theme-v9795.css']), 'retired dynamic theme loaders remain'
+tokens=(root/'css'/'tokens.css').read_text(encoding='utf-8')
+design=(root/'css'/'design-system.css').read_text(encoding='utf-8')
+for needle in ['--gm-primary:#596A85','--gm-accent:#886B78','--gm-bg:#F3F1EE','--gm-font-size-body:16px','--gm-space-4:16px']:
+ assert needle in tokens, f'design token missing: {needle}'
+assert '--ui-green:var(--gm-primary)' in design and '--ui-gold:var(--gm-accent)' in design, 'legacy aliases must map to canonical tokens'
+sw=(root/'sw.js').read_text(encoding='utf-8')
+assert 'tokens.css' in sw and 'design-system.css' in sw and 'theme-v9793.css' not in sw, 'service worker CSS shell is stale'
+assert all(x not in html for x in ['🎯','📍','🔎','📅']), 'high-saturation emoji remains in primary UI'
+assert 'today-path' in app and 'today-metrics' in app, 'execution card compact hierarchy missing'
+assert '<button class="btn primary" onclick="startTodayExecution' in app, 'execution CTA must use primary color'
+assert 'mobile polish - visual priority after device review' in design, 'mobile polish CSS missing'
+assert 'goal-tree mobile layout hotfix' in design and 'grid-template-columns:42px minmax(0,1fr)' in design, 'goal mobile layout hotfix missing'
+assert 'final visual cleanup - residual legacy color and mobile scan fixes' in design, 'final visual cleanup missing'
+assert 'calendar hero cleanup' in design, 'calendar hero cleanup missing'
 
-print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflow architecture')
+
+print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system')

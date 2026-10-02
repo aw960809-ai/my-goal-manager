@@ -12,11 +12,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta http-equiv="Content-Security-Policy" content="base-uri 'self'; object-src 'none'">
 <title>個人目標與學習行動管理系統</title>
+<link rel="stylesheet" href="./css/tokens.css">
 <link rel="stylesheet" href="./css/base.css">
 <link rel="stylesheet" href="./css/app-ui.css">
+<link rel="stylesheet" href="./css/design-system.css">
 
 
-<meta name="theme-color" content="#00563B">
+<meta name="theme-color" content="#596A85">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -28,7 +30,7 @@
 
 
 <meta name="application-name" content="目標管理">
-<meta name="msapplication-TileColor" content="#00563B">
+<meta name="msapplication-TileColor" content="#596A85">
 </head>
 <body>
 <div class="app">
@@ -44,7 +46,7 @@
 <section id="goals" class="view">
 <div class="goal-shell">
   <div class="panel goal-tree-panel">
-    <div class="goalnav-head"><div><h2>🎯 目標地圖</h2></div></div>
+    <div class="goalnav-head"><div><h2>目標地圖</h2></div></div>
     <div class="goal-map-tools goal-map-tools">
       <div class="goal-search goal-search"><span>⌕</span><input id="q" placeholder="搜尋目標名稱或關鍵字；結果直接定位…" oninput="renderTree()" autocomplete="off"><button type="button" class="goal-search-clear" aria-label="清除搜尋" title="清除搜尋" onclick="clearGoalSearch()">×</button></div>
       <select id="sf" onchange="renderTree()"><option value="all">全部狀態</option><option value="未開始">未開始</option><option value="進行中">進行中</option><option value="已完成">已完成</option></select>
@@ -67,7 +69,7 @@
 <section id="activity" class="view">
   <div class="panel">
     <div class="section-title">
-      <div><h2>🔎 活動雷達</h2></div>
+      <div><h2>活動雷達</h2></div>
       <div class="work-actions">
         <button class="btn" type="button" onclick="activityResetFilters()">重設</button>
         
@@ -85,9 +87,9 @@
       <div class="search-status-row"><span id="activitySearchStatus"></span><button class="search-reset" type="button" onclick="activityResetFilters()">↺ 重設條件</button></div>
     </div>
     <div class="activity-filter-row visual-filters" style="margin-top:9px">
-      <!-- V96.7 activity filters --><label class="filter-control"><span>📍 同心圓</span><select id="activityScope" onchange="activityPage=1;renderActivities()"><option value="全部">全部圈層</option><option value="東海校內">① 東海校內</option><option value="台中">② 台中</option><option value="全國">③ 全國</option><option value="海外／國際">④ 海外／國際</option></select></label>
+      <!-- V96.7 activity filters --><label class="filter-control"><span>圈層</span><select id="activityScope" onchange="activityPage=1;renderActivities()"><option value="全部">全部圈層</option><option value="東海校內">① 東海校內</option><option value="台中">② 台中</option><option value="全國">③ 全國</option><option value="海外／國際">④ 海外／國際</option></select></label>
       <label class="filter-control"><span>▦ 類型</span><select id="activityType" onchange="renderActivities()"><option value="全部">全部類型</option><option>法律／學術</option><option>語言／國際</option><option>教育／青少年</option><option>職涯／實習</option><option>公共參與</option></select></label><label class="filter-control"><span>◎ 適配度</span><select id="activityFitTier" onchange="activityPage=1;renderActivities()"><option value="全部">全部適配度</option><option value="高適配">高適配</option><option value="中適配">中適配</option><option value="探索">探索</option></select></label>
-      <!-- V96.8 goal bridge --><label class="filter-control"><span>🎯 子任務</span><select id="activityGoalFilter" onchange="activityPage=1;renderActivities()"><option value="全部">全部子任務</option></select></label>
+      <!-- V96.8 goal bridge --><label class="filter-control"><span>子任務</span><select id="activityGoalFilter" onchange="activityPage=1;renderActivities()"><option value="全部">全部子任務</option></select></label>
     </div>
     <div id="activityStats" class="context"></div>
     <div id="activityGoalContext" class="activity-goal-context" aria-live="polite"></div>
@@ -114,7 +116,7 @@
 <section id="calendar" class="view">
   <div class="calendar-shell">
     <div class="calendar-hero">
-      <div><h2>📅 學校行事曆</h2></div>
+      <div><h2>學校行事曆</h2></div>
       
     </div>
     <div class="calendar-toolbar">
@@ -175,7 +177,7 @@
     <div class="card stat-kpi"><small>本週執行安排</small><div class="big" id="est">0</div><div class="mini-label">提前安排／週</div></div>
     <div class="card stat-kpi"><small>實際紀錄</small><div class="big" id="logsN">0</div><div class="mini-label">次</div></div>
   </div>
-  <div class="panel execution-analysis-panel"><div class="section-title"><div><h2>計畫 × 實際執行</h2><small class="muted">行動成果、計畫履行與實際時數分開統計；只有實際計時才累計投入。取消不視為失敗。</small></div></div><div id="executionAnalysis"></div></div>
+  <div class="panel execution-analysis-panel"><div class="section-title"><div><h2>計畫 × 實際執行</h2><small class="muted">比較本週安排與實際投入；取消安排不列入失敗。</small></div></div><div id="executionAnalysis"></div></div>
   <div class="panel stats-progress-panel"><div class="section-title"><div><h2>本週整體投入</h2><small class="muted">進度條僅以目標實際／目標計算；其他讀書另外列入總讀書時間</small></div><b id="statsWeekRatio">0%</b></div><div class="progress-track"><div id="statsWeekBar" class="progress-fill"></div></div><div class="stats-progress-meta"><span>目標實際 <b id="statsActual">0</b> 分</span><span>其他讀書 <b id="statsOtherStudy">0</b> 分</span><span>總讀書 <b id="statsTotalStudy">0</b> 分</span><span>目標 <b id="statsTarget">0</b> 分</span><span>剩餘 <b id="statsRemaining">0</b> 分</span></div></div>
   <div class="grid2 stats-grid">
     <div class="panel"><div class="section-title"><div><h2>本週方向投入</h2></div></div><div id="domains" class="direction-bars"></div></div>
@@ -189,7 +191,7 @@
 
 <nav class="bottom-nav" aria-label="主要功能導覽">
 <button class="active" data-view="dash"><span class="bn-icon">⌂</span><span>總覽</span></button>
-<button data-view="goals"><span class="bn-icon">🎯</span><span>目標</span></button>
+<button data-view="goals"><span class="bn-icon">◎</span><span>目標</span></button>
 <button data-view="today"><span class="bn-icon">▶</span><span>執行</span></button>
 <button data-view="activity"><span class="bn-icon">◇</span><span>活動</span></button>
 <button data-view="scholarship"><span class="bn-icon">$</span><span>獎學金</span></button>
