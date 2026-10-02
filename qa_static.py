@@ -80,6 +80,18 @@ assert 'mobile polish - visual priority after device review' in design, 'mobile 
 assert 'goal-tree mobile layout hotfix' in design and 'grid-template-columns:42px minmax(0,1fr)' in design, 'goal mobile layout hotfix missing'
 assert 'final visual cleanup - residual legacy color and mobile scan fixes' in design, 'final visual cleanup missing'
 assert 'calendar hero cleanup' in design, 'calendar hero cleanup missing'
+nav_match=re.search(r'<nav class="bottom-nav".*?</nav>',html,re.S)
+assert nav_match, 'bottom navigation missing'
+primary_nav=nav_match.group(0)
+assert primary_nav.count('data-view=')==5, 'primary navigation must contain exactly five destinations'
+assert 'data-view="activity"' not in primary_nav and 'data-view="scholarship"' not in primary_nav, 'Explore views must not occupy primary navigation'
+assert 'home-explore-panel' in html and "go('activity')" in html and "go('scholarship')" in html, 'Home Explore entry missing'
+assert 'homeDateLabel' in html and 'dTodayMin' in html, 'Home daily summary missing'
+assert 'executionNowPanel' in html and 'other-study-disclosure' in html, 'execution information architecture missing'
+assert "const navId=(id==='activity'||id==='scholarship')?'dash':id;" in app, 'subview navigation ownership missing'
+assert "panel.classList.toggle('has-selection',has)" in app, 'sticky timer state binding missing'
+assert '97.13.0 information architecture' in design and 'repeat(5,minmax(0,1fr))' in design, 'phase 3 design rules missing'
 
 
-print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system')
+
+print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA')

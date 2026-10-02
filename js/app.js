@@ -949,7 +949,19 @@ function safeRemove(id){const t=getTask(id);if(!t)return;const c=kids(id);if(c.l
 function deleteCascade(id){const ids=descAll(id).map(x=>x.id);db.tasks=db.tasks.filter(t=>!ids.includes(t.id));if(selected&&ids.includes(selected))selected=null;save();renderAll();toast('目標已刪除；歷程紀錄保留')}
 function toggleKids(id){storeSet('o'+id,storeGet('o'+id)==='0'?'1':'0');renderTree();updateExpandToggle()}
 function closeTransientOverlays(){try{closeActualLogHistory()}catch(e){}try{closeSettings()}catch(e){}try{closeEditModal()}catch(e){}try{closeGoalInfoModal()}catch(e){}try{closeScholarshipInfoModal()}catch(e){}try{closeModal()}catch(e){}try{closeTest()}catch(e){}document.body.style.overflow='';}
-function go(id){const view=document.getElementById(id);if(!view)return;closeTransientOverlays();document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));view.classList.add('active');document.querySelectorAll('.bottom-nav button').forEach(x=>{const active=x.dataset.view===id;x.classList.toggle('active',active);x.setAttribute('aria-current',active?'page':'false')});window.scrollTo({top:0,behavior:'smooth'});if(id==='activity')renderActivities();if(id==='scholarship')renderScholarships();if(id==='calendar')renderCalendar();if(id==='dash'){dashboard();updateHubContext();bindInteractionFeedback()}}
+function go(id){
+ const view=document.getElementById(id);if(!view)return;
+ closeTransientOverlays();
+ document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+ view.classList.add('active');
+ const navId=(id==='activity'||id==='scholarship')?'dash':id;
+ document.querySelectorAll('.bottom-nav button').forEach(x=>{const active=x.dataset.view===navId;x.classList.toggle('active',active);x.setAttribute('aria-current',active?'page':'false')});
+ window.scrollTo({top:0,behavior:'smooth'});
+ if(id==='activity')renderActivities();
+ if(id==='scholarship')renderScholarships();
+ if(id==='calendar')renderCalendar();
+ if(id==='dash'){dashboard();updateHubContext();bindInteractionFeedback()}
+}
 document.querySelectorAll('.bottom-nav button').forEach(b=>b.onclick=()=>go(b.dataset.view));bindInteractionFeedback();
 try{if(document.activeElement&&/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))document.activeElement.blur();}catch(e){}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeActualLogHistory();closeGoalInfoModal();closeEditModal()}});
@@ -1017,7 +1029,7 @@ function finishTimer(){
  if(planId){const plan=(db.executionPlans||[]).find(x=>String(x.id)===String(planId));if(plan&&plan.status!=='已取消'){const planned=Math.max(1,+plan.minutes||0),previous=Math.max(0,+plan.actualMinutes||0),total=previous+mins;plan.actualMinutes=total;plan.status=total>=planned?'已完成':'已部分完成';if(plan.status==='已完成')plan.completedAt=new Date().toISOString();else delete plan.completedAt}}
  save();const done=timer.id;timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};clearActiveTimer();renderAll();document.getElementById('timerTask').textContent='已記錄：'+(t.name||done);document.getElementById('timerTaskCancel').style.display='none';updateClock();updateTimerButtons();toast(planId?`已記錄 ${mins} 分鐘；本次安排累計已實際 ${db.executionPlans.find(x=>String(x.id)===String(planId))?.actualMinutes||mins} 分鐘`:`已記錄 ${mins} 分鐘；完成度已更新`)
 }
-function updateTimerButtons(){const bs=document.querySelectorAll('.timerbtns button');if(bs.length<3)return;const has=timerHasSelection();bs[0].disabled=!!timer.running||!has;bs[1].disabled=!timer.running;bs[2].disabled=!has||timer.elapsed<=0;bs[0].textContent=timer.running?'計時中…':'開始';bs[1].textContent='暫停';bs[2].textContent=has&&timer.elapsed>0?'完成並記錄':'完成'}
+function updateTimerButtons(){const bs=document.querySelectorAll('.timerbtns button'),has=timerHasSelection(),panel=document.getElementById('executionNowPanel');if(panel){panel.classList.toggle('has-selection',has);panel.classList.toggle('is-running',!!timer.running)}if(bs.length<3)return;bs[0].disabled=!!timer.running||!has;bs[1].disabled=!timer.running;bs[2].disabled=!has||timer.elapsed<=0;bs[0].textContent=timer.running?'計時中…':'開始';bs[1].textContent='暫停';bs[2].textContent=has&&timer.elapsed>0?'完成並記錄':'完成'}
 function selectTask(id,focusEdit=false){const t=getTask(id);if(!t)return;selected=id;const chain=ancestors(id);goalPath={long:chain.find(x=>x.level===1)?.id||null,mid:chain.find(x=>x.level===2)?.id||null,short:chain.find(x=>chain.find(y=>y.level===3)?.id===x.id)?.id||chain.find(x=>x.level===3)?.id||null,exec:chain.find(x=>x.level===4)?.id||null};renderTree();updateHubContext();if(focusEdit)openEditModal(id)}
 function editModalField(t){
  const chain=ancestors(t.id),p=periodForTask(t),hours=t.weeklyMinutes>=60&&t.weeklyMinutes%60===0?String(t.weeklyMinutes/60):String(t.weeklyMinutes||0),unit=t.weeklyMinutes>=60&&t.weeklyMinutes%60===0?'hour':'min';
@@ -1044,7 +1056,11 @@ function saveEditModal(){
 }
 
 function wouldCycle(id,parent){let cur=parent,guard=0;while(cur&&guard++<10){if(cur===id)return true;cur=getTask(cur)?.parent}return false}
-function dashExecuteList(){const items=getTodayItems().slice(0,6);document.getElementById('dashActions').innerHTML=items.length?items.map(t=>{const w=currentWeekSummary(t),parent=ancestors(t.id).slice(-2,-1)[0]?.name||'';return `<div class="listitem dash-exec"><div><b>${esc(t.name)}</b><small>${calc(t)}% · 本週 ${w.actual}/${w.target} 分 · 剩餘 ${w.remaining} 分 · ${esc(parent)}</small></div><button class="btn gold" onclick="executeFromDashboard('${t.id}')">▶ 開始</button></div>`}).join(''):'<div class="empty">本週沒有待辦執行事項。可進入「執行」查看完整狀態。</div>'}
+function dashExecuteList(){
+ const box=document.getElementById('dashActions');if(!box)return;
+ const items=getTodayItems().slice(0,3);
+ box.innerHTML=items.length?items.map(t=>{const w=currentWeekSummary(t),parent=ancestors(t.id).slice(-2,-1)[0]?.name||'';return `<div class="listitem dash-exec"><div><b>${esc(t.name)}</b><small>${calc(t)}% · 本週 ${w.actual}/${w.target} 分 · 剩餘 ${w.remaining} 分${parent?' · '+esc(parent):''}</small></div><button class="btn primary" onclick="executeFromDashboard('${t.id}')">開始</button></div>`}).join(''):'<div class="empty">本週沒有待辦執行事項。</div>';
+}
 function executeFromDashboard(id){selected=id;const chain=ancestors(id);goalPath={long:chain.find(x=>x.level===1)?.id||null,mid:chain.find(x=>x.level===2)?.id||null,short:chain.find(x=>x.level===3)?.id||null,exec:id};useTimer(id);startTimer();toast('已開始執行')}
 function overviewMonthItems(date=todayKey()){
  const start=date;const d0=new Date(start+'T00:00:00');d0.setDate(d0.getDate()+30);const end=`${d0.getFullYear()}-${String(d0.getMonth()+1).padStart(2,'0')}-${String(d0.getDate()).padStart(2,'0')}`;
@@ -1094,20 +1110,43 @@ function renderDecisionList(){
  const el=document.getElementById('decisionList');if(!el)return;
  const load=weeklyWorkload(),badge=document.getElementById('weekLoadBadge');
  if(badge){badge.textContent=`本週 ${load.hours.toFixed(1).replace('.0','')}h · ${load.level}`;badge.className='decision-badge '+(load.score>=85?'urgent':load.score>=60?'normal':'ahead')}
- const items=decisionItems();
+ const all=decisionItems(),items=all.slice(0,1);
  el.innerHTML=items.length?items.map((x,i)=>{const due=x.days===0?'今天':x.days<0?'已截止':`${x.days} 天後`;return `<div class="decision-item ${x.state}"><span class="decision-rank">${i+1}</span><div class="decision-main"><b>${esc(x.t.name)}</b><small>${x.progress}% · 本週剩餘 ${x.w.remaining} 分 · ${x.gap>0?'進度落後約 '+x.gap+'%':'進度正常'} · ${due}</small></div><span class="decision-badge ${x.state}">${x.label}</span></div>`}).join(''):'<div class="empty">目前沒有需要優先處理的事項。</div>';
 }
 function dashboard(){
- const a=db.tasks.filter(t=>t.status!=='已封存'),rootsA=roots().filter(t=>t.status!=='已封存');
- document.getElementById('dOverall').textContent=(rootsA.length?Math.round(rootsA.reduce((s,t)=>s+calc(t),0)/rootsA.length):0)+'%';
- const weekItems=getTodayItems();document.getElementById('dToday').textContent=weekItems.length;
- const planStats=executionAnalysis(todayKey());const weeklyPlan=planStats.plannedMinutes;document.getElementById('dRun').textContent=(weeklyPlan/60).toFixed(1).replace('.0','')+'h';
- const ws=weekStartKey(todayKey()),we=weekEndKey(todayKey());const weeklyActual=db.logs.filter(x=>isCountableActualLog(x)&&logDate(x.time)>=ws&&logDate(x.time)<=we).reduce((s,x)=>s+(+x.minutes||0),0);document.getElementById('dMin').textContent=weeklyActual;
+ const rootsA=roots().filter(t=>t.status!=='已封存');
+ const overall=rootsA.length?Math.round(rootsA.reduce((sum,t)=>sum+calc(t),0)/rootsA.length):0;
+ document.getElementById('dOverall').textContent=overall+'%';
+
+ const weekItems=getTodayItems();
+ document.getElementById('dToday').textContent=weekItems.length;
+
+ const planStats=executionAnalysis(todayKey());
+ const weeklyPlan=planStats.plannedMinutes;
+ document.getElementById('dRun').textContent=(weeklyPlan/60).toFixed(1).replace('.0','')+'h';
+
+ const ws=weekStartKey(todayKey()),we=weekEndKey(todayKey());
+ const weekActual=db.logs.filter(x=>isCountableActualLog(x)&&logDate(x.time)>=ws&&logDate(x.time)<=we).reduce((sum,x)=>sum+(+x.minutes||0),0);
+ document.getElementById('dMin').textContent=weekActual;
+
+ const todayActual=db.logs.filter(x=>isCountableActualLog(x)&&logDate(x.time)===todayKey()).reduce((sum,x)=>sum+(+x.minutes||0),0);
+ const todayActualEl=document.getElementById('dTodayMin');if(todayActualEl)todayActualEl.textContent=todayActual;
+
+ const dateEl=document.getElementById('homeDateLabel');
+ if(dateEl){
+   const d=new Date(),weekday=['日','一','二','三','四','五','六'][d.getDay()];
+   dateEl.textContent=`${d.getMonth()+1} 月 ${d.getDate()} 日 · 星期${weekday}`;
+ }
+
  const directionHtml=rootsA.map(t=>{const prog=calc(t),stageCount=kids(t.id).filter(x=>x.status!=='已封存').length;return `<button type="button" class="direction ${selected===t.id?'active':''}" style="--progress:${prog}%" aria-pressed="${selected===t.id}" onclick="selectTask('${t.id}',true);go('goals')"><div class="num">主要目標</div><h3>${esc(t.name)}</h3><p>目前完成度 ${prog}% · ${stageCount} 個階段目標</p><div class="direction-progress" aria-label="完成度 ${prog}%"><span style="width:${prog}%"></span></div><div class="foot"><span>進入目標地圖</span><b>${prog}%</b></div></button>`}).join('')||'<div class="empty">尚無主要目標。</div>';
- document.getElementById('directions').innerHTML=directionHtml;const mgc=document.getElementById('mainGoalCount');if(mgc)mgc.textContent=`${rootsA.length} 個主要目標`;
+ document.getElementById('directions').innerHTML=directionHtml;
+ const mgc=document.getElementById('mainGoalCount');if(mgc)mgc.textContent=`${rootsA.length} 個主要目標`;
+
  dashExecuteList();
  renderDecisionList();
- const ds=overviewMonthItems();document.getElementById('deadlines').innerHTML=ds.length?ds.map(e=>`<div class="listitem"><span><b>${esc(e.title)}</b><small class="muted" style="display:block">${esc(e.meta||'')}</small></span><small>${esc(e.date)}</small></div>`).join(''):'<div class="empty">未來一個月沒有已登錄的重要時間節點。</div>';
+
+ const ds=overviewMonthItems().slice(0,4);
+ document.getElementById('deadlines').innerHTML=ds.length?ds.map(e=>`<div class="listitem"><span><b>${esc(e.title)}</b><small class="muted" style="display:block">${esc(e.meta||'')}</small></span><small>${esc(e.date)}</small></div>`).join(''):'<div class="empty">未來一個月沒有已登錄的重要時間節點。</div>';
 }
 function updateHubContext(){}
 function renderPlannedQueue(){

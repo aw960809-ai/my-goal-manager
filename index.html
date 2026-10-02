@@ -37,10 +37,72 @@
 <button class="settings-trigger" type="button" onclick="openSettings()" data-action="open-settings" aria-label="開啟設定" title="設定">⚙</button>
 
 <section id="dash" class="view active">
-<div class="overview-head"><div><h2>總覽</h2></div></div>
-<div class="cards"><div class="card"><small>整體進度</small><div class="big" id="dOverall">0%</div></div><div class="card" onclick="go('today')" style="cursor:pointer"><small>本週待辦</small><div class="big" id="dToday">0</div></div><div class="card"><small>本週計畫投入</small><div class="big" id="dRun">0h</div></div><div class="card" onclick="go('stats')" style="cursor:pointer"><small>本週實際投入</small><div class="big" id="dMin">0</div><small>分鐘</small></div></div>
-<div class="grid2 overview-main" style="margin-top:18px"><div class="panel"><div class="section-title"><div><h2>本週待辦執行事項</h2></div><button class="btn" onclick="go('today')">查看全部 →</button></div><div id="dashActions" class="list"></div></div><div class="panel"><div class="section-title"><div><h2>未來一個月｜時間節點</h2></div><button class="btn" onclick="go('calendar')">行事曆 →</button></div><div id="deadlines" class="list"></div></div></div><div class="panel decision-panel"><div class="section-title"><div><h2>現在最值得處理</h2></div><span id="weekLoadBadge" class="decision-badge normal">本週負荷</span></div><div id="decisionList" class="decision-list"></div></div>
-<div class="panel" style="margin-top:18px"><div class="section-title"><div><h2>主要目標</h2></div><span id="mainGoalCount" class="muted" style="font-size:12px">0 個主要目標</span></div><div id="directions" class="grid3"></div></div>
+  <header class="home-hero">
+    <div>
+      <span id="homeDateLabel" class="home-date-label">今天</span>
+      <h2>首頁</h2>
+      <p>先完成最重要的一件事，再處理其他。</p>
+    </div>
+    <button class="btn primary home-hero-action" type="button" onclick="go('today')">開始執行 →</button>
+  </header>
+
+  <div class="panel home-focus-panel">
+    <div class="section-title">
+      <div><small class="home-eyebrow">優先處理</small><h2>現在最值得處理</h2></div>
+      <span id="weekLoadBadge" class="decision-badge normal">本週負荷</span>
+    </div>
+    <div id="decisionList" class="decision-list"></div>
+    <button class="home-inline-link" type="button" onclick="go('today')">查看其他可執行事項 →</button>
+  </div>
+
+  <div class="home-metrics" aria-label="今日與本週摘要">
+    <button class="home-metric home-metric-primary" type="button" onclick="go('today')">
+      <small>今日投入</small><b id="dTodayMin">0</b><span>分鐘</span>
+    </button>
+    <button class="home-metric" type="button" onclick="go('today')">
+      <small>本週待辦</small><b id="dToday">0</b><span>項</span>
+    </button>
+    <button class="home-metric" type="button" onclick="go('stats')">
+      <small>本週實際</small><b id="dMin">0</b><span>分鐘</span>
+    </button>
+  </div>
+
+  <div class="home-meta-row" aria-label="長期與計畫摘要">
+    <div><small>整體進度</small><b id="dOverall">0%</b></div>
+    <div><small>本週計畫</small><b id="dRun">0h</b></div>
+  </div>
+
+  <div class="home-grid-two">
+    <div class="panel home-actions-panel">
+      <div class="section-title"><div><h2>接著做</h2><small class="muted">本週仍可投入的具體行動</small></div><button class="btn" type="button" onclick="go('today')">全部 →</button></div>
+      <div id="dashActions" class="list"></div>
+    </div>
+    <div class="panel home-next-panel">
+      <div class="section-title"><div><h2>接下來</h2><small class="muted">未來一個月的重要節點</small></div><button class="btn" type="button" onclick="go('calendar')">行事 →</button></div>
+      <div id="deadlines" class="list"></div>
+    </div>
+  </div>
+
+  <div class="panel home-explore-panel">
+    <div class="section-title"><div><h2>探索機會</h2><small class="muted">需要時再進入，不佔主要導覽</small></div></div>
+    <div class="home-explore-grid">
+      <button class="home-explore-card" type="button" onclick="go('activity')">
+        <span class="home-explore-icon">◇</span>
+        <span><b>活動雷達</b><small>找近期可參與的活動與國際機會</small></span>
+        <span class="home-explore-arrow">→</span>
+      </button>
+      <button class="home-explore-card" type="button" onclick="go('scholarship')">
+        <span class="home-explore-icon">$</span>
+        <span><b>獎學金</b><small>查看符合資格的考照與外語獎勵</small></span>
+        <span class="home-explore-arrow">→</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="panel home-goals-panel">
+    <div class="section-title"><div><h2>主要目標</h2></div><span id="mainGoalCount" class="muted">0 個主要目標</span></div>
+    <div id="directions" class="grid3"></div>
+  </div>
 </section>
 
 <section id="goals" class="view">
@@ -141,32 +203,46 @@
 </section>
 
 <section id="today" class="view">
-  <div class="panel compact-execution-panel">
-    <div class="section-title"><div><h2>執行</h2></div><span class="muted">選取後才開始計時</span></div>
-    <div id="todayList" class="list"></div>
-    <div class="planned-queue-head"><h3>未來已安排</h3><span id="plannedQueueCount" class="muted"></span></div>
-    <div id="plannedQueue" class="list"></div>
-  </div>
-  <div class="panel other-study-panel">
-    <div class="section-title"><div><h2>其他讀書時間</h2><small class="muted">臨時複習、課堂內容或未納入目標樹的學習</small></div><span class="muted">不影響目標完成度</span></div>
-    <div class="other-study-grid">
-      <label><span>內容／科目</span><input id="otherStudyName" type="text" maxlength="60" placeholder="例如：刑法分則課後複習"></label>
-      <label><span>日期</span><input id="otherStudyDate" type="date"></label>
-      <label><span>補登分鐘</span><input id="otherStudyMinutes" type="number" min="1" step="1" value="30"></label>
-    </div>
-    <div class="other-study-actions">
-      <button class="btn primary" type="button" onclick="selectOtherStudyTimer()">選取並計時</button>
-      <button class="btn gold" type="button" onclick="addOtherStudyLog()">直接補登</button>
-    </div>
-    <div class="other-study-note">會納入總讀書時數與實際投入歷程；不會抵扣任何 Level 4 週目標，也不會改變目標完成度。</div>
-  </div>
-  <div class="panel compact-timer-panel">
-    <div class="section-title"><div><h2>⏱ 執行計時</h2></div></div>
+  <header class="execution-page-head">
+    <div><span class="home-eyebrow">FOCUS</span><h2>執行</h2><p>選一件事，開始。其他事情先留在下面。</p></div>
+  </header>
+
+  <div class="panel execution-now-panel" id="executionNowPanel">
+    <div class="execution-now-head"><span>現在執行</span><small>計時狀態可在 PWA／Android 中斷後恢復</small></div>
     <div id="timerTask" class="timer-task">尚未選擇任務</div>
-    <div id="timerTaskCancel" style="display:none;text-align:right;margin-top:7px"><button class="cancel-select" type="button" onclick="cancelTodaySelection()">✕ 取消選取</button></div>
+    <div id="timerTaskCancel" class="timer-cancel-row" style="display:none"><button class="cancel-select" type="button" onclick="cancelTodaySelection()">✕ 取消選取</button></div>
     <div class="timer" id="clock">00:00:00</div>
     <div class="timerbtns"><button class="btn primary" onclick="startTimer()">開始</button><button class="btn" onclick="pauseTimer()">暫停</button><button class="btn gold" onclick="finishTimer()">完成</button></div>
   </div>
+
+  <div class="panel compact-execution-panel">
+    <div class="section-title"><div><h2>今天可執行</h2><small class="muted">依本週剩餘投入與期間整理</small></div></div>
+    <div id="todayList" class="list"></div>
+  </div>
+
+  <div class="panel execution-planned-panel">
+    <div class="planned-queue-head"><div><h3>已安排</h3><small class="muted">未來具體時間安排</small></div><span id="plannedQueueCount" class="muted"></span></div>
+    <div id="plannedQueue" class="list"></div>
+  </div>
+
+  <details class="panel other-study-panel other-study-disclosure">
+    <summary>
+      <span><b>其他讀書</b><small>臨時複習、課堂內容或未納入目標樹的學習</small></span>
+      <span class="other-study-toggle" aria-hidden="true">＋</span>
+    </summary>
+    <div class="other-study-body">
+      <div class="other-study-grid">
+        <label><span>內容／科目</span><input id="otherStudyName" type="text" maxlength="60" placeholder="例如：刑法分則課後複習"></label>
+        <label><span>日期</span><input id="otherStudyDate" type="date"></label>
+        <label><span>補登分鐘</span><input id="otherStudyMinutes" type="number" min="1" step="1" value="30"></label>
+      </div>
+      <div class="other-study-actions">
+        <button class="btn primary" type="button" onclick="selectOtherStudyTimer()">選取並計時</button>
+        <button class="btn gold" type="button" onclick="addOtherStudyLog()">直接補登</button>
+      </div>
+      <div class="other-study-note">納入總讀書時數，但不改變任何 Level 4 完成度。</div>
+    </div>
+  </details>
 </section>
 
 <section id="stats" class="view">
@@ -190,12 +266,10 @@
 
 
 <nav class="bottom-nav" aria-label="主要功能導覽">
-<button class="active" data-view="dash"><span class="bn-icon">⌂</span><span>總覽</span></button>
+<button class="active" data-view="dash"><span class="bn-icon">⌂</span><span>首頁</span></button>
 <button data-view="goals"><span class="bn-icon">◎</span><span>目標</span></button>
 <button data-view="today"><span class="bn-icon">▶</span><span>執行</span></button>
-<button data-view="activity"><span class="bn-icon">◇</span><span>活動</span></button>
-<button data-view="scholarship"><span class="bn-icon">$</span><span>獎學金</span></button>
-<button data-view="calendar"><span class="bn-icon">▣</span><span>行事曆</span></button>
+<button data-view="calendar"><span class="bn-icon">▣</span><span>行事</span></button>
 <button data-view="stats"><span class="bn-icon">◒</span><span>分析</span></button>
 </nav>
 

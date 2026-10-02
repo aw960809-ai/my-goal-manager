@@ -484,3 +484,165 @@ html[data-reduced-motion="true"] *,html[data-reduced-motion="true"] *::before,ht
 #calendar .calendar-update:hover{
   background:var(--gm-surface-soft)!important;
 }
+/* V97.13.0 information architecture - Home + Execution + five-item navigation */
+.bottom-nav{
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  width:min(620px,100%)!important;
+  height:calc(76px + env(safe-area-inset-bottom))!important;
+  padding:6px 10px calc(6px + env(safe-area-inset-bottom))!important;
+}
+.bottom-nav button{font-size:11px!important;gap:3px!important;border-radius:14px!important}
+.bottom-nav button .bn-icon{font-size:19px!important}
+.bottom-nav button.active{background:var(--gm-primary-soft)!important}
+
+.home-hero{
+  display:flex;justify-content:space-between;gap:16px;align-items:flex-end;
+  margin:2px auto var(--gm-space-5);max-width:1120px;padding:4px 2px;
+}
+.home-hero h2{margin:3px 0 3px;font-size:28px;line-height:1.2;color:var(--gm-text)}
+.home-hero p{margin:0;color:var(--gm-text-secondary);font-size:14px}
+.home-date-label,.home-eyebrow{
+  display:block;color:var(--gm-primary);font-size:12px;font-weight:700;letter-spacing:.04em;
+}
+.home-hero-action{flex:0 0 auto}
+.home-focus-panel{border-left:5px solid var(--gm-primary)!important;margin-bottom:var(--gm-space-4)!important}
+.home-focus-panel .decision-list{gap:0!important}
+.home-focus-panel .decision-item{
+  border:0!important;padding:4px 0!important;background:transparent!important;box-shadow:none!important;
+}
+.home-inline-link{
+  border:0;background:transparent;color:var(--gm-primary-dark);
+  font-size:13px;font-weight:600;padding:10px 0 0;
+}
+.home-metrics{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;
+  max-width:1120px;margin:0 auto 10px;
+}
+.home-metric{
+  min-width:0;min-height:112px;display:flex;flex-direction:column;align-items:flex-start;
+  justify-content:center;padding:16px;border:1px solid var(--gm-line);border-radius:var(--gm-radius-lg);
+  background:var(--gm-surface);color:var(--gm-text);box-shadow:var(--gm-shadow-sm);text-align:left;
+}
+.home-metric small{font-size:13px;color:var(--gm-text-secondary)}
+.home-metric b{
+  margin-top:4px;color:var(--gm-primary);font-size:31px;line-height:1.05;font-variant-numeric:tabular-nums;
+}
+.home-metric span{font-size:12px;color:var(--gm-text-muted);margin-top:3px}
+.home-metric-primary{border-color:var(--gm-primary)}
+.home-meta-row{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:1120px;margin:0 auto var(--gm-space-4);
+}
+.home-meta-row>div{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 13px;
+  border-radius:var(--gm-radius-md);background:var(--gm-surface-soft);color:var(--gm-text-secondary);
+}
+.home-meta-row small{font-size:12px}
+.home-meta-row b{font-size:16px;color:var(--gm-text)}
+.home-grid-two{
+  display:grid;grid-template-columns:1fr 1fr;gap:var(--gm-space-4);
+  max-width:1120px;margin:0 auto var(--gm-space-4);
+}
+.home-actions-panel,.home-next-panel,.home-explore-panel,.home-goals-panel{margin-top:0!important}
+#dash .dash-exec{grid-template-columns:minmax(0,1fr) auto}
+#dash .dash-exec .btn{min-width:86px}
+#dash .dash-exec small{
+  overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+}
+#deadlines .listitem{min-height:64px}
+.home-explore-panel{
+  max-width:1120px;margin-left:auto!important;margin-right:auto!important;margin-bottom:var(--gm-space-4)!important;
+}
+.home-explore-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.home-explore-card{
+  display:grid;grid-template-columns:38px minmax(0,1fr) auto;gap:10px;align-items:center;
+  min-width:0;padding:14px;border:1px solid var(--gm-line);border-radius:var(--gm-radius-md);
+  background:var(--gm-surface-elevated);color:var(--gm-text);text-align:left;
+}
+.home-explore-card:hover{border-color:var(--gm-primary)}
+.home-explore-icon{
+  width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
+  background:var(--gm-primary-soft);color:var(--gm-primary-dark);font-weight:700;
+}
+.home-explore-card b{display:block;font-size:16px}
+.home-explore-card small{
+  display:block;margin-top:2px;color:var(--gm-text-secondary);font-size:12px;line-height:1.45;
+}
+.home-explore-arrow{color:var(--gm-text-muted)}
+.home-goals-panel{max-width:1120px;margin-left:auto!important;margin-right:auto!important}
+
+.execution-page-head{
+  max-width:1120px;margin:2px auto var(--gm-space-4);padding:2px;
+}
+.execution-page-head h2{margin:2px 0 2px;font-size:28px;line-height:1.2}
+.execution-page-head p{margin:0;color:var(--gm-text-secondary);font-size:14px}
+#today{max-width:1120px;margin-left:auto;margin-right:auto}
+#today .execution-now-panel,#today .compact-execution-panel,#today .execution-planned-panel,#today .other-study-disclosure{
+  width:100%;max-width:none;margin:0 0 var(--gm-space-4)!important;
+}
+.execution-now-panel{
+  border-left:5px solid var(--gm-primary)!important;
+  transition:box-shadow .15s ease,transform .15s ease;
+}
+.execution-now-panel.has-selection{
+  position:sticky;top:8px;z-index:24;box-shadow:var(--gm-shadow-lg)!important;
+}
+.execution-now-panel.is-running{border-left-color:var(--gm-accent)!important}
+.execution-now-head{
+  display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px;
+}
+.execution-now-head>span{font-size:13px;font-weight:700;color:var(--gm-primary)}
+.execution-now-head small{font-size:11px!important;text-align:right}
+#today .timer{margin:18px 0!important}
+.timer-cancel-row{text-align:right;margin-top:7px}
+.execution-planned-panel .planned-queue-head{margin:0 0 8px!important;padding:0 0 10px!important}
+.execution-planned-panel .planned-queue-head>div h3{margin:0;font-size:18px}
+.execution-planned-panel .planned-queue-head>div small{display:block;margin-top:2px}
+.other-study-disclosure{overflow:hidden}
+.other-study-disclosure>summary{
+  list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;
+}
+.other-study-disclosure>summary::-webkit-details-marker{display:none}
+.other-study-disclosure>summary b{display:block;font-size:18px}
+.other-study-disclosure>summary small{
+  display:block;margin-top:2px;color:var(--gm-text-secondary)!important;font-size:12px!important;
+}
+.other-study-toggle{
+  width:38px;height:38px;border-radius:12px;display:grid;place-items:center;
+  background:var(--gm-primary-soft);color:var(--gm-primary-dark);font-size:22px;transition:transform .15s ease;
+}
+.other-study-disclosure[open] .other-study-toggle{transform:rotate(45deg)}
+.other-study-body{padding-top:16px;margin-top:14px;border-top:1px solid var(--gm-line)}
+
+@media(min-width:900px){
+  #today{
+    display:grid!important;grid-template-columns:minmax(0,1.25fr) minmax(320px,.75fr)!important;
+    gap:var(--gm-space-4)!important;align-items:start!important;
+  }
+  #today .execution-page-head{grid-column:1/-1;width:100%}
+  #today .execution-now-panel{grid-column:2;grid-row:2}
+  #today .compact-execution-panel{grid-column:1;grid-row:2 / span 2}
+  #today .execution-planned-panel{grid-column:2;grid-row:3}
+  #today .other-study-disclosure{grid-column:1/-1}
+}
+
+@media(max-width:700px){
+  .home-hero{align-items:flex-start}
+  .home-hero-action{display:none}
+  .home-hero h2,.execution-page-head h2{font-size:25px}
+  .home-metrics{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+  .home-metric{min-height:98px;padding:12px}
+  .home-metric b{font-size:26px}
+  .home-metric small{font-size:11px}
+  .home-grid-two{grid-template-columns:1fr;gap:var(--gm-space-3)}
+  .home-explore-grid{grid-template-columns:1fr}
+  .bottom-nav{
+    height:calc(72px + env(safe-area-inset-bottom))!important;
+    padding:4px 8px calc(4px + env(safe-area-inset-bottom))!important;
+  }
+  .bottom-nav button{font-size:10px!important}
+  .bottom-nav button .bn-icon{font-size:18px!important}
+  .execution-now-panel.has-selection{top:6px}
+  .execution-now-head{align-items:flex-start}
+  .execution-now-head small{max-width:55%;font-size:10px!important}
+  #today .timer{font-size:38px!important}
+}
