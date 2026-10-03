@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Goal Manager 資料救援檢查器</title>
+<style>
+:root{color-scheme:light dark;--bg:#f4f1eb;--card:#fffdf9;--ink:#253349;--muted:#6f7782;--line:#d9d5cf;--good:#0b6b53;--warn:#9b5b16;--bad:#a63d40;--accent:#49627f}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;background:var(--bg);color:var(--ink)}
+main{max-width:980px;margin:0 auto;padding:24px 16px 80px}
+h1{font-size:26px;margin:0 0 6px}
+h2{font-size:20px;margin:0 0 12px}
+p{line-height:1.6}
+.notice,.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:14px 0;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.notice{border-left:6px solid var(--good)}
+.warn{border-left:6px solid var(--warn)}
+.bad{border-left:6px solid var(--bad)}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+button{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);padding:11px 14px;font-weight:700}
+button.primary{background:var(--accent);color:white;border-color:var(--accent)}
+button:disabled{opacity:.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}
+.kv{background:rgba(128,128,128,.07);border-radius:12px;padding:10px}
+.kv small{display:block;color:var(--muted);margin-bottom:4px}
+.kv b{font-size:18px}
+.snap{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.snap:first-child{border-top:0;padding-top:0;margin-top:0}
+.tag{display:inline-block;border-radius:999px;padding:3px 8px;font-size:12px;font-weight:700;background:rgba(73,98,127,.12);margin-right:6px}
+.tag.good{background:rgba(11,107,83,.12);color:var(--good)}
+.tag.warn{background:rgba(155,91,22,.12);color:var(--warn)}
+.tag.bad{background:rgba(166,61,64,.12);color:var(--bad)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+pre{white-space:pre-wrap;word-break:break-word;background:#111;color:#eee;padding:12px;border-radius:12px;max-height:360px;overflow:auto}
+.muted{color:var(--muted)}
+.best{outline:3px solid rgba(11,107,83,.25)}
+@media(max-width:600px){main{padding:16px 12px 70px}h1{font-size:22px}.card{padding:14px}table{font-size:12px}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Goal Manager 資料救援檢查器</h1>
+  <p class="muted">只讀取同一網站來源下的 localStorage 與既有 IndexedDB 鏡像，不會寫入、不會還原、不會刪除任何資料。</p>
+
+  <div class="notice">
+    <b>安全模式：唯讀</b>
+    <p>此頁不呼叫 Goal Manager 的 save、import、restore 或 reset。先比較目前資料、3 個備份槽、舊版本 key 與 IndexedDB 鏡像，再決定是否需要復原。</p>
+  </div>
+
+  <div class="toolbar">
+    <button class="primary" id="scanBtn">重新掃描</button>
+    <button id="downloadBtn" disabled>下載診斷報告 JSON</button>
+    <button id="copyBtn" disabled>複製文字摘要</button>
+  </div>
+
+  <div id="status" class="card">尚未掃描。</div>
+  <div id="candidate"></div>
+  <div id="results"></div>
+
+  <div class="card">
+    <h2>說明</h2>
+    <p>「可計入讀書」採目前系統規則：actual 不為 false、未標示「已刪除」、非 system/auto 紀錄。其他讀書會計入總讀書，但不算 Level 4 目標進度。</p>
+    <p>若某個備份的「可計入分鐘」或「實際紀錄」明顯比目前資料多，它會被標成較可能的舊資料候選；這只是診斷，不會自動覆蓋目前資料。</p>
+  </div>
+</main>
+
+<script>
+(() => {
+  'use strict';
+
+  const PRIMARY='lawLangGoalSystemV92';
+  const BACKUPS=[
+    'lawLangGoalSystemV92_backup1',
+    'lawLangGoalSystemV92_backup2',
+    'lawLangGoalSystemV92_backup3'
+  ];
+  const IDB_NAME='lawLangGoalSystemPersistentV87';
+  const IDB_STORE='snapshots';
+  let lastReport=null;
+  let rawById=new Map();
+
+  const $=id=>document.getElementById(id);
+  const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[ch]));
+
+  function bytes(raw){
+    try{return new Blob([raw||'']).size}catch(_){return String(raw||'').length}
+  }
+
+  function localDateKey(value){
+    const d=new Date(value);
+    if(Number.isNaN(d.getTime()))return '';
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function weekRange(date=new Date()){
+    const d=new Date(date.getFullYear(),date.getMonth(),date.getDate());
+    const day=d.getDay();
+    d.setDate(d.getDate()-day+(day===0?-6:1));
+    const start=localDateKey(d);
+    d.setDate(d.getDate()+6);
+    return {start,end:localDateKey(d)};
+  }
+
+  function unwrap(raw){
+    const parsed=JSON.parse(raw);
+    if(parsed&&parsed.data&&typeof parsed.data==='object'){
+      return {
+        data:parsed.data,
+        schemaVersion:parsed.schemaVersion??null,
+        appVersion:parsed.appVersion??'',
+        savedAt:parsed.savedAt??'',
+        checksum:parsed.checksum??''
+      };
+    }
+    return {
+      data:parsed,
+      schemaVersion:0,
+      appVersion:'',
+      savedAt:'',
+      checksum:''
+    };
+  }
+
+  function logKind(log){
+    if(log?.kind==='other-study')return 'other-study';
+    if(log?.kind==='system'||log?.type==='auto')return 'system';
+    return 'goal-study';
+  }
+
+  function countable(log){
+    return !!log &&
+      log.actual!==false &&
+      log.status!=='已刪除' &&
+      logKind(log)!=='system' &&
+      log.type!=='auto';
+  }
+
+  function sum(rows){
+    return rows.reduce((n,x)=>n+Math.max(0,+x?.minutes||0),0);
+  }
+
+  function summarize(id,label,raw,source){
+    try{
+      const env=unwrap(raw);
+      const data=env.data||{};
+      const tasks=Array.isArray(data.tasks)?data.tasks:[];
+      const logs=Array.isArray(data.logs)?data.logs:[];
+      const valid=logs.filter(countable);
+      const other=valid.filter(x=>logKind(x)==='other-study');
+      const goal=valid.filter(x=>logKind(x)!=='other-study' && tasks.some(t=>String(t?.id)===String(x?.taskId)));
+      const deleted=logs.filter(x=>x?.status==='已刪除');
+      const wr=weekRange(new Date());
+      const week=valid.filter(x=>{
+        const day=localDateKey(x?.time);
+        return day&&day>=wr.start&&day<=wr.end;
+      });
+      const throughOct2=valid.filter(x=>{
+        const day=localDateKey(x?.time);
+        return day&&day<='2026-10-02';
+      });
+      const days={};
+      valid.forEach(log=>{
+        const day=localDateKey(log?.time)||'無日期';
+        if(!days[day])days[day]={minutes:0,count:0};
+        days[day].minutes+=Math.max(0,+log.minutes||0);
+        days[day].count++;
+      });
+      const logRows=valid
+        .map(x=>({
+          id:String(x.id||''),
+          time:String(x.time||''),
+          date:localDateKey(x.time),
+          minutes:Math.max(0,+x.minutes||0),
+          name:String(x.name||''),
+          taskId:x.taskId??null,
+          kind:logKind(x)
+        }))
+        .sort((a,b)=>String(a.time).localeCompare(String(b.time)));
+
+      return {
+        id,label,source,ok:true,
+        bytes:bytes(raw),
+        schemaVersion:env.schemaVersion,
+        appVersion:env.appVersion,
+        savedAt:env.savedAt,
+        checksum:env.checksum,
+        taskCount:tasks.length,
+        level4Count:tasks.filter(t=>Number(t?.level)===4&&t?.status!=='已封存').length,
+        logCount:logs.length,
+        countableCount:valid.length,
+        goalCount:goal.length,
+        otherCount:other.length,
+        deletedCount:deleted.length,
+        totalMinutes:sum(valid),
+        goalMinutes:sum(goal),
+        otherMinutes:sum(other),
+        weekStart:wr.start,
+        weekEnd:wr.end,
+        weekMinutes:sum(week),
+        throughOct2Minutes:sum(throughOct2),
+        throughOct2Count:throughOct2.length,
+        firstLog:logRows[0]?.time||'',
+        lastLog:logRows.at(-1)?.time||'',
+        daily:days,
+        logs:logRows
+      };
+    }catch(error){
+      return {
+        id,label,source,ok:false,
+        bytes:bytes(raw),
+        error:String(error?.message||error)
+      };
+    }
+  }
+
+  function localStorageEntries(){
+    const result=[];
+    const seen=new Set();
+    const add=(key,label,source='localStorage')=>{
+      if(seen.has(key))return;
+      seen.add(key);
+      let raw=null;
+      try{raw=localStorage.getItem(key)}catch(_){}
+      if(raw)result.push({id:key,label,raw,source});
+    };
+
+    add(PRIMARY,'目前主資料');
+    BACKUPS.forEach((key,i)=>add(key,`備份槽 ${i+1}`));
+
+    try{
+      for(let i=0;i<localStorage.length;i++){
+        const key=localStorage.key(i);
+        if(
+          key &&
+          /^lawLangGoalSystemV\d+$/.test(key) &&
+          !seen.has(key)
+        ){
+          add(key,`舊版本資料 ${key}`);
+        }
+      }
+    }catch(_){}
+
+    return result;
+  }
+
+  async function idbEntry(){
+    if(!('indexedDB' in window))return null;
+
+    try{
+      if(typeof indexedDB.databases!=='function'){
+        return {
+          id:'idb-skip',
+          label:'IndexedDB 鏡像',
+          source:'IndexedDB',
+          error:'瀏覽器不支援安全列舉資料庫；為維持唯讀模式，本頁不建立新資料庫。'
+        };
+      }
+
+      const dbs=await indexedDB.databases();
+      if(!dbs.some(x=>x?.name===IDB_NAME)){
+        return null;
+      }
+
+      return await new Promise(resolve=>{
+        const req=indexedDB.open(IDB_NAME);
+
+        req.onerror=()=>resolve({
+          id:'idb-error',
+          label:'IndexedDB 鏡像',
+          source:'IndexedDB',
+          error:String(req.error?.message||req.error||'open failed')
+        });
+
+        req.onsuccess=()=>{
+          const db=req.result;
+
+          if(!db.objectStoreNames.contains(IDB_STORE)){
+            db.close();
+            resolve({
+              id:'idb-no-store',
+              label:'IndexedDB 鏡像',
+              source:'IndexedDB',
+              error:'找不到 snapshots store'
+            });
+            return;
+          }
+
+          const tx=db.transaction(IDB_STORE,'readonly');
+          const get=tx.objectStore(IDB_STORE).get(PRIMARY);
+
+          get.onerror=()=>{
+            db.close();
+            resolve({
+              id:'idb-read-error',
+              label:'IndexedDB 鏡像',
+              source:'IndexedDB',
+              error:String(get.error?.message||get.error||'read failed')
+            });
+          };
+
+          get.onsuccess=()=>{
+            const raw=get.result;
+            db.close();
+            resolve(raw?{
+              id:'indexeddb-mirror',
+              label:'IndexedDB 鏡像',
+              raw:String(raw),
+              source:'IndexedDB'
+            }:null);
+          };
+        };
+      });
+    }catch(error){
+      return {
+        id:'idb-error',
+        label:'IndexedDB 鏡像',
+        source:'IndexedDB',
+        error:String(error?.message||error)
+      };
+    }
+  }
+
+  function candidateFrom(items){
+    const good=items.filter(x=>x.ok);
+    const current=good.find(x=>x.id===PRIMARY);
+    const alternatives=good.filter(x=>x.id!==PRIMARY);
+
+    if(!alternatives.length)return null;
+
+    const better=alternatives.filter(x=>
+      !current ||
+      x.totalMinutes>current.totalMinutes ||
+      x.countableCount>current.countableCount
+    );
+
+    if(!better.length)return null;
+
+    return better.sort((a,b)=>
+      (b.totalMinutes-a.totalMinutes) ||
+      (b.countableCount-a.countableCount) ||
+      String(b.savedAt).localeCompare(String(a.savedAt))
+    )[0];
+  }
+
+  function comparison(summary,current){
+    if(!current||!summary.ok)return '';
+    const dm=summary.totalMinutes-current.totalMinutes;
+    const dl=summary.countableCount-current.countableCount;
+    if(summary.id===current.id)return '目前基準';
+    return `${dm>=0?'+':''}${dm} 分／${dl>=0?'+':''}${dl} 筆`;
+  }
+
+  function downloadSnapshot(id){
+    const row=rawById.get(id);
+    if(!row?.raw)return;
+    const blob=new Blob([row.raw],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`GoalManager_recovery_${id.replace(/[^a-z0-9_-]+/gi,'_')}.json`;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  window.downloadSnapshot=downloadSnapshot;
+
+  function render(items){
+    rawById=new Map(items.filter(x=>x.raw).map(x=>[x.id,x]));
+    const summaries=items.map(row=>
+      row.raw
+        ?summarize(row.id,row.label,row.raw,row.source)
+        :{...row,ok:false}
+    );
+
+    const current=summaries.find(x=>x.id===PRIMARY&&x.ok)||null;
+    const best=candidateFrom(summaries);
+
+    if(best){
+      $('candidate').innerHTML=`
+        <div class="notice warn">
+          <h2>找到較可能的舊資料候選</h2>
+          <p><b>${esc(best.label)}</b>：可計入 ${best.countableCount} 筆、${best.totalMinutes} 分；目前主資料為 ${current?.countableCount??'—'} 筆、${current?.totalMinutes??'—'} 分。</p>
+          <p>先不要還原。把本頁的診斷報告傳回 ChatGPT，我們再比對哪個快照最接近修改前狀態。</p>
+        </div>`;
+    }else{
+      $('candidate').innerHTML=`
+        <div class="notice">
+          <h2>目前未自動判定出「資料更多」的舊快照</h2>
+          <p>仍請查看各備份的 savedAt、每日分鐘與紀錄數；也可能是資料存在但被 migration / 分類規則排除，而不是紀錄真的消失。</p>
+        </div>`;
+    }
+
+    $('results').innerHTML=summaries.map(s=>{
+      if(!s.ok){
+        return `<div class="card bad"><h2>${esc(s.label)}</h2><span class="tag bad">${esc(s.source||'')}</span><p>${esc(s.error||'無法解析')}</p></div>`;
+      }
+
+      const daily=Object.entries(s.daily)
+        .sort(([a],[b])=>b.localeCompare(a))
+        .slice(0,14)
+        .map(([d,v])=>`<tr><td>${esc(d)}</td><td>${v.count}</td><td>${v.minutes}</td></tr>`)
+        .join('');
+
+      return `<div class="card ${best?.id===s.id?'best':''}">
+        <h2>${esc(s.label)}</h2>
+        <div>
+          <span class="tag ${s.id===PRIMARY?'good':''}">${esc(s.source)}</span>
+          ${best?.id===s.id?'<span class="tag warn">較可能舊資料候選</span>':''}
+          <span class="tag">${esc(comparison(s,current))}</span>
+        </div>
+        <div class="grid snap">
+          <div class="kv"><small>savedAt</small><b style="font-size:14px">${esc(s.savedAt||'未記錄')}</b></div>
+          <div class="kv"><small>App / Schema</small><b style="font-size:14px">${esc(s.appVersion||'—')} / ${esc(s.schemaVersion)}</b></div>
+          <div class="kv"><small>目標 / Level 4</small><b>${s.taskCount} / ${s.level4Count}</b></div>
+          <div class="kv"><small>全部 logs</small><b>${s.logCount}</b></div>
+          <div class="kv"><small>可計入紀錄</small><b>${s.countableCount}</b></div>
+          <div class="kv"><small>總讀書</small><b>${s.totalMinutes} 分</b></div>
+          <div class="kv"><small>目標讀書</small><b>${s.goalMinutes} 分</b></div>
+          <div class="kv"><small>其他讀書</small><b>${s.otherMinutes} 分</b></div>
+          <div class="kv"><small>本週 ${esc(s.weekStart)}～${esc(s.weekEnd)}</small><b>${s.weekMinutes} 分</b></div>
+          <div class="kv"><small>截至 2026-10-02</small><b>${s.throughOct2Minutes} 分 / ${s.throughOct2Count} 筆</b></div>
+          <div class="kv"><small>已刪除 logs</small><b>${s.deletedCount}</b></div>
+          <div class="kv"><small>資料大小</small><b>${Math.round(s.bytes/1024)} KB</b></div>
+        </div>
+
+        <p class="muted">最早紀錄：${esc(s.firstLog||'—')}<br>最新紀錄：${esc(s.lastLog||'—')}</p>
+
+        <details>
+          <summary><b>最近 14 天有紀錄的日期</b></summary>
+          <table>
+            <thead><tr><th>日期</th><th>筆數</th><th>分鐘</th></tr></thead>
+            <tbody>${daily||'<tr><td colspan="3">沒有可計入紀錄</td></tr>'}</tbody>
+          </table>
+        </details>
+
+        ${rawById.has(s.id)?`<div class="toolbar"><button onclick="downloadSnapshot('${esc(s.id)}')">下載此快照 JSON</button></div>`:''}
+      </div>`;
+    }).join('');
+
+    lastReport={
+      generatedAt:new Date().toISOString(),
+      location:location.origin+location.pathname,
+      primaryKey:PRIMARY,
+      candidateId:best?.id||null,
+      summaries:summaries.map(s=>{
+        if(!s.ok)return s;
+        const {logs,...rest}=s;
+        return {...rest,logs};
+      })
+    };
+
+    $('downloadBtn').disabled=false;
+    $('copyBtn').disabled=false;
+    $('status').innerHTML=`掃描完成：找到 <b>${summaries.filter(x=>x.ok).length}</b> 份可解析快照。此過程沒有寫入任何 Goal Manager 資料。`;
+  }
+
+  async function scan(){
+    $('scanBtn').disabled=true;
+    $('status').textContent='正在唯讀掃描 localStorage 與 IndexedDB…';
+
+    const rows=localStorageEntries();
+    const idb=await idbEntry();
+
+    if(idb)rows.push(idb);
+
+    render(rows);
+    $('scanBtn').disabled=false;
+  }
+
+  $('scanBtn').addEventListener('click',scan);
+
+  $('downloadBtn').addEventListener('click',()=>{
+    if(!lastReport)return;
+    const blob=new Blob(
+      [JSON.stringify(lastReport,null,2)],
+      {type:'application/json'}
+    );
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`GoalManager_recovery_report_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  });
+
+  $('copyBtn').addEventListener('click',async()=>{
+    if(!lastReport)return;
+    const lines=lastReport.summaries.map(s=>
+      s.ok
+        ?`${s.label}: savedAt=${s.savedAt||'—'}, logs=${s.countableCount}, total=${s.totalMinutes}m, through10/02=${s.throughOct2Minutes}m`
+        :`${s.label}: ERROR ${s.error||''}`
+    );
+    const text=[
+      `candidate=${lastReport.candidateId||'none'}`,
+      ...lines
+    ].join('\n');
+
+    try{
+      await navigator.clipboard.writeText(text);
+      $('status').innerHTML='文字摘要已複製。';
+    }catch(_){
+      $('status').innerHTML=`<pre>${esc(text)}</pre>`;
+    }
+  });
+
+  scan();
+})();
+</script>
+</body>
+</html>
