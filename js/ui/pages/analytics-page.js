@@ -81,6 +81,21 @@
     );
   }
 
+  function setText(document,id,value){
+    const el=document.getElementById(id);
+    if(el)el.textContent=String(value);
+  }
+
+  function setHTML(document,id,value){
+    const el=document.getElementById(id);
+    if(el)el.innerHTML=value;
+  }
+
+  function setWidth(document,id,value){
+    const el=document.getElementById(id);
+    if(el&&el.style)el.style.width=value;
+  }
+
   function renderStats({
     document,
     leaves,
@@ -94,49 +109,43 @@
     esc,
     calc
   }){
-    document.getElementById('leafDone').textContent=
-      done+'/'+leaves.length;
+    const safeLeaves=Array.isArray(leaves)?leaves:[];
+    const safeRoots=Array.isArray(rootsActive)?rootsActive:[];
 
-    document.getElementById('avg').textContent=
-      avg+'%';
+    setText(document,'leafDone',`${done}/${safeLeaves.length}`);
+    setText(document,'avg',`${avg}%`);
+    setText(document,'est',planAnalysis?.plannedMinutes||0);
+    setText(document,'logsN',actualLogCount||0);
 
-    document.getElementById('est').textContent=
-      planAnalysis.plannedMinutes;
+    setText(document,'statsWeekRatio',`${week?.ratio||0}%`);
+    setWidth(document,'statsWeekBar',`${week?.ratio||0}%`);
+    setText(document,'statsActual',week?.goalActualMinutes||0);
+    setText(document,'statsOtherStudy',week?.otherStudyMinutes||0);
+    setText(document,'statsTotalStudy',week?.totalStudyMinutes||0);
+    setText(document,'statsTarget',week?.target||0);
+    setText(document,'statsRemaining',week?.remaining||0);
 
-    document.getElementById('logsN').textContent=
-      actualLogCount;
+    const totalTarget=Math.max(0,+week?.target||0);
 
-    document.getElementById('statsWeekRatio').textContent=
-      week.ratio+'%';
+    const directionHTML=safeRoots.map(task=>{
+      let minutes=0;
+      try{
+        minutes=Math.max(0,+currentWeekTargetForRoot(task)||0);
+      }catch(error){
+        if(typeof console!=='undefined'&&console.error){
+          console.error('[GoalManager:analytics-direction]',error);
+        }
+      }
 
-    document.getElementById('statsWeekBar').style.width=
-      week.ratio+'%';
+      const pct=totalTarget
+        ?Math.round(minutes/totalTarget*100)
+        :0;
 
-    document.getElementById('statsActual').textContent=
-      week.goalActualMinutes;
-
-    const otherEl=document.getElementById('statsOtherStudy');
-    if(otherEl)otherEl.textContent=week.otherStudyMinutes;
-
-    const totalEl=document.getElementById('statsTotalStudy');
-    if(totalEl)totalEl.textContent=week.totalStudyMinutes;
-
-    document.getElementById('statsTarget').textContent=
-      week.target;
-
-    document.getElementById('statsRemaining').textContent=
-      week.remaining;
-
-    document.getElementById('domains').innerHTML=
-      rootsActive.map(task=>{
-        const minutes=currentWeekTargetForRoot(task);
-        const pct=week.target
-          ?Math.round(minutes/week.target*100)
-          :0;
-
-        return `<div class="direction-row"><div class="direction-head"><b>${esc(task.name)}</b><span>${minutes} 分 · ${pct}%</span></div><div class="direction-track"><div class="direction-fill" style="width:${Math.min(100,pct)}%"></div></div></div>`;
-      }).join('')||
+      return `<div class="direction-row"><div class="direction-head"><b>${esc(task.name)}</b><span>${minutes} 分 · ${pct}%</span></div><div class="direction-track"><div class="direction-fill" style="width:${Math.min(100,pct)}%"></div></div></div>`;
+    }).join('')||
       '<div class="empty">尚無有效方向</div>';
+
+    setHTML(document,'domains',directionHTML);
 
     const buckets=[
       ['尚未開始',0],
@@ -145,24 +154,32 @@
       ['已完成',0]
     ];
 
-    leaves.forEach(task=>{
-      const progress=calc(task);
+    safeLeaves.forEach(task=>{
+      let progress=0;
+      try{
+        progress=Math.max(0,Math.min(100,+calc(task)||0));
+      }catch(error){
+        if(typeof console!=='undefined'&&console.error){
+          console.error('[GoalManager:analytics-progress]',error);
+        }
+      }
+
       if(progress===100)buckets[3][1]++;
       else if(progress>=70)buckets[2][1]++;
       else if(progress>0)buckets[1][1]++;
       else buckets[0][1]++;
     });
 
-    document.getElementById('progressDistribution').innerHTML=
-      buckets.map(bucket=>{
-        const pct=leaves.length
-          ?Math.round(bucket[1]/leaves.length*100)
-          :0;
+    const distributionHTML=buckets.map(bucket=>{
+      const pct=safeLeaves.length
+        ?Math.round(bucket[1]/safeLeaves.length*100)
+        :0;
 
-        return `<div class="distribution-row"><div class="distribution-head"><span>${bucket[0]}</span><b>${pct}%</b></div><div class="distribution-track"><div class="distribution-fill" style="width:${pct}%"></div></div><div class="distribution-meta">${bucket[1]} 個具體行動</div></div>`;
-      }).join('');
+      return `<div class="distribution-row"><div class="distribution-head"><span>${bucket[0]}</span><b>${pct}%</b></div><div class="distribution-track"><div class="distribution-fill" style="width:${pct}%"></div></div><div class="distribution-meta">${bucket[1]} 個具體行動</div></div>`;
+    }).join('');
+
+    setHTML(document,'progressDistribution',distributionHTML);
   }
-
 
   function deletedLogsHTML(logs,{esc,getTask}){
     const rows=Array.isArray(logs)?logs:[];
@@ -296,6 +313,9 @@
     executionAnalysisHTML,
     renderExecutionAnalysis,
     renderStats,
+    setText,
+    setHTML,
+    setWidth,
     deletedLogsHTML,
     actualHistoryDateKey,
     actualHistoryTimeLabel,

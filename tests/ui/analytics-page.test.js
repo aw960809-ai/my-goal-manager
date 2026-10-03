@@ -72,3 +72,34 @@ const review=AnalyticsPage.weeklyReviewHTML([{
 assert(review.includes('行政法'));
 assert(review.includes('課業負荷'));
 assert(review.includes('30%'));
+
+
+const partialDocument={
+  getElementById:id=>
+    id==='domains'
+      ?{innerHTML:'',style:{},textContent:''}
+      :null
+};
+
+assert.doesNotThrow(()=>{
+  AnalyticsPage.renderStats({
+    document:partialDocument,
+    leaves:[],
+    done:0,
+    avg:0,
+    planAnalysis:{plannedMinutes:0},
+    week:{
+      ratio:0,
+      goalActualMinutes:0,
+      otherStudyMinutes:0,
+      totalStudyMinutes:0,
+      target:0,
+      remaining:0
+    },
+    rootsActive:[],
+    currentWeekTargetForRoot:()=>0,
+    actualLogCount:0,
+    esc:x=>String(x),
+    calc:()=>0
+  });
+});

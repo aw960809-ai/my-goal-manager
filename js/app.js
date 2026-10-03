@@ -1,4 +1,4 @@
-const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.9.0')));
+const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.9.1')));
 const SCHEMA_VERSION=Number(globalThis.GOAL_MANAGER_SCHEMA_VERSION||6);
 const KEY='lawLangGoalSystemV92';
 const BACKUP_KEYS=['lawLangGoalSystemV92_backup1','lawLangGoalSystemV92_backup2','lawLangGoalSystemV92_backup3'];
@@ -899,6 +899,8 @@ function go(id){
  if(id==='scholarship')renderScholarships();
  if(id==='calendar')renderCalendar();
  if(id==='goals')renderGoalsPage();
+ if(id==='today'){today();renderTimerState();}
+ if(id==='stats')stats();
  if(id==='dash'){dashboard();updateHubContext();bindInteractionFeedback()}
 }
 document.querySelectorAll('.bottom-nav button').forEach(b=>b.onclick=()=>go(b.dataset.view));bindInteractionFeedback();

@@ -1,7 +1,6 @@
 const assert=require('assert');
 const AppOrchestrator=require('../../js/application/orchestrator.js');
 
-const calls=[];
 const names=[
   'normalizeState',
   'rebuildExecutionPlanActuals',
@@ -21,14 +20,42 @@ const names=[
   'bindActivitySearch'
 ];
 
+const calls=[];
 const steps={};
-names.forEach(name=>{
-  steps[name]=()=>calls.push(name);
-});
+names.forEach(name=>{steps[name]=()=>calls.push(name)});
 
-const order=AppOrchestrator.renderAll(steps);
+const result=AppOrchestrator.renderAll(steps);
 
 assert.deepStrictEqual(calls,names);
-assert.deepStrictEqual(order,names);
+assert.deepStrictEqual(result.order,names);
+assert.deepStrictEqual(result.errors,[]);
+assert.strictEqual(result.ok,true);
 
-console.log('OK: AppOrchestrator preserves render pipeline order');
+const isolatedCalls=[];
+const isolatedErrors=[];
+const isolatedSteps={};
+
+names.forEach(name=>{
+  isolatedSteps[name]=()=>{
+    isolatedCalls.push(name);
+    if(name==='renderActivities'){
+      throw new Error('activity renderer failed');
+    }
+  };
+});
+
+const isolated=AppOrchestrator.renderAll(
+  isolatedSteps,
+  {onError:entry=>isolatedErrors.push(entry)}
+);
+
+assert.strictEqual(isolated.ok,false);
+assert.strictEqual(isolated.errors.length,1);
+assert.strictEqual(isolated.errors[0].name,'renderActivities');
+assert.strictEqual(isolatedErrors.length,1);
+assert(
+  isolatedCalls.includes('stats'),
+  'analytics must still run after an earlier renderer fails'
+);
+
+console.log('OK: AppOrchestrator preserves order and isolates renderer failures');

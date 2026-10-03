@@ -10,6 +10,8 @@ const html=read('index.html');
 const sw=read('sw.js');
 const version=read('config/version.js');
 const bootstrap=read('js/bootstrap.js');
+const activity=read('js/activity.js');
+const scholarship=read('js/scholarship.js');
 
 const runtimeModules=[
   'js/domain/goals.js',
@@ -17,6 +19,7 @@ const runtimeModules=[
   'js/domain/execution.js',
   'js/domain/analytics.js',
   'js/domain/calendar.js',
+  'js/domain/radar-policy.js',
   'js/services/timer-service.js',
   'js/services/execution-service.js',
   'js/data/normalization.js',
@@ -110,3 +113,26 @@ for(const token of requiredDelegations){
 }
 
 console.log('OK: V98 architecture runtime contract');
+
+
+assert(
+  activity.includes('RadarPolicy.activityCircleInfo')&&
+  activity.includes('RadarPolicy.activityReviewState'),
+  'activity.js must delegate radar rules to RadarPolicy'
+);
+
+assert(
+  scholarship.includes('RadarPolicy.scholarshipRegionReason'),
+  'scholarship.js must delegate region rules to RadarPolicy'
+);
+
+
+assert(
+  app.includes("if(id==='stats')stats();"),
+  'analytics route must render stats directly'
+);
+
+assert(
+  app.includes("if(id==='today'){today();renderTimerState();}"),
+  'execution route must refresh execution directly'
+);
