@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>恢復截至 2026-10-02 的讀書紀錄</title>
+<style>
+:root{color-scheme:light dark;--bg:#f4f1eb;--card:#fffdf9;--ink:#253349;--muted:#6f7782;--line:#d9d5cf;--good:#0b6b53;--warn:#9b5b16;--bad:#a63d40;--accent:#49627f}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;background:var(--bg);color:var(--ink)}
+main{max-width:760px;margin:0 auto;padding:22px 14px 80px}
+h1{font-size:24px;margin:0 0 6px}
+h2{font-size:19px;margin:0 0 10px}
+p{line-height:1.6}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:14px 0;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.good{border-left:6px solid var(--good)}
+.warn{border-left:6px solid var(--warn)}
+.bad{border-left:6px solid var(--bad)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.kv{background:rgba(128,128,128,.07);border-radius:12px;padding:10px}
+.kv small{display:block;color:var(--muted);margin-bottom:4px}
+.kv b{font-size:19px}
+button{width:100%;border:1px solid var(--line);border-radius:13px;background:var(--card);color:var(--ink);padding:13px 14px;font-weight:800;font-size:16px;margin-top:10px}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.danger{background:var(--bad);border-color:var(--bad);color:#fff}
+button:disabled{opacity:.45}
+.muted{color:var(--muted)}
+pre{white-space:pre-wrap;word-break:break-word;background:#111;color:#eee;padding:12px;border-radius:12px;max-height:300px;overflow:auto}
+@media(max-width:520px){.grid{grid-template-columns:1fr 1fr}h1{font-size:21px}}
+</style>
+</head>
+<body>
+<main>
+<h1>恢復讀書紀錄至 2026-10-02</h1>
+<p class="muted">只恢復讀書 logs；保留目前 V98.9.1 的目標、活動、獎學金、行事曆、設定與其他資料。</p>
+
+<div id="status" class="card">正在檢查資料…</div>
+
+<div class="card warn">
+  <h2>這次恢復的範圍</h2>
+  <p>來源固定為 <b>lawLangGoalSystemV92_backup2</b>，只取日期 ≤ <b>2026-10-02</b> 的可計入讀書紀錄。</p>
+  <p>backup2 本身預期為 <b>57 筆、1200 分鐘</b>；另外補回 2026-10-02 的「債總預習」59 分鐘其他讀書，因此恢復後應為 <b>58 筆、1259 分鐘</b>。如果 backup2 本身不符合 57 筆／1200 分鐘，工具會停止，不會寫入。</p>
+</div>
+
+<div id="summary" class="card" style="display:none"></div>
+
+<div id="actions" class="card" style="display:none">
+  <h2>執行</h2>
+  <p>按下恢復前，工具會先把目前主資料完整存到獨立安全鍵，不會覆蓋 backup1～3。</p>
+  <button id="restoreBtn" class="primary" disabled>只恢復截至昨天的 57 筆紀錄</button>
+  <button id="rollbackBtn" class="danger" disabled>還原本次恢復前的主資料</button>
+</div>
+
+<div class="card">
+  <h2>安全保護</h2>
+  <p>恢復時不會更換目前 tasks，也不會把整份 V96.5 備份覆蓋回去。若舊 log 的 taskId 在目前目標樹不存在，工具會嘗試以「同名 Level 4」唯一匹配；只要有任何一筆無法對應，就停止寫入。</p>
+</div>
+
+<div id="detail" class="card" style="display:none"></div>
+</main>
+
+<script>
+(() => {
+  'use strict';
+
+  const PRIMARY='lawLangGoalSystemV92';
+  const SOURCE='lawLangGoalSystemV92_backup2';
+  const SAFETY='lawLangGoalSystemV92_pre_log_restore_20261003';
+  const IDB_NAME='lawLangGoalSystemPersistentV87';
+  const IDB_STORE='snapshots';
+  const CUTOFF='2026-10-02';
+  const EXPECTED_SOURCE_COUNT=57;
+  const EXPECTED_SOURCE_MINUTES=1200;
+  const EXPECTED_RESTORE_COUNT=58;
+  const EXPECTED_RESTORE_MINUTES=1259;
+  const OTHER_STUDY_DATE='2026-10-02';
+  const OTHER_STUDY_NAME='債總預習';
+  const OTHER_STUDY_MINUTES=59;
+
+  const $=id=>document.getElementById(id);
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+
+  function stableSerialize(value){
+    if(value===null||typeof value!=='object')return JSON.stringify(value);
+    if(Array.isArray(value))return '['+value.map(stableSerialize).join(',')+']';
+    return '{'+Object.keys(value).sort().map(k=>
+      JSON.stringify(k)+':'+stableSerialize(value[k])
+    ).join(',')+'}';
+  }
+
+  function fnv1a(str){
+    let h=2166136261;
+    for(let i=0;i<str.length;i++){
+      h^=str.charCodeAt(i);
+      h=Math.imul(h,16777619);
+    }
+    return (h>>>0).toString(16).padStart(8,'0');
+  }
+
+  function unwrap(raw){
+    const parsed=JSON.parse(raw);
+    if(parsed&&parsed.data&&Number.isFinite(+parsed.schemaVersion)){
+      const payload=stableSerialize(parsed.data);
+      if(parsed.checksum&&parsed.checksum!==fnv1a(payload)){
+        throw new Error('checksum 驗證失敗');
+      }
+      return {
+        envelope:parsed,
+        data:parsed.data
+      };
+    }
+    return {
+      envelope:{
+        schemaVersion:0,
+        appVersion:'',
+        savedAt:'',
+        checksum:''
+      },
+      data:parsed
+    };
+  }
+
+  function logDate(value){
+    const d=new Date(value);
+    if(Number.isNaN(d.getTime()))return '';
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
+  function logKind(log){
+    if(log?.kind==='other-study')return 'other-study';
+    if(log?.kind==='system'||log?.type==='auto')return 'system';
+    return 'goal-study';
+  }
+
+  function countable(log){
+    return !!log &&
+      log.actual!==false &&
+      log.status!=='已刪除' &&
+      logKind(log)!=='system' &&
+      log.type!=='auto';
+  }
+
+  function sum(rows){
+    return rows.reduce((n,x)=>n+Math.max(0,+x?.minutes||0),0);
+  }
+
+  function buildEnvelope(currentEnvelope,data){
+    const schemaVersion=Number(currentEnvelope?.schemaVersion||6);
+    const appVersion=String(
+      currentEnvelope?.appVersion||
+      'V98.9.1'
+    );
+    const payload=stableSerialize(data);
+
+    return {
+      schemaVersion,
+      appVersion,
+      savedAt:new Date().toISOString(),
+      checksum:fnv1a(payload),
+      data
+    };
+  }
+
+  function uniqueById(logs){
+    const seen=new Set();
+    const out=[];
+    for(const log of logs){
+      const id=String(log?.id||'');
+      if(!id||seen.has(id))continue;
+      seen.add(id);
+      out.push(log);
+    }
+    return out;
+  }
+
+  function mapLogs(sourceData,currentData){
+    const currentTasks=Array.isArray(currentData.tasks)?currentData.tasks:[];
+    const sourceTasks=Array.isArray(sourceData.tasks)?sourceData.tasks:[];
+    const currentIds=new Set(currentTasks.map(t=>String(t?.id||'')));
+    const sourceTaskMap=new Map(sourceTasks.map(t=>[String(t?.id||''),t]));
+
+    const sourceLogs=uniqueById(
+      (Array.isArray(sourceData.logs)?sourceData.logs:[])
+        .filter(log=>countable(log)&&logDate(log?.time)&&logDate(log?.time)<=CUTOFF)
+    );
+
+    const mapped=[];
+    const unresolved=[];
+    const remapped=[];
+
+    for(const log of sourceLogs){
+      const copy={...log};
+      const id=copy.taskId===null||copy.taskId===undefined
+        ?null
+        :String(copy.taskId);
+
+      if(id&&currentIds.has(id)){
+        mapped.push(copy);
+        continue;
+      }
+
+      const oldTask=id?sourceTaskMap.get(id):null;
+      const targetName=String(
+        oldTask?.name||
+        copy.name||
+        ''
+      ).trim();
+
+      const matches=currentTasks.filter(t=>
+        Number(t?.level)===4 &&
+        String(t?.name||'').trim()===targetName
+      );
+
+      if(matches.length===1){
+        const oldId=copy.taskId;
+        copy.taskId=String(matches[0].id);
+        mapped.push(copy);
+        remapped.push({
+          logId:String(copy.id||''),
+          oldTaskId:oldId,
+          newTaskId:copy.taskId,
+          name:targetName
+        });
+        continue;
+      }
+
+      unresolved.push({
+        logId:String(copy.id||''),
+        taskId:copy.taskId??null,
+        name:targetName,
+        matches:matches.map(t=>String(t.id))
+      });
+    }
+
+    return {
+      sourceLogs,
+      mapped,
+      unresolved,
+      remapped
+    };
+  }
+
+  async function mirrorIndexedDB(raw){
+    if(!('indexedDB' in window))return false;
+
+    return await new Promise(resolve=>{
+      const req=indexedDB.open(IDB_NAME,1);
+
+      req.onupgradeneeded=()=>{
+        if(!req.result.objectStoreNames.contains(IDB_STORE)){
+          req.result.createObjectStore(IDB_STORE);
+        }
+      };
+
+      req.onerror=()=>resolve(false);
+
+      req.onsuccess=()=>{
+        const db=req.result;
+        try{
+          const tx=db.transaction(IDB_STORE,'readwrite');
+          tx.objectStore(IDB_STORE).put(raw,PRIMARY);
+          tx.oncomplete=()=>{db.close();resolve(true)};
+          tx.onerror=()=>{db.close();resolve(false)};
+        }catch(_){
+          db.close();
+          resolve(false);
+        }
+      };
+    });
+  }
+
+  function analyze(){
+    try{
+      const currentRaw=localStorage.getItem(PRIMARY);
+      const sourceRaw=localStorage.getItem(SOURCE);
+
+      if(!currentRaw)throw new Error('找不到目前主資料');
+      if(!sourceRaw)throw new Error('找不到 backup2');
+
+      const current=unwrap(currentRaw);
+      const source=unwrap(sourceRaw);
+
+      const mapped=mapLogs(source.data,current.data);
+      const minutes=sum(mapped.sourceLogs);
+
+      const validSource=
+        mapped.sourceLogs.length===EXPECTED_SOURCE_COUNT &&
+        minutes===EXPECTED_SOURCE_MINUTES;
+
+      const canRestore=
+        validSource &&
+        mapped.unresolved.length===0 &&
+        mapped.mapped.length===EXPECTED_SOURCE_COUNT;
+
+      $('status').className='card '+(canRestore?'good':'bad');
+      $('status').innerHTML=canRestore
+        ?'<b>檢查完成，可以安全恢復。</b>'
+        :'<b>檢查未通過，尚未寫入任何資料。</b>';
+
+      $('summary').style.display='block';
+      $('summary').innerHTML=`
+        <h2>檢查結果</h2>
+        <div class="grid">
+          <div class="kv"><small>backup2 可計入紀錄</small><b>${mapped.sourceLogs.length}</b></div>
+          <div class="kv"><small>backup2 分鐘</small><b>${minutes}</b></div>
+          <div class="kv"><small>可直接對應／重映射</small><b>${mapped.mapped.length}</b></div>
+          <div class="kv"><small>無法對應</small><b>${mapped.unresolved.length}</b></div>
+        </div>
+        <p class="muted">會恢復 backup2 截至 ${CUTOFF} 的 57 筆目標讀書，再補回 ${OTHER_STUDY_DATE} 的「${OTHER_STUDY_NAME}」${OTHER_STUDY_MINUTES} 分鐘其他讀書；今天紀錄不保留。</p>
+      `;
+
+      $('actions').style.display='block';
+      $('restoreBtn').disabled=!canRestore;
+      $('rollbackBtn').disabled=!localStorage.getItem(SAFETY);
+
+      $('detail').style.display='block';
+      $('detail').innerHTML=`
+        <h2>對應細節</h2>
+        <p>重映射 ${mapped.remapped.length} 筆；無法對應 ${mapped.unresolved.length} 筆。</p>
+        ${mapped.unresolved.length
+          ?`<pre>${esc(JSON.stringify(mapped.unresolved,null,2))}</pre>`
+          :'<p class="muted">所有紀錄都能對應目前目標樹。</p>'
+        }
+      `;
+
+      return {
+        currentRaw,
+        current,
+        source,
+        mapped,
+        minutes,
+        canRestore
+      };
+    }catch(error){
+      $('status').className='card bad';
+      $('status').innerHTML='<b>檢查失敗：</b> '+esc(error?.message||error);
+      $('restoreBtn').disabled=true;
+      return null;
+    }
+  }
+
+  async function restore(){
+    const state=analyze();
+    if(!state?.canRestore)return;
+
+    const ok=confirm(
+      `確認恢復截至 ${CUTOFF} 的資料？\n\nbackup2：${EXPECTED_SOURCE_COUNT} 筆目標讀書／${EXPECTED_SOURCE_MINUTES} 分\n其他讀書：${OTHER_STUDY_NAME} ${OTHER_STUDY_MINUTES} 分\n恢復後：${EXPECTED_RESTORE_COUNT} 筆／${EXPECTED_RESTORE_MINUTES} 分\n\n目前目標／活動／獎學金／設定都會保留。今天的讀書紀錄不會保留。`
+    );
+    if(!ok)return;
+
+    try{
+      if(!localStorage.getItem(SAFETY)){
+        localStorage.setItem(SAFETY,state.currentRaw);
+      }
+
+      const manualOtherStudy={
+        id:'recovery-other-study-20261002-debt-59',
+        taskId:null,
+        name:OTHER_STUDY_NAME,
+        time:new Date(OTHER_STUDY_DATE+'T12:00:00').toISOString(),
+        minutes:OTHER_STUDY_MINUTES,
+        actual:true,
+        kind:'other-study',
+        source:'manual'
+      };
+
+      const nextData={
+        ...state.current.data,
+        logs:[
+          ...state.mapped.mapped.map(x=>({...x})),
+          manualOtherStudy
+        ]
+      };
+
+      const nextEnvelope=buildEnvelope(
+        state.current.envelope,
+        nextData
+      );
+
+      const nextRaw=JSON.stringify(nextEnvelope);
+      localStorage.setItem(PRIMARY,nextRaw);
+
+      const verify=unwrap(localStorage.getItem(PRIMARY));
+      const verifiedLogs=(Array.isArray(verify.data.logs)?verify.data.logs:[])
+        .filter(countable);
+      const verifiedMinutes=sum(verifiedLogs);
+
+      if(
+        verifiedLogs.length!==EXPECTED_RESTORE_COUNT ||
+        verifiedMinutes!==EXPECTED_RESTORE_MINUTES
+      ){
+        localStorage.setItem(PRIMARY,state.currentRaw);
+        throw new Error(
+          `寫入驗證失敗：${verifiedLogs.length} 筆／${verifiedMinutes} 分`
+        );
+      }
+
+      const idbOk=await mirrorIndexedDB(nextRaw);
+
+      $('status').className='card good';
+      $('status').innerHTML=`
+        <b>恢復成功。</b>
+        <p>主資料目前為 ${verifiedLogs.length} 筆、${verifiedMinutes} 分鐘；截至 ${CUTOFF}。</p>
+        <p>IndexedDB 鏡像：${idbOk?'已同步':'未同步（主資料已成功；重新開 App 後系統可再同步）'}</p>
+        <p>現在請完全關閉 Goal Manager，再重新開啟。</p>
+      `;
+
+      $('restoreBtn').disabled=true;
+      $('rollbackBtn').disabled=false;
+    }catch(error){
+      $('status').className='card bad';
+      $('status').innerHTML='<b>恢復失敗：</b> '+esc(error?.message||error);
+    }
+  }
+
+  async function rollback(){
+    const raw=localStorage.getItem(SAFETY);
+    if(!raw){
+      alert('沒有找到本次恢復前的安全快照。');
+      return;
+    }
+
+    if(!confirm('確定回到本次恢復前的主資料？'))return;
+
+    try{
+      unwrap(raw);
+      localStorage.setItem(PRIMARY,raw);
+      await mirrorIndexedDB(raw);
+
+      $('status').className='card warn';
+      $('status').innerHTML='<b>已還原本次恢復前的主資料。</b><p>請完全關閉 Goal Manager 後重新開啟。</p>';
+      $('rollbackBtn').disabled=false;
+      $('restoreBtn').disabled=false;
+    }catch(error){
+      $('status').className='card bad';
+      $('status').innerHTML='<b>回復失敗：</b> '+esc(error?.message||error);
+    }
+  }
+
+  $('restoreBtn').addEventListener('click',restore);
+  $('rollbackBtn').addEventListener('click',rollback);
+
+  analyze();
+})();
+</script>
+</body>
+</html>
