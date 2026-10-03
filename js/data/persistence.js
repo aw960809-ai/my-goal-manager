@@ -33,6 +33,7 @@
     key,
     backupKeys,
     backup=true,
+    guard,
     makeEnvelope,
     parseEnvelope,
     serializePayload,
@@ -48,35 +49,52 @@
     const next=JSON.stringify(makeEnvelope(normalized));
     const old=read(key);
 
-    if(backup&&old&&old!==next){
-      rotateBackups({
-        read,
-        write,
-        backupKeys,
-        currentRaw:old
+    if(typeof guard==='function'){
+      guard({
+        oldRaw:old,
+        nextRaw:next,
+        nextData:normalized
       });
     }
 
-    const writeOk=write(key,next);
-    const state=typeof writeStatus==='function'
-      ?writeStatus()
-      :{persistent:true};
+    try{
+      const writeOk=write(key,next);
+      const state=typeof writeStatus==='function'
+        ?writeStatus()
+        :{persistent:true};
 
-    if(!writeOk||state.persistent===false){
-      throw new Error('無法永久寫入本機儲存空間；已停止保存以避免誤判成功');
+      if(!writeOk||state.persistent===false){
+        throw new Error('無法永久寫入本機儲存空間；已停止保存以避免誤判成功');
+      }
+
+      const verify=read(key);
+      const parsed=parseEnvelope(verify);
+
+      if(
+        !parsed.data||
+        checksum(serializePayload(parsed.data))!==checksum(payload)
+      ){
+        throw new Error('寫入後驗證失敗');
+      }
+
+      // Rotate only after the new primary copy has passed integrity checks.
+      if(backup&&old&&old!==next){
+        rotateBackups({
+          read,
+          write,
+          backupKeys,
+          currentRaw:old
+        });
+      }
+
+      return normalized;
+    }catch(error){
+      // Best-effort rollback of the primary copy. Backups have not rotated yet.
+      if(old&&read(key)!==old){
+        try{write(key,old)}catch(_){}
+      }
+      throw error;
     }
-
-    const verify=read(key);
-    const parsed=parseEnvelope(verify);
-
-    if(
-      !parsed.data||
-      checksum(serializePayload(parsed.data))!==checksum(payload)
-    ){
-      throw new Error('寫入後驗證失敗');
-    }
-
-    return normalized;
   }
 
   function loadFirstValid({

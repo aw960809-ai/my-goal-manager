@@ -101,8 +101,10 @@ async function updateSettingsDataStatus(){
  const storeState=typeof storeWriteStatus==='function'?storeWriteStatus():null;let storage='不可用';try{storage=storeState?.persistent===false?'⚠ 暫存模式（關閉後可能遺失）':(localStorage?'✓ 永久儲存可用':'不可用')}catch(e){storage='⚠ 暫存模式'}
  const size=(()=>{try{return Math.round(new Blob([storeGet(KEY)||'']).size/1024)}catch(e){return 0}})();
  const backups=BACKUP_KEYS.filter(k=>!!storeGet(k)).length;
+ const anchor=typeof historyAnchorSummary==='function'?historyAnchorSummary():null;
+ const anchorText=anchor?`✓ ${anchor.logCount} 筆／${anchor.totalMinutes} 分鐘`:'⚠ 尚未建立';
  const errs=typeof validateDB==='function'?validateDB():[];
- el.innerHTML=`<div><b>資料結構</b><span>${errs.length?'⚠ '+errs.length+' 項問題':'✓ 正常'}</span></div><div><b>本機儲存</b><span>${storage}</span></div><div><b>目前資料大小</b><span>${size} KB</span></div><div><b>可用備份</b><span>${backups} 份</span></div>`;
+ el.innerHTML=`<div><b>資料結構</b><span>${errs.length?'⚠ '+errs.length+' 項問題':'✓ 正常'}</span></div><div><b>本機儲存</b><span>${storage}</span></div><div><b>目前資料大小</b><span>${size} KB</span></div><div><b>可用備份</b><span>${backups} 份</span></div><div><b>歷程安全基準</b><span>${anchorText}</span></div>`;
 }
 function createRestorePoint(){
  try{if(save({backup:true})) {renderSettings();toast('已建立復原點；目前資料未改變')}}catch(e){toast('建立復原點失敗')}
@@ -114,7 +116,7 @@ function restoreLatestBackup(){
  if(!confirm('確定要還原最近一份備份？\n目前資料會先保留在另一個備份槽。'))return;
  try{
   const d=tryReadCandidate(latest.raw,latest.key);if(!d)throw new Error('備份資料無效');
-  const previous=db;db=d;if(!save({backup:true})){db=previous;throw new Error('保存失敗')}
+  const previous=db;db=d;if(!save({backup:true,allowLogReplacement:true})){db=previous;throw new Error('保存失敗')}
   selected=null;goalPath={long:null,mid:null,short:null,exec:null};renderAll();renderSettings();toast('已還原最近備份');
  }catch(e){toast('還原失敗；目前資料未變更')}
 }
@@ -122,7 +124,7 @@ function resetUserData(){
  if(!confirm('⚠️ 確定清除本機使用者資料？\n\n系統會先建立一次備份，再恢復為初始資料。'))return;
  try{
   const current=storeGet(KEY);if(current)storeSet(BACKUP_KEYS[0],current);
-  db=normalize(seed());ensureSchoolCalendar();ensureToeicPlan();save({backup:false});
+  db=normalize(seed());ensureSchoolCalendar();ensureToeicPlan();save({backup:false,allowLogReplacement:true});
   selected=null;goalPath={long:null,mid:null,short:null,exec:null};renderAll();closeSettings();toast('已恢復初始資料；舊資料已保留備份');
  }catch(e){toast('重置失敗；目前資料可能未完整更新')}
 }
@@ -144,6 +146,7 @@ async function runDiagnostics(){
  try{checks.push(['安全邊界',securityDiagnostics().ok&&safeExternalUrl('javascript:alert(1)')==='',''])}catch(e){checks.push(['安全邊界',false,e.message])}
  try{checks.push(['活動資料',Array.isArray(db.activities)&&db.activities.length>0,''])}catch(e){checks.push(['活動資料',false,e.message])}
  try{checks.push(['獎學金資料',Array.isArray(db.scholarships)&&db.scholarships.length>0,''])}catch(e){checks.push(['獎學金資料',false,e.message])}
+ try{const anchor=typeof historyAnchorSummary==='function'?historyAnchorSummary():null;checks.push(['歷程安全基準',!!anchor,anchor?`${anchor.logCount} 筆／${anchor.totalMinutes} 分鐘`:'尚未建立'])}catch(e){checks.push(['歷程安全基準',false,e.message])}
  try{const ok=typeof indexedDB!=='undefined';checks.push(['IndexedDB 鏡像',ok,'瀏覽器支援狀態'])}catch(e){checks.push(['IndexedDB 鏡像',false,e.message])}
  try{let cacheCount=0;if('caches' in window)cacheCount=(await caches.keys()).length;checks.push(['Cache／Service Worker',('serviceWorker' in navigator),'快取 '+cacheCount+' 組'])}catch(e){checks.push(['Cache／Service Worker',false,e.message])}
  try{const estimate=navigator.storage?.estimate?await navigator.storage.estimate():null;const used=estimate?.usage?Math.round(estimate.usage/1024):null;checks.push(['瀏覽器儲存空間',true,used===null?'可用':'約 '+used+' KB 已使用'])}catch(e){checks.push(['瀏覽器儲存空間',true,'瀏覽器未提供估算'])}

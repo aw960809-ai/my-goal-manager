@@ -1,8 +1,9 @@
-const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.9.1')));
+const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.9.2')));
 const SCHEMA_VERSION=Number(globalThis.GOAL_MANAGER_SCHEMA_VERSION||6);
 const KEY='lawLangGoalSystemV92';
 const BACKUP_KEYS=['lawLangGoalSystemV92_backup1','lawLangGoalSystemV92_backup2','lawLangGoalSystemV92_backup3'];
 const ACTIVE_TIMER_KEY='lawLangGoalActiveTimerV1';
+const HISTORY_ANCHOR_KEY='lawLangGoalSystemV92_historyAnchorV1';
 const L={1:'方向／重要目標',2:'階段目標',3:'子任務',4:'具體行動'};
 let recoveryNotice='';
 function isUsableData(d){return !!d&&Array.isArray(d.tasks)&&Array.isArray(d.logs)}
@@ -15,7 +16,10 @@ function preparePersistentData(d){
  normalized.schoolCalendar=Array.isArray(normalized.schoolCalendar)?normalized.schoolCalendar:[];
  return normalized;
 }
-function persistEnvelope(d,{backup=true}={}){
+function persistEnvelope(d,{
+ backup=true,
+ allowLogReplacement=false
+}={}){
  const normalized=DataPersistence.persist(d,{
   prepare:preparePersistentData,
   read:storeGet,
@@ -24,6 +28,17 @@ function persistEnvelope(d,{backup=true}={}){
   key:KEY,
   backupKeys:BACKUP_KEYS,
   backup,
+  guard:({oldRaw,nextData})=>{
+   if(allowLogReplacement||!oldRaw)return;
+   let previous=null;
+   try{
+    const parsed=parseEnvelope(oldRaw);
+    previous=migrateData(parsed.data,parsed.schemaVersion);
+   }catch(_){
+    return;
+   }
+   HistoryGuard.assertPreserved(previous,nextData);
+  },
   makeEnvelope,
   parseEnvelope,
   serializePayload:dataPayload,
@@ -31,6 +46,37 @@ function persistEnvelope(d,{backup=true}={}){
  });
  db=normalized;
  return true;
+}
+
+function ensureHistoryAnchor(){
+ try{
+  if(storeGet(HISTORY_ANCHOR_KEY))return true;
+  const raw=storeGet(KEY);
+  if(!raw)return false;
+  const parsed=parseEnvelope(raw);
+  const data=migrateData(parsed.data,parsed.schemaVersion);
+  const info=HistoryGuard.metrics(data);
+  if(info.logCount<=0)return false;
+  return !!storeSet(HISTORY_ANCHOR_KEY,raw);
+ }catch(e){
+  console.warn('history anchor creation failed',e);
+  return false;
+ }
+}
+
+function historyAnchorSummary(){
+ try{
+  const raw=storeGet(HISTORY_ANCHOR_KEY);
+  if(!raw)return null;
+  const parsed=parseEnvelope(raw);
+  const data=migrateData(parsed.data,parsed.schemaVersion);
+  return {
+   ...HistoryGuard.metrics(data),
+   savedAt:JSON.parse(raw)?.savedAt||''
+  };
+ }catch(_){
+  return null;
+ }
 }
 let calendarCursor=new Date(),selected=null,timer=TimerService.empty(),goalPath={long:null,mid:null,short:null,exec:null};
 
@@ -117,6 +163,7 @@ function idbOpen(){return new Promise((resolve,reject)=>{try{if(!window.indexedD
 async function idbMirrorSave(){try{const dbx=await idbOpen();const tx=dbx.transaction(IDB_STORE,'readwrite');tx.objectStore(IDB_STORE).put(storeGet(KEY)||'',KEY);await new Promise((res,rej)=>{tx.oncomplete=res;tx.onerror=()=>rej(tx.error)});dbx.close()}catch(e){}}
 const THU_1151_LAW_PLAN_MARKER='thuPersonalMigration:1151-law-preview:v2';
 let db=loadDB();
+ensureHistoryAnchor();
 removeLegacyStandaloneToeicGoals();
 ensureSchoolCalendar();
 const thu1151LawPlanMigration=ensureThu1151LawPreviewPlan();
@@ -273,15 +320,15 @@ function loadDB(){
  if(found){
   if(found.source==='backup'){
    recoveryNotice='已從最近的有效備份恢復資料。';
-   try{persistEnvelope(found.data,{backup:false})}catch(e){}
+   try{persistEnvelope(found.data,{backup:false,allowLogReplacement:true})}catch(e){}
   }else if(found.source==='legacy'){
-   try{persistEnvelope(found.data,{backup:false})}catch(e){}
+   try{persistEnvelope(found.data,{backup:false,allowLogReplacement:true})}catch(e){}
   }
   return found.data;
  }
 
  const fresh=normalize(seed());
- try{persistEnvelope(fresh,{backup:false})}catch(e){
+ try{persistEnvelope(fresh,{backup:false,allowLogReplacement:true})}catch(e){
   storeSet(KEY,JSON.stringify(makeEnvelope(fresh)));
  }
  return fresh;
@@ -445,7 +492,7 @@ function ensureToeicPlan(){
  ].forEach(([id,date,title,time])=>{if(!db.calendarEvents.some(e=>e.id===id)){db.calendarEvents.push({id,type:'school',date,time,title,meta:'TOEIC 重要節點'})}})
 }
 
-function save(options={}){try{const ok=persistEnvelope(db,{backup:options.backup!==false});if(ok)idbMirrorSave();return ok}catch(e){console.error(e);toast('資料保存失敗，原資料未被覆蓋');return false}}
+function save(options={}){try{const ok=persistEnvelope(db,{backup:options.backup!==false,allowLogReplacement:options.allowLogReplacement===true});if(ok)idbMirrorSave();return ok}catch(e){console.error(e);toast(String(e?.message||'資料保存失敗，原資料未被覆蓋'));return false}}
 function esc(x){return String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 function todayKey(){const d=new Date(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${d.getFullYear()}-${m}-${day}`}
@@ -1154,7 +1201,7 @@ function importDB(){
    const taskN=Array.isArray(candidate.tasks)?candidate.tasks.length:0, logN=Array.isArray(candidate.logs)?candidate.logs.length:0;
    if(!confirm(`確認匯入這份備份？\n\n目標 ${taskN} 個／歷程 ${logN} 筆\n目前資料會先保留在備份槽。`))return;
    db=candidate;
-   if(!save()){db=previous;throw new Error('保存失敗，已恢復目前資料');}
+   if(!save({allowLogReplacement:true})){db=previous;throw new Error('保存失敗，已恢復目前資料');}
    selected=null;goalPath={long:null,mid:null,short:null,exec:null};renderAll();toast('匯入成功；舊資料已保留備份');
   }catch(e){db=previous;console.error(e);toast('匯入失敗：資料格式／完整性驗證未通過；目前資料未變更')}
  };r.readAsText(file)};i.click();
