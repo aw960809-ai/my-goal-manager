@@ -1,4 +1,4 @@
-const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.7.0')));
+const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.8.0')));
 const SCHEMA_VERSION=Number(globalThis.GOAL_MANAGER_SCHEMA_VERSION||6);
 const KEY='lawLangGoalSystemV92';
 const BACKUP_KEYS=['lawLangGoalSystemV92_backup1','lawLangGoalSystemV92_backup2','lawLangGoalSystemV92_backup3'];
@@ -1447,4 +1447,3 @@ function addActivityToCalendar(id){
  db.calendarEvents.push({id:'ce'+Date.now()+Math.random(),type:'activity',refId:id,date:a.date,time:a.time||'',title:a.title,url:activityExternalUrl(a),meta:'已確認',status:'已確認',createdAt:new Date().toISOString()});
  save();renderCalendar();toast('已確認加入行事曆');
 }
-renderAll();

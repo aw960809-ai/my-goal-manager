@@ -167,11 +167,17 @@ assert './js/data/persistence.js' in html and html.find('./js/data/persistence.j
 assert './js/data/persistence.js' in sw, 'service worker missing DataPersistence'
 assert all(x in data_persistence for x in ['rotateBackups','persist','loadFirstValid']), 'DataPersistence API incomplete'
 assert 'DataPersistence.persist' in app and 'DataPersistence.loadFirstValid' in app, 'persistence delegation missing'
+bootstrap=(root/'js'/'bootstrap.js').read_text(encoding='utf-8')
+assert html.find('./js/bootstrap.js') > html.find('./js/app.js'), 'bootstrap must load after app.js'
+assert 'window.renderAll()' in bootstrap and 'window.__goalManagerBooted' in bootstrap, 'bootstrap render ownership missing'
+assert not app.rstrip().endswith('renderAll();'), 'app.js still self-renders instead of bootstrap'
+assert 'dashboard:{render:window.dashboard}' in bootstrap and 'goals:{render:window.renderGoalsPage}' in bootstrap and 'execution:{render:window.today}' in bootstrap and 'analytics:{render:window.stats}' in bootstrap, 'AppModules still expose broad renderAll aliases'
+
 assert "const KEY='lawLangGoalSystemV92'" in app and 'BACKUP_KEYS' in app, 'persistent keys must remain stable'
 
-assert "GOAL_MANAGER_VERSION='98.7.0'" in version_js, 'V98.7 version source missing'
+assert "GOAL_MANAGER_VERSION='98.8.0'" in version_js, 'V98.8 version source missing'
 
 
 
 
-print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core, V98.1 calendar/timer, V98.2 execution/data, V98.3 UI pages, V98.4 goals/analytics pages, V98.5 UI cleanup, V98.6 dashboard/orchestration, V98.7 persistence')
+print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core, V98.1 calendar/timer, V98.2 execution/data, V98.3 UI pages, V98.4 goals/analytics pages, V98.5 UI cleanup, V98.6 dashboard/orchestration, V98.7 persistence, V98.8 bootstrap/regression')
