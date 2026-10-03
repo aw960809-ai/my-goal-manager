@@ -162,9 +162,16 @@ assert all(x in dashboard_page for x in ['executeListHTML','renderExecuteList','
 assert 'renderAll' in app_orchestrator, 'AppOrchestrator API incomplete'
 assert 'DashboardPage.renderDashboard' in app and 'DashboardPage.renderExecuteList' in app and 'DashboardPage.renderDecisionList' in app, 'DashboardPage delegation missing'
 assert 'AppOrchestrator.renderAll' in app, 'renderAll orchestration delegation missing'
-assert "GOAL_MANAGER_VERSION='98.6.0'" in version_js, 'V98.6 version source missing'
+data_persistence=(root/'js'/'data'/'persistence.js').read_text(encoding='utf-8')
+assert './js/data/persistence.js' in html and html.find('./js/data/persistence.js') < html.find('./js/app.js'), 'DataPersistence must load before app.js'
+assert './js/data/persistence.js' in sw, 'service worker missing DataPersistence'
+assert all(x in data_persistence for x in ['rotateBackups','persist','loadFirstValid']), 'DataPersistence API incomplete'
+assert 'DataPersistence.persist' in app and 'DataPersistence.loadFirstValid' in app, 'persistence delegation missing'
+assert "const KEY='lawLangGoalSystemV92'" in app and 'BACKUP_KEYS' in app, 'persistent keys must remain stable'
+
+assert "GOAL_MANAGER_VERSION='98.7.0'" in version_js, 'V98.7 version source missing'
 
 
 
 
-print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core, V98.1 calendar/timer, V98.2 execution/data, V98.3 UI pages, V98.4 goals/analytics pages, V98.5 UI cleanup, V98.6 dashboard/orchestration')
+print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core, V98.1 calendar/timer, V98.2 execution/data, V98.3 UI pages, V98.4 goals/analytics pages, V98.5 UI cleanup, V98.6 dashboard/orchestration, V98.7 persistence')

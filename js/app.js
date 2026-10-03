@@ -1,4 +1,4 @@
-const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.6.0')));
+const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.7.0')));
 const SCHEMA_VERSION=Number(globalThis.GOAL_MANAGER_SCHEMA_VERSION||6);
 const KEY='lawLangGoalSystemV92';
 const BACKUP_KEYS=['lawLangGoalSystemV92_backup1','lawLangGoalSystemV92_backup2','lawLangGoalSystemV92_backup3'];
@@ -6,15 +6,31 @@ const ACTIVE_TIMER_KEY='lawLangGoalActiveTimerV1';
 const L={1:'方向／重要目標',2:'階段目標',3:'子任務',4:'具體行動'};
 let recoveryNotice='';
 function isUsableData(d){return !!d&&Array.isArray(d.tasks)&&Array.isArray(d.logs)}
+function preparePersistentData(d){
+ const normalized=normalize(d);
+ normalized.activities=mergeActivityCatalog(validateCatalogBoundary(normalized.activities,'活動'));
+ normalized.scholarships=mergeScholarshipCatalog(validateCatalogBoundary(normalized.scholarships,'獎學金'));
+ if(!Array.isArray(normalized.activities)||!normalized.activities.length)normalized.activities=ACTIVITY_SEED.map(x=>({...x}));
+ if(!Array.isArray(normalized.scholarships)||!normalized.scholarships.length)normalized.scholarships=SCHOLARSHIP_SEED.map(x=>({...x}));
+ normalized.schoolCalendar=Array.isArray(normalized.schoolCalendar)?normalized.schoolCalendar:[];
+ return normalized;
+}
 function persistEnvelope(d,{backup=true}={}){
- const normalized=normalize(d);normalized.activities=mergeActivityCatalog(validateCatalogBoundary(normalized.activities,'活動'));normalized.scholarships=mergeScholarshipCatalog(validateCatalogBoundary(normalized.scholarships,'獎學金'));if(!Array.isArray(normalized.activities)||!normalized.activities.length)normalized.activities=ACTIVITY_SEED.map(x=>({...x}));if(!Array.isArray(normalized.scholarships)||!normalized.scholarships.length)normalized.scholarships=SCHOLARSHIP_SEED.map(x=>({...x}));normalized.schoolCalendar=Array.isArray(normalized.schoolCalendar)?normalized.schoolCalendar:[];
- const payload=dataPayload(normalized), next=JSON.stringify(makeEnvelope(normalized));
- const old=storeGet(KEY);
- if(backup&&old&&old!==next){for(let i=BACKUP_KEYS.length-1;i>0;i--){const prev=storeGet(BACKUP_KEYS[i-1]);if(prev)storeSet(BACKUP_KEYS[i],prev)}storeSet(BACKUP_KEYS[0],old)}
- const writeOk=storeSet(KEY,next),writeState=typeof storeWriteStatus==='function'?storeWriteStatus():{persistent:true};
- if(!writeOk||writeState.persistent===false)throw new Error('無法永久寫入本機儲存空間；已停止保存以避免誤判成功');
- const verify=storeGet(KEY);const parsed=parseEnvelope(verify);if(!parsed.data||fnv1a(dataPayload(parsed.data))!==fnv1a(payload))throw new Error('寫入後驗證失敗');
- db=normalized;return true;
+ const normalized=DataPersistence.persist(d,{
+  prepare:preparePersistentData,
+  read:storeGet,
+  write:storeSet,
+  writeStatus:typeof storeWriteStatus==='function'?storeWriteStatus:null,
+  key:KEY,
+  backupKeys:BACKUP_KEYS,
+  backup,
+  makeEnvelope,
+  parseEnvelope,
+  serializePayload:dataPayload,
+  checksum:fnv1a
+ });
+ db=normalized;
+ return true;
 }
 let calendarCursor=new Date(),selected=null,timer=TimerService.empty(),goalPath={long:null,mid:null,short:null,exec:null};
 
@@ -242,13 +258,33 @@ function tryReadCandidate(raw,label){
   validateData
  });
 }
+function legacyStorageKeys(){
+ return ['lawLangGoalSystemV91','lawLangGoalSystemV90','lawLangGoalSystemV89','lawLangGoalSystemV88','lawLangGoalSystemV87','lawLangGoalSystemV86','lawLangGoalSystemV84','lawLangGoalSystemV83','lawLangGoalSystemV82','lawLangGoalSystemV81','lawLangGoalSystemV80','lawLangGoalSystemV79','lawLangGoalSystemV78','lawLangGoalSystemV77','lawLangGoalSystemV76','lawLangGoalSystemV75','lawLangGoalSystemV74','lawLangGoalSystemV73','lawLangGoalSystemV72','lawLangGoalSystemV71','lawLangGoalSystemV70','lawLangGoalSystemV69','lawLangGoalSystemV68','lawLangGoalSystemV67','lawLangGoalSystemV66','lawLangGoalSystemV65','lawLangGoalSystemV63','lawLangGoalSystemV62','lawLangGoalSystemV61','lawLangGoalSystemV60'];
+}
 function loadDB(){
- const current=storeGet(KEY);
- if(current){const d=tryReadCandidate(current,'current');if(d)return d;}
- for(const k of BACKUP_KEYS){const raw=storeGet(k);if(!raw)continue;const d=tryReadCandidate(raw,k);if(d){recoveryNotice='已從最近的有效備份恢復資料。';try{persistEnvelope(d,{backup:false})}catch(e){}return d;}}
- const legacy=['lawLangGoalSystemV91','lawLangGoalSystemV90','lawLangGoalSystemV89','lawLangGoalSystemV88','lawLangGoalSystemV87','lawLangGoalSystemV86','lawLangGoalSystemV84','lawLangGoalSystemV83','lawLangGoalSystemV82','lawLangGoalSystemV81','lawLangGoalSystemV80','lawLangGoalSystemV79','lawLangGoalSystemV78','lawLangGoalSystemV77','lawLangGoalSystemV76','lawLangGoalSystemV75','lawLangGoalSystemV74','lawLangGoalSystemV73','lawLangGoalSystemV72','lawLangGoalSystemV71','lawLangGoalSystemV70','lawLangGoalSystemV69','lawLangGoalSystemV68','lawLangGoalSystemV67','lawLangGoalSystemV66','lawLangGoalSystemV65','lawLangGoalSystemV63','lawLangGoalSystemV62','lawLangGoalSystemV61','lawLangGoalSystemV60'];
- for(const k of legacy){const raw=storeGet(k);if(!raw)continue;const d=tryReadCandidate(raw,k);if(d){try{persistEnvelope(d,{backup:false})}catch(e){}return d;}}
- const fresh=normalize(seed());try{persistEnvelope(fresh,{backup:false})}catch(e){storeSet(KEY,JSON.stringify(makeEnvelope(fresh)))}return fresh;
+ const found=DataPersistence.loadFirstValid({
+  read:storeGet,
+  currentKey:KEY,
+  backupKeys:BACKUP_KEYS,
+  legacyKeys:legacyStorageKeys(),
+  decode:tryReadCandidate
+ });
+
+ if(found){
+  if(found.source==='backup'){
+   recoveryNotice='已從最近的有效備份恢復資料。';
+   try{persistEnvelope(found.data,{backup:false})}catch(e){}
+  }else if(found.source==='legacy'){
+   try{persistEnvelope(found.data,{backup:false})}catch(e){}
+  }
+  return found.data;
+ }
+
+ const fresh=normalize(seed());
+ try{persistEnvelope(fresh,{backup:false})}catch(e){
+  storeSet(KEY,JSON.stringify(makeEnvelope(fresh)));
+ }
+ return fresh;
 }
 async function clearApplicationCaches(){
  let removed=0;
