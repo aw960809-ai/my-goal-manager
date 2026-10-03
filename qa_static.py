@@ -113,9 +113,18 @@ assert all(x in study_domain for x in ['normalizeLog','isCountableActualLog','is
 assert all(x in execution_domain for x in ['currentWeekSummary','leafProgress','executionSummary','activeExecutionPlan','activeWeeklyTargetTotal']), 'ExecutionDomain API incomplete'
 assert all(x in analytics_domain for x in ['analysisValidLeafTasks','weeklyStudySummary','executionAnalysis']), 'AnalyticsDomain API incomplete'
 assert 'StudyLogDomain.logDate' in app and 'ExecutionDomain.currentWeekSummary' in app and 'AnalyticsDomain.executionAnalysis' in app, 'Domain compatibility wrappers missing'
-assert "GOAL_MANAGER_VERSION='98.0.0'" in version_js, 'V98 version source missing'
+calendar_domain=(root/'js'/'domain'/'calendar.js').read_text(encoding='utf-8')
+timer_service=(root/'js'/'services'/'timer-service.js').read_text(encoding='utf-8')
+assert './js/domain/calendar.js' in html and html.find('./js/domain/calendar.js') < html.find('./js/app.js'), 'CalendarDomain must load before app.js'
+assert './js/services/timer-service.js' in html and html.find('./js/services/timer-service.js') < html.find('./js/app.js'), 'TimerService must load before app.js'
+assert './js/domain/calendar.js' in sw and './js/services/timer-service.js' in sw, 'service worker missing CalendarDomain/TimerService'
+assert all(x in calendar_domain for x in ['dateKey','monthGridKeys','eventsForDate','monthCounts']), 'CalendarDomain API incomplete'
+assert all(x in timer_service for x in ['empty','normalize','payload','hasSelection','start','pause','elapsedMs','finish']), 'TimerService API incomplete'
+assert 'CalendarDomain.dateKey' in app and 'CalendarDomain.monthGridKeys' in app, 'calendar compatibility wrappers missing'
+assert 'TimerService.start' in app and 'TimerService.pause' in app and 'TimerService.finish' in app, 'timer compatibility delegation missing'
+assert "GOAL_MANAGER_VERSION='98.1.0'" in version_js, 'V98.1 version source missing'
 
 
 
 
-print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core')
+print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core, V98.1 calendar/timer')

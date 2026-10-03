@@ -1,6 +1,6 @@
 /* THU personal service worker */
 importScripts('./config/version.js');
-const PWA_VERSION=String(globalThis.GOAL_MANAGER_VERSION||'98.0.0');
+const PWA_VERSION=String(globalThis.GOAL_MANAGER_VERSION||'98.1.0');
 const PWA_SIGNATURE='thu-personal-'+PWA_VERSION+'-core';
 const CACHE_PREFIX='thu-goal-personal-v';
 const LEGACY_CACHE_PREFIX='law-goal-web-v';
@@ -10,7 +10,7 @@ const APP_SHELL=[
   './icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png',
   './404.html','./css/tokens.css','./css/base.css','./css/app-ui.css','./css/design-system.css','./config/version.js','./config/system-config.js',
   './config/profiles/personal-thu.js','./js/core/runtime-profile.js','./js/core/data-boundary.js',
-  './js/security.js','./js/store.js','./js/domain/goals.js','./js/domain/study-logs.js','./js/domain/execution.js','./js/domain/analytics.js','./js/settings.js','./js/activity.js',
+  './js/security.js','./js/store.js','./js/domain/goals.js','./js/domain/study-logs.js','./js/domain/execution.js','./js/domain/analytics.js','./js/domain/calendar.js','./js/services/timer-service.js','./js/settings.js','./js/activity.js',
   './js/scholarship.js','./js/app.js','./js/scholarship-lifecycle.js',
   './js/autofetch-health.js',
   './js/catalog-lifecycle.js',
