@@ -180,9 +180,20 @@ assert 'source.match(/const\\s+PWA_VERSION' not in pwa, 'stale SW literal-versio
 
 assert "const KEY='lawLangGoalSystemV92'" in app and 'BACKUP_KEYS' in app, 'persistent keys must remain stable'
 
-assert "GOAL_MANAGER_VERSION='98.8.1'" in version_js, 'V98.8.1 version source missing'
+assert "GOAL_MANAGER_VERSION='98.9.0'" in version_js, 'V98.9 version source missing'
 
 
 
 
-print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core, V98.1 calendar/timer, V98.2 execution/data, V98.3 UI pages, V98.4 goals/analytics pages, V98.5 UI cleanup, V98.6 dashboard/orchestration, V98.7 persistence, V98.8 bootstrap/regression')
+
+radar_policy=(root/'js'/'domain'/'radar-policy.js').read_text(encoding='utf-8')
+activity=(root/'js'/'activity.js').read_text(encoding='utf-8')
+scholarship=(root/'js'/'scholarship.js').read_text(encoding='utf-8')
+assert './js/domain/radar-policy.js' in html and html.find('./js/domain/radar-policy.js') < html.find('./js/activity.js'), 'RadarPolicy must load before activity.js'
+assert './js/domain/radar-policy.js' in sw, 'service worker missing RadarPolicy'
+assert all(x in radar_policy for x in ['activityCircleInfo','activityReviewState','scholarshipRegionReason']), 'RadarPolicy API incomplete'
+assert 'RadarPolicy.activityCircleInfo' in activity and 'RadarPolicy.activityReviewState' in activity, 'activity radar policy delegation missing'
+assert "3:'③ 中部'" in radar_policy and "4:'④ 全國'" in radar_policy, 'activity concentric circles do not match final specification'
+assert 'RadarPolicy.scholarshipRegionReason' in scholarship and 'excludeAnyRegionalRestriction:true' in scholarship, 'strict scholarship region policy missing'
+
+print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core, V98.1 calendar/timer, V98.2 execution/data, V98.3 UI pages, V98.4 goals/analytics pages, V98.5 UI cleanup, V98.6 dashboard/orchestration, V98.7 persistence, V98.8 bootstrap/regression, V98.9 radar accuracy')

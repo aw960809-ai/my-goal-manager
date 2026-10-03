@@ -65,13 +65,12 @@ function scholarshipSpecialtyKind(a){
 /* Scholarship Eligibility Engine */
 /* V97.6.0 Strict Scholarship Eligibility Engine */
 const SCHOLARSHIP_STRICT_POLICY=Object.freeze({
-  householdWhitelist:['嘉義縣'],
-  studyWhitelist:['臺中','台中'],
   currentSchool:'東海大學',
   currentLevel:'大學部',
   currentMajor:'法律',
   requireVerifiedThuDetail:true,
-  specialIdentityMode:'general-student-only'
+  specialIdentityMode:'general-student-only',
+  excludeAnyRegionalRestriction:true
 });
 
 function scholarshipStrictCorpus(a){
@@ -100,47 +99,7 @@ function scholarshipStrictGeneralAccess(target){
   return /(?:一般學生|一般優秀學生|一般在學生|全校學生|本校學生|各系學生|各學系學生|不限科系|不限學系|不限身分|全體學生)/.test(String(target||''));
 }
 
-function scholarshipStrictRegion(c){
-  const title=c.title;
-  const scope=[c.target,c.restrictions,c.academic,c.documents,c.note].join(' ');
-  const nationwide=/(?:全國|不限地區|不限戶籍|不限縣市|全臺|全台|各縣市)/;
-  if(nationwide.test(scope))return null;
-
-  const chiayiHousehold=/(?:嘉義縣).{0,32}(?:戶籍|設籍|原籍|籍貫)|(?:戶籍|設籍|原籍|籍貫).{0,32}(?:嘉義縣)/;
-  const taichungStudy=/(?:臺中|台中).{0,40}(?:就讀|在學|大專校院|大專院校|學校學生|學生)|(?:就讀|在學|大專校院|大專院校).{0,40}(?:臺中|台中)/;
-  const hasChiayi=chiayiHousehold.test(scope);
-  const hasTaichungStudy=taichungStudy.test(scope);
-
-  const taichungHousehold=/(?:臺中|台中).{0,28}(?:戶籍|設籍|原籍|籍貫)|(?:戶籍|設籍|原籍|籍貫).{0,28}(?:臺中|台中)/;
-  if(taichungHousehold.test(scope)){
-    const clearOr=/(?:或|任一|擇一|其中之一)/.test(scope);
-    if(!(clearOr&&hasTaichungStudy))return '臺中就讀不等於臺中設籍，地域必要資格不符';
-  }
-
-  const otherPlaces=/(?:基隆|臺北|台北|新北|桃園|新竹|苗栗|臺中|台中|彰化|南投|雲林|嘉義市|臺南|台南|高雄|屏東|宜蘭|花蓮|臺東|台東|澎湖|金門|連江|恆春)/;
-  const otherRegionRequirement=new RegExp(
-    '(?:限|僅限|限定|須|需|必須|申請對象|獎助對象|資格條件|戶籍|設籍|原籍|籍貫|居住)[^。；\\n]{0,48}'+otherPlaces.source+
-    '|'+otherPlaces.source+'[^。；\\n]{0,48}(?:戶籍|設籍|原籍|籍貫|居住|本縣|本市|學生)'
-  );
-  if(otherRegionRequirement.test(scope)){
-    if(hasChiayi||hasTaichungStudy){
-      const clearOr=/(?:或|任一|擇一|其中之一)/.test(scope);
-      const clearAnd=/(?:且|並且|同時|以及|及須|並須)/.test(scope);
-      if(clearOr&&!clearAnd)return null;
-    }
-    const withoutChiayi=scope.replace(/嘉義縣/g,'');
-    const onlyAllowed=hasChiayi&&!otherPlaces.test(withoutChiayi);
-    if(onlyAllowed)return null;
-    return '具有嘉義縣設籍／臺中就讀以外的地域必要資格';
-  }
-
-  if(/(?:本縣|本市|本鄉|本鎮|本區)/.test(scope)){
-    if(/嘉義縣/.test(title)&&!/(?:原住民|原住民族)/.test(title))return null;
-    return '具有地方性本縣／本市／本鄉鎮區限制';
-  }
-  return null;
-}
-
+function scholarshipStrictRegion(c){return RadarPolicy.scholarshipRegionReason(c)}
 function scholarshipStrictEconomic(c){
   const rx=/(?:清寒|低收入戶|中低收入戶|經濟弱勢|弱勢家庭|弱勢學生|家庭經濟困難|家境困難|家境清寒|經濟困難|需工讀|須工讀|工讀者|家庭收入|家戶所得)/;
   if(rx.test(c.title))return '獎助名稱即限定清寒／低收入／經濟困難對象';
@@ -326,7 +285,7 @@ function openScholarshipInfo(id){
   ${number?`<div class="info-kv"><small>獎助學金編號</small><b>${esc(number)}</b></div>`:''}
   ${life?.state?`<div class="info-kv"><small>期限狀態</small><b>${esc(life.state)}</b></div>`:''}
  </div><div class="notice">${assessment.eligible
- ?'只有在清寒／低收入／經濟弱勢或軍公教／軍警消等身分是基本申請或受獎必要條件時才排除；若只是額外補助、加發或報名費補助而一般學生仍可申請基本獎勵，則保留。專業考照與外語能力獎勵仍提高排序。'
+ ?'地域限制、清寒／低收入／經濟弱勢、特定族群、軍公教／軍警消、疾病／傷病、急難／受災、特定組織／親屬、非大學部或非法律科系等，只要是必要資格即排除；額外加發或非必要補助不因此排除。專業考照與外語能力獎勵仍提高排序。'
  :'此項因公告呈現明確的特定資格限制而不列入個人推薦；最終資格仍以官方簡章為準。'
  }</div><div class="goal-info-actions">${official?`<a class="btn primary" href="${esc(safeExternalUrl(official))}" target="_blank" rel="noopener noreferrer">${number?'開啟官方詳細辦法／申請書':'查看官方資訊'}</a>`:''}${assessment.eligible&&(a.date||a.deadline)?`<button class="btn dark" type="button" onclick="addActivityToCalendar('${String(a.id).replace(/'/g,"\\'")}');closeScholarshipInfoModal()">加入申請截止日</button>`:''}<button class="btn" type="button" onclick="closeScholarshipInfoModal()">關閉</button></div>`;
  document.getElementById('scholarshipInfoModal').classList.add('show');document.body.style.overflow='hidden';bindInteractionFeedback();
