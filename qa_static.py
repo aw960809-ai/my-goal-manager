@@ -48,7 +48,7 @@ config=(root/'config'/'system-config.js').read_text(encoding='utf-8')
 assert 'GOAL_MANAGER_VERSION' in config, 'AppConfig must consume shared version source'
 app=(root/'js'/'app.js').read_text(encoding='utf-8')
 assert 'GOAL_MANAGER_SCHEMA_VERSION' in app and 'STUDY_LOG_KIND' in app, 'app schema/log foundation missing'
-assert "l.kind!==STUDY_LOG_KIND.SYSTEM" in app and "l.type!=='auto'" in app, 'system logs must not count as actual study'
+assert 'StudyLogDomain.normalizeLog' in app and 'StudyLogDomain.isCountableActualLog' in app, 'study log compatibility delegation missing'
 assert 'ACTIVE_TIMER_KEY' in app and 'saveActiveTimer' in app and 'restoreActiveTimer' in app and 'renderTimerState' in app, 'persistent timer foundation missing'
 store=(root/'js'/'store.js').read_text(encoding='utf-8')
 assert 'storeWriteStatus' in store and 'persistent:false' in store, 'persistent storage health guard missing'
@@ -102,7 +102,20 @@ assert '97.14.0 goal dual-mode navigation' in design, 'phase 4 goal design rules
 assert 'GoalDomain hierarchy, path, browse and period helpers' in goal_test, 'GoalDomain test missing'
 assert './js/domain/goals.js' in sw, 'service worker missing GoalDomain module'
 
+# V98 Domain Core guards
+study_domain=(root/'js'/'domain'/'study-logs.js').read_text(encoding='utf-8')
+execution_domain=(root/'js'/'domain'/'execution.js').read_text(encoding='utf-8')
+analytics_domain=(root/'js'/'domain'/'analytics.js').read_text(encoding='utf-8')
+for module in ['./js/domain/study-logs.js','./js/domain/execution.js','./js/domain/analytics.js']:
+ assert module in html and html.find(module) < html.find('./js/app.js'), f'{module} must load before app.js'
+ assert module in sw, f'service worker missing {module}'
+assert all(x in study_domain for x in ['normalizeLog','isCountableActualLog','isOtherStudyLog','isGoalActualLog','goalStudyMinutesInRange','totalStudyMinutesInRange']), 'StudyLogDomain API incomplete'
+assert all(x in execution_domain for x in ['currentWeekSummary','leafProgress','executionSummary','activeExecutionPlan','activeWeeklyTargetTotal']), 'ExecutionDomain API incomplete'
+assert all(x in analytics_domain for x in ['analysisValidLeafTasks','weeklyStudySummary','executionAnalysis']), 'AnalyticsDomain API incomplete'
+assert 'StudyLogDomain.logDate' in app and 'ExecutionDomain.currentWeekSummary' in app and 'AnalyticsDomain.executionAnalysis' in app, 'Domain compatibility wrappers missing'
+assert "GOAL_MANAGER_VERSION='98.0.0'" in version_js, 'V98 version source missing'
 
 
 
-print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals')
+
+print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core')

@@ -1,4 +1,4 @@
-const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'97.11.0')));
+const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.0.0')));
 const SCHEMA_VERSION=Number(globalThis.GOAL_MANAGER_SCHEMA_VERSION||6);
 const KEY='lawLangGoalSystemV92';
 const BACKUP_KEYS=['lawLangGoalSystemV92_backup1','lawLangGoalSystemV92_backup2','lawLangGoalSystemV92_backup3'];
@@ -204,19 +204,8 @@ function repairKnownHierarchy(tasks){
 }
 
 
-const STUDY_LOG_KIND=Object.freeze({GOAL:'goal-study',OTHER:'other-study',SYSTEM:'system'});
-function normalizeLog(l){
- if(!l||typeof l!=='object')return null;
- const out={...l};
- if(out.kind==='other-study')out.kind=STUDY_LOG_KIND.OTHER;
- else if(out.kind==='system'||out.type==='auto')out.kind=STUDY_LOG_KIND.SYSTEM;
- else out.kind=STUDY_LOG_KIND.GOAL;
- out.minutes=Math.max(0,Number.isFinite(+out.minutes)?+out.minutes:0);
- if(out.taskId!==null&&out.taskId!==undefined)out.taskId=String(out.taskId);
- if(out.kind===STUDY_LOG_KIND.SYSTEM)out.actual=false;
- else if(out.actual===undefined)out.actual=true;
- return out;
-}
+const STUDY_LOG_KIND=StudyLogDomain.KIND;
+function normalizeLog(l){return StudyLogDomain.normalizeLog(l)}
 
 function normalize(d){
  d=d&&Array.isArray(d.tasks)?d:{tasks:[],logs:[]};
@@ -439,50 +428,21 @@ function roots(){return GoalDomain.roots(db.tasks)}
 function autoStatus(progress,archived=false){if(archived)return '已封存';const p=Math.max(0,Math.min(100,Math.round(+progress||0)));return p>=100?'已完成':p>0?'進行中':'未開始'}
 function periodForTask(t){return GoalDomain.periodForTask(db.tasks,t)}
 function descendantsOfLevel(parent,level){return GoalDomain.descendantsOfLevel(db.tasks,parent,level)}
-function weekStartKey(date=todayKey()){
- const d=new Date(date+'T00:00:00');d.setDate(d.getDate()-d.getDay()+(d.getDay()===0?-6:1));
- return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-function weekEndKey(date=todayKey()){
- const d=new Date(weekStartKey(date)+'T00:00:00');d.setDate(d.getDate()+6);
- return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-function activeWeekCount(t){
- const p=periodForTask(t);if(!p?.start||!p?.due)return 0;
- let d=new Date(weekStartKey(p.start)+'T00:00:00'),end=new Date(weekStartKey(p.due)+'T00:00:00'),n=0;
- while(d<=end&&n<520){n++;d.setDate(d.getDate()+7)}return n;
-}
-function logDate(x){const d=new Date(x);if(Number.isNaN(d.getTime()))return '';return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
-function isCountableActualLog(l){return !!l&&l.actual!==false&&l.status!=='已刪除'&&l.kind!==STUDY_LOG_KIND.SYSTEM&&l.type!=='auto'}
-function isOtherStudyLog(l){return !!l&&l.kind===STUDY_LOG_KIND.OTHER}
-function isGoalActualLog(l){return isCountableActualLog(l)&&!isOtherStudyLog(l)&&!!getTask(l.taskId)}
-function otherStudyMinutesInRange(start,end){return (Array.isArray(db.logs)?db.logs:[]).filter(l=>isCountableActualLog(l)&&isOtherStudyLog(l)&&logDate(l.time)>=start&&logDate(l.time)<=end).reduce((sum,l)=>sum+Math.max(0,+l.minutes||0),0)}
-function rebuildExecutionPlanActuals(){
- const plans=Array.isArray(db.executionPlans)?db.executionPlans:[];
- const sums=new Map();
- (Array.isArray(db.logs)?db.logs:[]).filter(isGoalActualLog).forEach(l=>{if(l.planId)sums.set(String(l.planId),(sums.get(String(l.planId))||0)+Math.max(0,+l.minutes||0));});
- plans.forEach(p=>{const total=sums.get(String(p.id))||0;p.actualMinutes=total;if(p.status!=='已取消'){p.status=total>=Math.max(1,+p.minutes||0)?'已完成':total>0?'已部分完成':'待執行';if(p.status==='已完成'){if(!p.completedAt)p.completedAt=new Date().toISOString()}else delete p.completedAt}});
-}
-function actualMinutesInRange(t,start,end){
- if(!t||t.level!==4)return 0;
- return db.logs.filter(x=>isCountableActualLog(x)&&String(x.taskId)===String(t.id)).reduce((sum,x)=>{const day=logDate(x.time);if(!day||day<start||day>end)return sum;const p=periodForTask(t);if(!inPeriod(day,p))return sum;return sum+Math.max(0,+x.minutes||0)},0);
-}
-function actualMinutes(t){const p=periodForTask(t);if(!p?.start||!p?.due)return 0;return actualMinutesInRange(t,p.start,p.due)}
-function currentWeekSummary(t,date=todayKey()){
- if(!t||t.level!==4)return {target:0,actual:0,remaining:0,start:'',end:'',active:false};
- const p=periodForTask(t),ws=weekStartKey(date),we=weekEndKey(date),active=!!p&&((inPeriod(ws,p)||inPeriod(we,p))||(ws<=p.due&&we>=p.start));
- if(!active)return {target:0,actual:0,remaining:0,start:ws,end:we,active:false};
- const target=Math.max(0,+t.weeklyMinutes||0),actual=actualMinutesInRange(t,ws,we),remaining=Math.max(0,target-actual);
- return {target,actual,remaining,start:ws,end:we,active:true};
-}
-function leafProgress(t){
- if(!t||t.level!==4)return 0;
- const weekly=Math.max(0,+t.weeklyMinutes||0),weeks=activeWeekCount(t),planned=weekly*weeks;
- if(planned<=0)return 0;
- return Math.max(0,Math.min(100,Math.round(actualMinutes(t)/planned*100)));
-}
-function executionSummary(t){const w=currentWeekSummary(t);return {weeklyTarget:w.target,weeklyActual:w.actual,weeklyRemaining:w.remaining,totalActual:actualMinutes(t),progress:leafProgress(t),active:w.active}}
-function inPeriod(date,period){return !!(date&&period?.start&&period?.due&&date>=period.start&&date<=period.due)}
+function weekStartKey(date=todayKey()){return ExecutionDomain.weekStartKey(date)}
+function weekEndKey(date=todayKey()){return ExecutionDomain.weekEndKey(date)}
+function activeWeekCount(t){return ExecutionDomain.activeWeekCount(db.tasks,t)}
+function logDate(x){return StudyLogDomain.logDate(x)}
+function isCountableActualLog(l){return StudyLogDomain.isCountableActualLog(l)}
+function isOtherStudyLog(l){return StudyLogDomain.isOtherStudyLog(l)}
+function isGoalActualLog(l){return StudyLogDomain.isGoalActualLog(l,db.tasks)}
+function otherStudyMinutesInRange(start,end){return StudyLogDomain.otherStudyMinutesInRange(db.logs,start,end)}
+function rebuildExecutionPlanActuals(){db.executionPlans=ExecutionDomain.rebuildExecutionPlanActuals(db.executionPlans,db.logs,db.tasks,new Date().toISOString())}
+function actualMinutesInRange(t,start,end){return ExecutionDomain.actualMinutesInRange(db.tasks,db.logs,t,start,end)}
+function actualMinutes(t){return ExecutionDomain.actualMinutes(db.tasks,db.logs,t)}
+function currentWeekSummary(t,date=todayKey()){return ExecutionDomain.currentWeekSummary(db.tasks,db.logs,t,date)}
+function leafProgress(t){return ExecutionDomain.leafProgress(db.tasks,db.logs,t)}
+function executionSummary(t){return ExecutionDomain.executionSummary(db.tasks,db.logs,t,todayKey())}
+function inPeriod(date,period){return ExecutionDomain.inPeriod(date,period)}
 function periodLabel(t){const p=periodForTask(t);if(!p?.start||!p?.due)return '尚未設定子任務期間';return `${p.start} ～ ${p.due}`}
 function calc(t,stack=new Set()){if(!t)return 0;if(stack.has(t.id))return 0;const c=kids(t.id).filter(x=>x.status!=='已封存');const oldStatus=t.status;if(!c.length){if(t.level===4)t.progress=leafProgress(t);else t.progress=0;t.status=autoStatus(t.progress,t.status==='已封存');if(t.status==='已完成'&&oldStatus!=='已完成'&&t.status!=='已封存')completion(t);return t.progress}stack.add(t.id);const p=Math.round(c.reduce((s,x)=>s+calc(x,stack),0)/c.length);stack.delete(t.id);t.progress=p;t.status=autoStatus(p,t.status==='已封存');if(t.status==='已完成'&&oldStatus!=='已完成'&&t.status!=='已封存')completion(t);return p}
 function recalcAllStatuses(){const rs=roots();const rid=new Set(rs.map(r=>r.id));rs.forEach(t=>calc(t));db.tasks.filter(t=>t.level>1&&t.status!=='已封存'&&!rid.has(t.id)).forEach(t=>calc(t));return db.tasks}
@@ -675,7 +635,7 @@ function saveExecutionPlan(taskId){
  db.executionPlans.push({id:'plan'+Date.now()+Math.random().toString(16).slice(2),taskId:t.id,name:t.name,date,time,minutes,status:'待執行',createdAt:new Date().toISOString()});
  save();renderAll();closeGoalInfoModal();toast('已安排「'+t.name+'」於 '+date+' '+time+' 執行');
 }
-function activeExecutionPlan(x){return x&&x.status!=='已完成'&&x.status!=='已取消'}
+function activeExecutionPlan(x){return ExecutionDomain.activeExecutionPlan(x)}
 function cancelExecutionPlan(id){
  const plan=(Array.isArray(db.executionPlans)?db.executionPlans:[]).find(x=>String(x.id)===String(id));
  if(!plan)return;
@@ -686,11 +646,9 @@ function cancelExecutionPlan(id){
  save();renderAll();
  toast('已取消這次執行安排；不影響實際投入紀錄');
 }
-function currentWeekTargetForRoot(root,date=todayKey()){return descAll(root.id).filter(t=>t.level===4&&t.status!=='已封存').reduce((sum,t)=>sum+currentWeekSummary(t,date).target,0)}
+function currentWeekTargetForRoot(root,date=todayKey()){return ExecutionDomain.currentWeekTargetForRoot(db.tasks,db.logs,root,date)}
 const REVIEW_REASONS=['課業負荷','考試／其他重要事項','時間不足','目標設定過高','主動調整','突發事件'];
-function previousWeekRange(date=todayKey()){
- const ws=weekStartKey(date),d=new Date(ws+'T00:00:00');d.setDate(d.getDate()-7);const start=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;return {start,end:weekEndKey(start)};
-}
+function previousWeekRange(date=todayKey()){return ExecutionDomain.previousWeekRange(date)}
 function getWeekReview(weekStart,taskId){return (db.weekReviews||[]).find(x=>x.weekStart===weekStart&&String(x.taskId)===String(taskId))||null}
 function previousWeekIncompleteItems(date=todayKey()){
  const r=previousWeekRange(date);return db.tasks.filter(t=>t.level===4&&t.status!=='已封存'&&currentWeekSummary(t,r.start).active&&currentWeekSummary(t,r.start).target>0).map(t=>{const w=currentWeekSummary(t,r.start);return {t,w,shortfall:Math.max(0,w.target-w.actual),review:getWeekReview(r.start,t.id)}}).filter(x=>x.shortfall>0).sort((a,b)=>b.shortfall-a.shortfall||calc(a.t)-calc(b.t));
@@ -703,64 +661,14 @@ function renderWeeklyReview(date=todayKey()){
  el.innerHTML=items.length?items.map(x=>{const selected=x.review?.reason||'';return `<div class="weekly-review-item"><div class="weekly-review-head"><div><b>${esc(x.t.name)}</b><small>目標 ${x.w.target} 分 · 實際 ${x.w.actual} 分 · 未完成 ${x.shortfall} 分</small></div><span class="pill">${calc(x.t)}%</span></div><div class="review-reasons">${REVIEW_REASONS.map(reason=>`<button type="button" class="review-reason ${selected===reason?'active':''}" onclick="setWeeklyReview('${String(x.t.id).replace(/'/g,"\\'")}','${reason}', '${date}')">${reason}</button>`).join('')}</div>${selected?`<div class="review-saved">已記錄：${esc(selected)}</div>`:''}</div>`}).join(''):'<div class="review-empty">上週沒有需要補記原因的未完成事項。</div>';
 }
 function executionAnalysis(date=todayKey()){
- const d=new Date(date+'T00:00:00'),day=d.getDay(),diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);const ws=dateKey(d),we=weekEndKey(ws);
- const plans=(Array.isArray(db.executionPlans)?db.executionPlans:[]).filter(p=>p&&p.date>=ws&&p.date<=we);
- const scheduledPlans=plans.filter(p=>p.status!=='已取消');
- const activePlans=plans.filter(activeExecutionPlan);
- const cancelledPlans=plans.filter(p=>p.status==='已取消');
- const actualLogs=(Array.isArray(db.logs)?db.logs:[]).filter(l=>isGoalActualLog(l)&&logDate(l.time)>=ws&&logDate(l.time)<=we);
- const actualMinutes=actualLogs.reduce((s,l)=>s+Math.max(0,+l.minutes||0),0);
- const otherStudyLogs=(Array.isArray(db.logs)?db.logs:[]).filter(l=>isCountableActualLog(l)&&isOtherStudyLog(l)&&logDate(l.time)>=ws&&logDate(l.time)<=we);
- const otherStudyMinutes=otherStudyLogs.reduce((s,l)=>s+Math.max(0,+l.minutes||0),0);
- const totalStudyMinutes=actualMinutes+otherStudyMinutes;
-
- const scheduledMap=new Map(scheduledPlans.map(p=>[String(p.id),p]));
- const historicalPlanMap=new Map(plans.map(p=>[String(p.id),p]));
- const cancelledPlanIds=new Set(cancelledPlans.map(p=>String(p.id)));
- const planActualMap=new Map(),historicalPlanActualMap=new Map();
- let unplannedActualMinutes=0;
-
- actualLogs.forEach(l=>{
-   const mins=Math.max(0,+l.minutes||0),pid=String(l?.planId||'');
-   if(!pid||!historicalPlanMap.has(pid)){
-     unplannedActualMinutes+=mins;
-     return;
-   }
-   historicalPlanActualMap.set(pid,(historicalPlanActualMap.get(pid)||0)+mins);
-   if(scheduledMap.has(pid))planActualMap.set(pid,(planActualMap.get(pid)||0)+mins);
+ return AnalyticsDomain.executionAnalysis({
+  tasks:db.tasks,
+  logs:db.logs,
+  plans:db.executionPlans,
+  timer,
+  date,
+  nowMs:Date.now()
  });
-
- let livePlanActualMinutes=0;
- planActualMap.forEach(v=>{livePlanActualMinutes+=v});
- if(timer.running&&timer.planId&&scheduledMap.has(String(timer.planId))){
-   const live=Math.max(0,Math.floor((timer.elapsed+(Date.now()-timer.start))/60000));
-   livePlanActualMinutes+=live;
-   planActualMap.set(String(timer.planId),(planActualMap.get(String(timer.planId))||0)+live);
- }
-
- const plannedMinutes=scheduledPlans.reduce((s,p)=>s+Math.max(0,+p.minutes||0),0);
- const fulfilledPlans=scheduledPlans.filter(p=>(planActualMap.get(String(p.id))||0)>=Math.max(1,+p.minutes||0));
- const startedPlans=scheduledPlans.filter(p=>(planActualMap.get(String(p.id))||0)>0);
- const expiredPlans=scheduledPlans.filter(p=>p.date<date&&(planActualMap.get(String(p.id))||0)<Math.max(1,+p.minutes||0));
- const timeRate=plannedMinutes?Math.round(Math.min(100,livePlanActualMinutes/plannedMinutes*100)*10)/10:null;
- const executionRate=scheduledPlans.length?Math.round(startedPlans.length/scheduledPlans.length*1000)/10:null;
- const completionRate=scheduledPlans.length?Math.round(fulfilledPlans.length/scheduledPlans.length*1000)/10:null;
- const completedForEstimate=fulfilledPlans.filter(p=>planActualMap.has(String(p.id)));
- const estimateAccuracy=completedForEstimate.length?Math.round(completedForEstimate.reduce((s,p)=>{
-   const planned=Math.max(1,+p.minutes||0),actual=Math.max(0,planActualMap.get(String(p.id))||0);
-   return s+Math.max(0,100-Math.abs(actual-planned)/planned*100);
- },0)/completedForEstimate.length*10)/10:null;
- const historicalPlanActualMinutes=[...historicalPlanActualMap.values()].reduce((s,v)=>s+v,0);
- const cancelledPlanActualMinutes=[...historicalPlanActualMap.entries()].reduce(
-   (s,[id,v])=>s+(cancelledPlanIds.has(String(id))?Math.max(0,+v||0):0),0
- );
-
- return {
-   ws,we,plans,scheduledPlans,activePlans,cancelledPlans,fulfilledPlans,startedPlans,expiredPlans,
-   plannedMinutes,actualMinutes,otherStudyMinutes,totalStudyMinutes,planActualMinutes:livePlanActualMinutes,historicalPlanActualMinutes,
-   cancelledPlanActualMinutes,unplannedActualMinutes,timeRate,executionRate,completionRate,
-   estimateAccuracy,planActualMap,historicalPlanActualMap,completedForEstimate
- };
 }
 function renderExecutionAnalysis(date=todayKey()){
  const el=document.getElementById('executionAnalysis');if(!el)return;
@@ -972,15 +880,7 @@ function renderActualLogHistory(){
 }
 
 /* analysis KPI source repair */
-function analysisValidLeafTasks(){
- return (Array.isArray(db.tasks)?db.tasks:[]).filter(t=>{
-   if(!t||Number(t.level)!==4||t.status==='已封存')return false;
-   const parent=getTask(t.parent);
-   if(!parent||Number(parent.level)!==3||parent.status==='已封存')return false;
-   const p=periodForTask(t);
-   return !!(p?.start&&p?.due&&p.start<=p.due);
- });
-}
+function analysisValidLeafTasks(){return AnalyticsDomain.analysisValidLeafTasks(db.tasks)}
 
 function stats(){
  const leaves=analysisValidLeafTasks();
@@ -1385,7 +1285,7 @@ function validateData(data){
  return [...new Set(errors)];
 }
 function validateDB(){repairKnownHierarchy(db.tasks);return validateData(db)}
-function activeWeeklyTargetTotal(date=todayKey()){return db.tasks.filter(t=>t.level===4&&t.status!=='已封存').reduce((s,t)=>s+currentWeekSummary(t,date).target,0)}
+function activeWeeklyTargetTotal(date=todayKey()){return ExecutionDomain.activeWeeklyTargetTotal(db.tasks,db.logs,date)}
 function auditButtonHandlers(){
  const missing=[];
  const html=document.documentElement.outerHTML;
@@ -1482,7 +1382,7 @@ function runSelfTest(){
   const html=document.documentElement.outerHTML;
   const ids=[...document.querySelectorAll('[id]')].map(e=>e.id);
   const dup=ids.filter((id,i)=>ids.indexOf(id)!==i);
-  tests.push([KEY==='lawLangGoalSystemV92'&&APP_VERSION==='V96.5'&&SCHEMA_VERSION===5,'版本 V96.5／沿用 V92 資料主鍵：正常']);
+  tests.push([KEY==='lawLangGoalSystemV92'&&SCHEMA_VERSION===6,'版本 '+APP_VERSION+'／Schema 6／沿用 V92 資料主鍵：正常']);
   tests.push([typeof deleteActualLog==='function'&&typeof restoreActualLog==='function'&&typeof isCountableActualLog==='function','實際紀錄刪除／恢復：正常']);
   tests.push([dup.length===0,'DOM ID 唯一性：正常']);
   tests.push([cleanupLegacyStorage()>=0,'舊版本儲存鍵清理：正常']);

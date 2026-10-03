@@ -26,15 +26,7 @@ jobs:
 
       - name: Static QA
         run: |
-          set -euo pipefail
-          node --check js/app.js
-          node --check js/domain/goals.js
-          node tests/goal-domain.test.js
-          node --check js/store.js
-          node --check js/settings.js
-          node --check js/pwa.js
-          python3 qa_static.py
-          git diff --check
+          bash scripts/verify.sh
 
       - name: Assemble site
         run: |
