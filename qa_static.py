@@ -48,7 +48,7 @@ config=(root/'config'/'system-config.js').read_text(encoding='utf-8')
 assert 'GOAL_MANAGER_VERSION' in config, 'AppConfig must consume shared version source'
 app=(root/'js'/'app.js').read_text(encoding='utf-8')
 assert 'GOAL_MANAGER_SCHEMA_VERSION' in app and 'STUDY_LOG_KIND' in app, 'app schema/log foundation missing'
-assert "l.kind!==STUDY_LOG_KIND.SYSTEM" in app and "l.type!=='auto'" in app, 'system logs must not count as actual study'
+assert 'StudyLogDomain.normalizeLog' in app and 'StudyLogDomain.isCountableActualLog' in app, 'study log compatibility delegation missing'
 assert 'ACTIVE_TIMER_KEY' in app and 'saveActiveTimer' in app and 'restoreActiveTimer' in app and 'renderTimerState' in app, 'persistent timer foundation missing'
 store=(root/'js'/'store.js').read_text(encoding='utf-8')
 assert 'storeWriteStatus' in store and 'persistent:false' in store, 'persistent storage health guard missing'
@@ -74,8 +74,9 @@ assert '--ui-green:var(--gm-primary)' in design and '--ui-gold:var(--gm-accent)'
 sw=(root/'sw.js').read_text(encoding='utf-8')
 assert 'tokens.css' in sw and 'design-system.css' in sw and 'theme-v9793.css' not in sw, 'service worker CSS shell is stale'
 assert all(x not in html for x in ['🎯','📍','🔎','📅']), 'high-saturation emoji remains in primary UI'
-assert 'today-path' in app and 'today-metrics' in app, 'execution card compact hierarchy missing'
-assert '<button class="btn primary" onclick="startTodayExecution' in app, 'execution CTA must use primary color'
+execution_ui_guard=(root/'js'/'ui'/'pages'/'execution-page.js').read_text(encoding='utf-8')
+assert 'today-path' in execution_ui_guard and 'today-metrics' in execution_ui_guard, 'execution card compact hierarchy missing'
+assert '<button class="btn primary" onclick="startTodayExecution' in execution_ui_guard, 'execution CTA must use primary color'
 assert 'mobile polish - visual priority after device review' in design, 'mobile polish CSS missing'
 assert 'goal-tree mobile layout hotfix' in design and 'grid-template-columns:42px minmax(0,1fr)' in design, 'goal mobile layout hotfix missing'
 assert 'final visual cleanup - residual legacy color and mobile scan fixes' in design, 'final visual cleanup missing'
@@ -102,7 +103,81 @@ assert '97.14.0 goal dual-mode navigation' in design, 'phase 4 goal design rules
 assert 'GoalDomain hierarchy, path, browse and period helpers' in goal_test, 'GoalDomain test missing'
 assert './js/domain/goals.js' in sw, 'service worker missing GoalDomain module'
 
+# V98 Domain Core guards
+study_domain=(root/'js'/'domain'/'study-logs.js').read_text(encoding='utf-8')
+execution_domain=(root/'js'/'domain'/'execution.js').read_text(encoding='utf-8')
+analytics_domain=(root/'js'/'domain'/'analytics.js').read_text(encoding='utf-8')
+for module in ['./js/domain/study-logs.js','./js/domain/execution.js','./js/domain/analytics.js']:
+ assert module in html and html.find(module) < html.find('./js/app.js'), f'{module} must load before app.js'
+ assert module in sw, f'service worker missing {module}'
+assert all(x in study_domain for x in ['normalizeLog','isCountableActualLog','isOtherStudyLog','isGoalActualLog','goalStudyMinutesInRange','totalStudyMinutesInRange']), 'StudyLogDomain API incomplete'
+assert all(x in execution_domain for x in ['currentWeekSummary','leafProgress','executionSummary','activeExecutionPlan','activeWeeklyTargetTotal']), 'ExecutionDomain API incomplete'
+assert all(x in analytics_domain for x in ['analysisValidLeafTasks','weeklyStudySummary','executionAnalysis']), 'AnalyticsDomain API incomplete'
+assert 'StudyLogDomain.logDate' in app and 'ExecutionDomain.currentWeekSummary' in app and 'AnalyticsDomain.executionAnalysis' in app, 'Domain compatibility wrappers missing'
+calendar_domain=(root/'js'/'domain'/'calendar.js').read_text(encoding='utf-8')
+timer_service=(root/'js'/'services'/'timer-service.js').read_text(encoding='utf-8')
+assert './js/domain/calendar.js' in html and html.find('./js/domain/calendar.js') < html.find('./js/app.js'), 'CalendarDomain must load before app.js'
+assert './js/services/timer-service.js' in html and html.find('./js/services/timer-service.js') < html.find('./js/app.js'), 'TimerService must load before app.js'
+assert './js/domain/calendar.js' in sw and './js/services/timer-service.js' in sw, 'service worker missing CalendarDomain/TimerService'
+assert all(x in calendar_domain for x in ['dateKey','monthGridKeys','eventsForDate','monthCounts']), 'CalendarDomain API incomplete'
+assert all(x in timer_service for x in ['empty','normalize','payload','hasSelection','start','pause','elapsedMs','finish']), 'TimerService API incomplete'
+assert 'CalendarDomain.dateKey' in app and 'CalendarDomain.monthGridKeys' in app, 'calendar compatibility wrappers missing'
+assert 'TimerService.start' in app and 'TimerService.pause' in app and 'TimerService.finish' in app, 'timer compatibility delegation missing'
+execution_service=(root/'js'/'services'/'execution-service.js').read_text(encoding='utf-8')
+data_normalization=(root/'js'/'data'/'normalization.js').read_text(encoding='utf-8')
+data_migrations=(root/'js'/'data'/'migrations.js').read_text(encoding='utf-8')
+data_repository=(root/'js'/'data'/'repository.js').read_text(encoding='utf-8')
+for module in ['./js/services/execution-service.js','./js/data/normalization.js','./js/data/migrations.js','./js/data/repository.js']:
+ assert module in html and html.find(module) < html.find('./js/app.js'), f'{module} must load before app.js'
+ assert module in sw, f'service worker missing {module}'
+assert all(x in execution_service for x in ['createPlan','cancelPlan','applyActualMinutes','findActivePlanForDate']), 'ExecutionService API incomplete'
+assert all(x in data_normalization for x in ['normalizeTask','normalizeTasks','normalizeWeekReviews']), 'DataNormalization API incomplete'
+assert 'migrate' in data_migrations, 'DataMigrations API incomplete'
+assert 'readCandidate' in data_repository, 'DataRepository API incomplete'
+assert 'DataNormalization.normalizeTasks' in app and 'DataMigrations.migrate' in app and 'DataRepository.readCandidate' in app, 'Data layer delegation missing'
+assert 'ExecutionService.createPlan' in app and 'ExecutionService.cancelPlan' in app and 'ExecutionService.applyActualMinutes' in app, 'ExecutionService delegation missing'
+calendar_page=(root/'js'/'ui'/'pages'/'calendar-page.js').read_text(encoding='utf-8')
+execution_page=(root/'js'/'ui'/'pages'/'execution-page.js').read_text(encoding='utf-8')
+for module in ['./js/ui/pages/calendar-page.js','./js/ui/pages/execution-page.js']:
+ assert module in html and html.find(module) < html.find('./js/app.js'), f'{module} must load before app.js'
+ assert module in sw, f'service worker missing {module}'
+assert all(x in calendar_page for x in ['summaryButton','agendaHTML','render']), 'CalendarPage API incomplete'
+assert all(x in execution_page for x in ['plannedQueueHTML','todayListHTML','renderPlannedQueue','renderToday']), 'ExecutionPage API incomplete'
+assert 'CalendarPage.render' in app and 'ExecutionPage.renderPlannedQueue' in app and 'ExecutionPage.renderToday' in app, 'UI page delegation missing'
+goals_page=(root/'js'/'ui'/'pages'/'goals-page.js').read_text(encoding='utf-8')
+analytics_page=(root/'js'/'ui'/'pages'/'analytics-page.js').read_text(encoding='utf-8')
+for module in ['./js/ui/pages/goals-page.js','./js/ui/pages/analytics-page.js']:
+ assert module in html and html.find(module) < html.find('./js/app.js'), f'{module} must load before app.js'
+ assert module in sw, f'service worker missing {module}'
+assert all(x in goals_page for x in ['browseMeta','browseCard','renderBrowse','resultCard','renderSearchResults','taskNode','renderTree']), 'GoalsPage API incomplete'
+assert all(x in analytics_page for x in ['formatMinutes','executionAnalysisHTML','renderExecutionAnalysis','renderStats','deletedLogsHTML','recentActualLogsHTML','actualHistoryModalShell','actualHistoryBodyHTML','weeklyReviewHTML']), 'AnalyticsPage API incomplete'
+assert 'GoalsPage.renderBrowse' in app and 'GoalsPage.renderSearchResults' in app and 'GoalsPage.taskNode' in app and 'GoalsPage.renderTree' in app, 'GoalsPage delegation missing'
+assert 'AnalyticsPage.renderExecutionAnalysis' in app and 'AnalyticsPage.renderStats' in app and 'AnalyticsPage.recentActualLogsHTML' in app and 'AnalyticsPage.actualHistoryBodyHTML' in app and 'AnalyticsPage.weeklyReviewHTML' in app, 'AnalyticsPage delegation missing'
+dashboard_page=(root/'js'/'ui'/'pages'/'dashboard-page.js').read_text(encoding='utf-8')
+app_orchestrator=(root/'js'/'application'/'orchestrator.js').read_text(encoding='utf-8')
+for module in ['./js/ui/pages/dashboard-page.js','./js/application/orchestrator.js']:
+ assert module in html and html.find(module) < html.find('./js/app.js'), f'{module} must load before app.js'
+ assert module in sw, f'service worker missing {module}'
+assert all(x in dashboard_page for x in ['executeListHTML','renderExecuteList','decisionListHTML','renderDecisionList','directionsHTML','deadlinesHTML','renderDashboard']), 'DashboardPage API incomplete'
+assert 'renderAll' in app_orchestrator, 'AppOrchestrator API incomplete'
+assert 'DashboardPage.renderDashboard' in app and 'DashboardPage.renderExecuteList' in app and 'DashboardPage.renderDecisionList' in app, 'DashboardPage delegation missing'
+assert 'AppOrchestrator.renderAll' in app, 'renderAll orchestration delegation missing'
+data_persistence=(root/'js'/'data'/'persistence.js').read_text(encoding='utf-8')
+assert './js/data/persistence.js' in html and html.find('./js/data/persistence.js') < html.find('./js/app.js'), 'DataPersistence must load before app.js'
+assert './js/data/persistence.js' in sw, 'service worker missing DataPersistence'
+assert all(x in data_persistence for x in ['rotateBackups','persist','loadFirstValid']), 'DataPersistence API incomplete'
+assert 'DataPersistence.persist' in app and 'DataPersistence.loadFirstValid' in app, 'persistence delegation missing'
+bootstrap=(root/'js'/'bootstrap.js').read_text(encoding='utf-8')
+assert html.find('./js/bootstrap.js') > html.find('./js/app.js'), 'bootstrap must load after app.js'
+assert 'window.renderAll()' in bootstrap and 'window.__goalManagerBooted' in bootstrap, 'bootstrap render ownership missing'
+assert not app.rstrip().endswith('renderAll();'), 'app.js still self-renders instead of bootstrap'
+assert 'dashboard:{render:window.dashboard}' in bootstrap and 'goals:{render:window.renderGoalsPage}' in bootstrap and 'execution:{render:window.today}' in bootstrap and 'analytics:{render:window.stats}' in bootstrap, 'AppModules still expose broad renderAll aliases'
+
+assert "const KEY='lawLangGoalSystemV92'" in app and 'BACKUP_KEYS' in app, 'persistent keys must remain stable'
+
+assert "GOAL_MANAGER_VERSION='98.8.0'" in version_js, 'V98.8 version source missing'
 
 
 
-print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals')
+
+print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core, V98.1 calendar/timer, V98.2 execution/data, V98.3 UI pages, V98.4 goals/analytics pages, V98.5 UI cleanup, V98.6 dashboard/orchestration, V98.7 persistence, V98.8 bootstrap/regression')

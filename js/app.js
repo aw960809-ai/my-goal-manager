@@ -1,4 +1,4 @@
-const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'97.11.0')));
+const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.8.0')));
 const SCHEMA_VERSION=Number(globalThis.GOAL_MANAGER_SCHEMA_VERSION||6);
 const KEY='lawLangGoalSystemV92';
 const BACKUP_KEYS=['lawLangGoalSystemV92_backup1','lawLangGoalSystemV92_backup2','lawLangGoalSystemV92_backup3'];
@@ -6,28 +6,43 @@ const ACTIVE_TIMER_KEY='lawLangGoalActiveTimerV1';
 const L={1:'方向／重要目標',2:'階段目標',3:'子任務',4:'具體行動'};
 let recoveryNotice='';
 function isUsableData(d){return !!d&&Array.isArray(d.tasks)&&Array.isArray(d.logs)}
-function persistEnvelope(d,{backup=true}={}){
- const normalized=normalize(d);normalized.activities=mergeActivityCatalog(validateCatalogBoundary(normalized.activities,'活動'));normalized.scholarships=mergeScholarshipCatalog(validateCatalogBoundary(normalized.scholarships,'獎學金'));if(!Array.isArray(normalized.activities)||!normalized.activities.length)normalized.activities=ACTIVITY_SEED.map(x=>({...x}));if(!Array.isArray(normalized.scholarships)||!normalized.scholarships.length)normalized.scholarships=SCHOLARSHIP_SEED.map(x=>({...x}));normalized.schoolCalendar=Array.isArray(normalized.schoolCalendar)?normalized.schoolCalendar:[];
- const payload=dataPayload(normalized), next=JSON.stringify(makeEnvelope(normalized));
- const old=storeGet(KEY);
- if(backup&&old&&old!==next){for(let i=BACKUP_KEYS.length-1;i>0;i--){const prev=storeGet(BACKUP_KEYS[i-1]);if(prev)storeSet(BACKUP_KEYS[i],prev)}storeSet(BACKUP_KEYS[0],old)}
- const writeOk=storeSet(KEY,next),writeState=typeof storeWriteStatus==='function'?storeWriteStatus():{persistent:true};
- if(!writeOk||writeState.persistent===false)throw new Error('無法永久寫入本機儲存空間；已停止保存以避免誤判成功');
- const verify=storeGet(KEY);const parsed=parseEnvelope(verify);if(!parsed.data||fnv1a(dataPayload(parsed.data))!==fnv1a(payload))throw new Error('寫入後驗證失敗');
- db=normalized;return true;
+function preparePersistentData(d){
+ const normalized=normalize(d);
+ normalized.activities=mergeActivityCatalog(validateCatalogBoundary(normalized.activities,'活動'));
+ normalized.scholarships=mergeScholarshipCatalog(validateCatalogBoundary(normalized.scholarships,'獎學金'));
+ if(!Array.isArray(normalized.activities)||!normalized.activities.length)normalized.activities=ACTIVITY_SEED.map(x=>({...x}));
+ if(!Array.isArray(normalized.scholarships)||!normalized.scholarships.length)normalized.scholarships=SCHOLARSHIP_SEED.map(x=>({...x}));
+ normalized.schoolCalendar=Array.isArray(normalized.schoolCalendar)?normalized.schoolCalendar:[];
+ return normalized;
 }
-let calendarCursor=new Date(),selected=null,timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''},goalPath={long:null,mid:null,short:null,exec:null};
+function persistEnvelope(d,{backup=true}={}){
+ const normalized=DataPersistence.persist(d,{
+  prepare:preparePersistentData,
+  read:storeGet,
+  write:storeSet,
+  writeStatus:typeof storeWriteStatus==='function'?storeWriteStatus:null,
+  key:KEY,
+  backupKeys:BACKUP_KEYS,
+  backup,
+  makeEnvelope,
+  parseEnvelope,
+  serializePayload:dataPayload,
+  checksum:fnv1a
+ });
+ db=normalized;
+ return true;
+}
+let calendarCursor=new Date(),selected=null,timer=TimerService.empty(),goalPath={long:null,mid:null,short:null,exec:null};
 
-function timerPayload(){return {id:timer.id,start:+timer.start||0,elapsed:+timer.elapsed||0,running:!!timer.running,planId:timer.planId||null,kind:timer.kind||'goal',label:String(timer.label||'')}}
+function timerPayload(){return TimerService.payload(timer)}
 function saveActiveTimer(){try{storeSet(ACTIVE_TIMER_KEY,JSON.stringify(timerPayload()))}catch(e){console.warn('active timer persistence failed',e)}}
 function clearActiveTimer(){try{localStorage.removeItem(ACTIVE_TIMER_KEY)}catch(e){try{delete memoryStore[ACTIVE_TIMER_KEY]}catch(_){}}}
 function restoreActiveTimer(){
  try{
   const raw=storeGet(ACTIVE_TIMER_KEY);if(!raw)return false;
   const saved=JSON.parse(raw);if(!saved||typeof saved!=='object')return false;
-  const kind=saved.kind==='other-study'?'other-study':'goal';
-  timer={id:saved.id||null,start:Math.max(0,+saved.start||0),elapsed:Math.max(0,+saved.elapsed||0),running:!!saved.running,planId:saved.planId||null,kind,label:String(saved.label||'')};
-  if(timer.running&&!timer.start)timer.start=Date.now();
+  timer=TimerService.normalize(saved);
+  if(timer.running&&!timer.start)timer={...timer,start:Date.now()};
   return true;
  }catch(e){clearActiveTimer();return false}
 }
@@ -204,38 +219,13 @@ function repairKnownHierarchy(tasks){
 }
 
 
-const STUDY_LOG_KIND=Object.freeze({GOAL:'goal-study',OTHER:'other-study',SYSTEM:'system'});
-function normalizeLog(l){
- if(!l||typeof l!=='object')return null;
- const out={...l};
- if(out.kind==='other-study')out.kind=STUDY_LOG_KIND.OTHER;
- else if(out.kind==='system'||out.type==='auto')out.kind=STUDY_LOG_KIND.SYSTEM;
- else out.kind=STUDY_LOG_KIND.GOAL;
- out.minutes=Math.max(0,Number.isFinite(+out.minutes)?+out.minutes:0);
- if(out.taskId!==null&&out.taskId!==undefined)out.taskId=String(out.taskId);
- if(out.kind===STUDY_LOG_KIND.SYSTEM)out.actual=false;
- else if(out.actual===undefined)out.actual=true;
- return out;
-}
+const STUDY_LOG_KIND=StudyLogDomain.KIND;
+function normalizeLog(l){return StudyLogDomain.normalizeLog(l)}
 
 function normalize(d){
  d=d&&Array.isArray(d.tasks)?d:{tasks:[],logs:[]};
  d.logs=(Array.isArray(d.logs)?d.logs:[]).map(normalizeLog).filter(Boolean);
- d.tasks=d.tasks.map(t=>{
-  const level=Math.max(1,Math.min(4,+t.level||1));
-  let weekly=0;
-  if(level===4){
-   if(Number.isFinite(+t.weeklyMinutes)) weekly=Math.max(0,+t.weeklyMinutes||0);
-   else{
-    const mins=Math.max(0,+t.minutes||0),mode=t.mode,cycle=t.cycle;
-    if(mode==='single'||cycle==='單次') weekly=mins;
-    else if(cycle==='日') weekly=mins*7;
-    else if(cycle==='月') weekly=Math.round(mins/4.345);
-    else weekly=mins;
-   }
-  }
-  return {id:String(t.id),name:String(t.name||'未命名目標'),level,parent:t.parent?String(t.parent):null,status:['未開始','進行中','已完成','已封存'].includes(t.status)?t.status:'未開始',weeklyMinutes:weekly,start:level===3?(t.start||''):'',due:level===3?(t.due||''):'',progress:Math.max(0,Math.min(100,+t.progress||0))};
- });
+ d.tasks=DataNormalization.normalizeTasks(d.tasks);
  repairKnownHierarchy(d.tasks);
  const ids=new Set(d.tasks.map(t=>t.id));
  d.tasks.forEach(t=>{if(t.level===1||!t.parent||!ids.has(t.parent)){t.parent=null}else if(getTaskFrom(d.tasks,t.parent)?.level!==t.level-1){t.parent=null;t.level=1}});
@@ -248,27 +238,53 @@ function normalize(d){
  d.calendarSelected=typeof d.calendarSelected==='string'?d.calendarSelected:'';
  d.calendarEvents=Array.isArray(d.calendarEvents)?d.calendarEvents:[];
  d.executionPlans=Array.isArray(d.executionPlans)?d.executionPlans:[];
- d.weekReviews=Array.isArray(d.weekReviews)?d.weekReviews.filter(x=>x&&x.weekStart&&x.taskId&&x.reason):[];
+ d.weekReviews=DataNormalization.normalizeWeekReviews(d.weekReviews);
  return d;
 }
 
 function migrateData(d,fromVersion=0){
- // V60～V78 的資料格式由 normalize 統一收斂；未來結構變更只需在此增加明確 migration。
- let out=d;
- out=normalize(out); repairKnownHierarchy(out.tasks); out=normalize(out);
- out.schemaVersion=SCHEMA_VERSION;
- return out;
+ return DataMigrations.migrate(d,{
+  fromVersion,
+  schemaVersion:SCHEMA_VERSION,
+  normalize,
+  repair:repairKnownHierarchy
+ });
 }
 function tryReadCandidate(raw,label){
- try{const parsed=parseEnvelope(raw);const d=migrateData(parsed.data,parsed.schemaVersion);if(!isUsableData(d))throw new Error('資料結構不完整');const errs=validateData(d);if(errs.length)throw new Error(errs.slice(0,3).join('；'));return d}catch(e){return null}
+ return DataRepository.readCandidate(raw,{
+  parseEnvelope,
+  migrateData,
+  isUsableData,
+  validateData
+ });
+}
+function legacyStorageKeys(){
+ return ['lawLangGoalSystemV91','lawLangGoalSystemV90','lawLangGoalSystemV89','lawLangGoalSystemV88','lawLangGoalSystemV87','lawLangGoalSystemV86','lawLangGoalSystemV84','lawLangGoalSystemV83','lawLangGoalSystemV82','lawLangGoalSystemV81','lawLangGoalSystemV80','lawLangGoalSystemV79','lawLangGoalSystemV78','lawLangGoalSystemV77','lawLangGoalSystemV76','lawLangGoalSystemV75','lawLangGoalSystemV74','lawLangGoalSystemV73','lawLangGoalSystemV72','lawLangGoalSystemV71','lawLangGoalSystemV70','lawLangGoalSystemV69','lawLangGoalSystemV68','lawLangGoalSystemV67','lawLangGoalSystemV66','lawLangGoalSystemV65','lawLangGoalSystemV63','lawLangGoalSystemV62','lawLangGoalSystemV61','lawLangGoalSystemV60'];
 }
 function loadDB(){
- const current=storeGet(KEY);
- if(current){const d=tryReadCandidate(current,'current');if(d)return d;}
- for(const k of BACKUP_KEYS){const raw=storeGet(k);if(!raw)continue;const d=tryReadCandidate(raw,k);if(d){recoveryNotice='已從最近的有效備份恢復資料。';try{persistEnvelope(d,{backup:false})}catch(e){}return d;}}
- const legacy=['lawLangGoalSystemV91','lawLangGoalSystemV90','lawLangGoalSystemV89','lawLangGoalSystemV88','lawLangGoalSystemV87','lawLangGoalSystemV86','lawLangGoalSystemV84','lawLangGoalSystemV83','lawLangGoalSystemV82','lawLangGoalSystemV81','lawLangGoalSystemV80','lawLangGoalSystemV79','lawLangGoalSystemV78','lawLangGoalSystemV77','lawLangGoalSystemV76','lawLangGoalSystemV75','lawLangGoalSystemV74','lawLangGoalSystemV73','lawLangGoalSystemV72','lawLangGoalSystemV71','lawLangGoalSystemV70','lawLangGoalSystemV69','lawLangGoalSystemV68','lawLangGoalSystemV67','lawLangGoalSystemV66','lawLangGoalSystemV65','lawLangGoalSystemV63','lawLangGoalSystemV62','lawLangGoalSystemV61','lawLangGoalSystemV60'];
- for(const k of legacy){const raw=storeGet(k);if(!raw)continue;const d=tryReadCandidate(raw,k);if(d){try{persistEnvelope(d,{backup:false})}catch(e){}return d;}}
- const fresh=normalize(seed());try{persistEnvelope(fresh,{backup:false})}catch(e){storeSet(KEY,JSON.stringify(makeEnvelope(fresh)))}return fresh;
+ const found=DataPersistence.loadFirstValid({
+  read:storeGet,
+  currentKey:KEY,
+  backupKeys:BACKUP_KEYS,
+  legacyKeys:legacyStorageKeys(),
+  decode:tryReadCandidate
+ });
+
+ if(found){
+  if(found.source==='backup'){
+   recoveryNotice='已從最近的有效備份恢復資料。';
+   try{persistEnvelope(found.data,{backup:false})}catch(e){}
+  }else if(found.source==='legacy'){
+   try{persistEnvelope(found.data,{backup:false})}catch(e){}
+  }
+  return found.data;
+ }
+
+ const fresh=normalize(seed());
+ try{persistEnvelope(fresh,{backup:false})}catch(e){
+  storeSet(KEY,JSON.stringify(makeEnvelope(fresh)));
+ }
+ return fresh;
 }
 async function clearApplicationCaches(){
  let removed=0;
@@ -439,50 +455,21 @@ function roots(){return GoalDomain.roots(db.tasks)}
 function autoStatus(progress,archived=false){if(archived)return '已封存';const p=Math.max(0,Math.min(100,Math.round(+progress||0)));return p>=100?'已完成':p>0?'進行中':'未開始'}
 function periodForTask(t){return GoalDomain.periodForTask(db.tasks,t)}
 function descendantsOfLevel(parent,level){return GoalDomain.descendantsOfLevel(db.tasks,parent,level)}
-function weekStartKey(date=todayKey()){
- const d=new Date(date+'T00:00:00');d.setDate(d.getDate()-d.getDay()+(d.getDay()===0?-6:1));
- return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-function weekEndKey(date=todayKey()){
- const d=new Date(weekStartKey(date)+'T00:00:00');d.setDate(d.getDate()+6);
- return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-function activeWeekCount(t){
- const p=periodForTask(t);if(!p?.start||!p?.due)return 0;
- let d=new Date(weekStartKey(p.start)+'T00:00:00'),end=new Date(weekStartKey(p.due)+'T00:00:00'),n=0;
- while(d<=end&&n<520){n++;d.setDate(d.getDate()+7)}return n;
-}
-function logDate(x){const d=new Date(x);if(Number.isNaN(d.getTime()))return '';return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
-function isCountableActualLog(l){return !!l&&l.actual!==false&&l.status!=='已刪除'&&l.kind!==STUDY_LOG_KIND.SYSTEM&&l.type!=='auto'}
-function isOtherStudyLog(l){return !!l&&l.kind===STUDY_LOG_KIND.OTHER}
-function isGoalActualLog(l){return isCountableActualLog(l)&&!isOtherStudyLog(l)&&!!getTask(l.taskId)}
-function otherStudyMinutesInRange(start,end){return (Array.isArray(db.logs)?db.logs:[]).filter(l=>isCountableActualLog(l)&&isOtherStudyLog(l)&&logDate(l.time)>=start&&logDate(l.time)<=end).reduce((sum,l)=>sum+Math.max(0,+l.minutes||0),0)}
-function rebuildExecutionPlanActuals(){
- const plans=Array.isArray(db.executionPlans)?db.executionPlans:[];
- const sums=new Map();
- (Array.isArray(db.logs)?db.logs:[]).filter(isGoalActualLog).forEach(l=>{if(l.planId)sums.set(String(l.planId),(sums.get(String(l.planId))||0)+Math.max(0,+l.minutes||0));});
- plans.forEach(p=>{const total=sums.get(String(p.id))||0;p.actualMinutes=total;if(p.status!=='已取消'){p.status=total>=Math.max(1,+p.minutes||0)?'已完成':total>0?'已部分完成':'待執行';if(p.status==='已完成'){if(!p.completedAt)p.completedAt=new Date().toISOString()}else delete p.completedAt}});
-}
-function actualMinutesInRange(t,start,end){
- if(!t||t.level!==4)return 0;
- return db.logs.filter(x=>isCountableActualLog(x)&&String(x.taskId)===String(t.id)).reduce((sum,x)=>{const day=logDate(x.time);if(!day||day<start||day>end)return sum;const p=periodForTask(t);if(!inPeriod(day,p))return sum;return sum+Math.max(0,+x.minutes||0)},0);
-}
-function actualMinutes(t){const p=periodForTask(t);if(!p?.start||!p?.due)return 0;return actualMinutesInRange(t,p.start,p.due)}
-function currentWeekSummary(t,date=todayKey()){
- if(!t||t.level!==4)return {target:0,actual:0,remaining:0,start:'',end:'',active:false};
- const p=periodForTask(t),ws=weekStartKey(date),we=weekEndKey(date),active=!!p&&((inPeriod(ws,p)||inPeriod(we,p))||(ws<=p.due&&we>=p.start));
- if(!active)return {target:0,actual:0,remaining:0,start:ws,end:we,active:false};
- const target=Math.max(0,+t.weeklyMinutes||0),actual=actualMinutesInRange(t,ws,we),remaining=Math.max(0,target-actual);
- return {target,actual,remaining,start:ws,end:we,active:true};
-}
-function leafProgress(t){
- if(!t||t.level!==4)return 0;
- const weekly=Math.max(0,+t.weeklyMinutes||0),weeks=activeWeekCount(t),planned=weekly*weeks;
- if(planned<=0)return 0;
- return Math.max(0,Math.min(100,Math.round(actualMinutes(t)/planned*100)));
-}
-function executionSummary(t){const w=currentWeekSummary(t);return {weeklyTarget:w.target,weeklyActual:w.actual,weeklyRemaining:w.remaining,totalActual:actualMinutes(t),progress:leafProgress(t),active:w.active}}
-function inPeriod(date,period){return !!(date&&period?.start&&period?.due&&date>=period.start&&date<=period.due)}
+function weekStartKey(date=todayKey()){return ExecutionDomain.weekStartKey(date)}
+function weekEndKey(date=todayKey()){return ExecutionDomain.weekEndKey(date)}
+function activeWeekCount(t){return ExecutionDomain.activeWeekCount(db.tasks,t)}
+function logDate(x){return StudyLogDomain.logDate(x)}
+function isCountableActualLog(l){return StudyLogDomain.isCountableActualLog(l)}
+function isOtherStudyLog(l){return StudyLogDomain.isOtherStudyLog(l)}
+function isGoalActualLog(l){return StudyLogDomain.isGoalActualLog(l,db.tasks)}
+function otherStudyMinutesInRange(start,end){return StudyLogDomain.otherStudyMinutesInRange(db.logs,start,end)}
+function rebuildExecutionPlanActuals(){db.executionPlans=ExecutionDomain.rebuildExecutionPlanActuals(db.executionPlans,db.logs,db.tasks,new Date().toISOString())}
+function actualMinutesInRange(t,start,end){return ExecutionDomain.actualMinutesInRange(db.tasks,db.logs,t,start,end)}
+function actualMinutes(t){return ExecutionDomain.actualMinutes(db.tasks,db.logs,t)}
+function currentWeekSummary(t,date=todayKey()){return ExecutionDomain.currentWeekSummary(db.tasks,db.logs,t,date)}
+function leafProgress(t){return ExecutionDomain.leafProgress(db.tasks,db.logs,t)}
+function executionSummary(t){return ExecutionDomain.executionSummary(db.tasks,db.logs,t,todayKey())}
+function inPeriod(date,period){return ExecutionDomain.inPeriod(date,period)}
 function periodLabel(t){const p=periodForTask(t);if(!p?.start||!p?.due)return '尚未設定子任務期間';return `${p.start} ～ ${p.due}`}
 function calc(t,stack=new Set()){if(!t)return 0;if(stack.has(t.id))return 0;const c=kids(t.id).filter(x=>x.status!=='已封存');const oldStatus=t.status;if(!c.length){if(t.level===4)t.progress=leafProgress(t);else t.progress=0;t.status=autoStatus(t.progress,t.status==='已封存');if(t.status==='已完成'&&oldStatus!=='已完成'&&t.status!=='已封存')completion(t);return t.progress}stack.add(t.id);const p=Math.round(c.reduce((s,x)=>s+calc(x,stack),0)/c.length);stack.delete(t.id);t.progress=p;t.status=autoStatus(p,t.status==='已封存');if(t.status==='已完成'&&oldStatus!=='已完成'&&t.status!=='已封存')completion(t);return p}
 function recalcAllStatuses(){const rs=roots();const rid=new Set(rs.map(r=>r.id));rs.forEach(t=>calc(t));db.tasks.filter(t=>t.level>1&&t.status!=='已封存'&&!rid.has(t.id)).forEach(t=>calc(t));return db.tasks}
@@ -496,51 +483,25 @@ function goalBrowseCurrent(){
  if(!t||t.status==='已封存'||t.level>=4)return null;
  return t;
 }
-function goalBrowseMeta(t){
- const childCount=kids(t.id).filter(x=>x.status!=='已封存').length;
- if(t.level===4){
-  const es=executionSummary(t);
-  return `本週 ${es.weeklyActual}/${es.weeklyTarget} 分 · 剩餘 ${es.weeklyRemaining} 分 · 累計 ${calc(t)}%`;
- }
- if(t.level===3)return `${periodLabel(t)} · ${childCount} 個具體行動`;
- return `${childCount} 個${L[t.level+1]||'下層目標'} · 完成度 ${calc(t)}%`;
-}
-function goalBrowseCard(t){
- const p=calc(t),childCount=kids(t.id).filter(x=>x.status!=='已封存').length;
- const action=t.level===4?'查看':'進入';
- return `<article class="goal-browse-card level-${t.level}">
-   <button class="goal-browse-main" type="button" onclick="browseGoal('${t.id}')">
-     <span class="goal-browse-level">${esc(L[t.level])}</span>
-     <b>${esc(t.name)}</b>
-     <small>${esc(goalBrowseMeta(t))}</small>
-     <span class="goal-browse-progress"><i style="width:${p}%"></i></span>
-   </button>
-   <div class="goal-browse-side">
-     <span class="goal-browse-pct">${p}%</span>
-     <span class="goal-browse-status ${t.status==='已完成'?'done':t.status==='進行中'?'run':''}">${esc(t.status)}</span>
-     <button class="goal-browse-info" type="button" aria-label="查看 ${esc(t.name)} 資訊" onclick="openGoalInfoModal('${t.id}')">ⓘ</button>
-     <span class="goal-browse-enter">${action}${t.level<4&&childCount?` · ${childCount}`:''}</span>
-   </div>
- </article>`;
-}
+function goalBrowseMeta(t){return GoalsPage.browseMeta(t,{kids,periodLabel,executionSummary,calc,levelLabels:L})}
+function goalBrowseCard(t){return GoalsPage.browseCard(t,{kids,periodLabel,executionSummary,calc,levelLabels:L,esc})}
 function renderGoalBrowse(){
- const list=document.getElementById('goalBrowseList'),crumb=document.getElementById('goalBreadcrumb'),context=document.getElementById('goalBrowseContext'),up=document.getElementById('goalBrowseUp'),add=document.getElementById('goalBrowseAdd');
- if(!list||!crumb||!context)return;
-
  let current=goalBrowseCurrent();
  if(goalBrowseId&&!current){goalBrowseId=null;storeSet('goalBrowseIdV1','');}
  const chain=current?ancestors(current.id):[];
- crumb.innerHTML=`<button type="button" onclick="browseGoalTo('')">全部方向</button>${chain.map(x=>`<span>›</span><button type="button" onclick="browseGoalTo('${x.id}')">${esc(x.name)}</button>`).join('')}`;
-
  const rows=GoalDomain.browseItems(db.tasks,current?.id||null).sort((a,b)=>(a.status==='已完成')-(b.status==='已完成')||String(a.name).localeCompare(String(b.name),'zh-Hant'));
- const p=current?calc(current):0;
- context.innerHTML=current
-   ? `<div><small>${esc(L[current.level])}</small><b>${esc(current.name)}</b><span>完成度 ${p}% · ${rows.length} 個下層</span></div><button type="button" onclick="openGoalInfoModal('${current.id}')">詳細資訊 →</button>`
-   : `<div><small>ROOT</small><b>主要方向</b><span>${rows.length} 個主要目標</span></div><button type="button" onclick="setGoalViewMode('map')">查看完整地圖 →</button>`;
-
- list.innerHTML=rows.length?rows.map(goalBrowseCard).join(''):'<div class="empty">這一層目前沒有下層目標。</div>';
- if(up){up.disabled=!current;up.textContent=current?'← 上一層':'已在最上層'}
- if(add)add.textContent=current?`＋ 新增${L[Math.min(4,current.level+1)]}`:'＋ 新增方向';
+ GoalsPage.renderBrowse({
+  document,
+  current,
+  chain,
+  rows,
+  levelLabels:L,
+  calc,
+  kids,
+  periodLabel,
+  executionSummary,
+  esc
+ });
  bindInteractionFeedback();
 }
 function setGoalViewMode(mode){
@@ -584,9 +545,18 @@ function renderGoalsPage(){
 }
 
 function taskHTML(t){
- const p=calc(t),c=kids(t.id),open=storeGet('o'+t.id)!=='0',isHit=goalSearchMatch(t),es=t.level===4?executionSummary(t):null;
- const planned=Array.isArray(db.executionPlans)?db.executionPlans.filter(x=>String(x.taskId)===String(t.id)&&activeExecutionPlan(x)):[]; const meta=t.level===3?('期間 '+periodLabel(t)):t.level===4?(`本週 ${es.weeklyActual}/${es.weeklyTarget} 分 · 剩餘 ${es.weeklyRemaining} 分 · 累計 ${es.totalActual} 分 · 期間 ${periodLabel(t)}${planned.length?` · 已安排 ${planned.length} 次`:''}`):'期間由下層子任務決定';
- return `<div class="task ${isHit?'search-hit':''}" id="task-${t.id}"><div class="taskline"><button class="chev ${c.length?'has-kids':''}" aria-label="${c.length?(open?'收合下層':'展開下層'):'無下層'}" title="${c.length?(open?'點擊收合下層':'點擊展開下層'):'沒有下層'}" onclick="toggleKids('${t.id}')">${c.length?(open?'▾':'▸'):'•'}</button><button class="taskname" aria-label="查看 ${esc(t.name)}" onclick="openGoalInfoModal('${t.id}')"><span>${esc(t.name)}</span><small>${L[t.level]} · ${meta}</small></button><span class="pill ${t.status==='已完成'?'done':t.status==='進行中'?'run':''}">${t.status}</span><span class="pct">${p}%</span><span class="mini"><button type="button" title="查看資訊" aria-label="查看資訊" onclick="openGoalInfoModal('${t.id}')">ⓘ</button>${t.level===4?`<button type="button" title="安排執行" aria-label="安排執行" onclick="openGoalInfoModal('${t.id}',true)">＋</button>`:''}</span></div><div class="barwrap"><div class="bar" style="width:${p}%"></div></div>${c.length&&open?`<div class="kids">${c.map(taskHTML).join('')}</div>`:''}</div>`
+ return GoalsPage.taskNode(t,{
+  calc,
+  kids,
+  isOpen:id=>storeGet('o'+id)!=='0',
+  isHit:goalSearchMatch,
+  executionSummary,
+  executionPlans:db.executionPlans,
+  activeExecutionPlan,
+  periodLabel,
+  levelLabels:L,
+  esc
+ });
 }
 function goalSearchQuery(){return (document.getElementById('q')?.value||'').trim().toLowerCase()}
 function goalSearchMatch(t){const q=goalSearchQuery();return !!(q&&String(t?.name||'').toLowerCase().includes(q))}
@@ -600,30 +570,42 @@ function scrollToGoalResult(id){const el=document.getElementById('search-result-
 function openSearchEdit(id){const t=getTask(id);if(!t)return;selected=id;const chain=ancestors(id);goalPath={long:chain.find(x=>x.level===1)?.id||null,mid:chain.find(x=>x.level===2)?.id||null,short:chain.find(x=>x.level===3)?.id||null,exec:chain.find(x=>x.level===4)?.id||null};openEditModal(id);toast('已開啟「'+t.name+'」編輯視窗')}
 function toggleSearchBranch(id){const t=getTask(id);if(!t)return;const open=storeGet('o'+id)!=='0';storeSet('o'+id,open?'0':'1');renderTree();setTimeout(()=>document.getElementById('search-result-'+id)?.scrollIntoView({behavior:'smooth',block:'center'}),30)}
 function goalResultCard(t){
- const chain=ancestors(t.id),path=chain.map(x=>esc(x.name)).join(' → '),p=calc(t);
- const parent=chain.length>1?chain[chain.length-2].name:'頂層主要目標';
- return `<div class="goal-result-card" id="search-result-${t.id}"><div><div class="goal-result-name">${esc(t.name)}<small>${L[t.level]}</small></div><div class="goal-result-path">位置：${path}</div><div class="goal-result-meta">完成度 ${p}% · 父層：${esc(parent)}${(t.level===3||t.level===4)?' · '+esc(periodLabel(t)):''}</div></div><div class="goal-result-actions"><button class="btn" type="button" onclick="openSearchEdit('${t.id}')">編輯</button>${t.level<4?`<button class="softbtn" type="button" onclick="toggleSearchBranch('${t.id}')">${storeGet('o'+t.id)==='0'?'展開父子樹':'收合父子樹'}</button>`:''}</div></div>`;
+ return GoalsPage.resultCard(t,{
+  ancestors,
+  calc,
+  periodLabel,
+  levelLabels:L,
+  esc,
+  isOpen:id=>storeGet('o'+id)!=='0'
+ });
 }
 function renderSearchResults(matches){
- const tree=document.getElementById('tree');if(!tree)return false;
  const q=goalSearchQuery(),s=(document.getElementById('sf')?.value||'all'),l=(document.getElementById('lf')?.value||'all');
- const mode=!!(q||s!=='all'||l!=='all');
- if(!mode)return false;
- const labels=[];if(q)labels.push('搜尋「'+q+'」');if(s!=='all')labels.push('狀態：'+s);if(l!=='all')labels.push('層級：'+({1:'方向',2:'階段目標',3:'子任務',4:'具體實現方式'}[l]||l));
- tree.innerHTML=`<div class="goal-result-mode"><span><strong>直接結果</strong>　${esc(labels.join(' · '))}</span><span>${matches.length} 筆</span></div><div class="goal-results">${matches.length?matches.map(goalResultCard).join(''):'<div class="empty">沒有符合目前搜尋／篩選條件的目標。</div>'}</div>`;
- const state=document.getElementById('goalFilterState');
- if(state)state.innerHTML=`<span>結果已直接對應到符合條件的階層，不再只顯示根方向。</span><span>${matches.length} 筆</span>`;
- return true;
+ return GoalsPage.renderSearchResults({
+  document,
+  matches,
+  query:q,
+  statusFilter:s,
+  levelFilter:l,
+  ancestors,
+  calc,
+  periodLabel,
+  levelLabels:L,
+  esc,
+  isOpen:id=>storeGet('o'+id)!=='0'
+ });
 }
 function renderTree(){
  const tree=document.getElementById('tree');if(!tree)return;
  const matches=goalSearchFilteredTasks();
  if(renderSearchResults(matches))return;
  const rootsList=roots().filter(t=>t.status!=='已封存');
- tree.innerHTML=rootsList.map(t=>taskHTML(t)).join('')||'<div class="empty">目前尚無主要目標。</div>';
+ GoalsPage.renderTree({
+  document,
+  roots:rootsList,
+  nodeHTML:taskHTML
+ });
  updateExpandToggle();
- const state=document.getElementById('goalFilterState');
- if(state)state.innerHTML=`<span>目前顯示全部主要目標與下層</span><span>${rootsList.length} 個主要目標</span>`;
 }
 function resetGoalFilters(){const q=document.getElementById('q'),s=document.getElementById('sf'),l=document.getElementById('lf');if(q)q.value='';if(s)s.value='all';if(l)l.value='all';renderTree();toast('已重設目標地圖篩選')}
 function allGoalNodesOpen(){const nodes=db.tasks.filter(t=>t.level<4&&t.status!=='已封存');return nodes.length>0&&nodes.every(t=>storeGet('o'+t.id)!=='0')}
@@ -672,25 +654,27 @@ function saveExecutionPlan(taskId){
  const date=document.getElementById('planDate')?.value||'',time=document.getElementById('planTime')?.value||'',minutes=Math.max(1,+document.getElementById('planMinutes')?.value||0);
  if(!date||!time||!minutes){toast('請完整設定日期、時間與投入分鐘');return}
  if(!Array.isArray(db.executionPlans))db.executionPlans=[];
- db.executionPlans.push({id:'plan'+Date.now()+Math.random().toString(16).slice(2),taskId:t.id,name:t.name,date,time,minutes,status:'待執行',createdAt:new Date().toISOString()});
+ db.executionPlans.push(ExecutionService.createPlan({
+  id:'plan'+Date.now()+Math.random().toString(16).slice(2),
+  task:t,date,time,minutes,
+  nowIso:new Date().toISOString()
+ }));
  save();renderAll();closeGoalInfoModal();toast('已安排「'+t.name+'」於 '+date+' '+time+' 執行');
 }
-function activeExecutionPlan(x){return x&&x.status!=='已完成'&&x.status!=='已取消'}
+function activeExecutionPlan(x){return ExecutionDomain.activeExecutionPlan(x)}
 function cancelExecutionPlan(id){
  const plan=(Array.isArray(db.executionPlans)?db.executionPlans:[]).find(x=>String(x.id)===String(id));
  if(!plan)return;
  if(plan.status==='已取消'){toast('這筆安排已取消');return}
  if(plan.status==='已完成'){toast('已完成的執行紀錄不能取消安排');return}
  if(!confirm(`確定取消「${plan.name||getTask(plan.taskId)?.name||'這次執行'}」於 ${plan.date} ${plan.time} 的安排？`))return;
- plan.status='已取消';plan.cancelledAt=new Date().toISOString();
+ Object.assign(plan,ExecutionService.cancelPlan(plan,new Date().toISOString()));
  save();renderAll();
  toast('已取消這次執行安排；不影響實際投入紀錄');
 }
-function currentWeekTargetForRoot(root,date=todayKey()){return descAll(root.id).filter(t=>t.level===4&&t.status!=='已封存').reduce((sum,t)=>sum+currentWeekSummary(t,date).target,0)}
+function currentWeekTargetForRoot(root,date=todayKey()){return ExecutionDomain.currentWeekTargetForRoot(db.tasks,db.logs,root,date)}
 const REVIEW_REASONS=['課業負荷','考試／其他重要事項','時間不足','目標設定過高','主動調整','突發事件'];
-function previousWeekRange(date=todayKey()){
- const ws=weekStartKey(date),d=new Date(ws+'T00:00:00');d.setDate(d.getDate()-7);const start=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;return {start,end:weekEndKey(start)};
-}
+function previousWeekRange(date=todayKey()){return ExecutionDomain.previousWeekRange(date)}
 function getWeekReview(weekStart,taskId){return (db.weekReviews||[]).find(x=>x.weekStart===weekStart&&String(x.taskId)===String(taskId))||null}
 function previousWeekIncompleteItems(date=todayKey()){
  const r=previousWeekRange(date);return db.tasks.filter(t=>t.level===4&&t.status!=='已封存'&&currentWeekSummary(t,r.start).active&&currentWeekSummary(t,r.start).target>0).map(t=>{const w=currentWeekSummary(t,r.start);return {t,w,shortfall:Math.max(0,w.target-w.actual),review:getWeekReview(r.start,t.id)}}).filter(x=>x.shortfall>0).sort((a,b)=>b.shortfall-a.shortfall||calc(a.t)-calc(b.t));
@@ -699,99 +683,31 @@ function setWeeklyReview(taskId,reason,date=todayKey()){
  const r=previousWeekRange(date),arr=Array.isArray(db.weekReviews)?db.weekReviews:[];const i=arr.findIndex(x=>x.weekStart===r.start&&String(x.taskId)===String(taskId));const row={id:'wr'+r.start.replace(/-/g,'')+'-'+String(taskId),weekStart:r.start,weekEnd:r.end,taskId:String(taskId),reason,updatedAt:new Date().toISOString()};if(i>=0)arr[i]=row;else arr.push(row);db.weekReviews=arr;save();renderWeeklyReview();toast('已記錄未完成原因');
 }
 function renderWeeklyReview(date=todayKey()){
- const el=document.getElementById('weeklyReviewList'),lab=document.getElementById('reviewWeekLabel');if(!el)return;const r=previousWeekRange(date),items=previousWeekIncompleteItems(date);if(lab)lab.textContent=`${r.start} ～ ${r.end}`;
- el.innerHTML=items.length?items.map(x=>{const selected=x.review?.reason||'';return `<div class="weekly-review-item"><div class="weekly-review-head"><div><b>${esc(x.t.name)}</b><small>目標 ${x.w.target} 分 · 實際 ${x.w.actual} 分 · 未完成 ${x.shortfall} 分</small></div><span class="pill">${calc(x.t)}%</span></div><div class="review-reasons">${REVIEW_REASONS.map(reason=>`<button type="button" class="review-reason ${selected===reason?'active':''}" onclick="setWeeklyReview('${String(x.t.id).replace(/'/g,"\\'")}','${reason}', '${date}')">${reason}</button>`).join('')}</div>${selected?`<div class="review-saved">已記錄：${esc(selected)}</div>`:''}</div>`}).join(''):'<div class="review-empty">上週沒有需要補記原因的未完成事項。</div>';
-}
-function executionAnalysis(date=todayKey()){
- const d=new Date(date+'T00:00:00'),day=d.getDay(),diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);const ws=dateKey(d),we=weekEndKey(ws);
- const plans=(Array.isArray(db.executionPlans)?db.executionPlans:[]).filter(p=>p&&p.date>=ws&&p.date<=we);
- const scheduledPlans=plans.filter(p=>p.status!=='已取消');
- const activePlans=plans.filter(activeExecutionPlan);
- const cancelledPlans=plans.filter(p=>p.status==='已取消');
- const actualLogs=(Array.isArray(db.logs)?db.logs:[]).filter(l=>isGoalActualLog(l)&&logDate(l.time)>=ws&&logDate(l.time)<=we);
- const actualMinutes=actualLogs.reduce((s,l)=>s+Math.max(0,+l.minutes||0),0);
- const otherStudyLogs=(Array.isArray(db.logs)?db.logs:[]).filter(l=>isCountableActualLog(l)&&isOtherStudyLog(l)&&logDate(l.time)>=ws&&logDate(l.time)<=we);
- const otherStudyMinutes=otherStudyLogs.reduce((s,l)=>s+Math.max(0,+l.minutes||0),0);
- const totalStudyMinutes=actualMinutes+otherStudyMinutes;
-
- const scheduledMap=new Map(scheduledPlans.map(p=>[String(p.id),p]));
- const historicalPlanMap=new Map(plans.map(p=>[String(p.id),p]));
- const cancelledPlanIds=new Set(cancelledPlans.map(p=>String(p.id)));
- const planActualMap=new Map(),historicalPlanActualMap=new Map();
- let unplannedActualMinutes=0;
-
- actualLogs.forEach(l=>{
-   const mins=Math.max(0,+l.minutes||0),pid=String(l?.planId||'');
-   if(!pid||!historicalPlanMap.has(pid)){
-     unplannedActualMinutes+=mins;
-     return;
-   }
-   historicalPlanActualMap.set(pid,(historicalPlanActualMap.get(pid)||0)+mins);
-   if(scheduledMap.has(pid))planActualMap.set(pid,(planActualMap.get(pid)||0)+mins);
+ const el=document.getElementById('weeklyReviewList'),lab=document.getElementById('reviewWeekLabel');if(!el)return;
+ const r=previousWeekRange(date),items=previousWeekIncompleteItems(date);
+ if(lab)lab.textContent=`${r.start} ～ ${r.end}`;
+ el.innerHTML=AnalyticsPage.weeklyReviewHTML(items,{
+  date,
+  reasons:REVIEW_REASONS,
+  esc,
+  calc
  });
-
- let livePlanActualMinutes=0;
- planActualMap.forEach(v=>{livePlanActualMinutes+=v});
- if(timer.running&&timer.planId&&scheduledMap.has(String(timer.planId))){
-   const live=Math.max(0,Math.floor((timer.elapsed+(Date.now()-timer.start))/60000));
-   livePlanActualMinutes+=live;
-   planActualMap.set(String(timer.planId),(planActualMap.get(String(timer.planId))||0)+live);
- }
-
- const plannedMinutes=scheduledPlans.reduce((s,p)=>s+Math.max(0,+p.minutes||0),0);
- const fulfilledPlans=scheduledPlans.filter(p=>(planActualMap.get(String(p.id))||0)>=Math.max(1,+p.minutes||0));
- const startedPlans=scheduledPlans.filter(p=>(planActualMap.get(String(p.id))||0)>0);
- const expiredPlans=scheduledPlans.filter(p=>p.date<date&&(planActualMap.get(String(p.id))||0)<Math.max(1,+p.minutes||0));
- const timeRate=plannedMinutes?Math.round(Math.min(100,livePlanActualMinutes/plannedMinutes*100)*10)/10:null;
- const executionRate=scheduledPlans.length?Math.round(startedPlans.length/scheduledPlans.length*1000)/10:null;
- const completionRate=scheduledPlans.length?Math.round(fulfilledPlans.length/scheduledPlans.length*1000)/10:null;
- const completedForEstimate=fulfilledPlans.filter(p=>planActualMap.has(String(p.id)));
- const estimateAccuracy=completedForEstimate.length?Math.round(completedForEstimate.reduce((s,p)=>{
-   const planned=Math.max(1,+p.minutes||0),actual=Math.max(0,planActualMap.get(String(p.id))||0);
-   return s+Math.max(0,100-Math.abs(actual-planned)/planned*100);
- },0)/completedForEstimate.length*10)/10:null;
- const historicalPlanActualMinutes=[...historicalPlanActualMap.values()].reduce((s,v)=>s+v,0);
- const cancelledPlanActualMinutes=[...historicalPlanActualMap.entries()].reduce(
-   (s,[id,v])=>s+(cancelledPlanIds.has(String(id))?Math.max(0,+v||0):0),0
- );
-
- return {
-   ws,we,plans,scheduledPlans,activePlans,cancelledPlans,fulfilledPlans,startedPlans,expiredPlans,
-   plannedMinutes,actualMinutes,otherStudyMinutes,totalStudyMinutes,planActualMinutes:livePlanActualMinutes,historicalPlanActualMinutes,
-   cancelledPlanActualMinutes,unplannedActualMinutes,timeRate,executionRate,completionRate,
-   estimateAccuracy,planActualMap,historicalPlanActualMap,completedForEstimate
- };
+}function executionAnalysis(date=todayKey()){
+ return AnalyticsDomain.executionAnalysis({
+  tasks:db.tasks,
+  logs:db.logs,
+  plans:db.executionPlans,
+  timer,
+  date,
+  nowMs:Date.now()
+ });
 }
 function renderExecutionAnalysis(date=todayKey()){
- const el=document.getElementById('executionAnalysis');if(!el)return;
- const a=executionAnalysis(date),fmt=m=>{const n=Math.max(0,Math.round(+m||0)),h=Math.floor(n/60),mm=n%60;return h?`${h}h ${mm}m`:`${mm}m`};
- const gap=a.planActualMinutes-a.plannedMinutes;
- const executionRateValue=a.executionRate===null?'—':a.executionRate+'%';
- const timeRateValue=a.timeRate===null?'—':a.timeRate+'%';
- const executionRateText=a.executionRate===null?'目前沒有有效執行安排可計算':'已開始實際執行／有效安排';
- const timeRateText=a.timeRate===null?'目前沒有有效執行安排可計算':`計畫實際 ${fmt(a.planActualMinutes)} ／有效計畫 ${fmt(a.plannedMinutes)}${timer.running&&timer.planId?' · 計時中即時計入':''}`;
- const estimateValue=a.estimateAccuracy===null?'—':a.estimateAccuracy+'%';
- const estimateText=a.estimateAccuracy===null?'待至少一筆有效計畫達成後評估':'以已達成有效計畫的預計／實際差距計算';
- const cancelledActual=Math.max(0,+a.cancelledPlanActualMinutes||0);
- el.innerHTML=`<div class="execution-analysis-group-title">計畫 × 實際執行 <small>有效安排與實際投入分開統計</small></div>
- <div class="execution-analysis-kpis">
-   <div><small>計畫實際執行率</small><b>${executionRateValue}</b><span>${a.startedPlans.length} / ${a.scheduledPlans.length} 次 · ${executionRateText}</span></div>
-   <div><small>時間達成率</small><b>${timeRateValue}</b><span>${timeRateText}</span></div>
-   <div><small>逾期未達計畫</small><b>${a.expiredPlans.length}</b><span>取消不列入失敗 · 已達成 ${a.fulfilledPlans.length} 次</span></div>
-   <div><small>估時吻合度</small><b>${estimateValue}</b><span>${estimateText}</span></div>
- </div>
- <div class="execution-analysis-detail">
-   <span>本週有效執行安排 <b>${fmt(a.plannedMinutes)}</b></span>
-   <span>有效安排實際 <b>${fmt(a.planActualMinutes)}</b></span>
-   <span>本週目標實際 <b>${fmt(a.actualMinutes)}</b></span>
-   <span>其他讀書 <b>${fmt(a.otherStudyMinutes)}</b></span>
-   <span>總讀書時間 <b>${fmt(a.totalStudyMinutes)}</b></span>
-   <span>未配對安排之目標實際 <b>${fmt(a.unplannedActualMinutes)}</b></span>
-   <span>已取消安排 <b>${a.cancelledPlans.length}</b></span>
-   ${cancelledActual?`<span>已取消安排之歷史實際 <b>${fmt(cancelledActual)}</b></span>`:''}
-   <span>安排差額 <b>${gap>=0?'+':''}${fmt(Math.abs(gap))}</b></span>
-   <span>已達安排 <b>${a.fulfilledPlans.length}/${a.scheduledPlans.length}</b></span>
- </div>`;
+ AnalyticsPage.renderExecutionAnalysis({
+  document,
+  analysis:executionAnalysis(date),
+  timerRunning:!!(timer.running&&timer.planId)
+ });
 }
 function deleteActualLog(id){
  const log=(Array.isArray(db.logs)?db.logs:[]).find(x=>String(x.id)===String(id));
@@ -810,7 +726,7 @@ function restoreActualLog(id){
 function renderDeletedLogs(){
  const el=document.getElementById('deletedLogs');if(!el)return;
  const logs=(Array.isArray(db.logs)?db.logs:[]).filter(l=>l.status==='已刪除').slice(0,20);
- el.innerHTML=logs.length?logs.map(l=>`<div class="listitem deleted-log-row"><div><b>${esc(l.name||getTask(l.taskId)?.name||'未命名行動')}</b><small class="muted" style="display:block">${esc((l.time||'').slice(0,16).replace('T',' · '))} · ${+l.minutes||0} 分 · 已刪除</small></div><button class="btn" type="button" onclick="restoreActualLog('${esc(l.id)}')">恢復紀錄</button></div>`).join(''):'<div class="empty">尚無已刪除的實際紀錄。</div>';
+ el.innerHTML=AnalyticsPage.deletedLogsHTML(logs,{esc,getTask});
 }
 /* compact actual-log history */
 let actualHistoryRange='7';
@@ -822,15 +738,8 @@ function actualHistorySource(){
   .slice()
   .sort((a,b)=>String(b.time||'').localeCompare(String(a.time||'')));
 }
-function actualHistoryDateKey(log){
- return String(log?.time||'').slice(0,10)||'無日期';
-}
-function actualHistoryTimeLabel(log){
- const raw=String(log?.time||'');
- const date=raw.slice(0,10)||'—';
- const time=raw.slice(11,16)||'';
- return time?date+' · '+time:date;
-}
+function actualHistoryDateKey(log){return AnalyticsPage.actualHistoryDateKey(log)}
+function actualHistoryTimeLabel(log){return AnalyticsPage.actualHistoryTimeLabel(log)}
 function actualHistoryFiltered(){
  const now=Date.now();
  const days=actualHistoryRange==='all'?null:Number(actualHistoryRange||7);
@@ -851,13 +760,7 @@ function ensureActualHistoryModal(){
  modal.setAttribute('role','dialog');
  modal.setAttribute('aria-modal','true');
  modal.setAttribute('aria-labelledby','actualHistoryTitle');
- modal.innerHTML=`<div class="edit-modal-box actual-history-box">
-  <div class="edit-modal-head">
-    <div><h2 id="actualHistoryTitle">實際投入歷程</h2><p>完整紀錄仍參與完成度與分析；此處只改變瀏覽方式。</p></div>
-    <button class="edit-modal-close" type="button" onclick="closeActualLogHistory()" aria-label="關閉實際投入歷程">×</button>
-  </div>
-  <div id="actualHistoryBody"></div>
- </div>`;
+ modal.innerHTML=AnalyticsPage.actualHistoryModalShell();
  modal.addEventListener('click',e=>{if(e.target===modal)closeActualLogHistory()});
  document.body.appendChild(modal);
  return modal;
@@ -886,23 +789,9 @@ function deleteActualLogFromHistory(id){
  requestAnimationFrame(()=>renderActualLogHistory());
 }
 function renderRecentActualLogs(){
- const el=document.getElementById('recentLogs');
- if(!el)return;
+ const el=document.getElementById('recentLogs');if(!el)return;
  const all=actualHistorySource();
- if(!all.length){
-   el.innerHTML='<div class="empty">尚無實際投入紀錄</div>';
-   return;
- }
- const recent=all.slice(0,5);
- el.innerHTML=recent.map(l=>`<div class="actual-log-compact-row">
-   <div class="actual-log-compact-main">
-     <b>${esc(l.name||getTask(l.taskId)?.name||'未命名行動')}</b>
-     <small>${esc(actualHistoryTimeLabel(l))} · ${Math.max(0,+l.minutes||0)} 分 · ${isOtherStudyLog(l)?'其他讀書':'目標執行'}</small>
-   </div>
- </div>`).join('')+
- `<button class="actual-history-open" type="button" onclick="openActualLogHistory()">
-   查看全部紀錄（共 ${all.length} 筆） <span>→</span>
- </button>`;
+ el.innerHTML=AnalyticsPage.recentActualLogsHTML(all,{esc,getTask,isOtherStudyLog});
 }
 function renderActualLogHistory(){
  const modal=document.getElementById('actualHistoryModal');
@@ -912,75 +801,40 @@ function renderActualLogHistory(){
  const source=actualHistorySource();
  const taskRows=[];
  const seen=new Set();
- if(source.some(isOtherStudyLog))taskRows.push(['__other-study__','其他讀書時間']);
- source.forEach(l=>{
-   if(isOtherStudyLog(l))return;
-   const id=String(l.taskId||'');
-   if(!id||seen.has(id))return;
-   seen.add(id);
-   taskRows.push([id,l.name||getTask(id)?.name||'未命名行動']);
+
+ if(source.some(isOtherStudyLog)){
+  taskRows.push(['__other-study__','其他讀書時間']);
+ }
+
+ source.forEach(log=>{
+  if(isOtherStudyLog(log))return;
+  const id=String(log.taskId||'');
+  if(!id||seen.has(id))return;
+  seen.add(id);
+  taskRows.push([id,log.name||getTask(id)?.name||'未命名行動']);
  });
+
  const filtered=actualHistoryFiltered();
- const totalMinutes=filtered.reduce((s,l)=>s+Math.max(0,+l.minutes||0),0);
+ const totalMinutes=filtered.reduce(
+  (sum,log)=>sum+Math.max(0,+log.minutes||0),
+  0
+ );
 
- const groups=new Map();
- filtered.forEach(l=>{
-   const d=actualHistoryDateKey(l);
-   if(!groups.has(d))groups.set(d,[]);
-   groups.get(d).push(l);
+ body.innerHTML=AnalyticsPage.actualHistoryBodyHTML({
+  filtered,
+  totalMinutes,
+  taskRows,
+  range:actualHistoryRange,
+  taskFilter:actualHistoryTask,
+  esc,
+  getTask,
+  isOtherStudyLog
  });
-
- const filters=`<div class="actual-history-controls">
-   <div class="actual-history-range" role="group" aria-label="歷程期間">
-     <button type="button" class="${actualHistoryRange==='7'?'active':''}" onclick="setActualHistoryRange('7')">近 7 日</button>
-     <button type="button" class="${actualHistoryRange==='30'?'active':''}" onclick="setActualHistoryRange('30')">近 30 日</button>
-     <button type="button" class="${actualHistoryRange==='all'?'active':''}" onclick="setActualHistoryRange('all')">全部</button>
-   </div>
-   <label class="actual-history-task-filter">紀錄類型／具體實現方式
-     <select onchange="setActualHistoryTask(this.value)">
-       <option value="all"${actualHistoryTask==='all'?' selected':''}>全部</option>
-       ${taskRows.map(([id,name])=>`<option value="${esc(id)}"${actualHistoryTask===id?' selected':''}>${esc(name)}</option>`).join('')}
-     </select>
-   </label>
- </div>`;
-
- const summary=`<div class="actual-history-summary">
-   <span>目前顯示 <b>${filtered.length}</b> 筆</span>
-   <span>合計 <b>${totalMinutes}</b> 分</span>
- </div>`;
-
- const grouped=filtered.length?[...groups.entries()].map(([date,logs])=>{
-   const mins=logs.reduce((s,l)=>s+Math.max(0,+l.minutes||0),0);
-   return `<details class="actual-history-day" open>
-    <summary><span>${esc(date)}</span><small>${logs.length} 筆 · ${mins} 分</small></summary>
-    <div class="actual-history-day-list">
-      ${logs.map(l=>`<div class="actual-history-row">
-        <div class="actual-history-row-main">
-          <b>${esc(l.name||getTask(l.taskId)?.name||'未命名行動')}</b>
-          <small>${esc(actualHistoryTimeLabel(l))} · ${Math.max(0,+l.minutes||0)} 分 · ${isOtherStudyLog(l)?'其他讀書':'目標執行'}</small>
-        </div>
-        <details class="actual-log-menu">
-          <summary aria-label="紀錄操作">⋯</summary>
-          <div><button type="button" onclick="deleteActualLogFromHistory('${esc(l.id)}')">刪除紀錄</button></div>
-        </details>
-      </div>`).join('')}
-    </div>
-   </details>`;
- }).join(''):'<div class="empty">這個篩選條件下沒有實際投入紀錄。</div>';
-
- body.innerHTML=filters+summary+`<div class="actual-history-groups">${grouped}</div>`;
 }
 
 /* analysis KPI source repair */
-function analysisValidLeafTasks(){
- return (Array.isArray(db.tasks)?db.tasks:[]).filter(t=>{
-   if(!t||Number(t.level)!==4||t.status==='已封存')return false;
-   const parent=getTask(t.parent);
-   if(!parent||Number(parent.level)!==3||parent.status==='已封存')return false;
-   const p=periodForTask(t);
-   return !!(p?.start&&p?.due&&p.start<=p.due);
- });
-}
+/* analysis KPI source repair */
+function analysisValidLeafTasks(){return AnalyticsDomain.analysisValidLeafTasks(db.tasks)}
 
 function stats(){
  const leaves=analysisValidLeafTasks();
@@ -988,31 +842,27 @@ function stats(){
  const done=leaves.filter(t=>calc(t)===100).length;
  const avg=leaves.length?Math.round((leaves.reduce((sum,t)=>sum+calc(t),0)/leaves.length)*10)/10:0;
  const planAnalysis=executionAnalysis();
- // 分析頁的「本週整體投入」看的是目標系統本身的週投入目標；
- // 計畫 × 實際區塊則另外看「提前安排的執行計畫」，兩者不可混為一談。
- const target=activeWeeklyTargetTotal(todayKey());
- const weekGoalActual=db.logs.filter(l=>isGoalActualLog(l)&&weekStartKey(l.time?.slice(0,10)||'')===weekStartKey(todayKey())).reduce((s,l)=>s+(+l.minutes||0),0);
- const weekOtherStudy=db.logs.filter(l=>isCountableActualLog(l)&&isOtherStudyLog(l)&&weekStartKey(l.time?.slice(0,10)||'')===weekStartKey(todayKey())).reduce((s,l)=>s+(+l.minutes||0),0);
- const weekTotalStudy=weekGoalActual+weekOtherStudy;
- const ratio=target?Math.min(100,Math.round(weekGoalActual/target*100)):0;
- document.getElementById('leafDone').textContent=done+'/'+leaves.length;
- document.getElementById('avg').textContent=avg+'%';
- document.getElementById('est').textContent=planAnalysis.plannedMinutes;
- document.getElementById('logsN').textContent=db.logs.filter(isCountableActualLog).length;
- document.getElementById('statsWeekRatio').textContent=ratio+'%';
- document.getElementById('statsWeekBar').style.width=ratio+'%';
- document.getElementById('statsActual').textContent=weekGoalActual;
- const otherEl=document.getElementById('statsOtherStudy');if(otherEl)otherEl.textContent=weekOtherStudy;
- const totalEl=document.getElementById('statsTotalStudy');if(totalEl)totalEl.textContent=weekTotalStudy;
- document.getElementById('statsTarget').textContent=target;
- document.getElementById('statsRemaining').textContent=Math.max(0,target-weekGoalActual);
+ const week=AnalyticsDomain.weeklyStudySummary({tasks:db.tasks,logs:db.logs,date:todayKey()});
  const rootsActive=roots().filter(t=>t.status!=='已封存');
- document.getElementById('domains').innerHTML=rootsActive.map(t=>{const m=currentWeekTargetForRoot(t),pct=target?Math.round(m/target*100):0;return `<div class="direction-row"><div class="direction-head"><b>${esc(t.name)}</b><span>${m} 分 · ${pct}%</span></div><div class="direction-track"><div class="direction-fill" style="width:${Math.min(100,pct)}%"></div></div></div>`}).join('')||'<div class="empty">尚無有效方向</div>';
- const buckets=[['尚未開始',0,0],['進行中',0,0],['高完成度',0,0],['已完成',0,0]];
- leaves.forEach(t=>{const p=calc(t);if(p===100)buckets[3][1]++;else if(p>=70)buckets[2][1]++;else if(p>0)buckets[1][1]++;else buckets[0][1]++;});
- document.getElementById('progressDistribution').innerHTML=buckets.map(b=>{const pct=leaves.length?Math.round(b[1]/leaves.length*100):0;return `<div class="distribution-row"><div class="distribution-head"><span>${b[0]}</span><b>${pct}%</b></div><div class="distribution-track"><div class="distribution-fill" style="width:${pct}%"></div></div><div class="distribution-meta">${b[1]} 個具體行動</div></div>`}).join('');
+
+ AnalyticsPage.renderStats({
+  document,
+  leaves,
+  done,
+  avg,
+  planAnalysis,
+  week,
+  rootsActive,
+  currentWeekTargetForRoot,
+  actualLogCount:StudyLogDomain.countableLogs(db.logs).length,
+  esc,
+  calc
+ });
+
  renderExecutionAnalysis();
-  renderRecentActualLogs(); renderDeletedLogs(); renderWeeklyReview();
+ renderRecentActualLogs();
+ renderDeletedLogs();
+ renderWeeklyReview();
 }
 function descAll(id){let out=[],stack=[id];while(stack.length){const x=stack.pop();kids(x).forEach(c=>{out.push(c);stack.push(c.id)})}const root=getTask(id);if(root)out.unshift(root);return out}
 function openAdd(parent=null){document.getElementById('modal').style.display='flex';document.getElementById('aName').value='';document.getElementById('aLevel').value=parent?Math.min(4,(getTask(parent)?.level||1)+1):1;document.getElementById('aParent').value='';document.getElementById('aStart').value='';document.getElementById('aDue').value='';document.getElementById('aWeekly').value=0;document.getElementById('aWeeklyUnit').value='hour';syncAddParents();if(parent)document.getElementById('aParent').value=parent;syncAddFields()}
@@ -1064,7 +914,7 @@ function otherStudyInputName(){return (document.getElementById('otherStudyName')
 function selectOtherStudyTimer(){
  if(timer.running){toast('目前已有計時進行中，請先完成或暫停');return}
  const name=otherStudyInputName();if(!name){toast('請先輸入其他讀書的內容或科目');document.getElementById('otherStudyName')?.focus();return}
- timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:STUDY_LOG_KIND.OTHER,label:name};saveActiveTimer();
+ timer=TimerService.selectOther(name);saveActiveTimer();
  document.getElementById('timerTask').textContent='其他讀書：'+name;
  document.getElementById('timerTaskCancel').style.display='block';
  updateClock();updateTimerButtons();toast('已選取其他讀書；尚未開始計時');
@@ -1079,7 +929,7 @@ function addOtherStudyLog(){
  db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:null,name,time:when.toISOString(),minutes:mins,actual:true,kind:STUDY_LOG_KIND.OTHER,source:'manual'});
  save();renderAll();toast(`已補登其他讀書 ${mins} 分鐘；不影響目標完成度`);
 }
-function timerHasSelection(){return timer.kind==='other-study'?!!timer.label:!!timer.id}
+function timerHasSelection(){return TimerService.hasSelection(timer)}
 
 
 function renderTimerState(){
@@ -1087,36 +937,36 @@ function renderTimerState(){
  const has=timerHasSelection();
  if(!has){taskEl.textContent='尚未選擇任務';if(cancel)cancel.style.display='none';updateClock();updateTimerButtons();return}
  if(timer.kind==='other-study')taskEl.textContent=(timer.running?'進行中：':'待執行：')+'其他讀書：'+(timer.label||'未命名');
- else{const t=getTask(timer.id);if(!t){timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};clearActiveTimer();taskEl.textContent='尚未選擇任務';if(cancel)cancel.style.display='none';updateClock();updateTimerButtons();return}taskEl.textContent=(timer.running?'進行中：':'待執行：')+t.name}
+ else{const t=getTask(timer.id);if(!t){timer=TimerService.empty();clearActiveTimer();taskEl.textContent='尚未選擇任務';if(cancel)cancel.style.display='none';updateClock();updateTimerButtons();return}taskEl.textContent=(timer.running?'進行中：':'待執行：')+t.name}
  if(cancel)cancel.style.display='block';updateClock();updateTimerButtons();if(timer.running)timerLoop();
 }
 
-function selectTodayExecution(id,planId=null){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中，請先完成或暫停');return}timer={id,start:0,elapsed:0,running:false,planId:planId||null,kind:'goal',label:''};saveActiveTimer();document.getElementById('timerTask').textContent='待執行：'+t.name;document.getElementById('timerTaskCancel').style.display='block';updateClock();updateTimerButtons();today();toast('已選取今日欲執行項目；尚未開始計時')}
-function cancelTodaySelection(){if(timer.running){toast('計時進行中，請先暫停或完成後再取消');return}timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};clearActiveTimer();document.getElementById('timerTask').textContent='尚未選擇任務';updateClock();updateTimerButtons();today();toast('已取消今日執行選取')}
-function startTodayExecution(id,planId=null){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中');return}if(!planId){const today=todayKey();const p=(Array.isArray(db.executionPlans)?db.executionPlans:[]).find(x=>String(x.taskId)===String(id)&&x.date===today&&activeExecutionPlan(x));if(p)planId=p.id}selectTodayExecution(id,planId);startTimer()}
+function selectTodayExecution(id,planId=null){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中，請先完成或暫停');return}timer=TimerService.selectGoal(id,planId);saveActiveTimer();document.getElementById('timerTask').textContent='待執行：'+t.name;document.getElementById('timerTaskCancel').style.display='block';updateClock();updateTimerButtons();today();toast('已選取今日欲執行項目；尚未開始計時')}
+function cancelTodaySelection(){if(timer.running){toast('計時進行中，請先暫停或完成後再取消');return}timer=TimerService.empty();clearActiveTimer();document.getElementById('timerTask').textContent='尚未選擇任務';updateClock();updateTimerButtons();today();toast('已取消今日執行選取')}
+function startTodayExecution(id,planId=null){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中');return}if(!planId){const today=todayKey();const p=ExecutionService.findActivePlanForDate(db.executionPlans,id,today);if(p)planId=p.id}selectTodayExecution(id,planId);startTimer()}
 function openTodayExecution(id,planId=null){go('today');selectTodayExecution(id,planId)}
-function useTimer(id){selected=id;timer={id,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};saveActiveTimer();document.getElementById('timerTask').textContent=getTask(id)?.name||'';go('today');updateClock();updateTimerButtons();toast('已選擇具體行動，可開始計時')}
+function useTimer(id){selected=id;timer=TimerService.selectGoal(id,null);saveActiveTimer();document.getElementById('timerTask').textContent=getTask(id)?.name||'';go('today');updateClock();updateTimerButtons();toast('已選擇具體行動，可開始計時')}
 function startTimer(){
  if(!timerHasSelection()){toast('請先選擇具體行動或其他讀書');return}
  if(timer.running){toast('計時已在進行中');return}
  if(timer.kind==='goal'){const t=getTask(timer.id);if(!t){toast('找不到目前執行的具體行動');return}t.status='進行中';save()}
- timer.running=true;timer.start=Date.now();saveActiveTimer();updateTimerButtons();timerLoop();toast(timer.kind==='other-study'?'已開始其他讀書計時':'已開始計時')
+ timer=TimerService.start(timer,Date.now());saveActiveTimer();updateTimerButtons();timerLoop();toast(timer.kind==='other-study'?'已開始其他讀書計時':'已開始計時')
 }
-function pauseTimer(){if(!timer.running){toast('目前沒有進行中的計時');return}timer.elapsed+=Date.now()-timer.start;timer.running=false;saveActiveTimer();updateClock();updateTimerButtons();toast('計時已暫停')}
+function pauseTimer(){if(!timer.running){toast('目前沒有進行中的計時');return}timer=TimerService.pause(timer,Date.now());saveActiveTimer();updateClock();updateTimerButtons();toast('計時已暫停')}
 function finishTimer(){
  if(!timerHasSelection()){toast('請先選擇具體行動或其他讀書');return}
- if(timer.running){timer.elapsed+=Date.now()-timer.start;timer.running=false}
- const mins=Math.max(1,Math.round(timer.elapsed/60000));
+ const finished=TimerService.finish(timer,Date.now());timer=finished.timer;
+ const mins=finished.minutes;
  if(timer.kind==='other-study'){
   const name=timer.label||'其他讀書';
   db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:null,name,time:new Date().toISOString(),minutes:mins,actual:true,kind:STUDY_LOG_KIND.OTHER,source:'timer'});
-  save();timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};clearActiveTimer();renderAll();
+  save();timer=TimerService.empty();clearActiveTimer();renderAll();
   document.getElementById('timerTask').textContent='已記錄其他讀書：'+name;document.getElementById('timerTaskCancel').style.display='none';updateClock();updateTimerButtons();toast(`已記錄其他讀書 ${mins} 分鐘；不影響目標完成度`);return;
  }
  const t=getTask(timer.id);if(!t){toast('找不到目前執行的具體行動');return}
  const planId=timer.planId||null;db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:t.id,name:t.name,time:new Date().toISOString(),minutes:mins,actual:true,planId});
- if(planId){const plan=(db.executionPlans||[]).find(x=>String(x.id)===String(planId));if(plan&&plan.status!=='已取消'){const planned=Math.max(1,+plan.minutes||0),previous=Math.max(0,+plan.actualMinutes||0),total=previous+mins;plan.actualMinutes=total;plan.status=total>=planned?'已完成':'已部分完成';if(plan.status==='已完成')plan.completedAt=new Date().toISOString();else delete plan.completedAt}}
- save();const done=timer.id;timer={id:null,start:0,elapsed:0,running:false,planId:null,kind:'goal',label:''};clearActiveTimer();renderAll();document.getElementById('timerTask').textContent='已記錄：'+(t.name||done);document.getElementById('timerTaskCancel').style.display='none';updateClock();updateTimerButtons();toast(planId?`已記錄 ${mins} 分鐘；本次安排累計已實際 ${db.executionPlans.find(x=>String(x.id)===String(planId))?.actualMinutes||mins} 分鐘`:`已記錄 ${mins} 分鐘；完成度已更新`)
+ if(planId){const plan=(db.executionPlans||[]).find(x=>String(x.id)===String(planId));if(plan&&plan.status!=='已取消')Object.assign(plan,ExecutionService.applyActualMinutes(plan,mins,new Date().toISOString()))}
+ save();const done=timer.id;timer=TimerService.empty();clearActiveTimer();renderAll();document.getElementById('timerTask').textContent='已記錄：'+(t.name||done);document.getElementById('timerTaskCancel').style.display='none';updateClock();updateTimerButtons();toast(planId?`已記錄 ${mins} 分鐘；本次安排累計已實際 ${db.executionPlans.find(x=>String(x.id)===String(planId))?.actualMinutes||mins} 分鐘`:`已記錄 ${mins} 分鐘；完成度已更新`)
 }
 function updateTimerButtons(){const bs=document.querySelectorAll('.timerbtns button'),has=timerHasSelection(),panel=document.getElementById('executionNowPanel');if(panel){panel.classList.toggle('has-selection',has);panel.classList.toggle('is-running',!!timer.running)}if(bs.length<3)return;bs[0].disabled=!!timer.running||!has;bs[1].disabled=!timer.running;bs[2].disabled=!has||timer.elapsed<=0;bs[0].textContent=timer.running?'計時中…':'開始';bs[1].textContent='暫停';bs[2].textContent=has&&timer.elapsed>0?'完成並記錄':'完成'}
 function selectTask(id,focusEdit=false){const t=getTask(id);if(!t)return;selected=id;const chain=ancestors(id);goalPath={long:chain.find(x=>x.level===1)?.id||null,mid:chain.find(x=>x.level===2)?.id||null,short:chain.find(x=>chain.find(y=>y.level===3)?.id===x.id)?.id||chain.find(x=>x.level===3)?.id||null,exec:chain.find(x=>x.level===4)?.id||null};renderTree();updateHubContext();if(focusEdit)openEditModal(id)}
@@ -1146,9 +996,15 @@ function saveEditModal(){
 
 function wouldCycle(id,parent){let cur=parent,guard=0;while(cur&&guard++<10){if(cur===id)return true;cur=getTask(cur)?.parent}return false}
 function dashExecuteList(){
- const box=document.getElementById('dashActions');if(!box)return;
  const items=getTodayItems().slice(0,3);
- box.innerHTML=items.length?items.map(t=>{const w=currentWeekSummary(t),parent=ancestors(t.id).slice(-2,-1)[0]?.name||'';return `<div class="listitem dash-exec"><div><b>${esc(t.name)}</b><small>${calc(t)}% · 本週 ${w.actual}/${w.target} 分 · 剩餘 ${w.remaining} 分${parent?' · '+esc(parent):''}</small></div><button class="btn primary" onclick="executeFromDashboard('${t.id}')">開始</button></div>`}).join(''):'<div class="empty">本週沒有待辦執行事項。</div>';
+ DashboardPage.renderExecuteList({
+  document,
+  items,
+  currentWeekSummary,
+  ancestors,
+  esc,
+  calc
+ });
 }
 function executeFromDashboard(id){selected=id;const chain=ancestors(id);goalPath={long:chain.find(x=>x.level===1)?.id||null,mid:chain.find(x=>x.level===2)?.id||null,short:chain.find(x=>x.level===3)?.id||null,exec:id};useTimer(id);startTimer();toast('已開始執行')}
 function overviewMonthItems(date=todayKey()){
@@ -1196,54 +1052,54 @@ function decisionItems(date=todayKey()){
  return getTodayItems().map(t=>decisionState(t,date)).filter(Boolean).sort((a,b)=>b.score-a.score||a.days-b.days||b.w.remaining-a.w.remaining).slice(0,3);
 }
 function renderDecisionList(){
- const el=document.getElementById('decisionList');if(!el)return;
- const load=weeklyWorkload(),badge=document.getElementById('weekLoadBadge');
- if(badge){badge.textContent=`本週 ${load.hours.toFixed(1).replace('.0','')}h · ${load.level}`;badge.className='decision-badge '+(load.score>=85?'urgent':load.score>=60?'normal':'ahead')}
- const all=decisionItems(),items=all.slice(0,1);
- el.innerHTML=items.length?items.map((x,i)=>{const due=x.days===0?'今天':x.days<0?'已截止':`${x.days} 天後`;return `<div class="decision-item ${x.state}"><span class="decision-rank">${i+1}</span><div class="decision-main"><b>${esc(x.t.name)}</b><small>${x.progress}% · 本週剩餘 ${x.w.remaining} 分 · ${x.gap>0?'進度落後約 '+x.gap+'%':'進度正常'} · ${due}</small></div><span class="decision-badge ${x.state}">${x.label}</span></div>`}).join(''):'<div class="empty">目前沒有需要優先處理的事項。</div>';
+ const load=weeklyWorkload();
+ const items=decisionItems().slice(0,1);
+ DashboardPage.renderDecisionList({
+  document,
+  load,
+  items,
+  esc
+ });
 }
 function dashboard(){
  const rootsA=roots().filter(t=>t.status!=='已封存');
  const overall=rootsA.length?Math.round(rootsA.reduce((sum,t)=>sum+calc(t),0)/rootsA.length):0;
- document.getElementById('dOverall').textContent=overall+'%';
-
  const weekItems=getTodayItems();
- document.getElementById('dToday').textContent=weekItems.length;
-
  const planStats=executionAnalysis(todayKey());
- const weeklyPlan=planStats.plannedMinutes;
- document.getElementById('dRun').textContent=(weeklyPlan/60).toFixed(1).replace('.0','')+'h';
-
  const ws=weekStartKey(todayKey()),we=weekEndKey(todayKey());
- const weekActual=db.logs.filter(x=>isCountableActualLog(x)&&logDate(x.time)>=ws&&logDate(x.time)<=we).reduce((sum,x)=>sum+(+x.minutes||0),0);
- document.getElementById('dMin').textContent=weekActual;
+ const weekActual=StudyLogDomain.totalStudyMinutesInRange(db.logs,ws,we);
+ const todayActual=StudyLogDomain.totalStudyMinutesInRange(db.logs,todayKey(),todayKey());
+ const deadlines=overviewMonthItems().slice(0,4);
 
- const todayActual=db.logs.filter(x=>isCountableActualLog(x)&&logDate(x.time)===todayKey()).reduce((sum,x)=>sum+(+x.minutes||0),0);
- const todayActualEl=document.getElementById('dTodayMin');if(todayActualEl)todayActualEl.textContent=todayActual;
-
- const dateEl=document.getElementById('homeDateLabel');
- if(dateEl){
-   const d=new Date(),weekday=['日','一','二','三','四','五','六'][d.getDay()];
-   dateEl.textContent=`${d.getMonth()+1} 月 ${d.getDate()} 日 · 星期${weekday}`;
- }
-
- const directionHtml=rootsA.map(t=>{const prog=calc(t),stageCount=kids(t.id).filter(x=>x.status!=='已封存').length;return `<button type="button" class="direction ${selected===t.id?'active':''}" style="--progress:${prog}%" aria-pressed="${selected===t.id}" onclick="selectTask('${t.id}',true);go('goals')"><div class="num">主要目標</div><h3>${esc(t.name)}</h3><p>目前完成度 ${prog}% · ${stageCount} 個階段目標</p><div class="direction-progress" aria-label="完成度 ${prog}%"><span style="width:${prog}%"></span></div><div class="foot"><span>進入目標地圖</span><b>${prog}%</b></div></button>`}).join('')||'<div class="empty">尚無主要目標。</div>';
- document.getElementById('directions').innerHTML=directionHtml;
- const mgc=document.getElementById('mainGoalCount');if(mgc)mgc.textContent=`${rootsA.length} 個主要目標`;
+ DashboardPage.renderDashboard({
+  document,
+  overall,
+  todayItemCount:weekItems.length,
+  weeklyPlanMinutes:planStats.plannedMinutes,
+  weekActualMinutes:weekActual,
+  todayActualMinutes:todayActual,
+  date:new Date(),
+  roots:rootsA,
+  selected,
+  calc,
+  kids,
+  deadlines,
+  esc
+ });
 
  dashExecuteList();
  renderDecisionList();
-
- const ds=overviewMonthItems().slice(0,4);
- document.getElementById('deadlines').innerHTML=ds.length?ds.map(e=>`<div class="listitem"><span><b>${esc(e.title)}</b><small class="muted" style="display:block">${esc(e.meta||'')}</small></span><small>${esc(e.date)}</small></div>`).join(''):'<div class="empty">未來一個月沒有已登錄的重要時間節點。</div>';
 }
 function updateHubContext(){}
 function renderPlannedQueue(){
- const box=document.getElementById('plannedQueue'),count=document.getElementById('plannedQueueCount');if(!box)return;
  const plans=(Array.isArray(db.executionPlans)?db.executionPlans:[]).filter(activeExecutionPlan).sort((a,b)=>(String(a.date)+' '+String(a.time)).localeCompare(String(b.date)+' '+String(b.time)));
- const today=todayKey();
- if(count)count.textContent=plans.length?`${plans.length} 項`:'尚無安排';
- box.innerHTML=plans.slice(0,8).map(x=>{const isToday=x.date===today;return `<div class="listitem planned-row"><div><b>${esc(x.name||getTask(x.taskId)?.name||'未命名行動')}</b><small class="muted" style="display:block">${esc(x.date)} ${esc(x.time)} · ${esc(x.minutes)} 分鐘${isToday?' · 今日':''}</small></div><div class="planned-actions"><span class="planned-status">${isToday?'待執行':'已安排'}</span><button class="btn" type="button" onclick="openTodayExecution('${esc(x.taskId)}','${esc(x.id)}')">選取</button><button class="dangerbtn" type="button" onclick="cancelExecutionPlan('${esc(x.id)}')">取消安排</button></div></div>`}).join('')||'<div class="empty">尚未安排未來執行項目。可在「目標地圖 → 具體實現方式 → 安排執行」建立。</div>';
+ ExecutionPage.renderPlannedQueue({
+  document,
+  plans,
+  today:todayKey(),
+  esc,
+  getTask
+ });
 }
 function getTodayItems(){
  const today=todayKey();
@@ -1259,17 +1115,28 @@ function getTodayItems(){
 /* V97.9.6 execution five-item preview */
 let todayItemsExpanded=false;
 function today(){
- const all=getTodayItems(),a=todayItemsExpanded?all:all.slice(0,5);
- const list=document.getElementById('todayList');if(!list)return;
- list.innerHTML=a.map(t=>{const isSel=String(timer.id)===String(t.id),w=currentWeekSummary(t),plans=(Array.isArray(db.executionPlans)?db.executionPlans:[]).filter(x=>String(x.taskId)===String(t.id)&&activeExecutionPlan(x)).sort((x,y)=>(x.date+' '+x.time).localeCompare(y.date+' '+y.time)),todayPlan=plans.find(x=>x.date===todayKey()),path=ancestors(t.id).slice(0,-1).map(x=>x.name).join(' › ');return `<div class="listitem ${isSel?'today-item-selected':''}"><div class="today-item-main"><span class="today-select-icon" aria-hidden="true">${isSel?'✓':'○'}</span><div class="today-item-copy"><b>${esc(t.name)}</b><small class="muted today-metrics">${todayPlan?`今日 ${esc(todayPlan.time)} · 預計 ${esc(todayPlan.minutes)} 分 · `:''}本週 ${w.actual}/${w.target} 分 · 剩餘 ${w.remaining} 分 · ${calc(t)}%</small>${path?`<small class="today-path" title="${esc(path)}">${esc(path)}</small>`:''}</div></div><div class="today-actions">${isSel?'<span class="today-selected-label">● 已選取</span>':''}<button class="btn" onclick="selectTodayExecution('${t.id}','${todayPlan?esc(todayPlan.id):''}')">${isSel?'重新選取':'選取'}</button><button class="btn primary" onclick="startTodayExecution('${t.id}','${todayPlan?esc(todayPlan.id):''}')">開始</button></div></div>`}).join('')||'<div class="empty">目前沒有可投入的具體實現方式。</div>';
- if(all.length>5)list.insertAdjacentHTML('beforeend',`<div style="display:flex;justify-content:center;padding:10px 0 2px"><button class="btn" type="button" onclick="toggleTodayItemsPreview()">${todayItemsExpanded?'收合為 5 項':`顯示全部（${all.length} 項）`}</button></div>`);
+ const all=getTodayItems(),items=todayItemsExpanded?all:all.slice(0,5);
+ ExecutionPage.renderToday({
+  document,
+  items,
+  totalCount:all.length,
+  expanded:todayItemsExpanded,
+  timer,
+  currentWeekSummary,
+  executionPlans:db.executionPlans,
+  activeExecutionPlan,
+  today:todayKey(),
+  ancestors,
+  esc,
+  calc
+ });
  renderPlannedQueue();
  syncOtherStudyForm();
 }
 function toggleTodayItemsPreview(){todayItemsExpanded=!todayItemsExpanded;today()}
 
 let timerLoopActive=false;function timerLoop(){if(timerLoopActive)return;timerLoopActive=true;const tick=()=>{if(!timer.running){timerLoopActive=false;return}updateClock();if(document.getElementById('executionAnalysis'))renderExecutionAnalysis();setTimeout(tick,500)};tick()}
-function updateClock(){const ms=timer.elapsed+(timer.running?Date.now()-timer.start:0),ss=Math.floor(ms/1000),h=Math.floor(ss/3600),m=Math.floor((ss%3600)/60),s=ss%60;document.getElementById('clock').textContent=[h,m,s].map(x=>String(x).padStart(2,'0')).join(':')}
+function updateClock(){const ms=TimerService.elapsedMs(timer,Date.now()),ss=Math.floor(ms/1000),h=Math.floor(ss/3600),m=Math.floor((ss%3600)/60),s=ss%60;document.getElementById('clock').textContent=[h,m,s].map(x=>String(x).padStart(2,'0')).join(':')}
 async function exportDB(){
  const envelope=typeof makeSecureBackupEnvelope==='function'?await makeSecureBackupEnvelope(db):makeEnvelope(normalize(db));const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(envelope,null,2)],{type:'application/json'}));a.download=`個人目標與學習行動管理系統_${APP_VERSION}_備份.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
@@ -1300,26 +1167,20 @@ function bindInteractionFeedback(){document.querySelectorAll('button').forEach(b
 
 
 function calendarEventsForDate(key){
- const school=(Array.isArray(db.schoolCalendar)?db.schoolCalendar:[])
-   .filter(e=>e.date===key)
-   .map(e=>({...e,type:'school',meta:e.meta||'學校行事'}));
- const confirmed=(Array.isArray(db.calendarEvents)?db.calendarEvents:[])
-   .filter(e=>e.date===key&&e.status!=='已取消')
-   .map(e=>{
-     const a=e.refId?catalogItemById(e.refId):null;
-     return {...e,type:e.type||'activity',title:e.title||a?.title||'已確認活動',time:e.time||a?.time||'',url:e.url||a?.url||a?.externalUrl||a?.sourceUrl||'',meta:(e.meta||'已確認')+' · 已確認'};
-   });
- return [...school,...confirmed];
+ return CalendarDomain.eventsForDate({
+  schoolCalendar:db.schoolCalendar,
+  calendarEvents:db.calendarEvents,
+  key,
+  enrichEvent:e=>{
+   const a=e.refId?catalogItemById(e.refId):null;
+   return {...e,type:e.type||'activity',title:e.title||a?.title||'已確認活動',time:e.time||a?.time||'',url:e.url||a?.url||a?.externalUrl||a?.sourceUrl||'',meta:(e.meta||'已確認')+' · 已確認'};
+  }
+ });
 }
 function calendarBaseDate(){return new Date(calendarCursor)}
-function dateKey(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
-function calendarDays(){
- const base=calendarBaseDate(),first=new Date(base.getFullYear(),base.getMonth(),1),startDay=first.getDay(),out=[];
- const gridStart=new Date(base.getFullYear(),base.getMonth(),1-startDay);
- for(let i=0;i<42;i++){const d=new Date(gridStart.getFullYear(),gridStart.getMonth(),gridStart.getDate()+i);out.push(dateKey(d))}
- return out;
-}
-function calendarSummaryButton(label,count,mode,active=false){return `<button type="button" class="summary-pill ${active?'active':''}" onclick="showCalendarSummary('${mode}')"><b>${esc(label)}</b> ${count} 項</button>`}
+function dateKey(d){return CalendarDomain.dateKey(d)}
+function calendarDays(){return CalendarDomain.monthGridKeys(calendarBaseDate())}
+function calendarSummaryButton(label,count,mode,active=false){return CalendarPage.summaryButton(esc(label),count,mode,active)}
 function calendarDetailHTML(title,subtitle,events){
   const list=events||[];
   const body=list.length?`<div class="calendar-detail-list">${list.map(e=>{
@@ -1351,16 +1212,19 @@ function showCalendarSummary(mode){
 }
 function hideCalendarDetail(){const el=document.getElementById('calendarDetail');if(el){el.style.display='none';el.innerHTML='';}}
 function renderCalendar(){
-  ensureSchoolCalendar();syncCalendarDatePicker();
-  const base=calendarBaseDate(),days=calendarDays(),today=todayKey();
-  const all=days.flatMap(calendarEventsForDate),schoolN=all.filter(e=>e.type==='school').length,confirmedN=all.filter(e=>e.type==='activity'&&String(e.meta||'').includes('已確認')).length,todayCount=calendarEventsForDate(today).length;
-  document.getElementById('calMonthTitle').textContent=`${base.getFullYear()} 年 ${base.getMonth()+1} 月`;
-  document.getElementById('calMonthSub').textContent=`115 學年度 · ${base.getMonth()+1} 月行事`;
-  document.getElementById('calendarSummary').innerHTML=calendarSummaryButton('今天',todayCount,'today',db.calendarSelected===today)+calendarSummaryButton('本月學校行事',schoolN,'school')+calendarSummaryButton('已確認活動',confirmedN,'confirmed');
-  document.getElementById('calendarAgenda').innerHTML=`<div class="calendar-weekdays">${['日','一','二','三','四','五','六'].map(x=>`<div>${x}</div>`).join('')}</div><div class="calendar-days">${days.map(key=>{const d=new Date(key+'T00:00:00'),es=calendarEventsForDate(key),inMonth=d.getMonth()===base.getMonth(),isToday=key===today,isSelected=key===db.calendarSelected;return `<button class="calendar-cell ${inMonth?'':'outside'} ${isToday?'today':''} ${isSelected?'selected-day':''}" type="button" onclick="calendarSelectDay('${key}')"><span class="cell-head"><b>${d.getDate()}</b>${isToday?'<em>今天</em>':''}</span><span class="cell-events">${es.slice(0,3).map(e=>`<span class="cell-event ${e.type} ${e.meta&&e.meta.includes('已確認')?'confirmed':''}"><i></i>${esc(e.title)}</span>`).join('')}${es.length>3?`<span class="cell-more">＋${es.length-3} 項</span>`:''}</span></button>`}).join('')}</div>`;
-  const selectedKey=db.calendarSelected;
-  if(selectedKey&&days.includes(selectedKey)){const es=calendarEventsForDate(selectedKey),d=new Date(selectedKey+'T00:00:00'),label=`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}（${['日','一','二','三','四','五','六'][d.getDay()]}）`;calendarDetailHTML(label,'已選日期 · 當日行程與活動',es);}
-  else hideCalendarDetail();
+ ensureSchoolCalendar();syncCalendarDatePicker();
+ const base=calendarBaseDate(),days=calendarDays(),today=todayKey();
+ CalendarPage.render({
+  document,
+  baseDate:base,
+  days,
+  today,
+  selectedDate:db.calendarSelected,
+  eventsForDate:calendarEventsForDate,
+  esc,
+  detailHTML:calendarDetailHTML,
+  hideDetail:hideCalendarDetail
+ });
 }
 function calendarSelectDay(key){showCalendarDay(key,true)}
 
@@ -1368,7 +1232,26 @@ function calendarGoToPickedDate(){const input=document.getElementById('calendarD
 function syncCalendarDatePicker(){const input=document.getElementById('calendarDatePicker');if(input)input.value=db.calendarSelected||todayKey()}
 function calendarShift(months){const d=calendarBaseDate();calendarCursor=new Date(d.getFullYear(),d.getMonth()+months,1);renderCalendar()}
 function calendarToday(){calendarCursor=new Date();db.calendarSelected=todayKey();save();renderCalendar();toast('已回到今天')}
-function renderAll(){db=normalize(db);rebuildExecutionPlanActuals();removeLegacyStandaloneToeicGoals();ensureActivities();ensureToeicPlan();recalcAllStatuses();renderGoalsPage();dashboard();today();renderTimerState();renderActivities();renderScholarships();renderCalendar();stats();bindInteractionFeedback();bindActivitySearch()}
+function renderAll(){
+ AppOrchestrator.renderAll({
+  normalizeState:()=>{db=normalize(db)},
+  rebuildExecutionPlanActuals,
+  removeLegacyStandaloneToeicGoals,
+  ensureActivities,
+  ensureToeicPlan,
+  recalcAllStatuses,
+  renderGoalsPage,
+  dashboard,
+  today,
+  renderTimerState,
+  renderActivities,
+  renderScholarships,
+  renderCalendar,
+  stats,
+  bindInteractionFeedback,
+  bindActivitySearch
+ });
+}
 function validateData(data){
  const errors=[],ids=new Set();const tasks=Array.isArray(data?.tasks)?data.tasks:[];
  for(const t of tasks){
@@ -1385,7 +1268,7 @@ function validateData(data){
  return [...new Set(errors)];
 }
 function validateDB(){repairKnownHierarchy(db.tasks);return validateData(db)}
-function activeWeeklyTargetTotal(date=todayKey()){return db.tasks.filter(t=>t.level===4&&t.status!=='已封存').reduce((s,t)=>s+currentWeekSummary(t,date).target,0)}
+function activeWeeklyTargetTotal(date=todayKey()){return ExecutionDomain.activeWeeklyTargetTotal(db.tasks,db.logs,date)}
 function auditButtonHandlers(){
  const missing=[];
  const html=document.documentElement.outerHTML;
@@ -1482,7 +1365,7 @@ function runSelfTest(){
   const html=document.documentElement.outerHTML;
   const ids=[...document.querySelectorAll('[id]')].map(e=>e.id);
   const dup=ids.filter((id,i)=>ids.indexOf(id)!==i);
-  tests.push([KEY==='lawLangGoalSystemV92'&&APP_VERSION==='V96.5'&&SCHEMA_VERSION===5,'版本 V96.5／沿用 V92 資料主鍵：正常']);
+  tests.push([KEY==='lawLangGoalSystemV92'&&SCHEMA_VERSION===6,'版本 '+APP_VERSION+'／Schema 6／沿用 V92 資料主鍵：正常']);
   tests.push([typeof deleteActualLog==='function'&&typeof restoreActualLog==='function'&&typeof isCountableActualLog==='function','實際紀錄刪除／恢復：正常']);
   tests.push([dup.length===0,'DOM ID 唯一性：正常']);
   tests.push([cleanupLegacyStorage()>=0,'舊版本儲存鍵清理：正常']);
@@ -1564,4 +1447,3 @@ function addActivityToCalendar(id){
  db.calendarEvents.push({id:'ce'+Date.now()+Math.random(),type:'activity',refId:id,date:a.date,time:a.time||'',title:a.title,url:activityExternalUrl(a),meta:'已確認',status:'已確認',createdAt:new Date().toISOString()});
  save();renderCalendar();toast('已確認加入行事曆');
 }
-renderAll();
