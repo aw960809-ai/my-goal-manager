@@ -1,4 +1,4 @@
-const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.1.0')));
+const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.2.0')));
 const SCHEMA_VERSION=Number(globalThis.GOAL_MANAGER_SCHEMA_VERSION||6);
 const KEY='lawLangGoalSystemV92';
 const BACKUP_KEYS=['lawLangGoalSystemV92_backup1','lawLangGoalSystemV92_backup2','lawLangGoalSystemV92_backup3'];
@@ -209,21 +209,7 @@ function normalizeLog(l){return StudyLogDomain.normalizeLog(l)}
 function normalize(d){
  d=d&&Array.isArray(d.tasks)?d:{tasks:[],logs:[]};
  d.logs=(Array.isArray(d.logs)?d.logs:[]).map(normalizeLog).filter(Boolean);
- d.tasks=d.tasks.map(t=>{
-  const level=Math.max(1,Math.min(4,+t.level||1));
-  let weekly=0;
-  if(level===4){
-   if(Number.isFinite(+t.weeklyMinutes)) weekly=Math.max(0,+t.weeklyMinutes||0);
-   else{
-    const mins=Math.max(0,+t.minutes||0),mode=t.mode,cycle=t.cycle;
-    if(mode==='single'||cycle==='單次') weekly=mins;
-    else if(cycle==='日') weekly=mins*7;
-    else if(cycle==='月') weekly=Math.round(mins/4.345);
-    else weekly=mins;
-   }
-  }
-  return {id:String(t.id),name:String(t.name||'未命名目標'),level,parent:t.parent?String(t.parent):null,status:['未開始','進行中','已完成','已封存'].includes(t.status)?t.status:'未開始',weeklyMinutes:weekly,start:level===3?(t.start||''):'',due:level===3?(t.due||''):'',progress:Math.max(0,Math.min(100,+t.progress||0))};
- });
+ d.tasks=DataNormalization.normalizeTasks(d.tasks);
  repairKnownHierarchy(d.tasks);
  const ids=new Set(d.tasks.map(t=>t.id));
  d.tasks.forEach(t=>{if(t.level===1||!t.parent||!ids.has(t.parent)){t.parent=null}else if(getTaskFrom(d.tasks,t.parent)?.level!==t.level-1){t.parent=null;t.level=1}});
@@ -236,19 +222,25 @@ function normalize(d){
  d.calendarSelected=typeof d.calendarSelected==='string'?d.calendarSelected:'';
  d.calendarEvents=Array.isArray(d.calendarEvents)?d.calendarEvents:[];
  d.executionPlans=Array.isArray(d.executionPlans)?d.executionPlans:[];
- d.weekReviews=Array.isArray(d.weekReviews)?d.weekReviews.filter(x=>x&&x.weekStart&&x.taskId&&x.reason):[];
+ d.weekReviews=DataNormalization.normalizeWeekReviews(d.weekReviews);
  return d;
 }
 
 function migrateData(d,fromVersion=0){
- // V60～V78 的資料格式由 normalize 統一收斂；未來結構變更只需在此增加明確 migration。
- let out=d;
- out=normalize(out); repairKnownHierarchy(out.tasks); out=normalize(out);
- out.schemaVersion=SCHEMA_VERSION;
- return out;
+ return DataMigrations.migrate(d,{
+  fromVersion,
+  schemaVersion:SCHEMA_VERSION,
+  normalize,
+  repair:repairKnownHierarchy
+ });
 }
 function tryReadCandidate(raw,label){
- try{const parsed=parseEnvelope(raw);const d=migrateData(parsed.data,parsed.schemaVersion);if(!isUsableData(d))throw new Error('資料結構不完整');const errs=validateData(d);if(errs.length)throw new Error(errs.slice(0,3).join('；'));return d}catch(e){return null}
+ return DataRepository.readCandidate(raw,{
+  parseEnvelope,
+  migrateData,
+  isUsableData,
+  validateData
+ });
 }
 function loadDB(){
  const current=storeGet(KEY);
@@ -631,7 +623,11 @@ function saveExecutionPlan(taskId){
  const date=document.getElementById('planDate')?.value||'',time=document.getElementById('planTime')?.value||'',minutes=Math.max(1,+document.getElementById('planMinutes')?.value||0);
  if(!date||!time||!minutes){toast('請完整設定日期、時間與投入分鐘');return}
  if(!Array.isArray(db.executionPlans))db.executionPlans=[];
- db.executionPlans.push({id:'plan'+Date.now()+Math.random().toString(16).slice(2),taskId:t.id,name:t.name,date,time,minutes,status:'待執行',createdAt:new Date().toISOString()});
+ db.executionPlans.push(ExecutionService.createPlan({
+  id:'plan'+Date.now()+Math.random().toString(16).slice(2),
+  task:t,date,time,minutes,
+  nowIso:new Date().toISOString()
+ }));
  save();renderAll();closeGoalInfoModal();toast('已安排「'+t.name+'」於 '+date+' '+time+' 執行');
 }
 function activeExecutionPlan(x){return ExecutionDomain.activeExecutionPlan(x)}
@@ -641,7 +637,7 @@ function cancelExecutionPlan(id){
  if(plan.status==='已取消'){toast('這筆安排已取消');return}
  if(plan.status==='已完成'){toast('已完成的執行紀錄不能取消安排');return}
  if(!confirm(`確定取消「${plan.name||getTask(plan.taskId)?.name||'這次執行'}」於 ${plan.date} ${plan.time} 的安排？`))return;
- plan.status='已取消';plan.cancelledAt=new Date().toISOString();
+ Object.assign(plan,ExecutionService.cancelPlan(plan,new Date().toISOString()));
  save();renderAll();
  toast('已取消這次執行安排；不影響實際投入紀錄');
 }
@@ -992,7 +988,7 @@ function renderTimerState(){
 
 function selectTodayExecution(id,planId=null){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中，請先完成或暫停');return}timer=TimerService.selectGoal(id,planId);saveActiveTimer();document.getElementById('timerTask').textContent='待執行：'+t.name;document.getElementById('timerTaskCancel').style.display='block';updateClock();updateTimerButtons();today();toast('已選取今日欲執行項目；尚未開始計時')}
 function cancelTodaySelection(){if(timer.running){toast('計時進行中，請先暫停或完成後再取消');return}timer=TimerService.empty();clearActiveTimer();document.getElementById('timerTask').textContent='尚未選擇任務';updateClock();updateTimerButtons();today();toast('已取消今日執行選取')}
-function startTodayExecution(id,planId=null){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中');return}if(!planId){const today=todayKey();const p=(Array.isArray(db.executionPlans)?db.executionPlans:[]).find(x=>String(x.taskId)===String(id)&&x.date===today&&activeExecutionPlan(x));if(p)planId=p.id}selectTodayExecution(id,planId);startTimer()}
+function startTodayExecution(id,planId=null){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中');return}if(!planId){const today=todayKey();const p=ExecutionService.findActivePlanForDate(db.executionPlans,id,today);if(p)planId=p.id}selectTodayExecution(id,planId);startTimer()}
 function openTodayExecution(id,planId=null){go('today');selectTodayExecution(id,planId)}
 function useTimer(id){selected=id;timer=TimerService.selectGoal(id,null);saveActiveTimer();document.getElementById('timerTask').textContent=getTask(id)?.name||'';go('today');updateClock();updateTimerButtons();toast('已選擇具體行動，可開始計時')}
 function startTimer(){
@@ -1014,7 +1010,7 @@ function finishTimer(){
  }
  const t=getTask(timer.id);if(!t){toast('找不到目前執行的具體行動');return}
  const planId=timer.planId||null;db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:t.id,name:t.name,time:new Date().toISOString(),minutes:mins,actual:true,planId});
- if(planId){const plan=(db.executionPlans||[]).find(x=>String(x.id)===String(planId));if(plan&&plan.status!=='已取消'){const planned=Math.max(1,+plan.minutes||0),previous=Math.max(0,+plan.actualMinutes||0),total=previous+mins;plan.actualMinutes=total;plan.status=total>=planned?'已完成':'已部分完成';if(plan.status==='已完成')plan.completedAt=new Date().toISOString();else delete plan.completedAt}}
+ if(planId){const plan=(db.executionPlans||[]).find(x=>String(x.id)===String(planId));if(plan&&plan.status!=='已取消')Object.assign(plan,ExecutionService.applyActualMinutes(plan,mins,new Date().toISOString()))}
  save();const done=timer.id;timer=TimerService.empty();clearActiveTimer();renderAll();document.getElementById('timerTask').textContent='已記錄：'+(t.name||done);document.getElementById('timerTaskCancel').style.display='none';updateClock();updateTimerButtons();toast(planId?`已記錄 ${mins} 分鐘；本次安排累計已實際 ${db.executionPlans.find(x=>String(x.id)===String(planId))?.actualMinutes||mins} 分鐘`:`已記錄 ${mins} 分鐘；完成度已更新`)
 }
 function updateTimerButtons(){const bs=document.querySelectorAll('.timerbtns button'),has=timerHasSelection(),panel=document.getElementById('executionNowPanel');if(panel){panel.classList.toggle('has-selection',has);panel.classList.toggle('is-running',!!timer.running)}if(bs.length<3)return;bs[0].disabled=!!timer.running||!has;bs[1].disabled=!timer.running;bs[2].disabled=!has||timer.elapsed<=0;bs[0].textContent=timer.running?'計時中…':'開始';bs[1].textContent='暫停';bs[2].textContent=has&&timer.elapsed>0?'完成並記錄':'完成'}

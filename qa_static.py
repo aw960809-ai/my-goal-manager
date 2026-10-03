@@ -122,9 +122,22 @@ assert all(x in calendar_domain for x in ['dateKey','monthGridKeys','eventsForDa
 assert all(x in timer_service for x in ['empty','normalize','payload','hasSelection','start','pause','elapsedMs','finish']), 'TimerService API incomplete'
 assert 'CalendarDomain.dateKey' in app and 'CalendarDomain.monthGridKeys' in app, 'calendar compatibility wrappers missing'
 assert 'TimerService.start' in app and 'TimerService.pause' in app and 'TimerService.finish' in app, 'timer compatibility delegation missing'
-assert "GOAL_MANAGER_VERSION='98.1.0'" in version_js, 'V98.1 version source missing'
+execution_service=(root/'js'/'services'/'execution-service.js').read_text(encoding='utf-8')
+data_normalization=(root/'js'/'data'/'normalization.js').read_text(encoding='utf-8')
+data_migrations=(root/'js'/'data'/'migrations.js').read_text(encoding='utf-8')
+data_repository=(root/'js'/'data'/'repository.js').read_text(encoding='utf-8')
+for module in ['./js/services/execution-service.js','./js/data/normalization.js','./js/data/migrations.js','./js/data/repository.js']:
+ assert module in html and html.find(module) < html.find('./js/app.js'), f'{module} must load before app.js'
+ assert module in sw, f'service worker missing {module}'
+assert all(x in execution_service for x in ['createPlan','cancelPlan','applyActualMinutes','findActivePlanForDate']), 'ExecutionService API incomplete'
+assert all(x in data_normalization for x in ['normalizeTask','normalizeTasks','normalizeWeekReviews']), 'DataNormalization API incomplete'
+assert 'migrate' in data_migrations, 'DataMigrations API incomplete'
+assert 'readCandidate' in data_repository, 'DataRepository API incomplete'
+assert 'DataNormalization.normalizeTasks' in app and 'DataMigrations.migrate' in app and 'DataRepository.readCandidate' in app, 'Data layer delegation missing'
+assert 'ExecutionService.createPlan' in app and 'ExecutionService.cancelPlan' in app and 'ExecutionService.applyActualMinutes' in app, 'ExecutionService delegation missing'
+assert "GOAL_MANAGER_VERSION='98.2.0'" in version_js, 'V98.2 version source missing'
 
 
 
 
-print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core, V98.1 calendar/timer')
+print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core, V98.1 calendar/timer, V98.2 execution/data')
