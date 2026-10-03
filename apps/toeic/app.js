@@ -1,6 +1,6 @@
 'use strict';
 
-const VERSION='2.0.0-github';
+const VERSION='2.1.0-ui';
 const KEYS={
  generated:'generated',sessions:'sessions',mistakes:'mistakes',settings:'settings',
  daily:'dailyMainAssignment',dailyHistory:'dailyMainHistory',dailyPool:'dailyMainCandidatePool',
@@ -60,6 +60,20 @@ function allLessons(){return[offlineLesson,...generated()]}
 function accuracy(){const ss=analyticsSessions(),t=ss.reduce((n,s)=>n+(Number(s.total)||0),0);return t?Math.round(ss.reduce((n,s)=>n+(Number(s.correct)||0),0)/t*100):0}
 function avgWpm(){const v=analyticsSessions().map(s=>Number(s.wpm)).filter(x=>x>=40&&x<=450);return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):0}
 function targetWords(){const a=accuracy(),w=avgWpm();if(!w)return'250–400';if(w<95||a<65)return'180–250';if(w<120||a<75)return'250–350';if(w<140||a<85)return'300–450';return'450–650'}
+function todayStudyMinutes(){
+ const d=dayKey();
+ return analyticsSessions().filter(x=>x.date===d).reduce((n,x)=>n+(Number(x.durationMinutes)||0),0)
+   +partSessions().filter(x=>x.date===d).reduce((n,x)=>n+(Number(x.durationMinutes)||0),0)
+   +mockHistory().filter(x=>x.date===d).reduce((n,x)=>n+(Number(x.durationMinutes)||0),0);
+}
+function activeReviewCount(){
+ return [...newsMistakes(),...partMistakes()].filter(x=>x.status!=='mastered').length;
+}
+function startQuick(minutes){
+ const plans={1:[5,2],3:[5,5],5:[6,5],10:[7,8]};
+ const [part,count]=plans[minutes]||plans[3];
+ startPractice(part,count);
+}
 
 async function loadNews(){
  try{
@@ -146,20 +160,60 @@ function makeGoalEvent(title,duration,total,correct,wrongSkills=[],extra={}){
 }
 
 function todayPage(){
- const ss=sessions(),done=ss.some(s=>s.date===dayKey());
+ const ss=sessions(),done=ss.some(x=>x.date===dayKey());
  const assigned=load(KEYS.daily,null);
  let lesson=assigned?allLessons().find(x=>x.id===assigned.articleId):null;
  if(!lesson)lesson=allLessons()[0];
- return`<section class="hero"><p class="eyebrow">TODAY</p><h2>${done?'今日主訓練已完成':'今日主訓練'}</h2><p>目前 ${settings.currentLevel} → 目標 ${settings.targetScore}。建議文章長度 ${targetWords()} 字；GitHub 版即使 AI 服務不可用仍可完整開啟、複習與模考。</p></section><div class="section-head"><h3>主文章</h3><span class="badge">${done?'已完成':'待完成'}</span></div><section class="card"><h3>${esc(lesson.title)}</h3><p class="muted">${esc(lesson.source)} · ${lesson.category}</p><div class="actions"><button class="primary" id="startDaily" data-id="${esc(lesson.id)}">開始訓練</button><button class="secondary" id="chooseNews">從新聞池挑題材</button></div></section><div class="section-head"><h3>今天的狀態</h3></div><section class="grid2"><div class="card kpi"><span class="muted">閱讀平均</span><strong>${avgWpm()||'—'}</strong><small>WPM</small></div><div class="card kpi"><span class="muted">新聞正確率</span><strong>${accuracy()||'—'}${accuracy()?'%':''}</strong></div></section>`}
+ const mins=todayStudyMinutes(),goal=Math.max(1,Number(settings.dailyMinutes)||30),pct=Math.min(100,Math.round(mins/goal*100));
+ const reviews=activeReviewCount();
+ const reviewTitle=reviews?('有 '+reviews+' 題還沒完全掌握'):'目前沒有待複習題目';
+ const reviewText=reviews?'用零碎時間把以前錯過的題目再做一次。':'今天可以把時間留給新題或閱讀。';
+ return`<section class="home-intro">
+   <p class="eyebrow">TODAY · ${dayKey()}</p>
+   <div class="today-number"><strong>${mins}</strong><span>min</span></div>
+   <p class="home-sub">今日學習 · 目標 ${goal} 分鐘</p>
+   <div class="progressbar"><i style="width:${pct}%"></i></div>
+ </section>
+ <section class="quick-card">
+   <p class="eyebrow">QUICK START</p>
+   <h2>現在有多少時間？</h2>
+   <p class="muted">不用挑題，直接開始。短時間先以 Part 5–7 為主。</p>
+   <div class="time-grid">
+     <button class="time-btn quick-time" data-min="1">1 分鐘</button>
+     <button class="time-btn quick-time" data-min="3">3 分鐘</button>
+     <button class="time-btn quick-time" data-min="5">5 分鐘</button>
+     <button class="time-btn quick-time" data-min="10">10 分鐘</button>
+   </div>
+ </section>
+ <div class="section-head"><h3>今天讀一篇</h3><span class="badge">${done?'已完成':'推薦'}</span></div>
+ <section class="card recommend-card">
+   <h3>${esc(lesson.title)}</h3>
+   <p class="muted">${esc(lesson.source)} · ${lesson.category} · 建議 ${targetWords()} 字</p>
+   <button class="primary wide" id="startDaily" data-id="${esc(lesson.id)}">${done?'再讀一次':'開始閱讀'}</button>
+   <button class="secondary wide" id="chooseNews">換一篇教材</button>
+ </section>
+ <div class="section-head"><h3>待複習</h3><span class="badge">${reviews} 題</span></div>
+ <section class="card">
+   <strong>${reviewTitle}</strong>
+   <p class="muted">${reviewText}</p>
+   ${reviews?'<button id="openReview" class="secondary wide">再戰一次</button>':''}
+ </section>`
+}
+
 function newsPage(){
- return`<section class="hero"><p class="eyebrow">LIVE TOPICS</p><h2>新聞教材池</h2><p>GitHub Actions 每日更新新聞標題與來源。按「建立教材」會在手機本機建立原創 TOEIC 練習改寫，不把新聞全文複製進系統。</p></section><div class="section-head"><h3>目前題材</h3><button id="reloadNews" class="secondary">重新讀取</button></div><section class="grid">${news.length?news.map(n=>`<article class="card news-card"><div class="news-meta"><span class="badge">${esc(n.category||'Business')}</span><span class="badge">${esc(n.source||'News')}</span></div><h3>${esc(n.title)}</h3><p class="muted">${esc(n.summary||'')}</p><div class="actions"><button class="primary make-lesson" data-id="${esc(n.id)}">建立原創 TOEIC 教材</button>${n.url?`<a class="secondary" href="${esc(n.url)}" target="_blank" rel="noopener">來源</a>`:''}</div></article>`).join(''):'<div class="card"><p class="muted">新聞池暫無資料；離線文章與題型訓練仍可使用。</p></div>'}</section>`}
+ return`<section class="hero"><p class="eyebrow">READING CENTER</p><h2>閱讀教材</h2><p>保留新聞題材，但把它當成閱讀與 Part 7 訓練入口；閱讀完成後再留下單字、句型與理解題。</p></section><div class="section-head"><h3>今日題材</h3><button id="reloadNews" class="secondary">更新</button></div><section class="grid">${news.length?news.map(n=>`<article class="card news-card"><div class="news-meta"><span class="badge">${esc(n.category||'Business')}</span><span class="badge">${esc(n.source||'News')}</span></div><h3>${esc(n.title)}</h3><p class="muted">${esc(n.summary||'')}</p><div class="actions"><button class="primary make-lesson" data-id="${esc(n.id)}">開始閱讀</button>${n.url?`<a class="secondary" href="${esc(n.url)}" target="_blank" rel="noopener">來源</a>`:''}</div></article>`).join(''):'<div class="card"><p class="muted">目前沒有可用新聞題材；既有教材與題目仍可使用。</p></div>'}</section>`
+}
+
 
 const PART_INFO={
  1:['照片描述','Listening'],2:['應答問題','Listening'],3:['簡短對話','Listening'],4:['簡短獨白','Listening'],
  5:['句子填空','Reading'],6:['段落填空','Reading'],7:['閱讀理解','Reading']
 };
 function practicePage(){
- return`<section class="hero"><p class="eyebrow">PARTS 1–7</p><h2>完整題型訓練</h2><p>GitHub 版改用本機原創題庫生成器，因此不會因 AppDeploy 額度用完而停用。題目不是 ETS 官方題。</p></section><div class="section-head"><h3>選擇 Part</h3><button id="startMock" class="secondary">完整 200 題模考</button></div><section class="practice-parts">${Object.entries(PART_INFO).map(([p,[name,fam]])=>`<button data-part="${p}"><strong>Part ${p} · ${name}</strong><small>${fam}</small></button>`).join('')}</section>`}
+ const readingParts=Object.entries(PART_INFO).filter(([p])=>Number(p)>=5);
+ return`<section class="hero"><p class="eyebrow">PRACTICE</p><h2>Part 5–7 練習</h2><p>日常練習只保留 Reading。短解析先讓你快速前進，需要時再展開深度解析。</p></section><div class="section-head"><h3>選擇題型</h3><span class="badge">Reading</span></div><section class="practice-parts">${readingParts.map(([p,[name]])=>`<button data-part="${p}"><strong>Part ${p} · ${name}</strong><small>${p==='5'?'文法／詞彙':p==='6'?'篇章脈絡／填空':'閱讀理解／資訊定位'}</small></button>`).join('')}</section><div class="section-head"><h3>能力檢驗</h3></div><section class="card"><h3>全真模考</h3><p class="muted">完整 200 題保留為獨立考試模式，不放進日常練習流程。</p><button id="startMock" class="secondary wide">進入全真模考</button></section>`
+}
+
 
 function reviewPage(){
  const nm=newsMistakes(),pm=partMistakes(),all=[...nm.map(x=>({...x,_kind:'news'})),...pm.map(x=>({...x,_kind:'part'}))];
@@ -167,8 +221,11 @@ function reviewPage(){
  return`<section class="hero"><p class="eyebrow">SPACED REVIEW</p><h2>錯題與複習</h2><p>既有 AppDeploy 錯題匯入後會保留狀態。GitHub 版新錯題同樣採 1 → 3 → 7 日複習節奏。</p></section><div class="section-head"><h3>待處理</h3><span class="badge">${active.length} 題</span></div><section class="grid">${active.length?active.slice(-30).reverse().map((m,i)=>`<article class="card review-row"><div><span class="badge">${esc(m.question?.part||`Part ${m.part||''}`)}</span> <span class="badge">${esc(m.status||'unmastered')}</span></div><strong>${esc(m.question?.q||'錯題')}</strong><button class="secondary review-mark" data-kind="${m._kind}" data-id="${esc(m.id)}">本次已複習並答對</button></article>`).join(''):'<div class="card"><p class="muted">目前沒有待複習錯題。</p></div>'}</section>`}
 function progressPage(){
  const ss=analyticsSessions(),ps=partSessions(),mh=mockHistory();
- const mins=ss.reduce((a,b)=>a+(Number(b.durationMinutes)||0),0)+ps.reduce((a,b)=>a+(Number(b.durationMinutes)||0),0);
- return`<section class="hero"><p class="eyebrow">PROGRESS</p><h2>${settings.currentLevel} → ${settings.targetScore}</h2><p>所有歷史資料都保存在此 GitHub 網域的瀏覽器儲存空間。</p></section><section class="kpis"><div class="card kpi"><small>新聞訓練</small><strong>${ss.length}</strong></div><div class="card kpi"><small>Part 練習</small><strong>${ps.length}</strong></div><div class="card kpi"><small>模考</small><strong>${mh.length}</strong></div></section><div class="section-head"><h3>近期新聞訓練</h3><span class="badge">${Math.round(mins)} 分</span></div><section class="grid">${ss.length?ss.slice(-8).reverse().map(s=>`<div class="card"><strong>${esc(s.title||'訓練')}</strong><p class="muted">${esc(s.date||'')} · ${s.correct||0}/${s.total||0} · ${displayWpm(s.wpm)}</p></div>`).join(''):'<div class="card"><p class="muted">尚無紀錄。</p></div>'}</section>`}
+ const mins=ss.reduce((a,b)=>a+(Number(b.durationMinutes)||0),0)+ps.reduce((a,b)=>a+(Number(b.durationMinutes)||0),0)+mh.reduce((a,b)=>a+(Number(b.durationMinutes)||0),0);
+ const reviews=activeReviewCount();
+ return`<section class="hero"><p class="eyebrow">MY TOEIC</p><h2>${settings.currentLevel} → ${settings.targetScore}</h2><p>把分析、複習與設定收在這裡，首頁只負責讓你快速開始學習。</p></section><section class="kpis"><div class="card kpi"><small>閱讀</small><strong>${ss.length}</strong></div><div class="card kpi"><small>練習</small><strong>${ps.length}</strong></div><div class="card kpi"><small>模考</small><strong>${mh.length}</strong></div></section><div class="section-head"><h3>學習資料</h3><span class="badge">${Math.round(mins)} 分</span></div><section class="grid"><div class="card"><h3>錯題與複習</h3><p class="muted">目前 ${reviews} 題待處理。</p><button id="openReview" class="secondary wide">查看複習</button></div><div class="card"><h3>設定與備份</h3><p class="muted">目標分數、每日分鐘、Goal Manager 同步與資料備份。</p><button id="openSettings" class="secondary wide">開啟設定</button></div></section><div class="section-head"><h3>近期閱讀</h3></div><section class="grid">${ss.length?ss.slice(-6).reverse().map(x=>`<div class="card"><strong>${esc(x.title||'訓練')}</strong><p class="muted">${esc(x.date||'')} · ${x.correct||0}/${x.total||0} · ${displayWpm(x.wpm)}</p></div>`).join(''):'<div class="card"><p class="muted">尚無紀錄。</p></div>'}</section>`
+}
+
 
 const MIGRATION_PREFIXES=['toeic','dailyMain','goalSync'];
 const MIGRATION_EXACT=new Set(['generated','sessions','mistakes','settings']);
@@ -193,11 +250,14 @@ function settingsPage(){
  return`<div class="section-head"><h2>設定</h2><span class="badge">v${VERSION}</span></div><section class="card"><h3>個人學習設定</h3><label class="setting"><span>目前 TOEIC 基準</span><input class="settings-input" id="cur" type="number" value="${settings.currentLevel}"></label><label class="setting"><span>目標分數</span><input class="settings-input" id="goal" type="number" value="${settings.targetScore}"></label><label class="setting"><span>每日分鐘</span><input class="settings-input" id="mins" type="number" value="${settings.dailyMinutes}"></label><button id="saveSettings" class="primary wide">儲存設定</button></section><section class="card"><div class="section-head" style="margin-top:0"><h3>GitHub 直連 Goal Manager</h3><span class="badge ok">同網域</span></div><p class="muted">完成新聞訓練、Part 練習或模考後，事件會寫入同一 GitHub Pages 網域的共享儲存區，不需要 AppDeploy iframe 或同步碼。</p><button id="flushQueue" class="secondary wide">搬移舊 Goal Sync 待傳紀錄</button></section><section class="card"><h3>完整遷移備份</h3><p class="muted">匯入前會先保存目前 GitHub TOEIC 本機資料快照。AppDeploy 匯出的 localStorage keys 可直接匯入。</p><div class="actions"><button id="exportBackup" class="primary">匯出 GitHub 備份</button></div><input id="importFile" class="file-input" type="file" accept=".json,application/json"><button id="importBackup" class="secondary wide">匯入 AppDeploy／GitHub 備份</button></section><section class="card"><h3>系統模式</h3><p class="muted">新聞題材：GitHub Actions。教材／題型／解析：本機原創生成器。語音：裝置 Speech Synthesis。此版本沒有 AppDeploy 點數依賴。</p></section>`}
 
 function render(){
- main.innerHTML=({today:todayPage,news:newsPage,practice:practicePage,review:reviewPage,progress:progressPage,settings:settingsPage})[route]();
+ main.innerHTML=({today:todayPage,news:newsPage,practice:practicePage,review:reviewPage,me:progressPage,progress:progressPage,settings:settingsPage})[route]();
  bind();
 }
 function bind(){
  document.querySelector('#startDaily')?.addEventListener('click',e=>openLesson(e.currentTarget.dataset.id));
+ document.querySelectorAll('.quick-time').forEach(b=>b.addEventListener('click',()=>startQuick(Number(b.dataset.min))));
+ document.querySelector('#openReview')?.addEventListener('click',()=>switchRoute('review'));
+ document.querySelector('#openSettings')?.addEventListener('click',()=>switchRoute('settings'));
  document.querySelector('#chooseNews')?.addEventListener('click',()=>switchRoute('news'));
  document.querySelector('#reloadNews')?.addEventListener('click',()=>void loadNews());
  document.querySelectorAll('.make-lesson').forEach(b=>b.onclick=()=>{const n=news.find(x=>String(x.id)===String(b.dataset.id));if(!n)return;const lesson=buildNewsLesson(n),rows=generated().filter(x=>x.id!==lesson.id);rows.push(lesson);save(KEYS.generated,rows.slice(-60));save(KEYS.daily,{date:dayKey(),articleId:lesson.id,completed:false,selectedByUser:true});toast('已建立本機原創教材');openLesson(lesson.id)});
@@ -217,16 +277,16 @@ function openLesson(id){
  activeLesson=a;lessonStarted=Date.now();readingStarted=Date.now();answers=[];qIndex=0;dialogTitle.textContent=a.title;renderLessonIntro();dialog.showModal();
 }
 function renderLessonIntro(){
- body.innerHTML=`<section class="grid"><div class="card"><p class="eyebrow">READING</p><p style="white-space:pre-line;line-height:1.75">${esc(activeLesson.text)}</p><div class="actions"><button id="speakArticle" class="secondary">🔊 播放全文</button><button id="analysisStep" class="primary">文章英文解構</button></div></div><div class="card"><h3>Vocabulary</h3>${(activeLesson.vocabulary||[]).map(v=>`<p><b>${esc(v[0]||v.word)}</b> · ${esc(v[1]||v.meaning)} <span class="muted">${esc(v[2]||v.collocation)}</span></p>`).join('')}</div></section>`;
- document.querySelector('#speakArticle').onclick=()=>speech(activeLesson.text);
+ body.innerHTML=`<section class="grid"><article class="card"><p class="eyebrow">READING</p><div class="reading-paper">${esc(activeLesson.text)}</div><div class="actions"><button id="analysisStep" class="primary wide">文章解析</button></div></article><section class="card"><h3>Vocabulary</h3>${(activeLesson.vocabulary||[]).map(v=>`<p><b>${esc(v[0]||v.word)}</b> · ${esc(v[1]||v.meaning)} <span class="muted">${esc(v[2]||v.collocation)}</span></p>`).join('')}</section></section>`;
  document.querySelector('#analysisStep').onclick=renderAnalysisStep;
 }
+
 function renderAnalysisStep(){
  const analysis=cachedAnalysis(activeLesson)||articleAnalysis(activeLesson.text);if(!cachedAnalysis(activeLesson))saveAnalysisCache(activeLesson,analysis);
- body.innerHTML=`<section><p class="eyebrow">ENGLISH DECONSTRUCTION</p><div class="notice">黃色標記主要顯示因果、轉折、條件與時間連接詞。這一版在本機解析，不呼叫外部 AI。</div><div class="analysis-grid">${analysis.map(s=>`<article class="analysis-sentence"><div class="actions" style="justify-content:space-between"><span class="badge">Sentence ${s.index+1}</span><button class="ghost speak-sentence" data-i="${s.index}">🔊</button></div><p>${s.highlighted}</p><details><summary>SIMPLER ENGLISH / STRUCTURE</summary><p>${esc(s.simple)}</p><p class="muted">${esc(s.structure)}</p><p class="muted">Reusable expression: ${esc(s.expression)}</p></details></article>`).join('')}</div><button id="startQuiz" class="primary wide">開始作答</button></section>`;
- document.querySelectorAll('.speak-sentence').forEach(b=>b.onclick=()=>speech(analysis[Number(b.dataset.i)].sentence));
+ body.innerHTML=`<section><p class="eyebrow">ENGLISH DECONSTRUCTION</p><div class="notice">先看句構、簡化語意與可重複使用的表達；閱讀本身不再加入朗讀操作。</div><div class="analysis-grid">${analysis.map(x=>`<article class="analysis-sentence"><span class="badge">Sentence ${x.index+1}</span><p>${x.highlighted}</p><details><summary>句構與簡化英文</summary><p>${esc(x.simple)}</p><p class="muted">${esc(x.structure)}</p><p class="muted">Reusable expression: ${esc(x.expression)}</p></details></article>`).join('')}</div><button id="startQuiz" class="primary wide">進入理解題</button></section>`;
  document.querySelector('#startQuiz').onclick=()=>{readingStarted=Date.now();renderLessonQuestion()};
 }
+
 function renderLessonQuestion(){
  const qs=activeLesson.questions||[];if(qIndex>=qs.length)return finishLesson();
  const item=qs[qIndex];
