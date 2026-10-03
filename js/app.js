@@ -1,4 +1,4 @@
-const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.5.0')));
+const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.6.0')));
 const SCHEMA_VERSION=Number(globalThis.GOAL_MANAGER_SCHEMA_VERSION||6);
 const KEY='lawLangGoalSystemV92';
 const BACKUP_KEYS=['lawLangGoalSystemV92_backup1','lawLangGoalSystemV92_backup2','lawLangGoalSystemV92_backup3'];
@@ -960,9 +960,15 @@ function saveEditModal(){
 
 function wouldCycle(id,parent){let cur=parent,guard=0;while(cur&&guard++<10){if(cur===id)return true;cur=getTask(cur)?.parent}return false}
 function dashExecuteList(){
- const box=document.getElementById('dashActions');if(!box)return;
  const items=getTodayItems().slice(0,3);
- box.innerHTML=items.length?items.map(t=>{const w=currentWeekSummary(t),parent=ancestors(t.id).slice(-2,-1)[0]?.name||'';return `<div class="listitem dash-exec"><div><b>${esc(t.name)}</b><small>${calc(t)}% · 本週 ${w.actual}/${w.target} 分 · 剩餘 ${w.remaining} 分${parent?' · '+esc(parent):''}</small></div><button class="btn primary" onclick="executeFromDashboard('${t.id}')">開始</button></div>`}).join(''):'<div class="empty">本週沒有待辦執行事項。</div>';
+ DashboardPage.renderExecuteList({
+  document,
+  items,
+  currentWeekSummary,
+  ancestors,
+  esc,
+  calc
+ });
 }
 function executeFromDashboard(id){selected=id;const chain=ancestors(id);goalPath={long:chain.find(x=>x.level===1)?.id||null,mid:chain.find(x=>x.level===2)?.id||null,short:chain.find(x=>x.level===3)?.id||null,exec:id};useTimer(id);startTimer();toast('已開始執行')}
 function overviewMonthItems(date=todayKey()){
@@ -1010,46 +1016,43 @@ function decisionItems(date=todayKey()){
  return getTodayItems().map(t=>decisionState(t,date)).filter(Boolean).sort((a,b)=>b.score-a.score||a.days-b.days||b.w.remaining-a.w.remaining).slice(0,3);
 }
 function renderDecisionList(){
- const el=document.getElementById('decisionList');if(!el)return;
- const load=weeklyWorkload(),badge=document.getElementById('weekLoadBadge');
- if(badge){badge.textContent=`本週 ${load.hours.toFixed(1).replace('.0','')}h · ${load.level}`;badge.className='decision-badge '+(load.score>=85?'urgent':load.score>=60?'normal':'ahead')}
- const all=decisionItems(),items=all.slice(0,1);
- el.innerHTML=items.length?items.map((x,i)=>{const due=x.days===0?'今天':x.days<0?'已截止':`${x.days} 天後`;return `<div class="decision-item ${x.state}"><span class="decision-rank">${i+1}</span><div class="decision-main"><b>${esc(x.t.name)}</b><small>${x.progress}% · 本週剩餘 ${x.w.remaining} 分 · ${x.gap>0?'進度落後約 '+x.gap+'%':'進度正常'} · ${due}</small></div><span class="decision-badge ${x.state}">${x.label}</span></div>`}).join(''):'<div class="empty">目前沒有需要優先處理的事項。</div>';
+ const load=weeklyWorkload();
+ const items=decisionItems().slice(0,1);
+ DashboardPage.renderDecisionList({
+  document,
+  load,
+  items,
+  esc
+ });
 }
 function dashboard(){
  const rootsA=roots().filter(t=>t.status!=='已封存');
  const overall=rootsA.length?Math.round(rootsA.reduce((sum,t)=>sum+calc(t),0)/rootsA.length):0;
- document.getElementById('dOverall').textContent=overall+'%';
-
  const weekItems=getTodayItems();
- document.getElementById('dToday').textContent=weekItems.length;
-
  const planStats=executionAnalysis(todayKey());
- const weeklyPlan=planStats.plannedMinutes;
- document.getElementById('dRun').textContent=(weeklyPlan/60).toFixed(1).replace('.0','')+'h';
-
  const ws=weekStartKey(todayKey()),we=weekEndKey(todayKey());
- const weekActual=db.logs.filter(x=>isCountableActualLog(x)&&logDate(x.time)>=ws&&logDate(x.time)<=we).reduce((sum,x)=>sum+(+x.minutes||0),0);
- document.getElementById('dMin').textContent=weekActual;
+ const weekActual=StudyLogDomain.totalStudyMinutesInRange(db.logs,ws,we);
+ const todayActual=StudyLogDomain.totalStudyMinutesInRange(db.logs,todayKey(),todayKey());
+ const deadlines=overviewMonthItems().slice(0,4);
 
- const todayActual=db.logs.filter(x=>isCountableActualLog(x)&&logDate(x.time)===todayKey()).reduce((sum,x)=>sum+(+x.minutes||0),0);
- const todayActualEl=document.getElementById('dTodayMin');if(todayActualEl)todayActualEl.textContent=todayActual;
-
- const dateEl=document.getElementById('homeDateLabel');
- if(dateEl){
-   const d=new Date(),weekday=['日','一','二','三','四','五','六'][d.getDay()];
-   dateEl.textContent=`${d.getMonth()+1} 月 ${d.getDate()} 日 · 星期${weekday}`;
- }
-
- const directionHtml=rootsA.map(t=>{const prog=calc(t),stageCount=kids(t.id).filter(x=>x.status!=='已封存').length;return `<button type="button" class="direction ${selected===t.id?'active':''}" style="--progress:${prog}%" aria-pressed="${selected===t.id}" onclick="selectTask('${t.id}',true);go('goals')"><div class="num">主要目標</div><h3>${esc(t.name)}</h3><p>目前完成度 ${prog}% · ${stageCount} 個階段目標</p><div class="direction-progress" aria-label="完成度 ${prog}%"><span style="width:${prog}%"></span></div><div class="foot"><span>進入目標地圖</span><b>${prog}%</b></div></button>`}).join('')||'<div class="empty">尚無主要目標。</div>';
- document.getElementById('directions').innerHTML=directionHtml;
- const mgc=document.getElementById('mainGoalCount');if(mgc)mgc.textContent=`${rootsA.length} 個主要目標`;
+ DashboardPage.renderDashboard({
+  document,
+  overall,
+  todayItemCount:weekItems.length,
+  weeklyPlanMinutes:planStats.plannedMinutes,
+  weekActualMinutes:weekActual,
+  todayActualMinutes:todayActual,
+  date:new Date(),
+  roots:rootsA,
+  selected,
+  calc,
+  kids,
+  deadlines,
+  esc
+ });
 
  dashExecuteList();
  renderDecisionList();
-
- const ds=overviewMonthItems().slice(0,4);
- document.getElementById('deadlines').innerHTML=ds.length?ds.map(e=>`<div class="listitem"><span><b>${esc(e.title)}</b><small class="muted" style="display:block">${esc(e.meta||'')}</small></span><small>${esc(e.date)}</small></div>`).join(''):'<div class="empty">未來一個月沒有已登錄的重要時間節點。</div>';
 }
 function updateHubContext(){}
 function renderPlannedQueue(){
@@ -1193,7 +1196,26 @@ function calendarGoToPickedDate(){const input=document.getElementById('calendarD
 function syncCalendarDatePicker(){const input=document.getElementById('calendarDatePicker');if(input)input.value=db.calendarSelected||todayKey()}
 function calendarShift(months){const d=calendarBaseDate();calendarCursor=new Date(d.getFullYear(),d.getMonth()+months,1);renderCalendar()}
 function calendarToday(){calendarCursor=new Date();db.calendarSelected=todayKey();save();renderCalendar();toast('已回到今天')}
-function renderAll(){db=normalize(db);rebuildExecutionPlanActuals();removeLegacyStandaloneToeicGoals();ensureActivities();ensureToeicPlan();recalcAllStatuses();renderGoalsPage();dashboard();today();renderTimerState();renderActivities();renderScholarships();renderCalendar();stats();bindInteractionFeedback();bindActivitySearch()}
+function renderAll(){
+ AppOrchestrator.renderAll({
+  normalizeState:()=>{db=normalize(db)},
+  rebuildExecutionPlanActuals,
+  removeLegacyStandaloneToeicGoals,
+  ensureActivities,
+  ensureToeicPlan,
+  recalcAllStatuses,
+  renderGoalsPage,
+  dashboard,
+  today,
+  renderTimerState,
+  renderActivities,
+  renderScholarships,
+  renderCalendar,
+  stats,
+  bindInteractionFeedback,
+  bindActivitySearch
+ });
+}
 function validateData(data){
  const errors=[],ids=new Set();const tasks=Array.isArray(data?.tasks)?data.tasks:[];
  for(const t of tasks){
