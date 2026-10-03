@@ -199,12 +199,19 @@ function renderActivities(){
   list.innerHTML=Object.entries(pageGroups).filter(([,items])=>items.length).map(([level,items])=>`<section class="activity-group circle${level}"><div class="activity-group-head"><div class="activity-group-title"><i></i>${activityCircleLabel(level)}</div><small>${level==='1'?'最低執行成本':level==='2'?'台中可直接行動':level==='3'?'中部可行動機會':'全國機會'}</small></div><div class="list">${items.map(a=>activityCardHTML(a,today)).join('')}</div></section>`).join('');
   renderActivityPagination(arr.length);renderActivityReferences();
 }
+function ensureActivityReviewDisclosureStyle(){
+ if(document.getElementById('activityReviewDisclosureStyle'))return;
+ const style=document.createElement('style');style.id='activityReviewDisclosureStyle';
+ style.textContent='.activity-review-disclosure{margin-top:14px;border:1px solid rgba(89,106,133,.18);border-radius:16px;background:rgba(255,255,255,.35);overflow:hidden}.activity-review-disclosure>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;font-weight:800}.activity-review-disclosure>summary::-webkit-details-marker{display:none}.activity-review-disclosure>summary small{font-weight:500;color:var(--muted,#6f7782);text-align:right}.activity-review-list{padding:0 12px 12px}.activity-review-list .reference-item{margin-top:8px}@media(max-width:520px){.activity-review-disclosure>summary{align-items:flex-start;flex-direction:column}.activity-review-disclosure>summary small{text-align:left}}';
+ document.head.appendChild(style);
+}
 function renderActivityReferences(){
+ ensureActivityReviewDisclosureStyle();
  const box=document.getElementById('activityReferences');if(!box)return;
  const refs=activityStore().filter(a=>a.kind==='reference'&&activityExternalUrl(a));
  const review=activityStore().filter(a=>RadarPolicy.activityReviewState(a).blocked);
  const refHTML=refs.length?`<div class="reference-title">📚 相關計畫資料（不列入可直接參加活動）</div>`+refs.map(a=>`<div class="reference-item"><div><b>${esc(a.title)}</b><small>${esc(a.statusText||'參考資料')} · ${esc(a.source||'官方來源')}</small></div><a class="btn" href="${esc(safeExternalUrl(activityExternalUrl(a)))}" target="_blank" rel="noopener noreferrer">查看官方資訊</a></div>`).join(''):'';
- const reviewHTML=review.length?`<div class="reference-title">⚠ 來源待複核（暫不列入推薦）</div>`+review.slice(0,20).map(a=>{const state=RadarPolicy.activityReviewState(a);return `<div class="reference-item"><div><b>${esc(a.title)}</b><small>${esc(state.reason)} · ${esc(a.source||a.organizer||'官方來源')}</small></div>${activityExternalUrl(a)?`<a class="btn" href="${esc(safeExternalUrl(activityExternalUrl(a)))}" target="_blank" rel="noopener noreferrer">查看來源</a>`:''}</div>`}).join(''):'';
+ const reviewHTML=review.length?`<details class="activity-review-disclosure"><summary><span>⚠ 來源待複核</span><small>${review.length} 項 · 暫不列入推薦 · 點擊展開</small></summary><div class="activity-review-list">${review.map(a=>{const state=RadarPolicy.activityReviewState(a);return `<div class="reference-item"><div><b>${esc(a.title)}</b><small>${esc(state.reason)} · ${esc(a.source||a.organizer||'官方來源')}</small></div>${activityExternalUrl(a)?`<a class="btn" href="${esc(safeExternalUrl(activityExternalUrl(a)))}" target="_blank" rel="noopener noreferrer">查看來源</a>`:''}</div>`}).join('')}</div></details>`:'';
  box.innerHTML=refHTML+reviewHTML;
 }
 function activityResetFilters(){['activitySearch'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});['activityScope','activityType','activityFitTier'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='全部'});activityPage=1;renderActivities()}

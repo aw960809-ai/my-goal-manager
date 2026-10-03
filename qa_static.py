@@ -233,3 +233,7 @@ assert "GOAL_MANAGER_VERSION='98.9.3'" in version_js, 'V98.9.3 version source mi
 activity_runtime=(root/'js'/'activity.js').read_text(encoding='utf-8')
 assert 'function activitySort(a,b)' in activity_runtime, 'activitySort comparator missing; activity list render will fail'
 assert '(b.fit.score-a.fit.score)' in activity_runtime and '(a.fit.circleLevel-b.fit.circleLevel)' in activity_runtime, 'activitySort ordering contract changed'
+
+# Compact source-review UX
+activity_runtime=(root/'js'/'activity.js').read_text(encoding='utf-8')
+assert 'activity-review-disclosure' in activity_runtime and '暫不列入推薦 · 點擊展開' in activity_runtime, 'source review must be collapsed by default'

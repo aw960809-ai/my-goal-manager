@@ -57,4 +57,12 @@ assert(
   'activity list comparator must exist: score first, then nearer circle'
 );
 
+
+assert(
+  activity.includes('activity-review-disclosure')&&
+  activity.includes('暫不列入推薦 · 點擊展開')&&
+  !activity.includes('review.slice(0,20)'),
+  'source-review rows must be collapsed by default instead of showing a long list'
+);
+
 console.log('OK: activity radar UI matches geography policy and remote-source status is coherent');
