@@ -433,19 +433,12 @@ function save(options={}){try{const ok=persistEnvelope(db,{backup:options.backup
 function esc(x){return String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 function todayKey(){const d=new Date(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${d.getFullYear()}-${m}-${day}`}
-function getTask(id){return db.tasks.find(t=>t.id===id)}
-function kids(id){return db.tasks.filter(t=>t.parent===id)}
-function roots(){return db.tasks.filter(t=>t.level===1)}
+function getTask(id){return GoalDomain.getTask(db.tasks,id)}
+function kids(id){return GoalDomain.children(db.tasks,id)}
+function roots(){return GoalDomain.roots(db.tasks)}
 function autoStatus(progress,archived=false){if(archived)return '已封存';const p=Math.max(0,Math.min(100,Math.round(+progress||0)));return p>=100?'已完成':p>0?'進行中':'未開始'}
-function periodForTask(t){
- if(!t)return null;
- if(t.level===1)return null;
- if(t.level===3)return {start:t.start||'',due:t.due||''};
- if(t.level===4)return periodForTask(getTask(t.parent));
- if(t.level===2){const subs=descendantsOfLevel(t.id,3).filter(x=>x.start&&x.due);if(!subs.length)return {start:'',due:''};return {start:subs.map(x=>x.start).sort()[0],due:subs.map(x=>x.due).sort().slice(-1)[0]}}
- return null;
-}
-function descendantsOfLevel(parent,level){return db.tasks.filter(x=>x.parent===parent&&x.level===level)}
+function periodForTask(t){return GoalDomain.periodForTask(db.tasks,t)}
+function descendantsOfLevel(parent,level){return GoalDomain.descendantsOfLevel(db.tasks,parent,level)}
 function weekStartKey(date=todayKey()){
  const d=new Date(date+'T00:00:00');d.setDate(d.getDate()-d.getDay()+(d.getDay()===0?-6:1));
  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -494,7 +487,102 @@ function periodLabel(t){const p=periodForTask(t);if(!p?.start||!p?.due)return '�
 function calc(t,stack=new Set()){if(!t)return 0;if(stack.has(t.id))return 0;const c=kids(t.id).filter(x=>x.status!=='已封存');const oldStatus=t.status;if(!c.length){if(t.level===4)t.progress=leafProgress(t);else t.progress=0;t.status=autoStatus(t.progress,t.status==='已封存');if(t.status==='已完成'&&oldStatus!=='已完成'&&t.status!=='已封存')completion(t);return t.progress}stack.add(t.id);const p=Math.round(c.reduce((s,x)=>s+calc(x,stack),0)/c.length);stack.delete(t.id);t.progress=p;t.status=autoStatus(p,t.status==='已封存');if(t.status==='已完成'&&oldStatus!=='已完成'&&t.status!=='已封存')completion(t);return p}
 function recalcAllStatuses(){const rs=roots();const rid=new Set(rs.map(r=>r.id));rs.forEach(t=>calc(t));db.tasks.filter(t=>t.level>1&&t.status!=='已封存'&&!rid.has(t.id)).forEach(t=>calc(t));return db.tasks}
 function completion(t){if(!db.logs.some(x=>(x.kind===STUDY_LOG_KIND.SYSTEM||x.type==='auto')&&x.taskId===t.id)){db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:t.id,name:t.name,time:new Date().toISOString(),minutes:0,type:'auto',kind:STUDY_LOG_KIND.SYSTEM,actual:false})}}
-function ancestors(id){const out=[];let cur=getTask(id),guard=0;while(cur&&guard++<5){out.unshift(cur);cur=getTask(cur.parent)}return out}
+function ancestors(id){return GoalDomain.ancestors(db.tasks,id,5)}
+let goalViewMode=storeGet('goalViewModeV1')==='map'?'map':'browse';
+let goalBrowseId=storeGet('goalBrowseIdV1')||null;
+
+function goalBrowseCurrent(){
+ const t=goalBrowseId?getTask(goalBrowseId):null;
+ if(!t||t.status==='已封存'||t.level>=4)return null;
+ return t;
+}
+function goalBrowseMeta(t){
+ const childCount=kids(t.id).filter(x=>x.status!=='已封存').length;
+ if(t.level===4){
+  const es=executionSummary(t);
+  return `本週 ${es.weeklyActual}/${es.weeklyTarget} 分 · 剩餘 ${es.weeklyRemaining} 分 · 累計 ${calc(t)}%`;
+ }
+ if(t.level===3)return `${periodLabel(t)} · ${childCount} 個具體行動`;
+ return `${childCount} 個${L[t.level+1]||'下層目標'} · 完成度 ${calc(t)}%`;
+}
+function goalBrowseCard(t){
+ const p=calc(t),childCount=kids(t.id).filter(x=>x.status!=='已封存').length;
+ const action=t.level===4?'查看':'進入';
+ return `<article class="goal-browse-card level-${t.level}">
+   <button class="goal-browse-main" type="button" onclick="browseGoal('${t.id}')">
+     <span class="goal-browse-level">${esc(L[t.level])}</span>
+     <b>${esc(t.name)}</b>
+     <small>${esc(goalBrowseMeta(t))}</small>
+     <span class="goal-browse-progress"><i style="width:${p}%"></i></span>
+   </button>
+   <div class="goal-browse-side">
+     <span class="goal-browse-pct">${p}%</span>
+     <span class="goal-browse-status ${t.status==='已完成'?'done':t.status==='進行中'?'run':''}">${esc(t.status)}</span>
+     <button class="goal-browse-info" type="button" aria-label="查看 ${esc(t.name)} 資訊" onclick="openGoalInfoModal('${t.id}')">ⓘ</button>
+     <span class="goal-browse-enter">${action}${t.level<4&&childCount?` · ${childCount}`:''}</span>
+   </div>
+ </article>`;
+}
+function renderGoalBrowse(){
+ const list=document.getElementById('goalBrowseList'),crumb=document.getElementById('goalBreadcrumb'),context=document.getElementById('goalBrowseContext'),up=document.getElementById('goalBrowseUp'),add=document.getElementById('goalBrowseAdd');
+ if(!list||!crumb||!context)return;
+
+ let current=goalBrowseCurrent();
+ if(goalBrowseId&&!current){goalBrowseId=null;storeSet('goalBrowseIdV1','');}
+ const chain=current?ancestors(current.id):[];
+ crumb.innerHTML=`<button type="button" onclick="browseGoalTo('')">全部方向</button>${chain.map(x=>`<span>›</span><button type="button" onclick="browseGoalTo('${x.id}')">${esc(x.name)}</button>`).join('')}`;
+
+ const rows=GoalDomain.browseItems(db.tasks,current?.id||null).sort((a,b)=>(a.status==='已完成')-(b.status==='已完成')||String(a.name).localeCompare(String(b.name),'zh-Hant'));
+ const p=current?calc(current):0;
+ context.innerHTML=current
+   ? `<div><small>${esc(L[current.level])}</small><b>${esc(current.name)}</b><span>完成度 ${p}% · ${rows.length} 個下層</span></div><button type="button" onclick="openGoalInfoModal('${current.id}')">詳細資訊 →</button>`
+   : `<div><small>ROOT</small><b>主要方向</b><span>${rows.length} 個主要目標</span></div><button type="button" onclick="setGoalViewMode('map')">查看完整地圖 →</button>`;
+
+ list.innerHTML=rows.length?rows.map(goalBrowseCard).join(''):'<div class="empty">這一層目前沒有下層目標。</div>';
+ if(up){up.disabled=!current;up.textContent=current?'← 上一層':'已在最上層'}
+ if(add)add.textContent=current?`＋ 新增${L[Math.min(4,current.level+1)]}`:'＋ 新增方向';
+ bindInteractionFeedback();
+}
+function setGoalViewMode(mode){
+ goalViewMode=mode==='map'?'map':'browse';
+ storeSet('goalViewModeV1',goalViewMode);
+ renderGoalsPage();
+}
+function browseGoal(id){
+ const t=getTask(id);if(!t)return;
+ selected=t.id;
+ if(t.level>=4){openGoalInfoModal(t.id);return}
+ goalBrowseId=t.id;storeSet('goalBrowseIdV1',String(t.id));renderGoalBrowse();
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+function browseGoalTo(id){
+ if(!id){goalBrowseId=null;storeSet('goalBrowseIdV1','');renderGoalBrowse();return}
+ const t=getTask(id);if(!t||t.level>=4)return;
+ goalBrowseId=t.id;storeSet('goalBrowseIdV1',String(t.id));renderGoalBrowse();
+}
+function browseGoalUp(){
+ const current=goalBrowseCurrent();
+ if(!current){return}
+ browseGoalTo(current.parent||'');
+}
+function addGoalFromBrowse(){
+ const current=goalBrowseCurrent();
+ openAdd(current?.id||null);
+}
+function focusGoalSearch(){
+ setGoalViewMode('map');
+ setTimeout(()=>document.getElementById('q')?.focus(),30);
+}
+function renderGoalsPage(){
+ const browse=document.getElementById('goalBrowsePanel'),map=document.getElementById('goalMapPanel'),browseTab=document.getElementById('goalBrowseTab'),mapTab=document.getElementById('goalMapTab');
+ if(!browse||!map)return;
+ const isMap=goalViewMode==='map';
+ browse.hidden=isMap;map.hidden=!isMap;
+ if(browseTab){browseTab.classList.toggle('active',!isMap);browseTab.setAttribute('aria-selected',String(!isMap))}
+ if(mapTab){mapTab.classList.toggle('active',isMap);mapTab.setAttribute('aria-selected',String(isMap))}
+ if(isMap)renderTree();else renderGoalBrowse();
+}
+
 function taskHTML(t){
  const p=calc(t),c=kids(t.id),open=storeGet('o'+t.id)!=='0',isHit=goalSearchMatch(t),es=t.level===4?executionSummary(t):null;
  const planned=Array.isArray(db.executionPlans)?db.executionPlans.filter(x=>String(x.taskId)===String(t.id)&&activeExecutionPlan(x)):[]; const meta=t.level===3?('期間 '+periodLabel(t)):t.level===4?(`本週 ${es.weeklyActual}/${es.weeklyTarget} 分 · 剩餘 ${es.weeklyRemaining} 分 · 累計 ${es.totalActual} 分 · 期間 ${periodLabel(t)}${planned.length?` · 已安排 ${planned.length} 次`:''}`):'期間由下層子任務決定';
@@ -960,6 +1048,7 @@ function go(id){
  if(id==='activity')renderActivities();
  if(id==='scholarship')renderScholarships();
  if(id==='calendar')renderCalendar();
+ if(id==='goals')renderGoalsPage();
  if(id==='dash'){dashboard();updateHubContext();bindInteractionFeedback()}
 }
 document.querySelectorAll('.bottom-nav button').forEach(b=>b.onclick=()=>go(b.dataset.view));bindInteractionFeedback();
@@ -1279,7 +1368,7 @@ function calendarGoToPickedDate(){const input=document.getElementById('calendarD
 function syncCalendarDatePicker(){const input=document.getElementById('calendarDatePicker');if(input)input.value=db.calendarSelected||todayKey()}
 function calendarShift(months){const d=calendarBaseDate();calendarCursor=new Date(d.getFullYear(),d.getMonth()+months,1);renderCalendar()}
 function calendarToday(){calendarCursor=new Date();db.calendarSelected=todayKey();save();renderCalendar();toast('已回到今天')}
-function renderAll(){db=normalize(db);rebuildExecutionPlanActuals();removeLegacyStandaloneToeicGoals();ensureActivities();ensureToeicPlan();recalcAllStatuses();renderTree();dashboard();today();renderTimerState();renderActivities();renderScholarships();renderCalendar();stats();bindInteractionFeedback();bindActivitySearch()}
+function renderAll(){db=normalize(db);rebuildExecutionPlanActuals();removeLegacyStandaloneToeicGoals();ensureActivities();ensureToeicPlan();recalcAllStatuses();renderGoalsPage();dashboard();today();renderTimerState();renderActivities();renderScholarships();renderCalendar();stats();bindInteractionFeedback();bindActivitySearch()}
 function validateData(data){
  const errors=[],ids=new Set();const tasks=Array.isArray(data?.tasks)?data.tasks:[];
  for(const t of tasks){

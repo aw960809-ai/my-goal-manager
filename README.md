@@ -74,3 +74,12 @@ V96.5 是「七模組 UI 一致性＋運行穩定性」修正版。優先原則�
 - 執行頁改為 Timer 優先；選取任務後 Timer 卡片會 sticky。
 - 未來安排獨立成區塊；「其他讀書」預設收合，需要時再展開。
 - 活動／獎學金視為首頁的子頁，進入時首頁導覽保持選取。
+
+
+## V97.14.0｜目標雙模式與 Goal Domain
+- 目標頁預設改為逐層瀏覽：方向 → 階段目標 → 子任務 → 具體行動。
+- Breadcrumb、上一層、搜尋與新增下層皆保留在單手手機操作範圍內。
+- 完整目標地圖保留，搜尋／狀態／層級篩選與整棵樹鳥瞰不刪除。
+- 新增 `js/domain/goals.js`，先抽出純階層與期間邏輯：getTask、children、roots、ancestors、periodForTask、browseItems。
+- `app.js` 保留相容 wrapper，既有呼叫點不需一次重寫。
+- 新增 `tests/goal-domain.test.js`，GitHub Pages 部署前會執行 GoalDomain 單元測試。

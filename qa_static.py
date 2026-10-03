@@ -91,7 +91,18 @@ assert 'executionNowPanel' in html and 'other-study-disclosure' in html, 'execut
 assert "const navId=(id==='activity'||id==='scholarship')?'dash':id;" in app, 'subview navigation ownership missing'
 assert "panel.classList.toggle('has-selection',has)" in app, 'sticky timer state binding missing'
 assert '97.13.0 information architecture' in design and 'repeat(5,minmax(0,1fr))' in design, 'phase 3 design rules missing'
+goal_domain=(root/'js'/'domain'/'goals.js').read_text(encoding='utf-8')
+goal_test=(root/'tests'/'goal-domain.test.js').read_text(encoding='utf-8')
+assert './js/domain/goals.js' in html and html.find('./js/domain/goals.js') < html.find('./js/app.js'), 'GoalDomain must load before app.js'
+assert all(x in goal_domain for x in ['getTask','children','roots','ancestors','periodForTask','browseItems']), 'GoalDomain API incomplete'
+assert 'GoalDomain.getTask' in app and 'GoalDomain.children' in app and 'GoalDomain.periodForTask' in app, 'app.js must delegate hierarchy helpers'
+assert 'goalBrowsePanel' in html and 'goalMapPanel' in html and 'goalBrowseTab' in html and 'goalMapTab' in html, 'goal dual-mode UI missing'
+assert all(x in app for x in ['renderGoalsPage','renderGoalBrowse','setGoalViewMode','browseGoalUp','focusGoalSearch']), 'goal browse controller missing'
+assert '97.14.0 goal dual-mode navigation' in design, 'phase 4 goal design rules missing'
+assert 'GoalDomain hierarchy, path, browse and period helpers' in goal_test, 'GoalDomain test missing'
+assert './js/domain/goals.js' in sw, 'service worker missing GoalDomain module'
 
 
 
-print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA')
+
+print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals')

@@ -106,11 +106,35 @@
 </section>
 
 <section id="goals" class="view">
-<div class="goal-shell">
-  <div class="panel goal-tree-panel">
-    <div class="goalnav-head"><div><h2>目標地圖</h2></div></div>
-    <div class="goal-map-tools goal-map-tools">
-      <div class="goal-search goal-search"><span>⌕</span><input id="q" placeholder="搜尋目標名稱或關鍵字；結果直接定位…" oninput="renderTree()" autocomplete="off"><button type="button" class="goal-search-clear" aria-label="清除搜尋" title="清除搜尋" onclick="clearGoalSearch()">×</button></div>
+  <header class="goal-page-head">
+    <div>
+      <span class="home-eyebrow">GOALS</span>
+      <h2>目標</h2>
+      <p>平常逐層瀏覽；需要搜尋、篩選或鳥瞰時再切到完整地圖。</p>
+    </div>
+    <div class="goal-view-switch" role="tablist" aria-label="目標檢視模式">
+      <button id="goalBrowseTab" class="active" type="button" role="tab" aria-selected="true" onclick="setGoalViewMode('browse')">逐層瀏覽</button>
+      <button id="goalMapTab" type="button" role="tab" aria-selected="false" onclick="setGoalViewMode('map')">完整地圖</button>
+    </div>
+  </header>
+
+  <div id="goalBrowsePanel" class="panel goal-browse-panel">
+    <div class="goal-browse-toolbar">
+      <div id="goalBreadcrumb" class="goal-breadcrumb" aria-label="目前目標路徑"></div>
+      <div class="goal-browse-actions">
+        <button id="goalBrowseUp" class="btn" type="button" onclick="browseGoalUp()">上一層</button>
+        <button class="btn" type="button" onclick="focusGoalSearch()">搜尋</button>
+        <button id="goalBrowseAdd" class="btn primary" type="button" onclick="addGoalFromBrowse()">＋ 新增</button>
+      </div>
+    </div>
+    <div id="goalBrowseContext" class="goal-browse-context"></div>
+    <div id="goalBrowseList" class="goal-browse-list"></div>
+  </div>
+
+  <div id="goalMapPanel" class="panel goal-tree-panel" hidden>
+    <div class="goalnav-head"><div><h2>完整目標地圖</h2><p>搜尋、篩選或一次查看整棵目標樹。</p></div></div>
+    <div class="goal-map-tools">
+      <div class="goal-search"><span>⌕</span><input id="q" placeholder="搜尋目標名稱或關鍵字；結果直接定位…" oninput="renderTree()" autocomplete="off"><button type="button" class="goal-search-clear" aria-label="清除搜尋" title="清除搜尋" onclick="clearGoalSearch()">×</button></div>
       <select id="sf" onchange="renderTree()"><option value="all">全部狀態</option><option value="未開始">未開始</option><option value="進行中">進行中</option><option value="已完成">已完成</option></select>
       <select id="lf" onchange="renderTree()"><option value="all">全部層級</option><option value="1">方向／重要目標</option><option value="2">階段目標</option><option value="3">子任務</option><option value="4">具體實現方式</option></select>
     </div>
@@ -118,15 +142,12 @@
       <button class="btn primary" onclick="openAdd(null)">＋ 新增方向</button>
       <button id="expandToggleBtn" class="btn" onclick="toggleAllGoals()">⌄ 展開全部</button>
       <button class="btn gold" onclick="resetGoalFilters()">↺ 重設篩選</button>
-      
     </div>
     <div id="goalFilterState" class="goal-filter-state"></div>
     <div class="goal-legend"><span><i class="l1"></i>方向</span><span><i class="l2"></i>階段目標</span><span><i class="l3"></i>子任務</span><span><i class="l4"></i>具體實現</span></div>
     <div id="tree" class="tree"></div>
   </div>
-</div>
 </section>
-
 
 <section id="activity" class="view">
   <div class="panel">
@@ -298,6 +319,7 @@
 <script src="./config/system-config.js" defer></script>
 <script src="./js/security.js" defer></script>
 <script src="./js/store.js" defer></script>
+<script src="./js/domain/goals.js" defer></script>
 <script src="./js/settings.js" defer></script>
 <script src="./js/activity.js" defer></script>
 <script src="./js/scholarship.js" defer></script>
