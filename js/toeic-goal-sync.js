@@ -1,7 +1,7 @@
 /* THU Goal Manager - GitHub same-origin TOEIC sync */
 (function(){
   "use strict";
-  const VERSION="98.0.1-github";
+  const VERSION="98.10.0-integrated";
   const HUB_KEY="GoalManagerToeicEventHubV2";
   const PROCESSED_KEY="GoalManagerToeicSync::processed";
   const STATUS_KEY="GoalManagerToeicSync::status";
@@ -14,12 +14,21 @@
   const saveLocal=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(_){return false}};
   const getProcessed=()=>{const raw=localStorage.getItem(PROCESSED_KEY),x=raw?JSON.parse(raw):[];if(!Array.isArray(x))throw Error("同步去重紀錄格式異常，未覆寫原資料");return x.map(String)};
   const saveProcessed=a=>saveLocal(PROCESSED_KEY,[...new Set(a.map(String))]);
-  const eventDate=e=>String(e?.endedAt||e?.startedAt||"").slice(0,10);
+  const eventDate=e=>{
+    const raw=e?.sourceDate||e?.endedAt||e?.startedAt||"";
+    if(/^\d{4}-\d{2}-\d{2}$/.test(String(raw)))return String(raw);
+    const d=new Date(raw);if(Number.isNaN(d.getTime()))return"";
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  };
   function activeTask(id,date){try{const t=typeof getTask==="function"?getTask(id):null;if(!t||t.level!==4||t.status==="已封存")return null;const p=typeof periodForTask==="function"?periodForTask(t):null;if(!p?.start||!p?.due||date<p.start||date>p.due)return null;return t}catch(_){return null}}
-  function split(total,pairs){total=Math.max(1,Math.round(Number(total)||1));const usable=pairs.filter(x=>x.task&&x.weight>0);if(!usable.length)return[];if(total<usable.length)return[{task:usable[0].task,minutes:total}];let left=total;return usable.map((x,i)=>{let minutes=i===usable.length-1?left:Math.max(1,Math.floor(total*x.weight));minutes=Math.min(minutes,left-(usable.length-i-1));left-=minutes;return{task:x.task,minutes}}).filter(x=>x.minutes>0)}
-  function allocationsFor(e){const date=eventDate(e),mins=Math.max(1,Math.round(Number(e?.durationMinutes)||1));if(!date)return[];const v=activeTask("g3-1-1-1",date),g=activeTask("g3-1-1-2",date);if(v||g)return split(mins,[{task:v,weight:.55},{task:g,weight:.45}]);const p56=activeTask("g3-2-2-1",date),p7=activeTask("g3-2-2-2",date);if(p56||p7)return split(mins,[{task:p56,weight:.25},{task:p7,weight:.75}]);const keep=activeTask("g3-3-1-1",date),err=activeTask("g3-3-1-2",date);if(keep||err)return split(mins,[{task:keep,weight:.6},{task:err,weight:.4}]);const timed=activeTask("g3-4-1-2",date);if(timed)return[{task:timed,minutes:mins}];const speed=activeTask("g3-5-1-2",date);if(speed)return[{task:speed,minutes:mins}];return[]}
+  function allocationsFor(e){
+    const date=eventDate(e),mins=Math.max(.01,Math.round((Number(e?.durationMinutes)||0)*10000)/10000);
+    if(!date||!window.ToeicPlanDomain)return[];
+    const unit=ToeicPlanDomain.inferUnit(e),id=ToeicPlanDomain.targetTaskId(date,unit),task=id?activeTask(id,date):null;
+    return task?[{task,minutes:mins,learningUnit:unit}]:[];
+  }
   function pairExists(eventId,taskId){try{return Array.isArray(db?.logs)&&db.logs.some(l=>String(l?.sourceEventId||"")===String(eventId)&&String(l?.taskId||"")===String(taskId))}catch(_){return false}}
-  function makeLog(e,a,index){return{id:`toeic-sync-${String(e.eventId).replace(/[^a-zA-Z0-9_-]/g,"-")}-${a.task.id}-${index}`,taskId:a.task.id,name:a.task.name,time:e.endedAt||e.startedAt||new Date().toISOString(),minutes:a.minutes,actual:true,planId:null,source:"news-toeic-github",sourceEventId:e.eventId,sourceArticleId:e.articleId||"",sourceArticleTitle:e.articleTitle||"",sourceAccuracy:Number(e.accuracy||0),sourceReadingWpm:Number(e.readingWpm||0),sourceQuestions:Number(e.questionsAnswered||0),sourceCorrect:Number(e.correctAnswers||0),sourceWrongSkills:Array.isArray(e.wrongSkills)?e.wrongSkills.slice(0,12):[]}}
+  function makeLog(e,a,index){return{id:`toeic-sync-${String(e.eventId).replace(/[^a-zA-Z0-9_-]/g,"-")}-${a.task.id}-${index}`,taskId:a.task.id,name:a.task.name,time:e.endedAt||e.startedAt||new Date().toISOString(),minutes:a.minutes,actual:true,planId:null,source:"news-toeic-github",sourceEventId:e.eventId,sourceArticleId:e.articleId||"",sourceArticleTitle:e.articleTitle||"",sourceAccuracy:Number(e.accuracy||0),sourceReadingWpm:Number(e.readingWpm||0),sourceQuestions:Number(e.questionsAnswered||0),sourceCorrect:Number(e.correctAnswers||0),sourceWrongSkills:Array.isArray(e.wrongSkills)?e.wrongSkills.slice(0,12):[],sourceLearningUnit:a.learningUnit||(window.ToeicPlanDomain?ToeicPlanDomain.inferUnit(e):'')}}
   function underToeic(t){
     let guard=0;
     while(t&&guard++<10){if(t.status==="已封存")return false;if(t.id==="g3")return true;t=getTask(t.parent)}
@@ -27,10 +36,10 @@
   }
   function vocabularyTask(date){
     const preferred=localStorage.getItem(VOCAB_TARGET_KEY)||"auto";
-    if(preferred!=="auto"){const t=activeTask(preferred,date);return t&&underToeic(t)?t:null}
-    const ids=["g3-1-1-1","g3-3-1-1",...db.tasks.filter(t=>t.level===4&&/字彙|單字|詞彙|vocab/i.test(t.name||"")).map(t=>t.id)];
-    for(const id of new Set(ids)){const t=activeTask(id,date);if(t&&underToeic(t))return t}
-    return null;
+    if(preferred!=="auto"){const t=activeTask(preferred,date);if(t&&underToeic(t))return t}
+    if(!window.ToeicPlanDomain)return null;
+    const id=ToeicPlanDomain.targetTaskId(date,ToeicPlanDomain.UNITS.REVIEW),t=id?activeTask(id,date):null;
+    return t&&underToeic(t)?t:null;
   }
   function vocabDays(e){
     if(e.source!=="news-toeic"||!String(e.eventId).startsWith("toeic-vocab-")||!Number.isInteger(e.questionsAnswered)||e.questionsAnswered<1||!Number.isInteger(e.correctAnswers)||e.correctAnswers<0||e.correctAnswers>e.questionsAnswered)throw Error("單字同步紀錄欄位異常");
@@ -125,13 +134,13 @@
   }
   function vocabSettingsHTML(){
     const selected=localStorage.getItem(VOCAB_TARGET_KEY)||"auto";
-    const tasks=Array.isArray(db?.tasks)?db.tasks.filter(t=>t.level===4&&underToeic(t)&&!/^g3-6/.test(t.id)):[];
+    const tasks=Array.isArray(db?.tasks)?db.tasks.filter(t=>t.level===4&&t.status!=='已封存'&&underToeic(t)&&!/^g3-6/.test(t.id)):[];
     const options=[`<option value="auto" ${selected==="auto"?"selected":""}>自動：期間內的字彙行動</option>`,...tasks.map(t=>{const p=periodForTask(t)||{};return `<option value="${esc(t.id)}" ${selected===t.id?"selected":""}>${esc(t.name)}（${esc(p.start)}～${esc(p.due)}）</option>`})];
     if(selected!=="auto"&&!tasks.some(t=>t.id===selected))options.push(`<option value="${esc(selected)}" selected>原指定行動目前不可用；尚未變更設定</option>`);
-    return `<p>單字同步 v2.6.2：按實際練習日期與秒數計入，不分攤給文法；期間外不計入。</p><label>單字訓練計入 <select id="gmVocabSyncTarget" style="max-width:100%;width:100%">${options.join("")}</select></label>`;
+    return `<p>單字／複習同步：按實際練習日期與秒數計入當期「短時間／弱點複習」；期間外不補造時間。</p><label>單字訓練計入 <select id="gmVocabSyncTarget" style="max-width:100%;width:100%">${options.join("")}</select></label>`;
   }
 
-  function panelHTML(){const s=load(STATUS_KEY,null)||state.last||{},status=s?.error?`同步異常：${s.error}`:s?.message||"尚無同步紀錄";return`<section id="gmToeicGoalSync" class="gm-toeic-sync"><div class="gm-toeic-head"><div><h3>News × TOEIC GitHub 直連</h3><p>同一 GitHub Pages 網域直接同步，不再使用 AppDeploy iframe。</p></div><span class="ok">已啟用</span></div>${vocabSettingsHTML()}<div class="gm-toeic-actions"><button type="button" class="btn gold" onclick="window.GoalManagerToeicSync.sync()">立即同步</button></div><div class="gm-toeic-status">${esc(status)}</div></section>`}
+  function panelHTML(){const s=load(STATUS_KEY,null)||state.last||{},status=s?.error?`同步異常：${s.error}`:s?.message||"尚無同步紀錄";return`<section id="gmToeicGoalSync" class="gm-toeic-sync"><div class="gm-toeic-head"><div><h3>TOEIC × Goal Manager GitHub 直連</h3><p>閱讀、複習、題目與模考依實際紀錄回推到當期整合目標，不再拆成單字／文法／Part 目標。</p></div><span class="ok">已啟用</span></div>${vocabSettingsHTML()}<div class="gm-toeic-actions"><button type="button" class="btn gold" onclick="window.GoalManagerToeicSync.sync()">立即同步</button></div><div class="gm-toeic-status">${esc(status)}</div></section>`}
   function styles(){if(document.getElementById("gmToeicGoalSyncStyle"))return;const s=document.createElement("style");s.id="gmToeicGoalSyncStyle";s.textContent='.gm-toeic-sync{margin-top:16px;padding:16px;border:1px solid #dce5e1;border-radius:18px;background:#fff}.gm-toeic-head{display:flex;justify-content:space-between;gap:12px}.gm-toeic-head h3{margin:0;color:#075c42}.gm-toeic-head p{margin:5px 0 0;color:#77827e;font-size:13px}.gm-toeic-head .ok{color:#08764f;font-weight:800}.gm-toeic-actions{margin-top:10px}.gm-toeic-status{margin-top:11px;padding:9px 11px;border-radius:12px;background:#f6f9f8;color:#29473e;font-size:12px}';document.head.appendChild(s)}
   function inject(){styles();const host=document.getElementById("settingsBody");if(!host)return;document.getElementById("gmToeicGoalSync")?.remove();host.insertAdjacentHTML("beforeend",panelHTML());const select=document.getElementById("gmVocabSyncTarget");if(select)select.onchange=()=>{try{localStorage.setItem(VOCAB_TARGET_KEY,select.value);sync()}catch{if(typeof toast==="function")toast("設定無法保存，請先匯出備份")}}}
   function hook(){if(typeof window.renderSettings!=="function"||window.renderSettings.__gmToeicSyncGithub)return;const original=window.renderSettings,wrapped=function(){const r=original.apply(this,arguments);setTimeout(inject,0);return r};wrapped.__gmToeicSyncGithub=true;window.renderSettings=wrapped}

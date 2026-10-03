@@ -102,6 +102,11 @@ assert all(x in app for x in ['renderGoalsPage','renderGoalBrowse','setGoalViewM
 assert '97.14.0 goal dual-mode navigation' in design, 'phase 4 goal design rules missing'
 assert 'GoalDomain hierarchy, path, browse and period helpers' in goal_test, 'GoalDomain test missing'
 assert './js/domain/goals.js' in sw, 'service worker missing GoalDomain module'
+toeic_plan=(root/'js'/'domain'/'toeic-plan.js').read_text(encoding='utf-8')
+assert './js/domain/toeic-plan.js' in html and html.find('./js/domain/toeic-plan.js') < html.find('./js/app.js'), 'ToeicPlanDomain must load before app.js'
+assert './js/domain/toeic-plan.js' in sw, 'service worker missing ToeicPlanDomain module'
+assert all(x in toeic_plan for x in ['taskSpecs','apply','targetTaskId','inferUnit','aggregateProgress','progressAliases']), 'ToeicPlanDomain API incomplete'
+assert 'ToeicPlanDomain.apply' in app and 'ToeicPlanDomain.aggregateProgress' in app, 'app.js missing TOEIC plan delegation'
 
 # V98 Domain Core guards
 study_domain=(root/'js'/'domain'/'study-logs.js').read_text(encoding='utf-8')
@@ -180,7 +185,7 @@ assert 'source.match(/const\\s+PWA_VERSION' not in pwa, 'stale SW literal-versio
 
 assert "const KEY='lawLangGoalSystemV92'" in app and 'BACKUP_KEYS' in app, 'persistent keys must remain stable'
 
-assert "GOAL_MANAGER_VERSION='98.9.4'" in version_js, 'V98.9.4 version source missing'
+assert "GOAL_MANAGER_VERSION='98.10.0'" in version_js, 'V98.10.0 version source missing'
 
 
 
@@ -206,7 +211,7 @@ assert all(x in analytics_runtime for x in ['setText','setHTML','setWidth']), 'A
 
 print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core, V98.1 calendar/timer, V98.2 execution/data, V98.3 UI pages, V98.4 goals/analytics pages, V98.5 UI cleanup, V98.6 dashboard/orchestration, V98.7 persistence, V98.8 bootstrap/regression, V98.9 radar accuracy, V98.9.1 analytics runtime')
 
-# V98.9.4 study-history durability guards
+# V98.10.0 study-history durability guards
 history_guard=(root/'js'/'data'/'history-guard.js').read_text(encoding='utf-8')
 persistence_guard=(root/'js'/'data'/'persistence.js').read_text(encoding='utf-8')
 settings_guard=(root/'js'/'settings.js').read_text(encoding='utf-8')
@@ -218,17 +223,17 @@ assert 'guard:({oldRaw,nextData})' in app, 'DataPersistence history guard wiring
 assert 'Rotate only after the new primary copy has passed integrity checks' in persistence_guard, 'backup rotation must happen after verified primary write'
 assert 'Best-effort rollback of the primary copy' in persistence_guard, 'verified-write rollback missing'
 assert '歷程安全基準' in settings_guard, 'settings history anchor visibility missing'
-assert "GOAL_MANAGER_VERSION='98.9.4'" in version_js, 'V98.9.4 version source missing'
+assert "GOAL_MANAGER_VERSION='98.10.0'" in version_js, 'V98.10.0 version source missing'
 
 
-# V98.9.4 radar UI and source-health coherence
+# V98.10.0 radar UI and source-health coherence
 assert '<option value="中部">③ 中部</option>' in html, 'activity UI missing Central Taiwan circle'
 assert '<option value="全國">④ 全國</option>' in html, 'activity UI missing Nationwide circle 4'
 assert '<option value="海外／國際">④ 海外／國際</option>' not in html, 'international still incorrectly rendered as circle 4'
 assert '<b>③ 中部</b>' in html and '<b>④ 全國</b>' in html, 'activity radar guide is stale'
 autofetch_health=(root/'js'/'autofetch-health.js').read_text(encoding='utf-8')
 assert 'syncActivityLoadState' in autofetch_health and '__activityRemoteRetryDone' in autofetch_health, 'activity source-health/list-load retry bridge missing'
-assert "GOAL_MANAGER_VERSION='98.9.4'" in version_js, 'V98.9.4 version source missing'
+assert "GOAL_MANAGER_VERSION='98.10.0'" in version_js, 'V98.10.0 version source missing'
 
 activity_runtime=(root/'js'/'activity.js').read_text(encoding='utf-8')
 assert 'function activitySort(a,b)' in activity_runtime, 'activitySort comparator missing; activity list render will fail'
@@ -239,8 +244,8 @@ activity_runtime=(root/'js'/'activity.js').read_text(encoding='utf-8')
 assert 'activity-review-disclosure' in activity_runtime and '暫不列入推薦 · 點擊展開' in activity_runtime, 'source review must be collapsed by default'
 
 
-# V98.9.4 published source-review collapse guard
+# V98.10.0 published source-review collapse guard
 activity_runtime=(root/'js'/'activity.js').read_text(encoding='utf-8')
 assert '<details class="activity-review-disclosure">' in activity_runtime, 'source-review collapse markup missing'
 assert '暫不列入推薦 · 點擊展開' in activity_runtime, 'source-review collapse summary missing'
-assert "GOAL_MANAGER_VERSION='98.9.4'" in version_js, 'V98.9.4 version source missing'
+assert "GOAL_MANAGER_VERSION='98.10.0'" in version_js, 'V98.10.0 version source missing'

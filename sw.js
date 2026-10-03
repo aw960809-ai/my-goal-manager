@@ -1,6 +1,6 @@
 /* THU personal service worker */
 importScripts('./config/version.js');
-const PWA_VERSION=String(globalThis.GOAL_MANAGER_VERSION||'98.9.4');
+const PWA_VERSION=String(globalThis.GOAL_MANAGER_VERSION||'98.10.0');
 const PWA_SIGNATURE='thu-personal-'+PWA_VERSION+'-core';
 const CACHE_PREFIX='thu-goal-personal-v';
 const LEGACY_CACHE_PREFIX='law-goal-web-v';
@@ -10,7 +10,7 @@ const APP_SHELL=[
   './icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png',
   './404.html','./css/tokens.css','./css/base.css','./css/app-ui.css','./css/design-system.css','./config/version.js','./config/system-config.js',
   './config/profiles/personal-thu.js','./js/core/runtime-profile.js','./js/core/data-boundary.js',
-  './js/security.js','./js/store.js','./js/domain/goals.js','./js/domain/study-logs.js','./js/domain/execution.js','./js/domain/analytics.js','./js/domain/calendar.js','./js/domain/radar-policy.js','./js/services/timer-service.js','./js/services/execution-service.js','./js/data/normalization.js','./js/data/migrations.js','./js/data/repository.js','./js/data/persistence.js','./js/data/history-guard.js','./js/ui/pages/calendar-page.js','./js/ui/pages/execution-page.js','./js/ui/pages/goals-page.js','./js/ui/pages/analytics-page.js','./js/ui/pages/dashboard-page.js','./js/application/orchestrator.js','./js/settings.js','./js/activity.js',
+  './js/security.js','./js/store.js','./js/domain/goals.js','./js/domain/study-logs.js','./js/domain/execution.js','./js/domain/toeic-plan.js','./js/domain/analytics.js','./js/domain/calendar.js','./js/domain/radar-policy.js','./js/services/timer-service.js','./js/services/execution-service.js','./js/data/normalization.js','./js/data/migrations.js','./js/data/repository.js','./js/data/persistence.js','./js/data/history-guard.js','./js/ui/pages/calendar-page.js','./js/ui/pages/execution-page.js','./js/ui/pages/goals-page.js','./js/ui/pages/analytics-page.js','./js/ui/pages/dashboard-page.js','./js/application/orchestrator.js','./js/settings.js','./js/activity.js',
   './js/scholarship.js','./js/app.js','./js/scholarship-lifecycle.js',
   './js/autofetch-health.js',
   './js/catalog-lifecycle.js',

@@ -167,8 +167,8 @@ ensureHistoryAnchor();
 removeLegacyStandaloneToeicGoals();
 ensureSchoolCalendar();
 const thu1151LawPlanMigration=ensureThu1151LawPreviewPlan();
-ensureToeicPlan();
-const initialPersonalSaveOk=save({backup:!!(thu1151LawPlanMigration&&thu1151LawPlanMigration.applied)});
+const toeicIntegratedPlanMigration=ensureToeicPlan();
+const initialPersonalSaveOk=save({backup:!!((thu1151LawPlanMigration&&thu1151LawPlanMigration.applied)||(toeicIntegratedPlanMigration&&toeicIntegratedPlanMigration.applied))});
 if(initialPersonalSaveOk&&thu1151LawPlanMigration&&thu1151LawPlanMigration.applied){
  try{storeSet(THU_1151_LAW_PLAN_MARKER,'1')}catch(_){}
 }
@@ -472,24 +472,18 @@ function ensureThu1151LawPreviewPlan(){
 }
 
 function ensureToeicPlan(){
- const add=[
-  ['g3','語言能力準備',1,null,0],
-  ['g3-1','TOEIC 基礎能力建立',2,'g3',0],['g3-1-1','字彙與核心句型',3,'g3-1',0],['g3-1-1-1','多益核心字彙',4,'g3-1-1',75],['g3-1-1-2','文法與句型基礎',4,'g3-1-1',75],
-  ['g3-2','TOEIC 題型能力建立',2,'g3',0],['g3-2-1','聽力題型訓練 Part 1–4',3,'g3-2',0],['g3-2-1-1','Part 1–2 基礎聽力',4,'g3-2-1',90],['g3-2-1-2','Part 3–4 情境聽力',4,'g3-2-1',90],['g3-2-2','閱讀題型訓練 Part 5–7',3,'g3-2',0],['g3-2-2-1','Part 5–6 文法與段落填空',4,'g3-2-2',90],['g3-2-2-2','Part 7 閱讀理解',4,'g3-2-2',90],
-  ['g3-3','期中考試週維持',2,'g3',0],['g3-3-1','低負荷維持與錯題複習',3,'g3-3',0],['g3-3-1-1','字彙／聽力維持',4,'g3-3-1',45],['g3-3-1-2','錯題快速複習',4,'g3-3-1',30],
-  ['g3-4','TOEIC 實戰與弱點修正',2,'g3',0],['g3-4-1','分項實戰與弱點循環',3,'g3-4',0],['g3-4-1-1','聽力限時練習',4,'g3-4-1',105],['g3-4-1-2','閱讀限時練習',4,'g3-4-1',105],['g3-4-1-3','錯題與弱點修正',4,'g3-4-1',0],
-  ['g3-5','考前衝刺',2,'g3',0],['g3-5-1','完整模擬與考前調整',3,'g3-5',0],['g3-5-1-1','完整模擬測驗',4,'g3-5-1',150],['g3-5-1-2','閱讀速度與時間配置',4,'g3-5-1',90],['g3-5-1-3','聽力穩定度與最後修正',4,'g3-5-1',90],['g3-6','TOEIC 正式考試',2,'g3',0],['g3-6-1-stage','正式考試安排',3,'g3-6',0],['g3-6-1','2026/12/20 TOEIC 聽力與閱讀測驗',4,'g3-6-1-stage',0]
- ];
- const ids=new Set(db.tasks.map(t=>String(t.id)));
- add.forEach(([id,name,level,parent,w])=>{if(!ids.has(id)){db.tasks.push(mk(id,name,level,parent,'未開始',w));ids.add(id)}});
- const periods={'g3-1-1':['2026-09-07','2026-09-27'],'g3-2-1':['2026-09-28','2026-10-25'],'g3-2-2':['2026-09-28','2026-10-25'],'g3-3-1':['2026-11-03','2026-11-09'],'g3-4-1':['2026-11-10','2026-12-06'],'g3-5-1':['2026-12-07','2026-12-19'],'g3-6-1-stage':['2026-12-20','2026-12-20']};
- Object.entries(periods).forEach(([id,v])=>{const t=getTask(id);if(t){t.start=v[0];t.due=v[1]}});
+ if(!window.ToeicPlanDomain)return {applied:false,reason:'toeic-plan-domain-unavailable'};
+ const result=ToeicPlanDomain.apply(db.tasks);
+ const aliases=ToeicPlanDomain.progressAliases(db.tasks,db.logs);
+ if(aliases.length)db.logs.push(...aliases);
+ try{storeSet('o'+ToeicPlanDomain.ROOT_ID,'1')}catch(_){}
  if(!Array.isArray(db.calendarEvents))db.calendarEvents=[];
  [
   ['toeic-reg-open','2026-10-30','TOEIC 12/20 場次｜報名開始','依官方報名系統'],
   ['toeic-reg-close','2026-12-04','TOEIC 12/20 場次｜報名截止','依官方報名系統'],
   ['toeic-20261220','2026-12-20','TOEIC 聽力與閱讀測驗｜正式考試','依准考證']
  ].forEach(([id,date,title,time])=>{if(!db.calendarEvents.some(e=>e.id===id)){db.calendarEvents.push({id,type:'school',date,time,title,meta:'TOEIC 重要節點'})}})
+ return {...result,applied:!!(result.applied||aliases.length),progressAliasesAdded:aliases.length};
 }
 
 function save(options={}){try{const ok=persistEnvelope(db,{backup:options.backup!==false,allowLogReplacement:options.allowLogReplacement===true});if(ok)idbMirrorSave();return ok}catch(e){console.error(e);toast(String(e?.message||'資料保存失敗，原資料未被覆蓋'));return false}}
@@ -518,7 +512,15 @@ function leafProgress(t){return ExecutionDomain.leafProgress(db.tasks,db.logs,t)
 function executionSummary(t){return ExecutionDomain.executionSummary(db.tasks,db.logs,t,todayKey())}
 function inPeriod(date,period){return ExecutionDomain.inPeriod(date,period)}
 function periodLabel(t){const p=periodForTask(t);if(!p?.start||!p?.due)return '尚未設定子任務期間';return `${p.start} ～ ${p.due}`}
-function calc(t,stack=new Set()){if(!t)return 0;if(stack.has(t.id))return 0;const c=kids(t.id).filter(x=>x.status!=='已封存');const oldStatus=t.status;if(!c.length){if(t.level===4)t.progress=leafProgress(t);else t.progress=0;t.status=autoStatus(t.progress,t.status==='已封存');if(t.status==='已完成'&&oldStatus!=='已完成'&&t.status!=='已封存')completion(t);return t.progress}stack.add(t.id);const p=Math.round(c.reduce((s,x)=>s+calc(x,stack),0)/c.length);stack.delete(t.id);t.progress=p;t.status=autoStatus(p,t.status==='已封存');if(t.status==='已完成'&&oldStatus!=='已完成'&&t.status!=='已封存')completion(t);return p}
+function calc(t,stack=new Set()){
+ if(!t)return 0;if(stack.has(t.id))return 0;
+ const c=kids(t.id).filter(x=>x.status!=='已封存'),oldStatus=t.status;
+ if(!c.length){if(t.level===4)t.progress=leafProgress(t);else t.progress=0;t.status=autoStatus(t.progress,t.status==='已封存');if(t.status==='已完成'&&oldStatus!=='已完成'&&t.status!=='已封存')completion(t);return t.progress}
+ stack.add(t.id);const rows=c.map(child=>({task:child,progress:calc(child,stack)}));stack.delete(t.id);
+ const toeicWeighted=window.ToeicPlanDomain?ToeicPlanDomain.aggregateProgress(db.tasks,t,rows,activeWeekCount):null;
+ const p=Number.isFinite(toeicWeighted)?toeicWeighted:Math.round(rows.reduce((s,row)=>s+row.progress,0)/rows.length);
+ t.progress=p;t.status=autoStatus(p,t.status==='已封存');if(t.status==='已完成'&&oldStatus!=='已完成'&&t.status!=='已封存')completion(t);return p
+}
 function recalcAllStatuses(){const rs=roots();const rid=new Set(rs.map(r=>r.id));rs.forEach(t=>calc(t));db.tasks.filter(t=>t.level>1&&t.status!=='已封存'&&!rid.has(t.id)).forEach(t=>calc(t));return db.tasks}
 function completion(t){if(!db.logs.some(x=>(x.kind===STUDY_LOG_KIND.SYSTEM||x.type==='auto')&&x.taskId===t.id)){db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:t.id,name:t.name,time:new Date().toISOString(),minutes:0,type:'auto',kind:STUDY_LOG_KIND.SYSTEM,actual:false})}}
 function ancestors(id){return GoalDomain.ancestors(db.tasks,id,5)}
@@ -1406,7 +1408,7 @@ function runSelfTest(){
   db.executionPlans=db.executionPlans.filter(x=>x!==p);
  }catch(x){tests.push([false,'可逆操作測試：'+x.message])}
  try{const legacyRoot={id:'__legacy_toeic__',name:'TOEIC 正式考試',level:1,parent:null,status:'未開始',weeklyMinutes:0,start:'',due:'',progress:0};const child={id:'__legacy_toeic_child__',name:'2026/12/20 TOEIC 聽力與閱讀測驗',level:4,parent:'__legacy_toeic__',status:'未開始',weeklyMinutes:0,start:'',due:'',progress:0};db.tasks.push(legacyRoot,child);const removed=removeLegacyStandaloneToeicGoals();const noLegacy=!db.tasks.some(t=>t.id===legacyRoot.id||t.id===child.id);tests.push([removed&&noLegacy,'舊 TOEIC 行事曆目標清理：正常']);}catch(x){tests.push([false,'舊 TOEIC 行事曆目標清理：'+x.message])}
- try{const t1=db.tasks.find(t=>t.id==='g1-2-1-1'),t2=db.tasks.find(t=>t.id==='g3-1-1-1');const pre=activeWeeklyTargetTotal('2026-09-04'),start=activeWeeklyTargetTotal('2026-09-07'),topic=activeWeeklyTargetTotal('2026-09-28');const preExpected=db.tasks.filter(t=>t.level===4).reduce((s,t)=>s+currentWeekSummary(t,'2026-09-04').target,0);const startExpected=db.tasks.filter(t=>t.level===4).reduce((s,t)=>s+currentWeekSummary(t,'2026-09-07').target,0);const topicExpected=db.tasks.filter(t=>t.level===4).reduce((s,t)=>s+currentWeekSummary(t,'2026-09-28').target,0);tests.push([pre===preExpected,'未開始階段不提前計入本週：正常']);tests.push([start===startExpected&&start>=pre,'進入有效週後自動啟用週時數：正常']);tests.push([topic===topicExpected,'跨階段週時數切換：正常']);tests.push([!!t1&&currentWeekSummary(t1,'2026-09-04').target===0&&currentWeekSummary(t1,'2026-09-07').target===Number(t1.weeklyMinutes||0),'子任務期間控制 Level 4：正常']);tests.push([!!t2&&currentWeekSummary(t2,'2026-09-04').target===0&&currentWeekSummary(t2,'2026-09-07').target===Number(t2.weeklyMinutes||0),'TOEIC 週時數啟用：正常']);}catch(x){tests.push([false,'分析／週時數計算：'+x.message])}
+ try{const t1=db.tasks.find(t=>t.id==='g1-2-1-1'),t2=db.tasks.find(t=>t.id==='g3-2026-10-article');const pre=activeWeeklyTargetTotal('2026-09-04'),start=activeWeeklyTargetTotal('2026-09-07'),topic=activeWeeklyTargetTotal('2026-10-03');const usable=db.tasks.filter(t=>t.level===4&&t.status!=='已封存');const preExpected=usable.reduce((s,t)=>s+currentWeekSummary(t,'2026-09-04').target,0);const startExpected=usable.reduce((s,t)=>s+currentWeekSummary(t,'2026-09-07').target,0);const topicExpected=usable.reduce((s,t)=>s+currentWeekSummary(t,'2026-10-03').target,0);tests.push([pre===preExpected,'未開始階段不提前計入本週：正常']);tests.push([start===startExpected&&start>=pre,'進入有效週後自動啟用週時數：正常']);tests.push([topic===topicExpected,'跨階段週時數切換：正常']);tests.push([!!t1&&currentWeekSummary(t1,'2026-09-04').target===0&&currentWeekSummary(t1,'2026-09-07').target===Number(t1.weeklyMinutes||0),'子任務期間控制 Level 4：正常']);tests.push([!!t2&&currentWeekSummary(t2,'2026-10-03').target===40,'TOEIC 整合週時數啟用：正常']);}catch(x){tests.push([false,'分析／週時數計算：'+x.message])}
   try{selected=null;pickGoal('long','g1');const single=selected==='g1'&&goalPath.long==='g1';pickGoal('long','g2');const switched=selected==='g2'&&goalPath.long==='g2';tests.push([single&&switched,'目標單一操作／切換目前目標：正常']);}catch(x){tests.push([false,'目標單一操作／切換目前目標：'+x.message])}
   const dead=['occurrenceOnDate','plannedOccurrences','syncAutoTemporalStatus','syncModalActionFields','clearOldAppCache','purgeLegacyCaches'];
  tests.push([dead.every(name=>typeof window[name]==='undefined'),'舊時間／快取函式已清除']);

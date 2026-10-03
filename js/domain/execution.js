@@ -57,16 +57,18 @@
     return n;
   }
 
+  function isProgressLogForTask(log,taskId){
+    if(!log||log.status==='已刪除'||String(log?.taskId)!==String(taskId))return false;
+    return StudyLogDomain.isCountableActualLog(log)||log.progressAlias===true;
+  }
+
   function actualMinutesInRange(tasks,logs,task,start,end){
     if(!task||Number(task.level)!==4)return 0;
 
     const p=GoalDomain.periodForTask(tasks,task);
 
     return list(logs)
-      .filter(log=>
-        StudyLogDomain.isCountableActualLog(log)&&
-        String(log?.taskId)===String(task.id)
-      )
+      .filter(log=>isProgressLogForTask(log,task.id))
       .reduce((sum,log)=>{
         const day=StudyLogDomain.logDate(log.time);
         if(!day||day<start||day>end)return sum;
@@ -228,6 +230,7 @@
     weekEndKey,
     inPeriod,
     activeWeekCount,
+    isProgressLogForTask,
     actualMinutesInRange,
     actualMinutes,
     currentWeekSummary,
