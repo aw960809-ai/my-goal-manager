@@ -1,4 +1,4 @@
-const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.3.0')));
+const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.4.0')));
 const SCHEMA_VERSION=Number(globalThis.GOAL_MANAGER_SCHEMA_VERSION||6);
 const KEY='lawLangGoalSystemV92';
 const BACKUP_KEYS=['lawLangGoalSystemV92_backup1','lawLangGoalSystemV92_backup2','lawLangGoalSystemV92_backup3'];
@@ -447,51 +447,25 @@ function goalBrowseCurrent(){
  if(!t||t.status==='已封存'||t.level>=4)return null;
  return t;
 }
-function goalBrowseMeta(t){
- const childCount=kids(t.id).filter(x=>x.status!=='已封存').length;
- if(t.level===4){
-  const es=executionSummary(t);
-  return `本週 ${es.weeklyActual}/${es.weeklyTarget} 分 · 剩餘 ${es.weeklyRemaining} 分 · 累計 ${calc(t)}%`;
- }
- if(t.level===3)return `${periodLabel(t)} · ${childCount} 個具體行動`;
- return `${childCount} 個${L[t.level+1]||'下層目標'} · 完成度 ${calc(t)}%`;
-}
-function goalBrowseCard(t){
- const p=calc(t),childCount=kids(t.id).filter(x=>x.status!=='已封存').length;
- const action=t.level===4?'查看':'進入';
- return `<article class="goal-browse-card level-${t.level}">
-   <button class="goal-browse-main" type="button" onclick="browseGoal('${t.id}')">
-     <span class="goal-browse-level">${esc(L[t.level])}</span>
-     <b>${esc(t.name)}</b>
-     <small>${esc(goalBrowseMeta(t))}</small>
-     <span class="goal-browse-progress"><i style="width:${p}%"></i></span>
-   </button>
-   <div class="goal-browse-side">
-     <span class="goal-browse-pct">${p}%</span>
-     <span class="goal-browse-status ${t.status==='已完成'?'done':t.status==='進行中'?'run':''}">${esc(t.status)}</span>
-     <button class="goal-browse-info" type="button" aria-label="查看 ${esc(t.name)} 資訊" onclick="openGoalInfoModal('${t.id}')">ⓘ</button>
-     <span class="goal-browse-enter">${action}${t.level<4&&childCount?` · ${childCount}`:''}</span>
-   </div>
- </article>`;
-}
+function goalBrowseMeta(t){return GoalsPage.browseMeta(t,{kids,periodLabel,executionSummary,calc,levelLabels:L})}
+function goalBrowseCard(t){return GoalsPage.browseCard(t,{kids,periodLabel,executionSummary,calc,levelLabels:L,esc})}
 function renderGoalBrowse(){
- const list=document.getElementById('goalBrowseList'),crumb=document.getElementById('goalBreadcrumb'),context=document.getElementById('goalBrowseContext'),up=document.getElementById('goalBrowseUp'),add=document.getElementById('goalBrowseAdd');
- if(!list||!crumb||!context)return;
-
  let current=goalBrowseCurrent();
  if(goalBrowseId&&!current){goalBrowseId=null;storeSet('goalBrowseIdV1','');}
  const chain=current?ancestors(current.id):[];
- crumb.innerHTML=`<button type="button" onclick="browseGoalTo('')">全部方向</button>${chain.map(x=>`<span>›</span><button type="button" onclick="browseGoalTo('${x.id}')">${esc(x.name)}</button>`).join('')}`;
-
  const rows=GoalDomain.browseItems(db.tasks,current?.id||null).sort((a,b)=>(a.status==='已完成')-(b.status==='已完成')||String(a.name).localeCompare(String(b.name),'zh-Hant'));
- const p=current?calc(current):0;
- context.innerHTML=current
-   ? `<div><small>${esc(L[current.level])}</small><b>${esc(current.name)}</b><span>完成度 ${p}% · ${rows.length} 個下層</span></div><button type="button" onclick="openGoalInfoModal('${current.id}')">詳細資訊 →</button>`
-   : `<div><small>ROOT</small><b>主要方向</b><span>${rows.length} 個主要目標</span></div><button type="button" onclick="setGoalViewMode('map')">查看完整地圖 →</button>`;
-
- list.innerHTML=rows.length?rows.map(goalBrowseCard).join(''):'<div class="empty">這一層目前沒有下層目標。</div>';
- if(up){up.disabled=!current;up.textContent=current?'← 上一層':'已在最上層'}
- if(add)add.textContent=current?`＋ 新增${L[Math.min(4,current.level+1)]}`:'＋ 新增方向';
+ GoalsPage.renderBrowse({
+  document,
+  current,
+  chain,
+  rows,
+  levelLabels:L,
+  calc,
+  kids,
+  periodLabel,
+  executionSummary,
+  esc
+ });
  bindInteractionFeedback();
 }
 function setGoalViewMode(mode){
@@ -551,20 +525,30 @@ function scrollToGoalResult(id){const el=document.getElementById('search-result-
 function openSearchEdit(id){const t=getTask(id);if(!t)return;selected=id;const chain=ancestors(id);goalPath={long:chain.find(x=>x.level===1)?.id||null,mid:chain.find(x=>x.level===2)?.id||null,short:chain.find(x=>x.level===3)?.id||null,exec:chain.find(x=>x.level===4)?.id||null};openEditModal(id);toast('已開啟「'+t.name+'」編輯視窗')}
 function toggleSearchBranch(id){const t=getTask(id);if(!t)return;const open=storeGet('o'+id)!=='0';storeSet('o'+id,open?'0':'1');renderTree();setTimeout(()=>document.getElementById('search-result-'+id)?.scrollIntoView({behavior:'smooth',block:'center'}),30)}
 function goalResultCard(t){
- const chain=ancestors(t.id),path=chain.map(x=>esc(x.name)).join(' → '),p=calc(t);
- const parent=chain.length>1?chain[chain.length-2].name:'頂層主要目標';
- return `<div class="goal-result-card" id="search-result-${t.id}"><div><div class="goal-result-name">${esc(t.name)}<small>${L[t.level]}</small></div><div class="goal-result-path">位置：${path}</div><div class="goal-result-meta">完成度 ${p}% · 父層：${esc(parent)}${(t.level===3||t.level===4)?' · '+esc(periodLabel(t)):''}</div></div><div class="goal-result-actions"><button class="btn" type="button" onclick="openSearchEdit('${t.id}')">編輯</button>${t.level<4?`<button class="softbtn" type="button" onclick="toggleSearchBranch('${t.id}')">${storeGet('o'+t.id)==='0'?'展開父子樹':'收合父子樹'}</button>`:''}</div></div>`;
+ return GoalsPage.resultCard(t,{
+  ancestors,
+  calc,
+  periodLabel,
+  levelLabels:L,
+  esc,
+  isOpen:id=>storeGet('o'+id)!=='0'
+ });
 }
 function renderSearchResults(matches){
- const tree=document.getElementById('tree');if(!tree)return false;
  const q=goalSearchQuery(),s=(document.getElementById('sf')?.value||'all'),l=(document.getElementById('lf')?.value||'all');
- const mode=!!(q||s!=='all'||l!=='all');
- if(!mode)return false;
- const labels=[];if(q)labels.push('搜尋「'+q+'」');if(s!=='all')labels.push('狀態：'+s);if(l!=='all')labels.push('層級：'+({1:'方向',2:'階段目標',3:'子任務',4:'具體實現方式'}[l]||l));
- tree.innerHTML=`<div class="goal-result-mode"><span><strong>直接結果</strong>　${esc(labels.join(' · '))}</span><span>${matches.length} 筆</span></div><div class="goal-results">${matches.length?matches.map(goalResultCard).join(''):'<div class="empty">沒有符合目前搜尋／篩選條件的目標。</div>'}</div>`;
- const state=document.getElementById('goalFilterState');
- if(state)state.innerHTML=`<span>結果已直接對應到符合條件的階層，不再只顯示根方向。</span><span>${matches.length} 筆</span>`;
- return true;
+ return GoalsPage.renderSearchResults({
+  document,
+  matches,
+  query:q,
+  statusFilter:s,
+  levelFilter:l,
+  ancestors,
+  calc,
+  periodLabel,
+  levelLabels:L,
+  esc,
+  isOpen:id=>storeGet('o'+id)!=='0'
+ });
 }
 function renderTree(){
  const tree=document.getElementById('tree');if(!tree)return;
@@ -666,35 +650,11 @@ function executionAnalysis(date=todayKey()){
  });
 }
 function renderExecutionAnalysis(date=todayKey()){
- const el=document.getElementById('executionAnalysis');if(!el)return;
- const a=executionAnalysis(date),fmt=m=>{const n=Math.max(0,Math.round(+m||0)),h=Math.floor(n/60),mm=n%60;return h?`${h}h ${mm}m`:`${mm}m`};
- const gap=a.planActualMinutes-a.plannedMinutes;
- const executionRateValue=a.executionRate===null?'—':a.executionRate+'%';
- const timeRateValue=a.timeRate===null?'—':a.timeRate+'%';
- const executionRateText=a.executionRate===null?'目前沒有有效執行安排可計算':'已開始實際執行／有效安排';
- const timeRateText=a.timeRate===null?'目前沒有有效執行安排可計算':`計畫實際 ${fmt(a.planActualMinutes)} ／有效計畫 ${fmt(a.plannedMinutes)}${timer.running&&timer.planId?' · 計時中即時計入':''}`;
- const estimateValue=a.estimateAccuracy===null?'—':a.estimateAccuracy+'%';
- const estimateText=a.estimateAccuracy===null?'待至少一筆有效計畫達成後評估':'以已達成有效計畫的預計／實際差距計算';
- const cancelledActual=Math.max(0,+a.cancelledPlanActualMinutes||0);
- el.innerHTML=`<div class="execution-analysis-group-title">計畫 × 實際執行 <small>有效安排與實際投入分開統計</small></div>
- <div class="execution-analysis-kpis">
-   <div><small>計畫實際執行率</small><b>${executionRateValue}</b><span>${a.startedPlans.length} / ${a.scheduledPlans.length} 次 · ${executionRateText}</span></div>
-   <div><small>時間達成率</small><b>${timeRateValue}</b><span>${timeRateText}</span></div>
-   <div><small>逾期未達計畫</small><b>${a.expiredPlans.length}</b><span>取消不列入失敗 · 已達成 ${a.fulfilledPlans.length} 次</span></div>
-   <div><small>估時吻合度</small><b>${estimateValue}</b><span>${estimateText}</span></div>
- </div>
- <div class="execution-analysis-detail">
-   <span>本週有效執行安排 <b>${fmt(a.plannedMinutes)}</b></span>
-   <span>有效安排實際 <b>${fmt(a.planActualMinutes)}</b></span>
-   <span>本週目標實際 <b>${fmt(a.actualMinutes)}</b></span>
-   <span>其他讀書 <b>${fmt(a.otherStudyMinutes)}</b></span>
-   <span>總讀書時間 <b>${fmt(a.totalStudyMinutes)}</b></span>
-   <span>未配對安排之目標實際 <b>${fmt(a.unplannedActualMinutes)}</b></span>
-   <span>已取消安排 <b>${a.cancelledPlans.length}</b></span>
-   ${cancelledActual?`<span>已取消安排之歷史實際 <b>${fmt(cancelledActual)}</b></span>`:''}
-   <span>安排差額 <b>${gap>=0?'+':''}${fmt(Math.abs(gap))}</b></span>
-   <span>已達安排 <b>${a.fulfilledPlans.length}/${a.scheduledPlans.length}</b></span>
- </div>`;
+ AnalyticsPage.renderExecutionAnalysis({
+  document,
+  analysis:executionAnalysis(date),
+  timerRunning:!!(timer.running&&timer.planId)
+ });
 }
 function deleteActualLog(id){
  const log=(Array.isArray(db.logs)?db.logs:[]).find(x=>String(x.id)===String(id));
@@ -883,31 +843,27 @@ function stats(){
  const done=leaves.filter(t=>calc(t)===100).length;
  const avg=leaves.length?Math.round((leaves.reduce((sum,t)=>sum+calc(t),0)/leaves.length)*10)/10:0;
  const planAnalysis=executionAnalysis();
- // 分析頁的「本週整體投入」看的是目標系統本身的週投入目標；
- // 計畫 × 實際區塊則另外看「提前安排的執行計畫」，兩者不可混為一談。
- const target=activeWeeklyTargetTotal(todayKey());
- const weekGoalActual=db.logs.filter(l=>isGoalActualLog(l)&&weekStartKey(l.time?.slice(0,10)||'')===weekStartKey(todayKey())).reduce((s,l)=>s+(+l.minutes||0),0);
- const weekOtherStudy=db.logs.filter(l=>isCountableActualLog(l)&&isOtherStudyLog(l)&&weekStartKey(l.time?.slice(0,10)||'')===weekStartKey(todayKey())).reduce((s,l)=>s+(+l.minutes||0),0);
- const weekTotalStudy=weekGoalActual+weekOtherStudy;
- const ratio=target?Math.min(100,Math.round(weekGoalActual/target*100)):0;
- document.getElementById('leafDone').textContent=done+'/'+leaves.length;
- document.getElementById('avg').textContent=avg+'%';
- document.getElementById('est').textContent=planAnalysis.plannedMinutes;
- document.getElementById('logsN').textContent=db.logs.filter(isCountableActualLog).length;
- document.getElementById('statsWeekRatio').textContent=ratio+'%';
- document.getElementById('statsWeekBar').style.width=ratio+'%';
- document.getElementById('statsActual').textContent=weekGoalActual;
- const otherEl=document.getElementById('statsOtherStudy');if(otherEl)otherEl.textContent=weekOtherStudy;
- const totalEl=document.getElementById('statsTotalStudy');if(totalEl)totalEl.textContent=weekTotalStudy;
- document.getElementById('statsTarget').textContent=target;
- document.getElementById('statsRemaining').textContent=Math.max(0,target-weekGoalActual);
+ const week=AnalyticsDomain.weeklyStudySummary({tasks:db.tasks,logs:db.logs,date:todayKey()});
  const rootsActive=roots().filter(t=>t.status!=='已封存');
- document.getElementById('domains').innerHTML=rootsActive.map(t=>{const m=currentWeekTargetForRoot(t),pct=target?Math.round(m/target*100):0;return `<div class="direction-row"><div class="direction-head"><b>${esc(t.name)}</b><span>${m} 分 · ${pct}%</span></div><div class="direction-track"><div class="direction-fill" style="width:${Math.min(100,pct)}%"></div></div></div>`}).join('')||'<div class="empty">尚無有效方向</div>';
- const buckets=[['尚未開始',0,0],['進行中',0,0],['高完成度',0,0],['已完成',0,0]];
- leaves.forEach(t=>{const p=calc(t);if(p===100)buckets[3][1]++;else if(p>=70)buckets[2][1]++;else if(p>0)buckets[1][1]++;else buckets[0][1]++;});
- document.getElementById('progressDistribution').innerHTML=buckets.map(b=>{const pct=leaves.length?Math.round(b[1]/leaves.length*100):0;return `<div class="distribution-row"><div class="distribution-head"><span>${b[0]}</span><b>${pct}%</b></div><div class="distribution-track"><div class="distribution-fill" style="width:${pct}%"></div></div><div class="distribution-meta">${b[1]} 個具體行動</div></div>`}).join('');
+
+ AnalyticsPage.renderStats({
+  document,
+  leaves,
+  done,
+  avg,
+  planAnalysis,
+  week,
+  rootsActive,
+  currentWeekTargetForRoot,
+  actualLogCount:StudyLogDomain.countableLogs(db.logs).length,
+  esc,
+  calc
+ });
+
  renderExecutionAnalysis();
-  renderRecentActualLogs(); renderDeletedLogs(); renderWeeklyReview();
+ renderRecentActualLogs();
+ renderDeletedLogs();
+ renderWeeklyReview();
 }
 function descAll(id){let out=[],stack=[id];while(stack.length){const x=stack.pop();kids(x).forEach(c=>{out.push(c);stack.push(c.id)})}const root=getTask(id);if(root)out.unshift(root);return out}
 function openAdd(parent=null){document.getElementById('modal').style.display='flex';document.getElementById('aName').value='';document.getElementById('aLevel').value=parent?Math.min(4,(getTask(parent)?.level||1)+1):1;document.getElementById('aParent').value='';document.getElementById('aStart').value='';document.getElementById('aDue').value='';document.getElementById('aWeekly').value=0;document.getElementById('aWeeklyUnit').value='hour';syncAddParents();if(parent)document.getElementById('aParent').value=parent;syncAddFields()}
