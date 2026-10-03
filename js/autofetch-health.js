@@ -202,9 +202,28 @@
     document.getElementById("gmAutoFetchCompact")?.remove();
     host.insertAdjacentHTML("beforeend",compactHTML());
   }
+  function syncActivityLoadState(){
+    const host=document.getElementById('activityAutoStatus');
+    const updated=document.getElementById('activityAutoUpdated');
+    const meta=document.getElementById('activityAutoMeta');
+    const info=state.activities;
+    if(!host||!updated||!meta||!info)return;
+
+    if(info.ok&&host.dataset.remoteState==='load-failed'){
+      updated.textContent='資料來源正常／列表正在重試';
+      meta.textContent=`來源 ${info.healthy}/${info.sources||info.healthy||0} 可讀；目前先保留既有活動資料。`;
+
+      if(window.__activityRemoteRetryDone!==true&&typeof window.loadRemoteActivities==='function'){
+        window.__activityRemoteRetryDone=true;
+        setTimeout(()=>window.loadRemoteActivities(),300);
+      }
+    }
+  }
+
   function renderEverywhere(){
     injectSettings();
     injectCompact();
+    syncActivityLoadState();
   }
 
   const originalRenderSettings=window.renderSettings;

@@ -119,6 +119,7 @@ function activityFit(a){
   const score=Math.max(0,Math.min(100,goal+action+knowledge+proximity+freshness+institutional)),tier=activityFitTier(score),time=activityTimeState(a);
   return {score,priority:score,tier,matchPercent:Math.max(0,Math.min(100,Math.round((goal/45)*100))),task:rel.task,eligible:time.eligible,timeState:time.state,timeReason:time.reason,circleLevel:circle.level,circleLabel:circle.label,circleKey:circle.key,reasons:[],goalMatches:[],sourceMode:'local'};
 }
+function activitySort(a,b){return (b.fit.score-a.fit.score)||(a.fit.circleLevel-b.fit.circleLevel)||((a.date||'9999-12-31').localeCompare(b.date||'9999-12-31'))||a.title.localeCompare(b.title,'zh-Hant')}
 function activityCircleLabel(level){return RadarPolicy.circleLabel(level)}
 let activityPage=1;
 const ACTIVITY_PAGE_SIZE=window.ActivityRules?.pageSize||4;
@@ -168,8 +169,8 @@ async function loadRemoteActivities(){
   remoteActivityCatalog=normalizedItems.filter(x=>!x.scholarship&&x.type!=='獎學金／助學金'&&x.kind!=='scholarship');activityAutoMeta=payload.meta||{};
   db.scholarships=mergeScholarshipCatalog([...(Array.isArray(db.scholarships)?db.scholarships:[]),...remoteScholarships]);db.activities=mergeActivityCatalog([...(Array.isArray(db.activities)?db.activities:[]),...remoteActivityCatalog]);
   activityPage=1;renderActivities();renderScholarships();
-  const box=document.getElementById('activityAutoStatus');if(box){box.style.display='block';const u=document.getElementById('activityAutoUpdated'),m=document.getElementById('activityAutoMeta');if(u)u.textContent=activityAutoMeta.updatedAt?('更新 '+new Date(activityAutoMeta.updatedAt).toLocaleString('zh-TW',{hour12:false})):'自動資料';if(m)m.textContent=`來源 ${activityAutoMeta.sources||0} · 活動 ${items.length} · 獎學金 ${scholarshipItems.length} · 成功 ${activityAutoMeta.ok||0} · 失敗 ${activityAutoMeta.failed||0}`}
- }catch(e){const box=document.getElementById('activityAutoStatus');if(box){box.style.display='block';const u=document.getElementById('activityAutoUpdated'),m=document.getElementById('activityAutoMeta');if(u)u.textContent='自動資料暫不可用';if(m)m.textContent='目前使用內建活動資料；下次更新會再嘗試。'}}
+  const box=document.getElementById('activityAutoStatus');if(box){box.dataset.remoteState='loaded';box.style.display='block';const u=document.getElementById('activityAutoUpdated'),m=document.getElementById('activityAutoMeta');if(u)u.textContent=activityAutoMeta.updatedAt?('更新 '+new Date(activityAutoMeta.updatedAt).toLocaleString('zh-TW',{hour12:false})):'自動資料';if(m)m.textContent=`來源 ${activityAutoMeta.sources||0} · 活動 ${items.length} · 獎學金 ${scholarshipItems.length} · 成功 ${activityAutoMeta.ok||0} · 失敗 ${activityAutoMeta.failed||0}`}
+ }catch(e){console.warn('remote activity catalog load failed',e);const box=document.getElementById('activityAutoStatus');if(box){box.dataset.remoteState='load-failed';box.style.display='block';const u=document.getElementById('activityAutoUpdated'),m=document.getElementById('activityAutoMeta');if(u)u.textContent='即時列表載入未完成';if(m)m.textContent='目前保留既有／內建活動資料；來源健康監測會再次確認並自動重試一次。'}}
 }
 function activityCardHTML(a,today){
   const f=a.fit,tierClass=activityFitClass(f.tier),deadline=activityDeadlineInfo(a),goals=activityGoalLabels(a,f);
