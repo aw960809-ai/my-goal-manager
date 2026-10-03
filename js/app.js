@@ -1,4 +1,4 @@
-const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.2.0')));
+const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.3.0')));
 const SCHEMA_VERSION=Number(globalThis.GOAL_MANAGER_SCHEMA_VERSION||6);
 const KEY='lawLangGoalSystemV92';
 const BACKUP_KEYS=['lawLangGoalSystemV92_backup1','lawLangGoalSystemV92_backup2','lawLangGoalSystemV92_backup3'];
@@ -1134,11 +1134,14 @@ function dashboard(){
 }
 function updateHubContext(){}
 function renderPlannedQueue(){
- const box=document.getElementById('plannedQueue'),count=document.getElementById('plannedQueueCount');if(!box)return;
  const plans=(Array.isArray(db.executionPlans)?db.executionPlans:[]).filter(activeExecutionPlan).sort((a,b)=>(String(a.date)+' '+String(a.time)).localeCompare(String(b.date)+' '+String(b.time)));
- const today=todayKey();
- if(count)count.textContent=plans.length?`${plans.length} 項`:'尚無安排';
- box.innerHTML=plans.slice(0,8).map(x=>{const isToday=x.date===today;return `<div class="listitem planned-row"><div><b>${esc(x.name||getTask(x.taskId)?.name||'未命名行動')}</b><small class="muted" style="display:block">${esc(x.date)} ${esc(x.time)} · ${esc(x.minutes)} 分鐘${isToday?' · 今日':''}</small></div><div class="planned-actions"><span class="planned-status">${isToday?'待執行':'已安排'}</span><button class="btn" type="button" onclick="openTodayExecution('${esc(x.taskId)}','${esc(x.id)}')">選取</button><button class="dangerbtn" type="button" onclick="cancelExecutionPlan('${esc(x.id)}')">取消安排</button></div></div>`}).join('')||'<div class="empty">尚未安排未來執行項目。可在「目標地圖 → 具體實現方式 → 安排執行」建立。</div>';
+ ExecutionPage.renderPlannedQueue({
+  document,
+  plans,
+  today:todayKey(),
+  esc,
+  getTask
+ });
 }
 function getTodayItems(){
  const today=todayKey();
@@ -1154,10 +1157,21 @@ function getTodayItems(){
 /* V97.9.6 execution five-item preview */
 let todayItemsExpanded=false;
 function today(){
- const all=getTodayItems(),a=todayItemsExpanded?all:all.slice(0,5);
- const list=document.getElementById('todayList');if(!list)return;
- list.innerHTML=a.map(t=>{const isSel=String(timer.id)===String(t.id),w=currentWeekSummary(t),plans=(Array.isArray(db.executionPlans)?db.executionPlans:[]).filter(x=>String(x.taskId)===String(t.id)&&activeExecutionPlan(x)).sort((x,y)=>(x.date+' '+x.time).localeCompare(y.date+' '+y.time)),todayPlan=plans.find(x=>x.date===todayKey()),path=ancestors(t.id).slice(0,-1).map(x=>x.name).join(' › ');return `<div class="listitem ${isSel?'today-item-selected':''}"><div class="today-item-main"><span class="today-select-icon" aria-hidden="true">${isSel?'✓':'○'}</span><div class="today-item-copy"><b>${esc(t.name)}</b><small class="muted today-metrics">${todayPlan?`今日 ${esc(todayPlan.time)} · 預計 ${esc(todayPlan.minutes)} 分 · `:''}本週 ${w.actual}/${w.target} 分 · 剩餘 ${w.remaining} 分 · ${calc(t)}%</small>${path?`<small class="today-path" title="${esc(path)}">${esc(path)}</small>`:''}</div></div><div class="today-actions">${isSel?'<span class="today-selected-label">● 已選取</span>':''}<button class="btn" onclick="selectTodayExecution('${t.id}','${todayPlan?esc(todayPlan.id):''}')">${isSel?'重新選取':'選取'}</button><button class="btn primary" onclick="startTodayExecution('${t.id}','${todayPlan?esc(todayPlan.id):''}')">開始</button></div></div>`}).join('')||'<div class="empty">目前沒有可投入的具體實現方式。</div>';
- if(all.length>5)list.insertAdjacentHTML('beforeend',`<div style="display:flex;justify-content:center;padding:10px 0 2px"><button class="btn" type="button" onclick="toggleTodayItemsPreview()">${todayItemsExpanded?'收合為 5 項':`顯示全部（${all.length} 項）`}</button></div>`);
+ const all=getTodayItems(),items=todayItemsExpanded?all:all.slice(0,5);
+ ExecutionPage.renderToday({
+  document,
+  items,
+  totalCount:all.length,
+  expanded:todayItemsExpanded,
+  timer,
+  currentWeekSummary,
+  executionPlans:db.executionPlans,
+  activeExecutionPlan,
+  today:todayKey(),
+  ancestors,
+  esc,
+  calc
+ });
  renderPlannedQueue();
  syncOtherStudyForm();
 }
@@ -1208,7 +1222,7 @@ function calendarEventsForDate(key){
 function calendarBaseDate(){return new Date(calendarCursor)}
 function dateKey(d){return CalendarDomain.dateKey(d)}
 function calendarDays(){return CalendarDomain.monthGridKeys(calendarBaseDate())}
-function calendarSummaryButton(label,count,mode,active=false){return `<button type="button" class="summary-pill ${active?'active':''}" onclick="showCalendarSummary('${mode}')"><b>${esc(label)}</b> ${count} 項</button>`}
+function calendarSummaryButton(label,count,mode,active=false){return CalendarPage.summaryButton(esc(label),count,mode,active)}
 function calendarDetailHTML(title,subtitle,events){
   const list=events||[];
   const body=list.length?`<div class="calendar-detail-list">${list.map(e=>{
@@ -1240,16 +1254,19 @@ function showCalendarSummary(mode){
 }
 function hideCalendarDetail(){const el=document.getElementById('calendarDetail');if(el){el.style.display='none';el.innerHTML='';}}
 function renderCalendar(){
-  ensureSchoolCalendar();syncCalendarDatePicker();
-  const base=calendarBaseDate(),days=calendarDays(),today=todayKey();
-  const all=days.flatMap(calendarEventsForDate),schoolN=all.filter(e=>e.type==='school').length,confirmedN=all.filter(e=>e.type==='activity'&&String(e.meta||'').includes('已確認')).length,todayCount=calendarEventsForDate(today).length;
-  document.getElementById('calMonthTitle').textContent=`${base.getFullYear()} 年 ${base.getMonth()+1} 月`;
-  document.getElementById('calMonthSub').textContent=`115 學年度 · ${base.getMonth()+1} 月行事`;
-  document.getElementById('calendarSummary').innerHTML=calendarSummaryButton('今天',todayCount,'today',db.calendarSelected===today)+calendarSummaryButton('本月學校行事',schoolN,'school')+calendarSummaryButton('已確認活動',confirmedN,'confirmed');
-  document.getElementById('calendarAgenda').innerHTML=`<div class="calendar-weekdays">${['日','一','二','三','四','五','六'].map(x=>`<div>${x}</div>`).join('')}</div><div class="calendar-days">${days.map(key=>{const d=new Date(key+'T00:00:00'),es=calendarEventsForDate(key),inMonth=d.getMonth()===base.getMonth(),isToday=key===today,isSelected=key===db.calendarSelected;return `<button class="calendar-cell ${inMonth?'':'outside'} ${isToday?'today':''} ${isSelected?'selected-day':''}" type="button" onclick="calendarSelectDay('${key}')"><span class="cell-head"><b>${d.getDate()}</b>${isToday?'<em>今天</em>':''}</span><span class="cell-events">${es.slice(0,3).map(e=>`<span class="cell-event ${e.type} ${e.meta&&e.meta.includes('已確認')?'confirmed':''}"><i></i>${esc(e.title)}</span>`).join('')}${es.length>3?`<span class="cell-more">＋${es.length-3} 項</span>`:''}</span></button>`}).join('')}</div>`;
-  const selectedKey=db.calendarSelected;
-  if(selectedKey&&days.includes(selectedKey)){const es=calendarEventsForDate(selectedKey),d=new Date(selectedKey+'T00:00:00'),label=`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}（${['日','一','二','三','四','五','六'][d.getDay()]}）`;calendarDetailHTML(label,'已選日期 · 當日行程與活動',es);}
-  else hideCalendarDetail();
+ ensureSchoolCalendar();syncCalendarDatePicker();
+ const base=calendarBaseDate(),days=calendarDays(),today=todayKey();
+ CalendarPage.render({
+  document,
+  baseDate:base,
+  days,
+  today,
+  selectedDate:db.calendarSelected,
+  eventsForDate:calendarEventsForDate,
+  esc,
+  detailHTML:calendarDetailHTML,
+  hideDetail:hideCalendarDetail
+ });
 }
 function calendarSelectDay(key){showCalendarDay(key,true)}
 

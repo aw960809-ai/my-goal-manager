@@ -74,8 +74,9 @@ assert '--ui-green:var(--gm-primary)' in design and '--ui-gold:var(--gm-accent)'
 sw=(root/'sw.js').read_text(encoding='utf-8')
 assert 'tokens.css' in sw and 'design-system.css' in sw and 'theme-v9793.css' not in sw, 'service worker CSS shell is stale'
 assert all(x not in html for x in ['🎯','📍','🔎','📅']), 'high-saturation emoji remains in primary UI'
-assert 'today-path' in app and 'today-metrics' in app, 'execution card compact hierarchy missing'
-assert '<button class="btn primary" onclick="startTodayExecution' in app, 'execution CTA must use primary color'
+execution_ui_guard=(root/'js'/'ui'/'pages'/'execution-page.js').read_text(encoding='utf-8')
+assert 'today-path' in execution_ui_guard and 'today-metrics' in execution_ui_guard, 'execution card compact hierarchy missing'
+assert '<button class="btn primary" onclick="startTodayExecution' in execution_ui_guard, 'execution CTA must use primary color'
 assert 'mobile polish - visual priority after device review' in design, 'mobile polish CSS missing'
 assert 'goal-tree mobile layout hotfix' in design and 'grid-template-columns:42px minmax(0,1fr)' in design, 'goal mobile layout hotfix missing'
 assert 'final visual cleanup - residual legacy color and mobile scan fixes' in design, 'final visual cleanup missing'
@@ -135,9 +136,17 @@ assert 'migrate' in data_migrations, 'DataMigrations API incomplete'
 assert 'readCandidate' in data_repository, 'DataRepository API incomplete'
 assert 'DataNormalization.normalizeTasks' in app and 'DataMigrations.migrate' in app and 'DataRepository.readCandidate' in app, 'Data layer delegation missing'
 assert 'ExecutionService.createPlan' in app and 'ExecutionService.cancelPlan' in app and 'ExecutionService.applyActualMinutes' in app, 'ExecutionService delegation missing'
-assert "GOAL_MANAGER_VERSION='98.2.0'" in version_js, 'V98.2 version source missing'
+calendar_page=(root/'js'/'ui'/'pages'/'calendar-page.js').read_text(encoding='utf-8')
+execution_page=(root/'js'/'ui'/'pages'/'execution-page.js').read_text(encoding='utf-8')
+for module in ['./js/ui/pages/calendar-page.js','./js/ui/pages/execution-page.js']:
+ assert module in html and html.find(module) < html.find('./js/app.js'), f'{module} must load before app.js'
+ assert module in sw, f'service worker missing {module}'
+assert all(x in calendar_page for x in ['summaryButton','agendaHTML','render']), 'CalendarPage API incomplete'
+assert all(x in execution_page for x in ['plannedQueueHTML','todayListHTML','renderPlannedQueue','renderToday']), 'ExecutionPage API incomplete'
+assert 'CalendarPage.render' in app and 'ExecutionPage.renderPlannedQueue' in app and 'ExecutionPage.renderToday' in app, 'UI page delegation missing'
+assert "GOAL_MANAGER_VERSION='98.3.0'" in version_js, 'V98.3 version source missing'
 
 
 
 
-print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core, V98.1 calendar/timer, V98.2 execution/data')
+print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core, V98.1 calendar/timer, V98.2 execution/data, V98.3 UI pages')
