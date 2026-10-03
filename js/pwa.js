@@ -1,6 +1,6 @@
-/* V97.3.0 THU personal automatic update lifecycle */
+/* V98.8.1 THU personal automatic update lifecycle */
 window.PWA=(function(){
-  const CURRENT_VERSION=String(window.AppConfig?.version||'V97.3.0').replace(/^V/i,'');
+  const CURRENT_VERSION=String(window.AppConfig?.version||'V98.8.1').replace(/^V/i,'');
   const CHECK_INTERVAL=5*60*1000;
   const CHECK_MIN_GAP=60*1000;
   let deferredPrompt=null;
@@ -123,15 +123,18 @@ window.PWA=(function(){
   }
 
   async function remoteMeta(){
-    const url=new URL('./sw.js',location.href);
+    const url=new URL('./config/version.js',location.href);
     url.searchParams.set('update_probe',Date.now());
     const res=await fetch(url.href,{cache:'no-store',headers:{'Cache-Control':'no-cache'}});
     if(!res.ok)throw new Error('HTTP '+res.status);
     const source=await res.text();
-    const vm=source.match(/const\s+PWA_VERSION\s*=\s*['"]([^'"]+)['"]/);
-    const sm=source.match(/const\s+PWA_SIGNATURE\s*=\s*['"]([^'"]+)['"]/);
+    const vm=source.match(/GOAL_MANAGER_VERSION\s*=\s*['"]([^'"]+)['"]/);
     if(!vm)throw new Error('找不到遠端版本號');
-    return {version:vm[1],signature:sm?.[1]||''};
+    const version=String(vm[1]||'').replace(/^V/i,'');
+    return {
+      version,
+      signature:'thu-personal-'+version+'-core'
+    };
   }
   async function currentWorkerMeta(){
     try{

@@ -172,10 +172,15 @@ assert html.find('./js/bootstrap.js') > html.find('./js/app.js'), 'bootstrap mus
 assert 'window.renderAll()' in bootstrap and 'window.__goalManagerBooted' in bootstrap, 'bootstrap render ownership missing'
 assert not app.rstrip().endswith('renderAll();'), 'app.js still self-renders instead of bootstrap'
 assert 'dashboard:{render:window.dashboard}' in bootstrap and 'goals:{render:window.renderGoalsPage}' in bootstrap and 'execution:{render:window.today}' in bootstrap and 'analytics:{render:window.stats}' in bootstrap, 'AppModules still expose broad renderAll aliases'
+pwa=(root/'js'/'pwa.js').read_text(encoding='utf-8')
+assert "new URL('./config/version.js',location.href)" in pwa, 'PWA update check must use canonical version.js'
+assert 'GOAL_MANAGER_VERSION\\s*=\\s*' in pwa, 'PWA remote version parser missing'
+assert 'source.match(/const\\s+PWA_VERSION' not in pwa, 'stale SW literal-version parser remains'
+
 
 assert "const KEY='lawLangGoalSystemV92'" in app and 'BACKUP_KEYS' in app, 'persistent keys must remain stable'
 
-assert "GOAL_MANAGER_VERSION='98.8.0'" in version_js, 'V98.8 version source missing'
+assert "GOAL_MANAGER_VERSION='98.8.1'" in version_js, 'V98.8.1 version source missing'
 
 
 
