@@ -1,4 +1,4 @@
-const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.4.0')));
+const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.5.0')));
 const SCHEMA_VERSION=Number(globalThis.GOAL_MANAGER_SCHEMA_VERSION||6);
 const KEY='lawLangGoalSystemV92';
 const BACKUP_KEYS=['lawLangGoalSystemV92_backup1','lawLangGoalSystemV92_backup2','lawLangGoalSystemV92_backup3'];
@@ -509,9 +509,18 @@ function renderGoalsPage(){
 }
 
 function taskHTML(t){
- const p=calc(t),c=kids(t.id),open=storeGet('o'+t.id)!=='0',isHit=goalSearchMatch(t),es=t.level===4?executionSummary(t):null;
- const planned=Array.isArray(db.executionPlans)?db.executionPlans.filter(x=>String(x.taskId)===String(t.id)&&activeExecutionPlan(x)):[]; const meta=t.level===3?('期間 '+periodLabel(t)):t.level===4?(`本週 ${es.weeklyActual}/${es.weeklyTarget} 分 · 剩餘 ${es.weeklyRemaining} 分 · 累計 ${es.totalActual} 分 · 期間 ${periodLabel(t)}${planned.length?` · 已安排 ${planned.length} 次`:''}`):'期間由下層子任務決定';
- return `<div class="task ${isHit?'search-hit':''}" id="task-${t.id}"><div class="taskline"><button class="chev ${c.length?'has-kids':''}" aria-label="${c.length?(open?'收合下層':'展開下層'):'無下層'}" title="${c.length?(open?'點擊收合下層':'點擊展開下層'):'沒有下層'}" onclick="toggleKids('${t.id}')">${c.length?(open?'▾':'▸'):'•'}</button><button class="taskname" aria-label="查看 ${esc(t.name)}" onclick="openGoalInfoModal('${t.id}')"><span>${esc(t.name)}</span><small>${L[t.level]} · ${meta}</small></button><span class="pill ${t.status==='已完成'?'done':t.status==='進行中'?'run':''}">${t.status}</span><span class="pct">${p}%</span><span class="mini"><button type="button" title="查看資訊" aria-label="查看資訊" onclick="openGoalInfoModal('${t.id}')">ⓘ</button>${t.level===4?`<button type="button" title="安排執行" aria-label="安排執行" onclick="openGoalInfoModal('${t.id}',true)">＋</button>`:''}</span></div><div class="barwrap"><div class="bar" style="width:${p}%"></div></div>${c.length&&open?`<div class="kids">${c.map(taskHTML).join('')}</div>`:''}</div>`
+ return GoalsPage.taskNode(t,{
+  calc,
+  kids,
+  isOpen:id=>storeGet('o'+id)!=='0',
+  isHit:goalSearchMatch,
+  executionSummary,
+  executionPlans:db.executionPlans,
+  activeExecutionPlan,
+  periodLabel,
+  levelLabels:L,
+  esc
+ });
 }
 function goalSearchQuery(){return (document.getElementById('q')?.value||'').trim().toLowerCase()}
 function goalSearchMatch(t){const q=goalSearchQuery();return !!(q&&String(t?.name||'').toLowerCase().includes(q))}
@@ -555,10 +564,12 @@ function renderTree(){
  const matches=goalSearchFilteredTasks();
  if(renderSearchResults(matches))return;
  const rootsList=roots().filter(t=>t.status!=='已封存');
- tree.innerHTML=rootsList.map(t=>taskHTML(t)).join('')||'<div class="empty">目前尚無主要目標。</div>';
+ GoalsPage.renderTree({
+  document,
+  roots:rootsList,
+  nodeHTML:taskHTML
+ });
  updateExpandToggle();
- const state=document.getElementById('goalFilterState');
- if(state)state.innerHTML=`<span>目前顯示全部主要目標與下層</span><span>${rootsList.length} 個主要目標</span>`;
 }
 function resetGoalFilters(){const q=document.getElementById('q'),s=document.getElementById('sf'),l=document.getElementById('lf');if(q)q.value='';if(s)s.value='all';if(l)l.value='all';renderTree();toast('已重設目標地圖篩選')}
 function allGoalNodesOpen(){const nodes=db.tasks.filter(t=>t.level<4&&t.status!=='已封存');return nodes.length>0&&nodes.every(t=>storeGet('o'+t.id)!=='0')}
@@ -636,10 +647,16 @@ function setWeeklyReview(taskId,reason,date=todayKey()){
  const r=previousWeekRange(date),arr=Array.isArray(db.weekReviews)?db.weekReviews:[];const i=arr.findIndex(x=>x.weekStart===r.start&&String(x.taskId)===String(taskId));const row={id:'wr'+r.start.replace(/-/g,'')+'-'+String(taskId),weekStart:r.start,weekEnd:r.end,taskId:String(taskId),reason,updatedAt:new Date().toISOString()};if(i>=0)arr[i]=row;else arr.push(row);db.weekReviews=arr;save();renderWeeklyReview();toast('已記錄未完成原因');
 }
 function renderWeeklyReview(date=todayKey()){
- const el=document.getElementById('weeklyReviewList'),lab=document.getElementById('reviewWeekLabel');if(!el)return;const r=previousWeekRange(date),items=previousWeekIncompleteItems(date);if(lab)lab.textContent=`${r.start} ～ ${r.end}`;
- el.innerHTML=items.length?items.map(x=>{const selected=x.review?.reason||'';return `<div class="weekly-review-item"><div class="weekly-review-head"><div><b>${esc(x.t.name)}</b><small>目標 ${x.w.target} 分 · 實際 ${x.w.actual} 分 · 未完成 ${x.shortfall} 分</small></div><span class="pill">${calc(x.t)}%</span></div><div class="review-reasons">${REVIEW_REASONS.map(reason=>`<button type="button" class="review-reason ${selected===reason?'active':''}" onclick="setWeeklyReview('${String(x.t.id).replace(/'/g,"\\'")}','${reason}', '${date}')">${reason}</button>`).join('')}</div>${selected?`<div class="review-saved">已記錄：${esc(selected)}</div>`:''}</div>`}).join(''):'<div class="review-empty">上週沒有需要補記原因的未完成事項。</div>';
-}
-function executionAnalysis(date=todayKey()){
+ const el=document.getElementById('weeklyReviewList'),lab=document.getElementById('reviewWeekLabel');if(!el)return;
+ const r=previousWeekRange(date),items=previousWeekIncompleteItems(date);
+ if(lab)lab.textContent=`${r.start} ～ ${r.end}`;
+ el.innerHTML=AnalyticsPage.weeklyReviewHTML(items,{
+  date,
+  reasons:REVIEW_REASONS,
+  esc,
+  calc
+ });
+}function executionAnalysis(date=todayKey()){
  return AnalyticsDomain.executionAnalysis({
   tasks:db.tasks,
   logs:db.logs,
@@ -673,7 +690,7 @@ function restoreActualLog(id){
 function renderDeletedLogs(){
  const el=document.getElementById('deletedLogs');if(!el)return;
  const logs=(Array.isArray(db.logs)?db.logs:[]).filter(l=>l.status==='已刪除').slice(0,20);
- el.innerHTML=logs.length?logs.map(l=>`<div class="listitem deleted-log-row"><div><b>${esc(l.name||getTask(l.taskId)?.name||'未命名行動')}</b><small class="muted" style="display:block">${esc((l.time||'').slice(0,16).replace('T',' · '))} · ${+l.minutes||0} 分 · 已刪除</small></div><button class="btn" type="button" onclick="restoreActualLog('${esc(l.id)}')">恢復紀錄</button></div>`).join(''):'<div class="empty">尚無已刪除的實際紀錄。</div>';
+ el.innerHTML=AnalyticsPage.deletedLogsHTML(logs,{esc,getTask});
 }
 /* compact actual-log history */
 let actualHistoryRange='7';
@@ -685,15 +702,8 @@ function actualHistorySource(){
   .slice()
   .sort((a,b)=>String(b.time||'').localeCompare(String(a.time||'')));
 }
-function actualHistoryDateKey(log){
- return String(log?.time||'').slice(0,10)||'無日期';
-}
-function actualHistoryTimeLabel(log){
- const raw=String(log?.time||'');
- const date=raw.slice(0,10)||'—';
- const time=raw.slice(11,16)||'';
- return time?date+' · '+time:date;
-}
+function actualHistoryDateKey(log){return AnalyticsPage.actualHistoryDateKey(log)}
+function actualHistoryTimeLabel(log){return AnalyticsPage.actualHistoryTimeLabel(log)}
 function actualHistoryFiltered(){
  const now=Date.now();
  const days=actualHistoryRange==='all'?null:Number(actualHistoryRange||7);
@@ -714,13 +724,7 @@ function ensureActualHistoryModal(){
  modal.setAttribute('role','dialog');
  modal.setAttribute('aria-modal','true');
  modal.setAttribute('aria-labelledby','actualHistoryTitle');
- modal.innerHTML=`<div class="edit-modal-box actual-history-box">
-  <div class="edit-modal-head">
-    <div><h2 id="actualHistoryTitle">實際投入歷程</h2><p>完整紀錄仍參與完成度與分析；此處只改變瀏覽方式。</p></div>
-    <button class="edit-modal-close" type="button" onclick="closeActualLogHistory()" aria-label="關閉實際投入歷程">×</button>
-  </div>
-  <div id="actualHistoryBody"></div>
- </div>`;
+ modal.innerHTML=AnalyticsPage.actualHistoryModalShell();
  modal.addEventListener('click',e=>{if(e.target===modal)closeActualLogHistory()});
  document.body.appendChild(modal);
  return modal;
@@ -749,23 +753,9 @@ function deleteActualLogFromHistory(id){
  requestAnimationFrame(()=>renderActualLogHistory());
 }
 function renderRecentActualLogs(){
- const el=document.getElementById('recentLogs');
- if(!el)return;
+ const el=document.getElementById('recentLogs');if(!el)return;
  const all=actualHistorySource();
- if(!all.length){
-   el.innerHTML='<div class="empty">尚無實際投入紀錄</div>';
-   return;
- }
- const recent=all.slice(0,5);
- el.innerHTML=recent.map(l=>`<div class="actual-log-compact-row">
-   <div class="actual-log-compact-main">
-     <b>${esc(l.name||getTask(l.taskId)?.name||'未命名行動')}</b>
-     <small>${esc(actualHistoryTimeLabel(l))} · ${Math.max(0,+l.minutes||0)} 分 · ${isOtherStudyLog(l)?'其他讀書':'目標執行'}</small>
-   </div>
- </div>`).join('')+
- `<button class="actual-history-open" type="button" onclick="openActualLogHistory()">
-   查看全部紀錄（共 ${all.length} 筆） <span>→</span>
- </button>`;
+ el.innerHTML=AnalyticsPage.recentActualLogsHTML(all,{esc,getTask,isOtherStudyLog});
 }
 function renderActualLogHistory(){
  const modal=document.getElementById('actualHistoryModal');
@@ -775,65 +765,38 @@ function renderActualLogHistory(){
  const source=actualHistorySource();
  const taskRows=[];
  const seen=new Set();
- if(source.some(isOtherStudyLog))taskRows.push(['__other-study__','其他讀書時間']);
- source.forEach(l=>{
-   if(isOtherStudyLog(l))return;
-   const id=String(l.taskId||'');
-   if(!id||seen.has(id))return;
-   seen.add(id);
-   taskRows.push([id,l.name||getTask(id)?.name||'未命名行動']);
+
+ if(source.some(isOtherStudyLog)){
+  taskRows.push(['__other-study__','其他讀書時間']);
+ }
+
+ source.forEach(log=>{
+  if(isOtherStudyLog(log))return;
+  const id=String(log.taskId||'');
+  if(!id||seen.has(id))return;
+  seen.add(id);
+  taskRows.push([id,log.name||getTask(id)?.name||'未命名行動']);
  });
+
  const filtered=actualHistoryFiltered();
- const totalMinutes=filtered.reduce((s,l)=>s+Math.max(0,+l.minutes||0),0);
+ const totalMinutes=filtered.reduce(
+  (sum,log)=>sum+Math.max(0,+log.minutes||0),
+  0
+ );
 
- const groups=new Map();
- filtered.forEach(l=>{
-   const d=actualHistoryDateKey(l);
-   if(!groups.has(d))groups.set(d,[]);
-   groups.get(d).push(l);
+ body.innerHTML=AnalyticsPage.actualHistoryBodyHTML({
+  filtered,
+  totalMinutes,
+  taskRows,
+  range:actualHistoryRange,
+  taskFilter:actualHistoryTask,
+  esc,
+  getTask,
+  isOtherStudyLog
  });
-
- const filters=`<div class="actual-history-controls">
-   <div class="actual-history-range" role="group" aria-label="歷程期間">
-     <button type="button" class="${actualHistoryRange==='7'?'active':''}" onclick="setActualHistoryRange('7')">近 7 日</button>
-     <button type="button" class="${actualHistoryRange==='30'?'active':''}" onclick="setActualHistoryRange('30')">近 30 日</button>
-     <button type="button" class="${actualHistoryRange==='all'?'active':''}" onclick="setActualHistoryRange('all')">全部</button>
-   </div>
-   <label class="actual-history-task-filter">紀錄類型／具體實現方式
-     <select onchange="setActualHistoryTask(this.value)">
-       <option value="all"${actualHistoryTask==='all'?' selected':''}>全部</option>
-       ${taskRows.map(([id,name])=>`<option value="${esc(id)}"${actualHistoryTask===id?' selected':''}>${esc(name)}</option>`).join('')}
-     </select>
-   </label>
- </div>`;
-
- const summary=`<div class="actual-history-summary">
-   <span>目前顯示 <b>${filtered.length}</b> 筆</span>
-   <span>合計 <b>${totalMinutes}</b> 分</span>
- </div>`;
-
- const grouped=filtered.length?[...groups.entries()].map(([date,logs])=>{
-   const mins=logs.reduce((s,l)=>s+Math.max(0,+l.minutes||0),0);
-   return `<details class="actual-history-day" open>
-    <summary><span>${esc(date)}</span><small>${logs.length} 筆 · ${mins} 分</small></summary>
-    <div class="actual-history-day-list">
-      ${logs.map(l=>`<div class="actual-history-row">
-        <div class="actual-history-row-main">
-          <b>${esc(l.name||getTask(l.taskId)?.name||'未命名行動')}</b>
-          <small>${esc(actualHistoryTimeLabel(l))} · ${Math.max(0,+l.minutes||0)} 分 · ${isOtherStudyLog(l)?'其他讀書':'目標執行'}</small>
-        </div>
-        <details class="actual-log-menu">
-          <summary aria-label="紀錄操作">⋯</summary>
-          <div><button type="button" onclick="deleteActualLogFromHistory('${esc(l.id)}')">刪除紀錄</button></div>
-        </details>
-      </div>`).join('')}
-    </div>
-   </details>`;
- }).join(''):'<div class="empty">這個篩選條件下沒有實際投入紀錄。</div>';
-
- body.innerHTML=filters+summary+`<div class="actual-history-groups">${grouped}</div>`;
 }
 
+/* analysis KPI source repair */
 /* analysis KPI source repair */
 function analysisValidLeafTasks(){return AnalyticsDomain.analysisValidLeafTasks(db.tasks)}
 

@@ -149,13 +149,13 @@ analytics_page=(root/'js'/'ui'/'pages'/'analytics-page.js').read_text(encoding='
 for module in ['./js/ui/pages/goals-page.js','./js/ui/pages/analytics-page.js']:
  assert module in html and html.find(module) < html.find('./js/app.js'), f'{module} must load before app.js'
  assert module in sw, f'service worker missing {module}'
-assert all(x in goals_page for x in ['browseMeta','browseCard','renderBrowse','resultCard','renderSearchResults']), 'GoalsPage API incomplete'
-assert all(x in analytics_page for x in ['formatMinutes','executionAnalysisHTML','renderExecutionAnalysis','renderStats']), 'AnalyticsPage API incomplete'
-assert 'GoalsPage.renderBrowse' in app and 'GoalsPage.renderSearchResults' in app, 'GoalsPage delegation missing'
-assert 'AnalyticsPage.renderExecutionAnalysis' in app and 'AnalyticsPage.renderStats' in app, 'AnalyticsPage delegation missing'
-assert "GOAL_MANAGER_VERSION='98.4.0'" in version_js, 'V98.4 version source missing'
+assert all(x in goals_page for x in ['browseMeta','browseCard','renderBrowse','resultCard','renderSearchResults','taskNode','renderTree']), 'GoalsPage API incomplete'
+assert all(x in analytics_page for x in ['formatMinutes','executionAnalysisHTML','renderExecutionAnalysis','renderStats','deletedLogsHTML','recentActualLogsHTML','actualHistoryModalShell','actualHistoryBodyHTML','weeklyReviewHTML']), 'AnalyticsPage API incomplete'
+assert 'GoalsPage.renderBrowse' in app and 'GoalsPage.renderSearchResults' in app and 'GoalsPage.taskNode' in app and 'GoalsPage.renderTree' in app, 'GoalsPage delegation missing'
+assert 'AnalyticsPage.renderExecutionAnalysis' in app and 'AnalyticsPage.renderStats' in app and 'AnalyticsPage.recentActualLogsHTML' in app and 'AnalyticsPage.actualHistoryBodyHTML' in app and 'AnalyticsPage.weeklyReviewHTML' in app, 'AnalyticsPage delegation missing'
+assert "GOAL_MANAGER_VERSION='98.5.0'" in version_js, 'V98.5 version source missing'
 
 
 
 
-print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core, V98.1 calendar/timer, V98.2 execution/data, V98.3 UI pages, V98.4 goals/analytics pages')
+print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core, V98.1 calendar/timer, V98.2 execution/data, V98.3 UI pages, V98.4 goals/analytics pages, V98.5 UI cleanup')

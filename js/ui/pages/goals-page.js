@@ -182,11 +182,67 @@
     return true;
   }
 
+
+  function taskNode(task,{
+    calc,
+    kids,
+    isOpen,
+    isHit,
+    executionSummary,
+    executionPlans,
+    activeExecutionPlan,
+    periodLabel,
+    levelLabels,
+    esc
+  }){
+    const progress=calc(task);
+    const children=kids(task.id);
+    const open=isOpen(task.id);
+    const hit=isHit(task);
+    const summary=task.level===4?executionSummary(task):null;
+
+    const planned=(Array.isArray(executionPlans)?executionPlans:[])
+      .filter(x=>
+        String(x.taskId)===String(task.id)&&
+        activeExecutionPlan(x)
+      );
+
+    const meta=task.level===3
+      ?('期間 '+periodLabel(task))
+      :task.level===4
+        ?`本週 ${summary.weeklyActual}/${summary.weeklyTarget} 分 · 剩餘 ${summary.weeklyRemaining} 分 · 累計 ${summary.totalActual} 分 · 期間 ${periodLabel(task)}${planned.length?` · 已安排 ${planned.length} 次`:''}`
+        :'期間由下層子任務決定';
+
+    return `<div class="task ${hit?'search-hit':''}" id="task-${task.id}"><div class="taskline"><button class="chev ${children.length?'has-kids':''}" aria-label="${children.length?(open?'收合下層':'展開下層'):'無下層'}" title="${children.length?(open?'點擊收合下層':'點擊展開下層'):'沒有下層'}" onclick="toggleKids('${task.id}')">${children.length?(open?'▾':'▸'):'•'}</button><button class="taskname" aria-label="查看 ${esc(task.name)}" onclick="openGoalInfoModal('${task.id}')"><span>${esc(task.name)}</span><small>${levelLabels[task.level]} · ${meta}</small></button><span class="pill ${task.status==='已完成'?'done':task.status==='進行中'?'run':''}">${task.status}</span><span class="pct">${progress}%</span><span class="mini"><button type="button" title="查看資訊" aria-label="查看資訊" onclick="openGoalInfoModal('${task.id}')">ⓘ</button>${task.level===4?`<button type="button" title="安排執行" aria-label="安排執行" onclick="openGoalInfoModal('${task.id}',true)">＋</button>`:''}</span></div><div class="barwrap"><div class="bar" style="width:${progress}%"></div></div>${children.length&&open?`<div class="kids">${children.map(child=>taskNode(child,{calc,kids,isOpen,isHit,executionSummary,executionPlans,activeExecutionPlan,periodLabel,levelLabels,esc})).join('')}</div>`:''}</div>`;
+  }
+
+  function renderTree({
+    document,
+    roots,
+    nodeHTML
+  }){
+    const tree=document.getElementById('tree');
+    if(!tree)return;
+
+    tree.innerHTML=(Array.isArray(roots)?roots:[])
+      .map(nodeHTML)
+      .join('')||
+      '<div class="empty">目前尚無主要目標。</div>';
+
+    const state=document.getElementById('goalFilterState');
+    if(state){
+      state.innerHTML=
+        `<span>目前顯示全部主要目標與下層</span><span>${roots.length} 個主要目標</span>`;
+    }
+  }
+
   return Object.freeze({
     browseMeta,
     browseCard,
     renderBrowse,
     resultCard,
-    renderSearchResults
+    renderSearchResults,
+    taskNode,
+    renderTree
   });
 });
