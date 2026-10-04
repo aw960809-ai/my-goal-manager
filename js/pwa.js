@@ -1,6 +1,6 @@
-/* V98.10.0 THU personal automatic update lifecycle */
+/* V98.10.1 THU personal automatic update lifecycle */
 window.PWA=(function(){
-  const CURRENT_VERSION=String(window.AppConfig?.version||'V98.10.0').replace(/^V/i,'');
+  const CURRENT_VERSION=String(window.AppConfig?.version||'V98.10.1').replace(/^V/i,'');
   const CHECK_INTERVAL=5*60*1000;
   const CHECK_MIN_GAP=60*1000;
   let deferredPrompt=null;

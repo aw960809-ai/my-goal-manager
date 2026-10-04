@@ -41,29 +41,25 @@
   function weeklyStudySummary({tasks,logs,date}){
     const ws=ExecutionDomain.weekStartKey(date);
     const we=ExecutionDomain.weekEndKey(date);
-    const target=ExecutionDomain.activeWeeklyTargetTotal(tasks,logs,date);
-
-    const goalActualMinutes=StudyLogDomain.goalStudyMinutesInRange(
-      logs,tasks,ws,we
-    );
-
-    const otherStudyMinutes=StudyLogDomain.otherStudyMinutesInRange(
-      logs,ws,we
-    );
-
+    const accounting=ExecutionDomain.activeWeeklyAccounting(tasks,logs,date);
+    const target=accounting.target;
+    const goalActualMinutes=StudyLogDomain.goalStudyMinutesInRange(logs,tasks,ws,we);
+    const otherStudyMinutes=StudyLogDomain.otherStudyMinutesInRange(logs,ws,we);
     const totalStudyMinutes=goalActualMinutes+otherStudyMinutes;
+    const creditedGoalMinutes=accounting.credited;
+    const overrunGoalMinutes=accounting.overrun;
 
     return {
       ws,
       we,
       target,
       goalActualMinutes,
+      creditedGoalMinutes,
+      overrunGoalMinutes,
       otherStudyMinutes,
       totalStudyMinutes,
-      remaining:Math.max(0,target-goalActualMinutes),
-      ratio:target
-        ?Math.min(100,Math.round(goalActualMinutes/target*100))
-        :0
+      remaining:accounting.remaining,
+      ratio:target?Math.min(100,Math.round(creditedGoalMinutes/target*100)):0
     };
   }
 
@@ -179,8 +175,23 @@
       (planActualMap.get(String(plan.id))||0)<Math.max(1,+plan.minutes||0)
     );
 
+    const planAccounting=scheduledPlans.reduce((sum,plan)=>{
+      const accounting=ExecutionDomain.timeAccounting(
+        Math.max(0,+plan.minutes||0),
+        planActualMap.get(String(plan.id))||0
+      );
+      sum.credited+=accounting.credited;
+      sum.overrun+=accounting.overrun;
+      sum.remaining+=accounting.remaining;
+      return sum;
+    },{credited:0,overrun:0,remaining:0});
+
+    const creditedPlanMinutes=planAccounting.credited;
+    const overrunPlanMinutes=planAccounting.overrun;
+    const remainingPlanMinutes=planAccounting.remaining;
+
     const timeRate=plannedMinutes
-      ?Math.round(Math.min(100,livePlanActualMinutes/plannedMinutes*100)*10)/10
+      ?Math.round(creditedPlanMinutes/plannedMinutes*1000)/10
       :null;
 
     const executionRate=scheduledPlans.length
@@ -240,6 +251,9 @@
       otherStudyMinutes,
       totalStudyMinutes,
       planActualMinutes:livePlanActualMinutes,
+      creditedPlanMinutes,
+      overrunPlanMinutes,
+      remainingPlanMinutes,
       historicalPlanActualMinutes,
       cancelledPlanActualMinutes,
       unplannedActualMinutes,

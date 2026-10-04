@@ -16,7 +16,9 @@
   function executionAnalysisHTML(analysis,{timerRunning=false}={}){
     const a=analysis;
     const fmt=formatMinutes;
-    const gap=a.planActualMinutes-a.plannedMinutes;
+    const creditedPlanMinutes=Math.max(0,+a.creditedPlanMinutes||0);
+    const overrunPlanMinutes=Math.max(0,+a.overrunPlanMinutes||0);
+    const remainingPlanMinutes=Math.max(0,+a.remainingPlanMinutes||0);
 
     const executionRateValue=
       a.executionRate===null?'—':a.executionRate+'%';
@@ -32,7 +34,7 @@
     const timeRateText=
       a.timeRate===null
         ?'目前沒有有效執行安排可計算'
-        :`計畫實際 ${fmt(a.planActualMinutes)} ／有效計畫 ${fmt(a.plannedMinutes)}${timerRunning?' · 計時中即時計入':''}`;
+        :`有效達成 ${fmt(creditedPlanMinutes)} ／有效計畫 ${fmt(a.plannedMinutes)} · 實際 ${fmt(a.planActualMinutes)}${timerRunning?' · 計時中即時計入':''}`;
 
     const estimateValue=
       a.estimateAccuracy===null?'—':a.estimateAccuracy+'%';
@@ -57,13 +59,15 @@
  <div class="execution-analysis-detail">
    <span>本週有效執行安排 <b>${fmt(a.plannedMinutes)}</b></span>
    <span>有效安排實際 <b>${fmt(a.planActualMinutes)}</b></span>
+   <span>有效達成時間 <b>${fmt(creditedPlanMinutes)}</b></span>
+   ${overrunPlanMinutes?`<span>超出原訂時間 <b>+${fmt(overrunPlanMinutes)}</b></span>`:''}
+   ${remainingPlanMinutes?`<span>尚待安排時間 <b>${fmt(remainingPlanMinutes)}</b></span>`:''}
    <span>本週目標實際 <b>${fmt(a.actualMinutes)}</b></span>
    <span>其他讀書 <b>${fmt(a.otherStudyMinutes)}</b></span>
    <span>總讀書時間 <b>${fmt(a.totalStudyMinutes)}</b></span>
    <span>未配對安排之目標實際 <b>${fmt(a.unplannedActualMinutes)}</b></span>
    <span>已取消安排 <b>${a.cancelledPlans.length}</b></span>
    ${cancelledActual?`<span>已取消安排之歷史實際 <b>${fmt(cancelledActual)}</b></span>`:''}
-   <span>安排差額 <b>${gap>=0?'+':''}${fmt(Math.abs(gap))}</b></span>
    <span>已達安排 <b>${a.fulfilledPlans.length}/${a.scheduledPlans.length}</b></span>
  </div>`;
   }
@@ -120,6 +124,8 @@
     setText(document,'statsWeekRatio',`${week?.ratio||0}%`);
     setWidth(document,'statsWeekBar',`${week?.ratio||0}%`);
     setText(document,'statsActual',week?.goalActualMinutes||0);
+    setText(document,'statsCredited',week?.creditedGoalMinutes||0);
+    setText(document,'statsOverrun',week?.overrunGoalMinutes||0);
     setText(document,'statsOtherStudy',week?.otherStudyMinutes||0);
     setText(document,'statsTotalStudy',week?.totalStudyMinutes||0);
     setText(document,'statsTarget',week?.target||0);

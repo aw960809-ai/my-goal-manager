@@ -30,10 +30,19 @@ const week=ExecutionDomain.currentWeekSummary(
 assert.deepStrictEqual(week,{
   target:420,
   actual:90,
+  credited:90,
+  overrun:0,
   remaining:330,
   start:'2026-09-28',
   end:'2026-10-04',
   active:true
+});
+
+assert.deepStrictEqual(ExecutionDomain.timeAccounting(60,85),{
+  planned:60,actual:85,credited:60,overrun:25,remaining:0,progress:100
+});
+assert.deepStrictEqual(ExecutionDomain.timeAccounting(0,85),{
+  planned:0,actual:85,credited:0,overrun:0,remaining:0,progress:0
 });
 
 const before=ExecutionDomain.currentWeekSummary(
@@ -64,6 +73,11 @@ assert.strictEqual(
     fixture.anchorDate
   ),
   fixture.expected.weeklyTargetMinutes
+);
+
+assert.deepStrictEqual(
+  ExecutionDomain.activeWeeklyAccounting(fixture.tasks,fixture.logs,fixture.anchorDate),
+  {target:420,actual:90,credited:90,overrun:0,remaining:330}
 );
 
 assert.deepStrictEqual(

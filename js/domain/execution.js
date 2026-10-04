@@ -41,6 +41,23 @@
     );
   }
 
+  function timeAccounting(planned,actual){
+    const target=Math.max(0,+planned||0);
+    const spent=Math.max(0,+actual||0);
+    if(target<=0){
+      return {planned:0,actual:spent,credited:0,overrun:0,remaining:0,progress:0};
+    }
+    const credited=Math.min(spent,target);
+    return {
+      planned:target,
+      actual:spent,
+      credited,
+      overrun:Math.max(0,spent-target),
+      remaining:Math.max(0,target-spent),
+      progress:Math.max(0,Math.min(100,Math.round(credited/target*100)))
+    };
+  }
+
   function activeWeekCount(tasks,task){
     const p=GoalDomain.periodForTask(tasks,task);
     if(!p?.start||!p?.due)return 0;
@@ -85,7 +102,7 @@
 
   function currentWeekSummary(tasks,logs,task,date){
     if(!task||Number(task.level)!==4){
-      return {target:0,actual:0,remaining:0,start:'',end:'',active:false};
+      return {target:0,actual:0,credited:0,overrun:0,remaining:0,start:'',end:'',active:false};
     }
 
     const p=GoalDomain.periodForTask(tasks,task);
@@ -98,16 +115,19 @@
     );
 
     if(!active){
-      return {target:0,actual:0,remaining:0,start:ws,end:we,active:false};
+      return {target:0,actual:0,credited:0,overrun:0,remaining:0,start:ws,end:we,active:false};
     }
 
     const target=Math.max(0,+task.weeklyMinutes||0);
     const actual=actualMinutesInRange(tasks,logs,task,ws,we);
+    const accounting=timeAccounting(target,actual);
 
     return {
       target,
       actual,
-      remaining:Math.max(0,target-actual),
+      credited:accounting.credited,
+      overrun:accounting.overrun,
+      remaining:accounting.remaining,
       start:ws,
       end:we,
       active:true
@@ -123,10 +143,7 @@
 
     if(planned<=0)return 0;
 
-    return Math.max(
-      0,
-      Math.min(100,Math.round(actualMinutes(tasks,logs,task)/planned*100))
-    );
+    return timeAccounting(planned,actualMinutes(tasks,logs,task)).progress;
   }
 
   function executionSummary(tasks,logs,task,date){
@@ -135,6 +152,8 @@
     return {
       weeklyTarget:w.target,
       weeklyActual:w.actual,
+      weeklyCredited:w.credited,
+      weeklyOverrun:w.overrun,
       weeklyRemaining:w.remaining,
       totalActual:actualMinutes(tasks,logs,task),
       progress:leafProgress(tasks,logs,task),
@@ -208,6 +227,21 @@
       );
   }
 
+  function activeWeeklyAccounting(tasks,logs,date){
+    return list(tasks)
+      .filter(task=>Number(task.level)===4&&task.status!=='已封存')
+      .reduce((sum,task)=>{
+        const row=currentWeekSummary(tasks,logs,task,date);
+        if(!row.active)return sum;
+        sum.target+=row.target;
+        sum.actual+=row.actual;
+        sum.credited+=row.credited;
+        sum.overrun+=row.overrun;
+        sum.remaining+=row.remaining;
+        return sum;
+      },{target:0,actual:0,credited:0,overrun:0,remaining:0});
+  }
+
   function previousWeekRange(date){
     const ws=weekStartKey(date);
     const d=new Date(ws+'T00:00:00');
@@ -233,6 +267,7 @@
     isProgressLogForTask,
     actualMinutesInRange,
     actualMinutes,
+    timeAccounting,
     currentWeekSummary,
     leafProgress,
     executionSummary,
@@ -240,6 +275,7 @@
     rebuildExecutionPlanActuals,
     descendants,
     currentWeekTargetForRoot,
+    activeWeeklyAccounting,
     previousWeekRange,
     activeWeeklyTargetTotal
   });

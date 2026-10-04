@@ -185,7 +185,7 @@ assert 'source.match(/const\\s+PWA_VERSION' not in pwa, 'stale SW literal-versio
 
 assert "const KEY='lawLangGoalSystemV92'" in app and 'BACKUP_KEYS' in app, 'persistent keys must remain stable'
 
-assert "GOAL_MANAGER_VERSION='98.10.0'" in version_js, 'V98.10.0 version source missing'
+assert "GOAL_MANAGER_VERSION='98.10.1'" in version_js, 'V98.10.1 version source missing'
 
 
 
@@ -211,7 +211,7 @@ assert all(x in analytics_runtime for x in ['setText','setHTML','setWidth']), 'A
 
 print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core, V98.1 calendar/timer, V98.2 execution/data, V98.3 UI pages, V98.4 goals/analytics pages, V98.5 UI cleanup, V98.6 dashboard/orchestration, V98.7 persistence, V98.8 bootstrap/regression, V98.9 radar accuracy, V98.9.1 analytics runtime')
 
-# V98.10.0 study-history durability guards
+# V98.10.1 study-history durability guards
 history_guard=(root/'js'/'data'/'history-guard.js').read_text(encoding='utf-8')
 persistence_guard=(root/'js'/'data'/'persistence.js').read_text(encoding='utf-8')
 settings_guard=(root/'js'/'settings.js').read_text(encoding='utf-8')
@@ -223,17 +223,17 @@ assert 'guard:({oldRaw,nextData})' in app, 'DataPersistence history guard wiring
 assert 'Rotate only after the new primary copy has passed integrity checks' in persistence_guard, 'backup rotation must happen after verified primary write'
 assert 'Best-effort rollback of the primary copy' in persistence_guard, 'verified-write rollback missing'
 assert '歷程安全基準' in settings_guard, 'settings history anchor visibility missing'
-assert "GOAL_MANAGER_VERSION='98.10.0'" in version_js, 'V98.10.0 version source missing'
+assert "GOAL_MANAGER_VERSION='98.10.1'" in version_js, 'V98.10.1 version source missing'
 
 
-# V98.10.0 radar UI and source-health coherence
+# V98.10.1 radar UI and source-health coherence
 assert '<option value="中部">③ 中部</option>' in html, 'activity UI missing Central Taiwan circle'
 assert '<option value="全國">④ 全國</option>' in html, 'activity UI missing Nationwide circle 4'
 assert '<option value="海外／國際">④ 海外／國際</option>' not in html, 'international still incorrectly rendered as circle 4'
 assert '<b>③ 中部</b>' in html and '<b>④ 全國</b>' in html, 'activity radar guide is stale'
 autofetch_health=(root/'js'/'autofetch-health.js').read_text(encoding='utf-8')
 assert 'syncActivityLoadState' in autofetch_health and '__activityRemoteRetryDone' in autofetch_health, 'activity source-health/list-load retry bridge missing'
-assert "GOAL_MANAGER_VERSION='98.10.0'" in version_js, 'V98.10.0 version source missing'
+assert "GOAL_MANAGER_VERSION='98.10.1'" in version_js, 'V98.10.1 version source missing'
 
 activity_runtime=(root/'js'/'activity.js').read_text(encoding='utf-8')
 assert 'function activitySort(a,b)' in activity_runtime, 'activitySort comparator missing; activity list render will fail'
@@ -244,8 +244,19 @@ activity_runtime=(root/'js'/'activity.js').read_text(encoding='utf-8')
 assert 'activity-review-disclosure' in activity_runtime and '暫不列入推薦 · 點擊展開' in activity_runtime, 'source review must be collapsed by default'
 
 
-# V98.10.0 published source-review collapse guard
+# V98.10.1 published source-review collapse guard
 activity_runtime=(root/'js'/'activity.js').read_text(encoding='utf-8')
 assert '<details class="activity-review-disclosure">' in activity_runtime, 'source-review collapse markup missing'
 assert '暫不列入推薦 · 點擊展開' in activity_runtime, 'source-review collapse summary missing'
-assert "GOAL_MANAGER_VERSION='98.10.0'" in version_js, 'V98.10.0 version source missing'
+assert "GOAL_MANAGER_VERSION='98.10.1'" in version_js, 'V98.10.1 version source missing'
+
+
+# V98.10.1 global time-accounting invariants
+execution_time_guard=(root/'js'/'domain'/'execution.js').read_text(encoding='utf-8')
+analytics_time_guard=(root/'js'/'domain'/'analytics.js').read_text(encoding='utf-8')
+analytics_ui_time_guard=(root/'js'/'ui'/'pages'/'analytics-page.js').read_text(encoding='utf-8')
+assert 'function timeAccounting(planned,actual)' in execution_time_guard, 'global timeAccounting helper missing'
+assert 'function activeWeeklyAccounting(tasks,logs,date)' in execution_time_guard, 'per-action weekly accounting missing'
+assert all(x in analytics_time_guard for x in ['creditedGoalMinutes','overrunGoalMinutes','creditedPlanMinutes','overrunPlanMinutes','remainingPlanMinutes']), 'analytics must separate raw actual, credited progress and overrun'
+assert 'statsCredited' in html and 'statsOverrun' in html, 'weekly accounting visibility missing'
+assert '有效達成時間' in analytics_ui_time_guard and '超出原訂時間' in analytics_ui_time_guard, 'execution analysis accounting visibility missing'

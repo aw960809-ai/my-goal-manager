@@ -1,7 +1,7 @@
 /* THU Goal Manager - GitHub same-origin TOEIC sync */
 (function(){
   "use strict";
-  const VERSION="98.10.0-integrated";
+  const VERSION="98.10.1-integrated";
   const HUB_KEY="GoalManagerToeicEventHubV2";
   const PROCESSED_KEY="GoalManagerToeicSync::processed";
   const STATUS_KEY="GoalManagerToeicSync::status";
