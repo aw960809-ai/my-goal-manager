@@ -244,20 +244,43 @@
 
   <details class="panel other-study-panel other-study-disclosure">
     <summary>
-      <span><b>其他讀書</b><small>臨時複習、課堂內容或未納入目標樹的學習</small></span>
+      <span><b>補登學習</b><small>忘記計時時補登目標實際，或記錄未納入目標樹的其他讀書</small></span>
       <span class="other-study-toggle" aria-hidden="true">＋</span>
     </summary>
     <div class="other-study-body">
-      <div class="other-study-grid">
-        <label><span>內容／科目</span><input id="otherStudyName" type="text" maxlength="60" placeholder="例如：刑法分則課後複習"></label>
-        <label><span>日期</span><input id="otherStudyDate" type="date"></label>
-        <label><span>補登分鐘</span><input id="otherStudyMinutes" type="number" min="1" step="1" value="30"></label>
+      <div class="study-backfill-mode">
+        <label><span>補登類型</span>
+          <select id="studyBackfillMode" onchange="syncStudyBackfillMode()">
+            <option value="goal">目標具體實現</option>
+            <option value="other">其他讀書</option>
+          </select>
+        </label>
       </div>
-      <div class="other-study-actions">
-        <button class="btn primary" type="button" onclick="selectOtherStudyTimer()">選取並計時</button>
-        <button class="btn gold" type="button" onclick="addOtherStudyLog()">直接補登</button>
+
+      <div id="goalStudyBackfillFields" class="study-backfill-section">
+        <div class="other-study-grid">
+          <label class="study-backfill-task-field"><span>具體實現</span><select id="goalStudyBackfillTask" onchange="syncGoalStudyBackfillHint()"></select></label>
+          <label><span>日期</span><input id="goalStudyBackfillDate" type="date" onchange="syncGoalStudyBackfillOptions()"></label>
+          <label><span>補登分鐘</span><input id="goalStudyBackfillMinutes" type="number" min="1" step="1" value="30"></label>
+        </div>
+        <div id="goalStudyBackfillHint" class="other-study-note">只會列入有效執行期間內的 Level 4 實際投入。</div>
+        <div class="other-study-actions">
+          <button class="btn primary" type="button" onclick="addGoalStudyLog()">補登目標實際</button>
+        </div>
       </div>
-      <div class="other-study-note">納入總讀書時數，但不改變任何 Level 4 完成度。</div>
+
+      <div id="otherStudyBackfillFields" class="study-backfill-section" hidden>
+        <div class="other-study-grid">
+          <label><span>內容／科目</span><input id="otherStudyName" type="text" maxlength="60" placeholder="例如：刑法分則課後複習"></label>
+          <label><span>日期</span><input id="otherStudyDate" type="date"></label>
+          <label><span>補登分鐘</span><input id="otherStudyMinutes" type="number" min="1" step="1" value="30"></label>
+        </div>
+        <div class="other-study-actions">
+          <button class="btn primary" type="button" onclick="selectOtherStudyTimer()">選取並計時</button>
+          <button class="btn gold" type="button" onclick="addOtherStudyLog()">直接補登</button>
+        </div>
+        <div class="other-study-note">其他讀書會納入總讀書時數，但不改變任何 Level 4 完成度。</div>
+      </div>
     </div>
   </details>
 </section>

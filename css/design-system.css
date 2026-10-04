@@ -854,3 +854,14 @@ html[data-reduced-motion="true"] *,html[data-reduced-motion="true"] *::before,ht
 .direction-meta{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:7px;color:var(--gm-text-secondary);font-size:12px;line-height:1.45}
 .direction-meta span{white-space:nowrap}
 @media(max-width:700px){.stats-progress-panel .section-title{align-items:flex-start}.stats-week-ratio{font-size:24px;line-height:1}}
+
+/* V98.11.1 unified study backfill */
+.study-backfill-mode{margin-bottom:14px}
+.study-backfill-mode label{display:block}
+.study-backfill-mode label>span{display:block;margin-bottom:6px;color:var(--gm-text-secondary);font-size:12px;font-weight:600}
+.study-backfill-mode select{width:100%}
+.study-backfill-section{min-width:0}
+.study-backfill-task-field{grid-column:1/-1}
+.study-backfill-task-field select{width:100%}
+.study-backfill-section[hidden]{display:none!important}
+@media(max-width:700px){.study-backfill-task-field{grid-column:auto}}

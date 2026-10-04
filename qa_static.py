@@ -88,7 +88,7 @@ assert primary_nav.count('data-view=')==5, 'primary navigation must contain exac
 assert 'data-view="activity"' not in primary_nav and 'data-view="scholarship"' not in primary_nav, 'Explore views must not occupy primary navigation'
 assert 'home-explore-panel' in html and "go('activity')" in html and "go('scholarship')" in html, 'Home Explore entry missing'
 assert 'homeDateLabel' in html and 'dTodayMin' in html, 'Home daily summary missing'
-assert 'executionNowPanel' in html and 'other-study-disclosure' in html, 'execution information architecture missing'
+assert 'executionNowPanel' in html and 'other-study-disclosure' in html and 'studyBackfillMode' in html, 'execution information architecture missing'
 assert "const navId=(id==='activity'||id==='scholarship')?'dash':id;" in app, 'subview navigation ownership missing'
 assert "panel.classList.toggle('has-selection',has)" in app, 'sticky timer state binding missing'
 assert '97.13.0 information architecture' in design and 'repeat(5,minmax(0,1fr))' in design, 'phase 3 design rules missing'
@@ -185,7 +185,7 @@ assert 'source.match(/const\\s+PWA_VERSION' not in pwa, 'stale SW literal-versio
 
 assert "const KEY='lawLangGoalSystemV92'" in app and 'BACKUP_KEYS' in app, 'persistent keys must remain stable'
 
-assert "GOAL_MANAGER_VERSION='98.11.0'" in version_js, 'V98.11.0 version source missing'
+assert "GOAL_MANAGER_VERSION='98.11.1'" in version_js, 'V98.11.1 version source missing'
 
 
 
@@ -211,7 +211,7 @@ assert all(x in analytics_runtime for x in ['setText','setHTML','setWidth']), 'A
 
 print('OK: views, IDs, handlers, JSON, version, storage, logs, timer, workflows, design system, phase3 IA, phase4 goals, V98 domain core, V98.1 calendar/timer, V98.2 execution/data, V98.3 UI pages, V98.4 goals/analytics pages, V98.5 UI cleanup, V98.6 dashboard/orchestration, V98.7 persistence, V98.8 bootstrap/regression, V98.9 radar accuracy, V98.9.1 analytics runtime')
 
-# V98.11.0 study-history durability guards
+# V98.11.1 study-history durability guards
 history_guard=(root/'js'/'data'/'history-guard.js').read_text(encoding='utf-8')
 persistence_guard=(root/'js'/'data'/'persistence.js').read_text(encoding='utf-8')
 settings_guard=(root/'js'/'settings.js').read_text(encoding='utf-8')
@@ -223,17 +223,17 @@ assert 'guard:({oldRaw,nextData})' in app, 'DataPersistence history guard wiring
 assert 'Rotate only after the new primary copy has passed integrity checks' in persistence_guard, 'backup rotation must happen after verified primary write'
 assert 'Best-effort rollback of the primary copy' in persistence_guard, 'verified-write rollback missing'
 assert '歷程安全基準' in settings_guard, 'settings history anchor visibility missing'
-assert "GOAL_MANAGER_VERSION='98.11.0'" in version_js, 'V98.11.0 version source missing'
+assert "GOAL_MANAGER_VERSION='98.11.1'" in version_js, 'V98.11.1 version source missing'
 
 
-# V98.11.0 radar UI and source-health coherence
+# V98.11.1 radar UI and source-health coherence
 assert '<option value="中部">③ 中部</option>' in html, 'activity UI missing Central Taiwan circle'
 assert '<option value="全國">④ 全國</option>' in html, 'activity UI missing Nationwide circle 4'
 assert '<option value="海外／國際">④ 海外／國際</option>' not in html, 'international still incorrectly rendered as circle 4'
 assert '<b>③ 中部</b>' in html and '<b>④ 全國</b>' in html, 'activity radar guide is stale'
 autofetch_health=(root/'js'/'autofetch-health.js').read_text(encoding='utf-8')
 assert 'syncActivityLoadState' in autofetch_health and '__activityRemoteRetryDone' in autofetch_health, 'activity source-health/list-load retry bridge missing'
-assert "GOAL_MANAGER_VERSION='98.11.0'" in version_js, 'V98.11.0 version source missing'
+assert "GOAL_MANAGER_VERSION='98.11.1'" in version_js, 'V98.11.1 version source missing'
 
 activity_runtime=(root/'js'/'activity.js').read_text(encoding='utf-8')
 assert 'function activitySort(a,b)' in activity_runtime, 'activitySort comparator missing; activity list render will fail'
@@ -244,14 +244,14 @@ activity_runtime=(root/'js'/'activity.js').read_text(encoding='utf-8')
 assert 'activity-review-disclosure' in activity_runtime and '暫不列入推薦 · 點擊展開' in activity_runtime, 'source review must be collapsed by default'
 
 
-# V98.11.0 published source-review collapse guard
+# V98.11.1 published source-review collapse guard
 activity_runtime=(root/'js'/'activity.js').read_text(encoding='utf-8')
 assert '<details class="activity-review-disclosure">' in activity_runtime, 'source-review collapse markup missing'
 assert '暫不列入推薦 · 點擊展開' in activity_runtime, 'source-review collapse summary missing'
-assert "GOAL_MANAGER_VERSION='98.11.0'" in version_js, 'V98.11.0 version source missing'
+assert "GOAL_MANAGER_VERSION='98.11.1'" in version_js, 'V98.11.1 version source missing'
 
 
-# V98.11.0 global time-accounting invariants
+# V98.11.1 global time-accounting invariants
 execution_time_guard=(root/'js'/'domain'/'execution.js').read_text(encoding='utf-8')
 analytics_time_guard=(root/'js'/'domain'/'analytics.js').read_text(encoding='utf-8')
 analytics_ui_time_guard=(root/'js'/'ui'/'pages'/'analytics-page.js').read_text(encoding='utf-8')
@@ -262,7 +262,7 @@ assert 'statsCredited' in html and 'statsOverrun' in html, 'weekly accounting vi
 assert "setText(document,'statsCredited'" in analytics_ui_time_guard and "setText(document,'statsOverrun'" in analytics_ui_time_guard, 'weekly accounting visibility missing'
 
 
-# V98.11.0 bounded PWA update settlement
+# V98.11.1 bounded PWA update settlement
 pwa_bounded=(root/'js'/'pwa.js').read_text(encoding='utf-8')
 sw_bounded=(root/'sw.js').read_text(encoding='utf-8')
 assert 'UPDATE_SETTLE_MAX_MS=30*1000' in pwa_bounded and 'function updateWaitExpired()' in pwa_bounded, 'PWA settlement timeout guard missing'
@@ -271,7 +271,7 @@ assert 'const CRITICAL_SHELL=[' in sw_bounded and 'async function warmInstallCac
 assert 'await cache.addAll(APP_SHELL)' not in sw_bounded, 'service-worker install still blocks on full app shell'
 
 
-# V98.11.0 direct-execution retirement of schedule-plan product flow
+# V98.11.1 direct-execution retirement of schedule-plan product flow
 execution_ui_direct=(root/'js'/'ui'/'pages'/'execution-page.js').read_text(encoding='utf-8')
 analytics_ui_direct=(root/'js'/'ui'/'pages'/'analytics-page.js').read_text(encoding='utf-8')
 dashboard_ui_direct=(root/'js'/'ui'/'pages'/'dashboard-page.js').read_text(encoding='utf-8')
@@ -286,3 +286,19 @@ assert 'weeklyTargetMinutes' in dashboard_ui_direct and 'weeklyPlanMinutes' not 
 assert 'weeklyDirectionSummary' in analytics_domain and all(x in analytics_ui_direct for x in ['實際 ${actual} 分','有效 ${credited} 分','超時 ${overrun} 分','目標 ${target} 分']), 'direction analytics must show real weekly accounting'
 assert 'executionAnalysisHTML' not in analytics_ui_direct and 'renderExecutionAnalysis' not in analytics_ui_direct, 'plan-centric analytics UI remains active'
 assert 'stats-week-ratio' in html and 'stats-week-ratio' in design, 'mobile weekly ratio nowrap fix missing'
+
+
+# V98.11.1 unified manual study backfill
+assert '補登學習' in html and 'goalStudyBackfillTask' in html and 'goalStudyBackfillDate' in html and 'goalStudyBackfillMinutes' in html, 'goal-study backfill UI missing'
+assert 'function addGoalStudyLog()' in app and "source:'manual-backfill'" in app and 'kind:STUDY_LOG_KIND.GOAL' in app, 'goal-study manual backfill runtime missing'
+assert "if(date>todayKey())" in app and 'date<p.start||date>p.due' in app, 'goal-study backfill date guards missing'
+assert "source:'manual-backfill',planId" not in app, 'manual backfill must never attach an execution plan'
+assert 'function syncStudyBackfillMode()' in app and 'function syncStudyBackfillForm()' in app, 'unified backfill mode controller missing'
+assert 'otherStudyBackfillFields' in html and 'selectOtherStudyTimer()' in html and 'addOtherStudyLog()' in html, 'other-study workflow must remain available'
+
+
+# V98.11.1 date-aware compact goal-study backfill selector
+assert 'goalStudyBackfillDate" type="date" onchange="syncGoalStudyBackfillOptions()"' in html, 'backfill date must refresh eligible Level 4 options'
+assert 'function goalStudyBackfillTasks(date=todayKey())' in app and 'day>=p.start&&day<=p.due' in app, 'backfill selector must filter by chosen date'
+assert 'function goalStudyBackfillLabel(t)' in app and 'parent?`${parent.name} › ${t.name}`' in app, 'backfill option labels must stay compact'
+assert '沒有有效具體實現' in app, 'empty eligible backfill state missing'

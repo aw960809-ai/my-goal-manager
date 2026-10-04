@@ -906,6 +906,108 @@ function syncOtherStudyForm(){
  if(date&&!date.value)date.value=todayKey();
  if(mins&&(!mins.value||+mins.value<=0))mins.value='30';
 }
+function goalStudyBackfillTasks(date=todayKey()){
+ const day=String(date||'').slice(0,10);
+ return db.tasks
+  .filter(t=>{
+   if(Number(t.level)!==4||t.status==='已封存')return false;
+   const p=periodForTask(t);
+   return !!(p?.start&&p?.due&&day>=p.start&&day<=p.due);
+  })
+  .sort((a,b)=>{
+   const ap=goalStudyBackfillLabel(a);
+   const bp=goalStudyBackfillLabel(b);
+   return ap.localeCompare(bp,'zh-Hant');
+  });
+}
+function goalStudyBackfillLabel(t){
+ const parent=getTask(t?.parent);
+ return parent?`${parent.name} › ${t.name}`:String(t?.name||'未命名具體實現');
+}
+function syncGoalStudyBackfillOptions(){
+ const select=document.getElementById('goalStudyBackfillTask');if(!select)return;
+ const date=document.getElementById('goalStudyBackfillDate')?.value||todayKey();
+ const tasks=goalStudyBackfillTasks(date);
+ const previous=select.value;
+ const selectedTask=typeof selected!=='undefined'?getTask(selected):null;
+ const preferred=
+  (previous&&tasks.some(t=>String(t.id)===String(previous)))
+   ?previous
+   :(selectedTask&&Number(selectedTask.level)===4&&tasks.some(t=>String(t.id)===String(selectedTask.id)))
+    ?String(selectedTask.id)
+    :'';
+ select.innerHTML=tasks.length
+  ?tasks.map(t=>`<option value="${esc(t.id)}">${esc(goalStudyBackfillLabel(t))}</option>`).join('')
+  :`<option value="">${esc(date)} 沒有有效具體實現</option>`;
+ if(preferred)select.value=preferred;
+ syncGoalStudyBackfillHint();
+}
+function syncGoalStudyBackfillHint(){
+ const hint=document.getElementById('goalStudyBackfillHint');
+ const id=document.getElementById('goalStudyBackfillTask')?.value||'';
+ const t=id?getTask(id):null;if(!hint)return;
+ if(!t){hint.textContent='目前沒有可補登的具體實現。';return}
+ const p=periodForTask(t);
+ hint.textContent=p?.start&&p?.due
+  ?`可補登期間：${p.start} ～ ${p.due}；補登後直接參與完成度、有效達成、超時與總讀書時間。`
+  :'此具體實現尚無有效期間，暫不能補登為目標實際。';
+}
+function syncStudyBackfillMode(){
+ const mode=document.getElementById('studyBackfillMode')?.value||'goal';
+ const goal=document.getElementById('goalStudyBackfillFields');
+ const other=document.getElementById('otherStudyBackfillFields');
+ if(goal)goal.hidden=mode!=='goal';
+ if(other)other.hidden=mode!=='other';
+}
+function syncStudyBackfillForm(){
+ syncOtherStudyForm();
+ const date=document.getElementById('goalStudyBackfillDate');
+ const mins=document.getElementById('goalStudyBackfillMinutes');
+ if(date&&!date.value)date.value=todayKey();
+ if(mins&&(!mins.value||+mins.value<=0))mins.value='30';
+ syncGoalStudyBackfillOptions();
+ syncStudyBackfillMode();
+}
+function addGoalStudyLog(){
+ const taskId=document.getElementById('goalStudyBackfillTask')?.value||'';
+ const t=taskId?getTask(taskId):null;
+ const date=document.getElementById('goalStudyBackfillDate')?.value||todayKey();
+ const mins=Math.round(+document.getElementById('goalStudyBackfillMinutes')?.value||0);
+ if(!t||Number(t.level)!==4||t.status==='已封存'){toast('請選擇有效的目標具體實現');return}
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){toast('請選擇有效日期');return}
+ if(date>todayKey()){toast('補登日期不能晚於今天');return}
+ if(mins<=0){toast('補登分鐘必須大於 0');return}
+ const p=periodForTask(t);
+ if(!p?.start||!p?.due){
+  toast('此具體實現尚無有效執行期間，請先設定其上層子任務期間');
+  return;
+ }
+ if(date<p.start||date>p.due){
+  toast(`補登日期不在執行期間 ${p.start} ～ ${p.due} 內`);
+  document.getElementById('goalStudyBackfillDate')?.focus();
+  return;
+ }
+ const when=date===todayKey()?new Date():new Date(date+'T12:00:00');
+ if(Number.isNaN(when.getTime())){toast('日期格式無效');return}
+ const row={
+  id:'log'+Date.now()+Math.random(),
+  taskId:t.id,
+  name:t.name,
+  time:when.toISOString(),
+  minutes:mins,
+  actual:true,
+  kind:STUDY_LOG_KIND.GOAL,
+  source:'manual-backfill'
+ };
+ db.logs.unshift(row);
+ if(!save()){
+  db.logs=db.logs.filter(x=>x!==row);
+  toast('補登失敗；目前資料未變更');
+  return;
+ }
+ renderAll();
+ toast(`已補登「${t.name}」${mins} 分鐘；完成度與總讀書時間已更新`);
+}
 function otherStudyInputName(){return (document.getElementById('otherStudyName')?.value||'').trim()}
 function selectOtherStudyTimer(){
  if(timer.running){toast('目前已有計時進行中，請先完成或暫停');return}
@@ -1109,7 +1211,7 @@ function today(){
   esc,
   calc
  });
- syncOtherStudyForm();
+ syncStudyBackfillForm();
 }
 function toggleTodayItemsPreview(){todayItemsExpanded=!todayItemsExpanded;today()}
 

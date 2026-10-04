@@ -61,6 +61,32 @@ assert.strictEqual(
   fixture.expected.totalStudyMinutes
 );
 
+
+const manualBackfill=StudyLogDomain.normalizeLog({
+  id:'manual-backfill',
+  taskId:'action',
+  name:'行政法預習',
+  time:'2026-10-01T12:00:00+08:00',
+  minutes:30,
+  actual:true,
+  kind:'goal-study',
+  source:'manual-backfill'
+});
+
+assert.strictEqual(manualBackfill.kind,StudyLogDomain.KIND.GOAL);
+assert.strictEqual(StudyLogDomain.isCountableActualLog(manualBackfill),true);
+assert.strictEqual(StudyLogDomain.isGoalActualLog(manualBackfill,fixture.tasks),true);
+assert.strictEqual(
+  StudyLogDomain.goalStudyMinutesInRange(
+    [...fixture.logs,manualBackfill],
+    fixture.tasks,
+    '2026-09-28',
+    '2026-10-04'
+  ),
+  fixture.expected.goalActualMinutes+30,
+  'manual goal backfill must count exactly like timer-based goal study'
+);
+
 const deleted={...goal,id:'deleted',status:'已刪除',minutes:999};
 assert.strictEqual(StudyLogDomain.isCountableActualLog(deleted),false);
 

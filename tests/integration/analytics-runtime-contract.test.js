@@ -93,4 +93,17 @@ assert(app.includes("if(id==='today'){today();renderTimerState();}"));
 assert(!app.includes('saveExecutionPlan'));
 assert(!app.includes('findActivePlanForDate'));
 
+assert(app.includes('function addGoalStudyLog()'));
+assert(app.includes("source:'manual-backfill'"));
+assert(app.includes('kind:STUDY_LOG_KIND.GOAL'));
+assert(app.includes("if(date>todayKey())"));
+assert(app.includes('date<p.start||date>p.due'));
+assert(!app.includes("source:'manual-backfill',planId"));
+
+assert(app.includes('function goalStudyBackfillTasks(date=todayKey())'));
+assert(app.includes('day>=p.start&&day<=p.due'));
+assert(app.includes('function goalStudyBackfillLabel(t)'));
+assert(app.includes('parent?`${parent.name} › ${t.name}`'));
+assert(app.includes('沒有有效具體實現'));
+
 console.log('OK: analytics renders direct-execution weekly/direction states and routing refreshes pages');
