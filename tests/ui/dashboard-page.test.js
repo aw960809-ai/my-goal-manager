@@ -52,4 +52,8 @@ assert(directions.includes('台政大轉學考'));
 assert(directions.includes('40%'));
 assert(directions.includes('1 個階段目標'));
 
+const nodes={dOverall:{textContent:''},dToday:{textContent:''},dRun:{textContent:''},dMin:{textContent:''},dTodayMin:{textContent:''},homeDateLabel:{textContent:''},directions:{innerHTML:''},mainGoalCount:{textContent:''},deadlines:{innerHTML:''}};
+DashboardPage.renderDashboard({document:{getElementById:id=>nodes[id]||null},overall:40,todayItemCount:3,weeklyTargetMinutes:1030,weekActualMinutes:641,todayActualMinutes:30,date:new Date('2026-10-04T12:00:00+08:00'),roots:[],selected:null,calc:()=>0,kids:()=>[],deadlines:[],esc:x=>String(x)});
+assert.strictEqual(nodes.dRun.textContent,'17.2h');assert.strictEqual(nodes.dMin.textContent,641);
+
 console.log('OK: DashboardPage execution, decision and direction rendering');

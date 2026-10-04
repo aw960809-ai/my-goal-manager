@@ -76,4 +76,7 @@ assert.strictEqual(overrunAnalysis.remainingPlanMinutes,60);
 assert.strictEqual(overrunAnalysis.timeRate,50,'overrun must not offset another plan');
 assert.strictEqual(overrunAnalysis.totalStudyMinutes,120,'raw overrun remains in total study time');
 
-console.log('OK: AnalyticsDomain weekly and plan-vs-actual aggregation');
+const direction=AnalyticsDomain.weeklyDirectionSummary({tasks:overrunTasks,logs:overrunLogs,roots:[overrunTasks[0]],date:'2026-10-01'})[0];
+assert.strictEqual(direction.target,120);assert.strictEqual(direction.actual,120);assert.strictEqual(direction.credited,60);assert.strictEqual(direction.overrun,60);assert.strictEqual(direction.remaining,60);assert.strictEqual(direction.ratio,50);
+
+console.log('OK: AnalyticsDomain weekly study, direction and legacy plan aggregation');

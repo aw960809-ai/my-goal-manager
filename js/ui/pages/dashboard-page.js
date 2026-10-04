@@ -115,7 +115,7 @@
     document,
     overall,
     todayItemCount,
-    weeklyPlanMinutes,
+    weeklyTargetMinutes,
     weekActualMinutes,
     todayActualMinutes,
     date,
@@ -129,7 +129,7 @@
     document.getElementById('dOverall').textContent=overall+'%';
     document.getElementById('dToday').textContent=todayItemCount;
     document.getElementById('dRun').textContent=
-      (weeklyPlanMinutes/60).toFixed(1).replace('.0','')+'h';
+      (weeklyTargetMinutes/60).toFixed(1).replace('.0','')+'h';
     document.getElementById('dMin').textContent=weekActualMinutes;
 
     const todayActual=document.getElementById('dTodayMin');

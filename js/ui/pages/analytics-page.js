@@ -13,78 +13,6 @@
     return h?`${h}h ${m}m`:`${m}m`;
   }
 
-  function executionAnalysisHTML(analysis,{timerRunning=false}={}){
-    const a=analysis;
-    const fmt=formatMinutes;
-    const creditedPlanMinutes=Math.max(0,+a.creditedPlanMinutes||0);
-    const overrunPlanMinutes=Math.max(0,+a.overrunPlanMinutes||0);
-    const remainingPlanMinutes=Math.max(0,+a.remainingPlanMinutes||0);
-
-    const executionRateValue=
-      a.executionRate===null?'—':a.executionRate+'%';
-
-    const timeRateValue=
-      a.timeRate===null?'—':a.timeRate+'%';
-
-    const executionRateText=
-      a.executionRate===null
-        ?'目前沒有有效執行安排可計算'
-        :'已開始實際執行／有效安排';
-
-    const timeRateText=
-      a.timeRate===null
-        ?'目前沒有有效執行安排可計算'
-        :`有效達成 ${fmt(creditedPlanMinutes)} ／有效計畫 ${fmt(a.plannedMinutes)} · 實際 ${fmt(a.planActualMinutes)}${timerRunning?' · 計時中即時計入':''}`;
-
-    const estimateValue=
-      a.estimateAccuracy===null?'—':a.estimateAccuracy+'%';
-
-    const estimateText=
-      a.estimateAccuracy===null
-        ?'待至少一筆有效計畫達成後評估'
-        :'以已達成有效計畫的預計／實際差距計算';
-
-    const cancelledActual=Math.max(
-      0,
-      +a.cancelledPlanActualMinutes||0
-    );
-
-    return `<div class="execution-analysis-group-title">計畫 × 實際執行 <small>有效安排與實際投入分開統計</small></div>
- <div class="execution-analysis-kpis">
-   <div><small>計畫實際執行率</small><b>${executionRateValue}</b><span>${a.startedPlans.length} / ${a.scheduledPlans.length} 次 · ${executionRateText}</span></div>
-   <div><small>時間達成率</small><b>${timeRateValue}</b><span>${timeRateText}</span></div>
-   <div><small>逾期未達計畫</small><b>${a.expiredPlans.length}</b><span>取消不列入失敗 · 已達成 ${a.fulfilledPlans.length} 次</span></div>
-   <div><small>估時吻合度</small><b>${estimateValue}</b><span>${estimateText}</span></div>
- </div>
- <div class="execution-analysis-detail">
-   <span>本週有效執行安排 <b>${fmt(a.plannedMinutes)}</b></span>
-   <span>有效安排實際 <b>${fmt(a.planActualMinutes)}</b></span>
-   <span>有效達成時間 <b>${fmt(creditedPlanMinutes)}</b></span>
-   ${overrunPlanMinutes?`<span>超出原訂時間 <b>+${fmt(overrunPlanMinutes)}</b></span>`:''}
-   ${remainingPlanMinutes?`<span>尚待安排時間 <b>${fmt(remainingPlanMinutes)}</b></span>`:''}
-   <span>本週目標實際 <b>${fmt(a.actualMinutes)}</b></span>
-   <span>其他讀書 <b>${fmt(a.otherStudyMinutes)}</b></span>
-   <span>總讀書時間 <b>${fmt(a.totalStudyMinutes)}</b></span>
-   <span>未配對安排之目標實際 <b>${fmt(a.unplannedActualMinutes)}</b></span>
-   <span>已取消安排 <b>${a.cancelledPlans.length}</b></span>
-   ${cancelledActual?`<span>已取消安排之歷史實際 <b>${fmt(cancelledActual)}</b></span>`:''}
-   <span>已達安排 <b>${a.fulfilledPlans.length}/${a.scheduledPlans.length}</b></span>
- </div>`;
-  }
-
-  function renderExecutionAnalysis({
-    document,
-    analysis,
-    timerRunning=false
-  }){
-    const el=document.getElementById('executionAnalysis');
-    if(!el)return;
-    el.innerHTML=executionAnalysisHTML(
-      analysis,
-      {timerRunning}
-    );
-  }
-
   function setText(document,id,value){
     const el=document.getElementById(id);
     if(el)el.textContent=String(value);
@@ -105,20 +33,18 @@
     leaves,
     done,
     avg,
-    planAnalysis,
     week,
-    rootsActive,
-    currentWeekTargetForRoot,
+    directionRows,
     actualLogCount,
     esc,
     calc
   }){
     const safeLeaves=Array.isArray(leaves)?leaves:[];
-    const safeRoots=Array.isArray(rootsActive)?rootsActive:[];
+    const safeDirections=Array.isArray(directionRows)?directionRows:[];
 
     setText(document,'leafDone',`${done}/${safeLeaves.length}`);
     setText(document,'avg',`${avg}%`);
-    setText(document,'est',planAnalysis?.plannedMinutes||0);
+    setText(document,'weekCreditedKpi',week?.creditedGoalMinutes||0);
     setText(document,'logsN',actualLogCount||0);
 
     setText(document,'statsWeekRatio',`${week?.ratio||0}%`);
@@ -131,26 +57,11 @@
     setText(document,'statsTarget',week?.target||0);
     setText(document,'statsRemaining',week?.remaining||0);
 
-    const totalTarget=Math.max(0,+week?.target||0);
-
-    const directionHTML=safeRoots.map(task=>{
-      let minutes=0;
-      try{
-        minutes=Math.max(0,+currentWeekTargetForRoot(task)||0);
-      }catch(error){
-        if(typeof console!=='undefined'&&console.error){
-          console.error('[GoalManager:analytics-direction]',error);
-        }
-      }
-
-      const pct=totalTarget
-        ?Math.round(minutes/totalTarget*100)
-        :0;
-
-      return `<div class="direction-row"><div class="direction-head"><b>${esc(task.name)}</b><span>${minutes} 分 · ${pct}%</span></div><div class="direction-track"><div class="direction-fill" style="width:${Math.min(100,pct)}%"></div></div></div>`;
-    }).join('')||
-      '<div class="empty">尚無有效方向</div>';
-
+    const directionHTML=safeDirections.map(row=>{
+      const ratio=Math.max(0,Math.min(100,+row.ratio||0));
+      const actual=Math.max(0,+row.actual||0),credited=Math.max(0,+row.credited||0),overrun=Math.max(0,+row.overrun||0),target=Math.max(0,+row.target||0);
+      return `<div class="direction-row"><div class="direction-head"><b>${esc(row.name)}</b><span>${ratio}%</span></div><div class="direction-track"><div class="direction-fill" style="width:${ratio}%"></div></div><div class="direction-meta"><span>實際 ${actual} 分</span><span>有效 ${credited} 分</span><span>超時 ${overrun} 分</span><span>目標 ${target} 分</span></div></div>`;
+    }).join('')||'<div class="empty">尚無有效方向</div>';
     setHTML(document,'domains',directionHTML);
 
     const buckets=[
@@ -316,8 +227,6 @@
 
   return Object.freeze({
     formatMinutes,
-    executionAnalysisHTML,
-    renderExecutionAnalysis,
     renderStats,
     setText,
     setHTML,

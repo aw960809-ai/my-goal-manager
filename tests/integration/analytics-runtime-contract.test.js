@@ -8,12 +8,11 @@ function element(){
 }
 
 const ids=[
-  'leafDone','avg','est','logsN',
+  'leafDone','avg','weekCreditedKpi','logsN',
   'statsWeekRatio','statsWeekBar',
-  'statsActual','statsOtherStudy',
-  'statsTotalStudy','statsTarget',
-  'statsRemaining','domains',
-  'progressDistribution'
+  'statsActual','statsCredited','statsOverrun',
+  'statsOtherStudy','statsTotalStudy','statsTarget',
+  'statsRemaining','domains','progressDistribution'
 ];
 
 const elements=Object.fromEntries(ids.map(id=>[id,element()]));
@@ -24,17 +23,17 @@ AnalyticsPage.renderStats({
   leaves:[],
   done:0,
   avg:0,
-  planAnalysis:{plannedMinutes:0},
   week:{
     ratio:0,
     goalActualMinutes:0,
+    creditedGoalMinutes:0,
+    overrunGoalMinutes:0,
     otherStudyMinutes:0,
     totalStudyMinutes:0,
     target:0,
     remaining:0
   },
-  rootsActive:[],
-  currentWeekTargetForRoot:()=>0,
+  directionRows:[],
   actualLogCount:0,
   esc:x=>String(x),
   calc:()=>0
@@ -52,23 +51,36 @@ AnalyticsPage.renderStats({
   leaves:[{id:'task-1',name:'行政法',level:4,status:'進行中'}],
   done:0,
   avg:25,
-  planAnalysis:{plannedMinutes:120},
   week:{
     ratio:50,
-    goalActualMinutes:60,
+    goalActualMinutes:80,
+    creditedGoalMinutes:60,
+    overrunGoalMinutes:20,
     otherStudyMinutes:30,
-    totalStudyMinutes:90,
+    totalStudyMinutes:110,
     target:120,
     remaining:60
   },
-  rootsActive:[{id:'root',name:'台大及政大轉學考'}],
-  currentWeekTargetForRoot:()=>120,
+  directionRows:[{
+    rootId:'root',
+    name:'台大及政大轉學考',
+    target:120,
+    actual:80,
+    credited:60,
+    overrun:20,
+    remaining:60,
+    ratio:50
+  }],
   actualLogCount:2,
   esc:x=>String(x),
   calc:()=>25
 });
 
 assert(elements.domains.innerHTML.includes('台大及政大轉學考'));
+assert(elements.domains.innerHTML.includes('實際 80 分'));
+assert(elements.domains.innerHTML.includes('有效 60 分'));
+assert(elements.domains.innerHTML.includes('超時 20 分'));
+assert(elements.domains.innerHTML.includes('目標 120 分'));
 assert(elements.progressDistribution.innerHTML.includes('1 個具體行動'));
 
 const app=fs.readFileSync(
@@ -78,5 +90,7 @@ const app=fs.readFileSync(
 
 assert(app.includes("if(id==='stats')stats();"));
 assert(app.includes("if(id==='today'){today();renderTimerState();}"));
+assert(!app.includes('saveExecutionPlan'));
+assert(!app.includes('findActivePlanForDate'));
 
-console.log('OK: analytics renders empty/data states and view routing refreshes page');
+console.log('OK: analytics renders direct-execution weekly/direction states and routing refreshes pages');

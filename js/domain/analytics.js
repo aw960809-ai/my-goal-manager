@@ -63,6 +63,32 @@
     };
   }
 
+  function descendantLeafTasks(tasks,rootId){
+    const rows=list(tasks),out=[],stack=[String(rootId)];
+    while(stack.length){
+      const parentId=stack.pop();
+      rows.filter(task=>String(task?.parent)===parentId).forEach(task=>{
+        if(task.status==='已封存')return;
+        if(Number(task.level)===4)out.push(task);else stack.push(String(task.id));
+      });
+    }
+    return out;
+  }
+
+  function weeklyDirectionSummary({tasks,logs,roots,date}){
+    return list(roots).map(root=>{
+      const totals=descendantLeafTasks(tasks,root?.id).reduce((sum,task)=>{
+        const row=ExecutionDomain.currentWeekSummary(tasks,logs,task,date);
+        if(!row.active)return sum;
+        sum.target+=Math.max(0,+row.target||0);sum.actual+=Math.max(0,+row.actual||0);
+        sum.credited+=Math.max(0,+row.credited||0);sum.overrun+=Math.max(0,+row.overrun||0);
+        sum.remaining+=Math.max(0,+row.remaining||0);return sum;
+      },{target:0,actual:0,credited:0,overrun:0,remaining:0});
+      return {rootId:String(root?.id||''),name:String(root?.name||''),...totals,ratio:totals.target?Math.min(100,Math.round(totals.credited/totals.target*100)):0};
+    });
+  }
+
+  // 舊備份相容：executionAnalysis 保留純函式讀取舊 executionPlans；主要產品流程已不再使用。
   function executionAnalysis({
     tasks,
     logs,
@@ -270,6 +296,7 @@
   return Object.freeze({
     analysisValidLeafTasks,
     weeklyStudySummary,
+    weeklyDirectionSummary,
     executionAnalysis
   });
 });
