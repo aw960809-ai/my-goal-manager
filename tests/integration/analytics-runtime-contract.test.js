@@ -106,4 +106,9 @@ assert(app.includes('function goalStudyBackfillLabel(t)'));
 assert(app.includes('parent?`${parent.name} › ${t.name}`'));
 assert(app.includes('沒有有效具體實現'));
 
+assert(app.includes('function startFreeStudyTimer()'));
+assert(app.includes("TimerService.selectOther(name)"));
+assert(app.includes("document.getElementById('freeStudyName')"));
+assert(!app.includes('function selectOtherStudyTimer()'));
+
 console.log('OK: analytics renders direct-execution weekly/direction states and routing refreshes pages');

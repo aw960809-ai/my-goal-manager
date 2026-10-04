@@ -865,3 +865,20 @@ html[data-reduced-motion="true"] *,html[data-reduced-motion="true"] *::before,ht
 .study-backfill-task-field select{width:100%}
 .study-backfill-section[hidden]{display:none!important}
 @media(max-width:700px){.study-backfill-task-field{grid-column:auto}}
+
+/* V98.11.2 direct free-study timer */
+.free-study-quick-start{
+  margin-top:12px;padding:12px;border:1px solid var(--gm-line);
+  border-radius:var(--gm-radius-md);background:var(--gm-surface-soft);
+}
+.free-study-quick-start[hidden]{display:none!important}
+.free-study-quick-copy b{display:block;font-size:15px;color:var(--gm-text)}
+.free-study-quick-copy small{display:block;margin-top:2px;color:var(--gm-text-secondary)!important;font-size:12px!important}
+.free-study-quick-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:10px;align-items:center}
+.free-study-quick-row input{width:100%;min-width:0}
+.free-study-quick-row .btn{white-space:nowrap}
+.free-study-quick-note{margin-top:7px;color:var(--gm-text-muted);font-size:11px;line-height:1.45}
+@media(max-width:520px){
+  .free-study-quick-row{grid-template-columns:1fr}
+  .free-study-quick-row .btn{width:100%}
+}

@@ -1009,13 +1009,21 @@ function addGoalStudyLog(){
  toast(`已補登「${t.name}」${mins} 分鐘；完成度與總讀書時間已更新`);
 }
 function otherStudyInputName(){return (document.getElementById('otherStudyName')?.value||'').trim()}
-function selectOtherStudyTimer(){
+function freeStudyInputName(){return (document.getElementById('freeStudyName')?.value||'').trim()}
+function startFreeStudyTimer(){
  if(timer.running){toast('目前已有計時進行中，請先完成或暫停');return}
- const name=otherStudyInputName();if(!name){toast('請先輸入其他讀書的內容或科目');document.getElementById('otherStudyName')?.focus();return}
- timer=TimerService.selectOther(name);saveActiveTimer();
- document.getElementById('timerTask').textContent='其他讀書：'+name;
- document.getElementById('timerTaskCancel').style.display='block';
- updateClock();updateTimerButtons();toast('已選取其他讀書；尚未開始計時');
+ const name=freeStudyInputName();
+ if(!name){
+  toast('請先輸入自由計時內容');
+  document.getElementById('freeStudyName')?.focus();
+  return;
+ }
+ timer=TimerService.selectOther(name);
+ saveActiveTimer();
+ renderTimerState();
+ startTimer();
+ const input=document.getElementById('freeStudyName');
+ if(input)input.value='';
 }
 function addOtherStudyLog(){
  const name=otherStudyInputName(),date=document.getElementById('otherStudyDate')?.value||todayKey(),mins=Math.round(+document.getElementById('otherStudyMinutes')?.value||0);
@@ -1031,23 +1039,29 @@ function timerHasSelection(){return TimerService.hasSelection(timer)}
 
 
 function renderTimerState(){
- const taskEl=document.getElementById('timerTask'),cancel=document.getElementById('timerTaskCancel');if(!taskEl)return;
+ const taskEl=document.getElementById('timerTask'),cancel=document.getElementById('timerTaskCancel'),free=document.getElementById('freeStudyQuickStart');if(!taskEl)return;
  const has=timerHasSelection();
- if(!has){taskEl.textContent='尚未選擇任務';if(cancel)cancel.style.display='none';updateClock();updateTimerButtons();return}
+ if(!has){
+  taskEl.textContent='尚未選擇任務';
+  if(cancel)cancel.style.display='none';
+  if(free)free.hidden=false;
+  updateClock();updateTimerButtons();return
+ }
+ if(free)free.hidden=true;
  if(timer.kind==='other-study')taskEl.textContent=(timer.running?'進行中：':'待執行：')+'其他讀書：'+(timer.label||'未命名');
- else{const t=getTask(timer.id);if(!t){timer=TimerService.empty();clearActiveTimer();taskEl.textContent='尚未選擇任務';if(cancel)cancel.style.display='none';updateClock();updateTimerButtons();return}taskEl.textContent=(timer.running?'進行中：':'待執行：')+t.name}
+ else{const t=getTask(timer.id);if(!t){timer=TimerService.empty();clearActiveTimer();taskEl.textContent='尚未選擇任務';if(cancel)cancel.style.display='none';if(free)free.hidden=false;updateClock();updateTimerButtons();return}taskEl.textContent=(timer.running?'進行中：':'待執行：')+t.name}
  if(cancel)cancel.style.display='block';updateClock();updateTimerButtons();if(timer.running)timerLoop();
 }
 
-function selectTodayExecution(id){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中，請先完成或暫停');return}timer=TimerService.selectGoal(id,null);saveActiveTimer();document.getElementById('timerTask').textContent='待執行：'+t.name;document.getElementById('timerTaskCancel').style.display='block';updateClock();updateTimerButtons();today();toast('已選取今日欲執行項目；尚未開始計時')}
-function cancelTodaySelection(){if(timer.running){toast('計時進行中，請先暫停或完成後再取消');return}timer=TimerService.empty();clearActiveTimer();document.getElementById('timerTask').textContent='尚未選擇任務';updateClock();updateTimerButtons();today();toast('已取消今日執行選取')}
+function selectTodayExecution(id){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中，請先完成或暫停');return}timer=TimerService.selectGoal(id,null);saveActiveTimer();renderTimerState();today();toast('已選取今日欲執行項目；尚未開始計時')}
+function cancelTodaySelection(){if(timer.running){toast('計時進行中，請先暫停或完成後再取消');return}timer=TimerService.empty();clearActiveTimer();renderTimerState();today();toast('已取消今日執行選取')}
 function startTodayExecution(id){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中');return}selectTodayExecution(id);startTimer()}
 function useTimer(id){selected=id;timer=TimerService.selectGoal(id,null);saveActiveTimer();document.getElementById('timerTask').textContent=getTask(id)?.name||'';go('today');updateClock();updateTimerButtons();toast('已選擇具體行動，可開始計時')}
 function startTimer(){
  if(!timerHasSelection()){toast('請先選擇具體行動或其他讀書');return}
  if(timer.running){toast('計時已在進行中');return}
  if(timer.kind==='goal'){const t=getTask(timer.id);if(!t){toast('找不到目前執行的具體行動');return}t.status='進行中';save()}
- timer=TimerService.start(timer,Date.now());saveActiveTimer();updateTimerButtons();timerLoop();toast(timer.kind==='other-study'?'已開始其他讀書計時':'已開始計時')
+ timer=TimerService.start(timer,Date.now());saveActiveTimer();updateTimerButtons();timerLoop();toast(timer.kind==='other-study'?'已開始自由計時':'已開始計時')
 }
 function pauseTimer(){if(!timer.running){toast('目前沒有進行中的計時');return}timer=TimerService.pause(timer,Date.now());saveActiveTimer();updateClock();updateTimerButtons();toast('計時已暫停')}
 function finishTimer(){

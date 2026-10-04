@@ -231,6 +231,14 @@
   <div class="panel execution-now-panel" id="executionNowPanel">
     <div class="execution-now-head"><span>現在執行</span><small>計時狀態可在 PWA／Android 中斷後恢復</small></div>
     <div id="timerTask" class="timer-task">尚未選擇任務</div>
+    <div id="freeStudyQuickStart" class="free-study-quick-start">
+      <div class="free-study-quick-copy"><b>自由計時</b><small>不屬於任何具體實現時，直接記錄為其他讀書。</small></div>
+      <div class="free-study-quick-row">
+        <input id="freeStudyName" type="text" maxlength="60" placeholder="例如：憲法課後複習" onkeydown="if(event.key==='Enter'){event.preventDefault();startFreeStudyTimer()}">
+        <button class="btn primary" type="button" onclick="startFreeStudyTimer()">開始自由計時</button>
+      </div>
+      <div class="free-study-quick-note">完成後會計入今日、本週與總讀書時間，但不增加任何 Level 4 完成度。</div>
+    </div>
     <div id="timerTaskCancel" class="timer-cancel-row" style="display:none"><button class="cancel-select" type="button" onclick="cancelTodaySelection()">✕ 取消選取</button></div>
     <div class="timer" id="clock">00:00:00</div>
     <div class="timerbtns"><button class="btn primary" onclick="startTimer()">開始</button><button class="btn" onclick="pauseTimer()">暫停</button><button class="btn gold" onclick="finishTimer()">完成</button></div>
@@ -276,8 +284,7 @@
           <label><span>補登分鐘</span><input id="otherStudyMinutes" type="number" min="1" step="1" value="30"></label>
         </div>
         <div class="other-study-actions">
-          <button class="btn primary" type="button" onclick="selectOtherStudyTimer()">選取並計時</button>
-          <button class="btn gold" type="button" onclick="addOtherStudyLog()">直接補登</button>
+          <button class="btn primary" type="button" onclick="addOtherStudyLog()">直接補登</button>
         </div>
         <div class="other-study-note">其他讀書會納入總讀書時數，但不改變任何 Level 4 完成度。</div>
       </div>
