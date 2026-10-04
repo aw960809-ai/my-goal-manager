@@ -14,7 +14,7 @@ const match=versionSource.match(
 );
 
 assert(match,'version.js must expose GOAL_MANAGER_VERSION');
-assert.strictEqual(match[1],'98.10.1');
+assert.strictEqual(match[1],'98.10.2');
 
 assert(
   sw.includes("importScripts('./config/version.js')"),
@@ -34,6 +34,32 @@ assert(
 assert(
   !pwa.includes('source.match(/const\\s+PWA_VERSION'),
   'PWA update check must not expect literal PWA_VERSION in sw.js'
+);
+
+
+assert(
+  sw.includes('const CRITICAL_SHELL=[')&&
+  sw.includes('async function warmInstallCache(urls)')&&
+  sw.includes('self.skipWaiting();'),
+  'service worker install must use a bounded critical-shell warmup'
+);
+
+assert(
+  !sw.includes('await cache.addAll(APP_SHELL)'),
+  'service worker install must not block on the whole app shell'
+);
+
+assert(
+  pwa.includes('const UPDATE_SETTLE_MAX_MS=30*1000')&&
+  pwa.includes('function updateWaitExpired()')&&
+  pwa.includes('UPDATE_SETTLE_RETRY_MS'),
+  'PWA update settlement must have a bounded retry window'
+);
+
+assert(
+  pwa.includes('目前頁面可繼續使用')&&
+  pwa.includes('下次啟動自動重試'),
+  'PWA update timeout must fail open without blocking normal use'
 );
 
 console.log('OK: PWA update check uses canonical version source');

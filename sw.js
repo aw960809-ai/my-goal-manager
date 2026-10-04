@@ -1,6 +1,6 @@
 /* THU personal service worker */
 importScripts('./config/version.js');
-const PWA_VERSION=String(globalThis.GOAL_MANAGER_VERSION||'98.10.1');
+const PWA_VERSION=String(globalThis.GOAL_MANAGER_VERSION||'98.10.2');
 const PWA_SIGNATURE='thu-personal-'+PWA_VERSION+'-core';
 const CACHE_PREFIX='thu-goal-personal-v';
 const LEGACY_CACHE_PREFIX='law-goal-web-v';
@@ -50,12 +50,40 @@ async function staleWhileRevalidate(request){
     }).catch(()=>null);
   return cached||await fresh||Response.error();
 }
+const INSTALL_CACHE_TIMEOUT=8*1000;
+const CRITICAL_SHELL=[
+  './','./index.html','./config/version.js','./config/system-config.js',
+  './css/tokens.css','./css/base.css','./css/app-ui.css','./css/design-system.css',
+  './js/pwa.js','./js/app.js','./js/bootstrap.js'
+];
+
+async function warmInstallCache(urls){
+  const cache=await caches.open(CACHE);
+  const jobs=urls.map(async url=>{
+    const controller=typeof AbortController==='function'?new AbortController():null;
+    const timer=setTimeout(()=>controller?.abort(),5*1000);
+    try{
+      const response=await fetch(url,{
+        cache:'no-store',
+        signal:controller?.signal
+      });
+      if(response&&response.ok)await cache.put(url,response.clone());
+    }catch(_){
+      // Install must not be blocked by one slow or temporarily unavailable asset.
+    }finally{
+      clearTimeout(timer);
+    }
+  });
+
+  await Promise.race([
+    Promise.allSettled(jobs),
+    new Promise(resolve=>setTimeout(resolve,INSTALL_CACHE_TIMEOUT))
+  ]);
+}
+
 self.addEventListener('install',event=>{
-  event.waitUntil((async()=>{
-    const cache=await caches.open(CACHE);
-    await cache.addAll(APP_SHELL);
-    await Promise.allSettled(MUTABLE_DATA.map(url=>cache.add(url)));
-  })());
+  self.skipWaiting();
+  event.waitUntil(warmInstallCache(CRITICAL_SHELL));
 });
 self.addEventListener('activate',event=>{
   event.waitUntil((async()=>{

@@ -1,8 +1,10 @@
-/* V98.10.1 THU personal automatic update lifecycle */
+/* V98.10.2 THU personal automatic update lifecycle */
 window.PWA=(function(){
-  const CURRENT_VERSION=String(window.AppConfig?.version||'V98.10.1').replace(/^V/i,'');
+  const CURRENT_VERSION=String(window.AppConfig?.version||'V98.10.2').replace(/^V/i,'');
   const CHECK_INTERVAL=5*60*1000;
   const CHECK_MIN_GAP=60*1000;
+  const UPDATE_SETTLE_RETRY_MS=3*1000;
+  const UPDATE_SETTLE_MAX_MS=30*1000;
   let deferredPrompt=null;
   let registration=null;
   let reloading=false;
@@ -77,8 +79,19 @@ window.PWA=(function(){
   }
  /* PWA update settlement watchdog */
   let updateWatchdog=null;
+  let updateStartedAt=0;
   function clearUpdateWatchdog(){
     if(updateWatchdog){clearTimeout(updateWatchdog);updateWatchdog=null}
+  }
+  function beginUpdateWatch(){
+    if(!updateStartedAt)updateStartedAt=Date.now();
+  }
+  function resetUpdateWatch(){
+    updateStartedAt=0;
+    clearUpdateWatchdog();
+  }
+  function updateWaitExpired(){
+    return !!updateStartedAt&&Date.now()-updateStartedAt>=UPDATE_SETTLE_MAX_MS;
   }
   async function settleUpdateState(){
     try{
@@ -87,33 +100,51 @@ window.PWA=(function(){
       const sameVersion=!!(remote&&current&&remote.version===current.version);
       const sameSignature=!remote?.signature||!current?.signature||remote.signature===current.signature;
       if(sameVersion&&sameSignature){
+        resetUpdateWatch();
         hideUpdate();
         const time=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
         setUpdateUI('ok',`目前已是最新版本 V${remote.version} · ${time}`);
         return;
       }
+      if(updateWaitExpired()){
+        hideUpdate();
+        updateStartedAt=0;
+        setUpdateUI(
+          'error',
+          `Service Worker 尚未接管 V${remote.version}；目前頁面可繼續使用，系統會於下次啟動自動重試`
+        );
+        return;
+      }
       if(registration?.waiting){
+        beginUpdateWatch();
         registration.waiting.postMessage({type:'SKIP_WAITING'});
         armUpdateWatchdog();
         return;
       }
       if(registration?.installing){
+        beginUpdateWatch();
         armUpdateWatchdog();
         return;
       }
       hideUpdate();
-      setUpdateUI('error','更新尚未完成，請按「立即檢查更新」重試');
+      updateStartedAt=0;
+      setUpdateUI('error','更新尚未完成；目前頁面可繼續使用，下次啟動會自動重試');
     }catch(e){
       console.warn('THU update settlement check failed',e);
       hideUpdate();
-      setUpdateUI('error',isOnline()?'更新確認逾時，請按「立即檢查更新」重試':'目前離線，恢復連線後再更新');
+      updateStartedAt=0;
+      setUpdateUI('error',isOnline()?'更新確認逾時；目前頁面可繼續使用，下次啟動會自動重試':'目前離線，恢復連線後再更新');
     }
   }
   function armUpdateWatchdog(){
     clearUpdateWatchdog();
-    updateWatchdog=setTimeout(()=>{updateWatchdog=null;settleUpdateState()},12000);
+    updateWatchdog=setTimeout(()=>{
+      updateWatchdog=null;
+      settleUpdateState();
+    },UPDATE_SETTLE_RETRY_MS);
   }
   function showUpdate(){
+    beginUpdateWatch();
     ensureUpdateBar().classList.add('show');
     armUpdateWatchdog();
   }
@@ -221,6 +252,7 @@ window.PWA=(function(){
         (remote.signature&&currentSignature&&remote.signature!==currentSignature);
 
       if(!changed){
+        resetUpdateWatch();
         hideUpdate();
         if(!silent){
           const time=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
@@ -290,6 +322,7 @@ window.PWA=(function(){
         sessionStorage.setItem(key,'1');
       }catch(_){}
       reloading=true;
+      resetUpdateWatch();
       hideUpdate();
       setTimeout(()=>location.reload(),80);
     });
