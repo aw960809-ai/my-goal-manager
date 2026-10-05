@@ -1,0 +1,28 @@
+{
+  "release": "20261005a",
+  "app": "my-goal-manager",
+  "short_name": "目標管理",
+  "source_commit": "984c9241e40fabbdde7fa5641a8316c6045d8555",
+  "active_manifest": "manifest-original.webmanifest",
+  "manifests": [
+    "manifest-original.webmanifest",
+    "manifest.webmanifest"
+  ],
+  "scope_of_change": "launcher-icons-only",
+  "storage_migration": false,
+  "application_versions_changed": false,
+  "colors": {
+    "background": "#F7F5E9",
+    "primary": "#105947",
+    "accent": "#D3A341"
+  },
+  "assets": {
+    "icon.svg": "4489ad7974c4440bf10af463ac9591f64c5d0cc698eff613476de94834a2fee7",
+    "icon-maskable.svg": "4fc6907b5e03aa7d9bebc857e814c2f4f944340a3c6cd610bf783f44e013a8f8",
+    "icon-64.png": "a4c0ca4f7f9c6e458ffc344332d517852e6a1ce7b7b4b4440a384d5a6db78217",
+    "apple-touch-icon.png": "173ee650ac5f123d9289b391bd52e61449d538a124c47a364f24858088746092",
+    "icon-192.png": "5727c0327d89e087cf42a8a9658e4f491d817cbe5464545a01841f158e53aa63",
+    "icon-512.png": "15eb8432c3507d61ab319d9d8ccaff2e8398d1db2617c9fdd8ce5a6450734715",
+    "icon-maskable-512.png": "688768b4d9c8fef0159096cbba5e436aa879b5773444644f2f97fbfa471e78b5"
+  }
+}

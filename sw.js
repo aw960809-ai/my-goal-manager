@@ -1,11 +1,22 @@
+/* SUITE_ICON_RELEASE:20261005a; visual assets only; storage and application versions unchanged. */
 /* THU personal service worker */
 importScripts('./config/version.js');
 const PWA_VERSION=String(globalThis.GOAL_MANAGER_VERSION||'98.11.2');
 const PWA_SIGNATURE='thu-personal-'+PWA_VERSION+'-core';
 const CACHE_PREFIX='thu-goal-personal-v';
 const LEGACY_CACHE_PREFIX='law-goal-web-v';
-const CACHE=CACHE_PREFIX+PWA_VERSION;
-const APP_SHELL=[
+const CACHE=CACHE_PREFIX+PWA_VERSION+'-icons-20261005a';
+const APP_SHELL=[/* suite-icons:assets:start */
+  "./assets/suite-icons/20261005a/icon-64.png",
+  "./assets/suite-icons/20261005a/apple-touch-icon.png",
+  "./assets/suite-icons/20261005a/icon-192.png",
+  "./assets/suite-icons/20261005a/icon-512.png",
+  "./assets/suite-icons/20261005a/icon-maskable-512.png",
+  "./manifest-original.webmanifest",
+  "./manifest.webmanifest",
+  "./suite-icon-release.json",
+/* suite-icons:assets:end */
+
   './','./index.html','./manifest-original.webmanifest','./icon.svg','./icon-original-192.png','./icon-original-512.png','./apple-touch-original.png',
   './icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png',
   './404.html','./css/tokens.css','./css/base.css','./css/app-ui.css','./css/design-system.css','./config/version.js','./config/system-config.js',
@@ -51,7 +62,17 @@ async function staleWhileRevalidate(request){
   return cached||await fresh||Response.error();
 }
 const INSTALL_CACHE_TIMEOUT=8*1000;
-const CRITICAL_SHELL=[
+const CRITICAL_SHELL=[/* suite-icons:assets:start */
+  "./assets/suite-icons/20261005a/icon-64.png",
+  "./assets/suite-icons/20261005a/apple-touch-icon.png",
+  "./assets/suite-icons/20261005a/icon-192.png",
+  "./assets/suite-icons/20261005a/icon-512.png",
+  "./assets/suite-icons/20261005a/icon-maskable-512.png",
+  "./manifest-original.webmanifest",
+  "./manifest.webmanifest",
+  "./suite-icon-release.json",
+/* suite-icons:assets:end */
+
   './','./index.html','./config/version.js','./config/system-config.js',
   './css/tokens.css','./css/base.css','./css/app-ui.css','./css/design-system.css',
   './js/pwa.js','./js/app.js','./js/bootstrap.js'
