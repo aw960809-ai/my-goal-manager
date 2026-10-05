@@ -1108,7 +1108,7 @@ function saveEditModal(){
 
 function wouldCycle(id,parent){let cur=parent,guard=0;while(cur&&guard++<10){if(cur===id)return true;cur=getTask(cur)?.parent}return false}
 function dashExecuteList(){
- const items=getTodayItems().slice(0,3);
+ const items=decisionItems().map(item=>item.t);
  DashboardPage.renderExecuteList({
   document,
   items,
@@ -1137,7 +1137,7 @@ function weeklyWorkload(date=todayKey()){
  else if(hours>=35){level='偏忙';score=60+(hours-35)/7*25}
  else if(hours>=25){level='正常';score=30+(hours-25)/10*30}
  else if(hours>0){level='寬鬆';score=Math.max(0,hours/25*30)}
- const actual=db.logs.filter(isGoalActualLog).reduce((s,x)=>{const d=logDate(x.time);const ws=weekStartKey(date),we=weekEndKey(date);return s+(d>=ws&&d<=we?(+x.minutes||0):0)},0);
+ const actual=AnalyticsDomain.weeklyStudySummary({tasks:db.tasks,logs:db.logs,date}).goalActualMinutes;
  const used=target?Math.min(100,actual/target*100):0;
  const capacity=Math.max(0,100-score);
  return {target,hours,level,score:Math.round(score),actual,used:Math.round(used),capacity};
@@ -1177,10 +1177,18 @@ function dashboard(){
  const rootsA=roots().filter(t=>t.status!=='已封存');
  const overall=rootsA.length?Math.round(rootsA.reduce((sum,t)=>sum+calc(t),0)/rootsA.length):0;
  const weekItems=getTodayItems();
- const weeklyTargetMinutes=activeWeeklyTargetTotal(todayKey());
- const ws=weekStartKey(todayKey()),we=weekEndKey(todayKey());
- const weekActual=StudyLogDomain.totalStudyMinutesInRange(db.logs,ws,we);
- const todayActual=StudyLogDomain.totalStudyMinutesInRange(db.logs,todayKey(),todayKey());
+ const weekSummary=AnalyticsDomain.weeklyStudySummary({
+  tasks:db.tasks,
+  logs:db.logs,
+  date:todayKey()
+ });
+ const weeklyTargetMinutes=weekSummary.target;
+ const weekActual=weekSummary.totalStudyMinutes;
+ const todayActual=StudyLogDomain.totalStudyMinutesInRange(
+  db.logs,
+  todayKey(),
+  todayKey()
+ );
  const deadlines=overviewMonthItems().slice(0,4);
 
  DashboardPage.renderDashboard({

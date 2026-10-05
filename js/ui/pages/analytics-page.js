@@ -1,16 +1,18 @@
 /* Analytics page renderer. Metrics are supplied by AnalyticsDomain. */
 (function(root,factory){
-  const api=factory();
+  const time=typeof module==='object'&&module.exports
+    ?require('../time-format.js')
+    :root.TimeFormat;
+  const api=factory(time);
   if(typeof module==='object'&&module.exports)module.exports=api;
   root.AnalyticsPage=api;
-})(typeof globalThis!=='undefined'?globalThis:this,function(){
+})(typeof globalThis!=='undefined'?globalThis:this,function(TimeFormat){
   'use strict';
 
+  if(!TimeFormat)throw new Error('AnalyticsPage requires TimeFormat');
+
   function formatMinutes(minutes){
-    const n=Math.max(0,Math.round(+minutes||0));
-    const h=Math.floor(n/60);
-    const m=n%60;
-    return h?`${h}h ${m}m`:`${m}m`;
+    return TimeFormat.shortEnglish(minutes);
   }
 
   function setText(document,id,value){
@@ -44,23 +46,23 @@
 
     setText(document,'leafDone',`${done}/${safeLeaves.length}`);
     setText(document,'avg',`${avg}%`);
-    setText(document,'weekCreditedKpi',week?.creditedGoalMinutes||0);
+    setText(document,'weekCreditedKpi',TimeFormat.minutes(week?.creditedGoalMinutes));
     setText(document,'logsN',actualLogCount||0);
 
     setText(document,'statsWeekRatio',`${week?.ratio||0}%`);
     setWidth(document,'statsWeekBar',`${week?.ratio||0}%`);
-    setText(document,'statsActual',week?.goalActualMinutes||0);
-    setText(document,'statsCredited',week?.creditedGoalMinutes||0);
-    setText(document,'statsOverrun',week?.overrunGoalMinutes||0);
-    setText(document,'statsOtherStudy',week?.otherStudyMinutes||0);
-    setText(document,'statsTotalStudy',week?.totalStudyMinutes||0);
-    setText(document,'statsTarget',week?.target||0);
-    setText(document,'statsRemaining',week?.remaining||0);
+    setText(document,'statsActual',TimeFormat.minutes(week?.goalActualMinutes));
+    setText(document,'statsCredited',TimeFormat.minutes(week?.creditedGoalMinutes));
+    setText(document,'statsOverrun',TimeFormat.minutes(week?.overrunGoalMinutes));
+    setText(document,'statsOtherStudy',TimeFormat.minutes(week?.otherStudyMinutes));
+    setText(document,'statsTotalStudy',TimeFormat.minutes(week?.totalStudyMinutes));
+    setText(document,'statsTarget',TimeFormat.minutes(week?.target));
+    setText(document,'statsRemaining',TimeFormat.minutes(week?.remaining));
 
     const directionHTML=safeDirections.map(row=>{
       const ratio=Math.max(0,Math.min(100,+row.ratio||0));
       const actual=Math.max(0,+row.actual||0),credited=Math.max(0,+row.credited||0),overrun=Math.max(0,+row.overrun||0),target=Math.max(0,+row.target||0);
-      return `<div class="direction-row"><div class="direction-head"><b>${esc(row.name)}</b><span>${ratio}%</span></div><div class="direction-track"><div class="direction-fill" style="width:${ratio}%"></div></div><div class="direction-meta"><span>實際 ${actual} 分</span><span>有效 ${credited} 分</span><span>超時 ${overrun} 分</span><span>目標 ${target} 分</span></div></div>`;
+      return `<div class="direction-row"><div class="direction-head"><b>${esc(row.name)}</b><span>${ratio}%</span></div><div class="direction-track"><div class="direction-fill" style="width:${ratio}%"></div></div><div class="direction-meta"><span>實際 ${TimeFormat.minutes(actual)} 分</span><span>有效 ${TimeFormat.minutes(credited)} 分</span><span>超時 ${TimeFormat.minutes(overrun)} 分</span><span>目標 ${TimeFormat.minutes(target)} 分</span></div></div>`;
     }).join('')||'<div class="empty">尚無有效方向</div>';
     setHTML(document,'domains',directionHTML);
 
@@ -101,7 +103,7 @@
   function deletedLogsHTML(logs,{esc,getTask}){
     const rows=Array.isArray(logs)?logs:[];
     return rows.length
-      ?rows.map(log=>`<div class="listitem deleted-log-row"><div><b>${esc(log.name||getTask(log.taskId)?.name||'未命名行動')}</b><small class="muted" style="display:block">${esc((log.time||'').slice(0,16).replace('T',' · '))} · ${+log.minutes||0} 分 · 已刪除</small></div><button class="btn" type="button" onclick="restoreActualLog('${esc(log.id)}')">恢復紀錄</button></div>`).join('')
+      ?rows.map(log=>`<div class="listitem deleted-log-row"><div><b>${esc(log.name||getTask(log.taskId)?.name||'未命名行動')}</b><small class="muted" style="display:block">${esc((log.time||'').slice(0,16).replace('T',' · '))} · ${TimeFormat.minutes(log.minutes)} 分 · 已刪除</small></div><button class="btn" type="button" onclick="restoreActualLog('${esc(log.id)}')">恢復紀錄</button></div>`).join('')
       :'<div class="empty">尚無已刪除的實際紀錄。</div>';
   }
 
@@ -127,7 +129,7 @@
     return recent.map(log=>`<div class="actual-log-compact-row">
    <div class="actual-log-compact-main">
      <b>${esc(log.name||getTask(log.taskId)?.name||'未命名行動')}</b>
-     <small>${esc(actualHistoryTimeLabel(log))} · ${Math.max(0,+log.minutes||0)} 分 · ${isOtherStudyLog(log)?'其他讀書':'目標執行'}</small>
+     <small>${esc(actualHistoryTimeLabel(log))} · ${TimeFormat.minutes(log.minutes)} 分 · ${isOtherStudyLog(log)?'其他讀書':'目標執行'}</small>
    </div>
  </div>`).join('')+
  `<button class="actual-history-open" type="button" onclick="openActualLogHistory()">
@@ -179,7 +181,7 @@
 
     const summary=`<div class="actual-history-summary">
    <span>目前顯示 <b>${filtered.length}</b> 筆</span>
-   <span>合計 <b>${totalMinutes}</b> 分</span>
+   <span>合計 <b>${TimeFormat.minutes(totalMinutes)}</b> 分</span>
  </div>`;
 
     const grouped=filtered.length
@@ -190,12 +192,12 @@
         );
 
         return `<details class="actual-history-day" open>
-    <summary><span>${esc(date)}</span><small>${logs.length} 筆 · ${mins} 分</small></summary>
+    <summary><span>${esc(date)}</span><small>${logs.length} 筆 · ${TimeFormat.minutes(mins)} 分</small></summary>
     <div class="actual-history-day-list">
       ${logs.map(log=>`<div class="actual-history-row">
         <div class="actual-history-row-main">
           <b>${esc(log.name||getTask(log.taskId)?.name||'未命名行動')}</b>
-          <small>${esc(actualHistoryTimeLabel(log))} · ${Math.max(0,+log.minutes||0)} 分 · ${isOtherStudyLog(log)?'其他讀書':'目標執行'}</small>
+          <small>${esc(actualHistoryTimeLabel(log))} · ${TimeFormat.minutes(log.minutes)} 分 · ${isOtherStudyLog(log)?'其他讀書':'目標執行'}</small>
         </div>
         <details class="actual-log-menu">
           <summary aria-label="紀錄操作">⋯</summary>
@@ -221,7 +223,7 @@
     return rows.map(item=>{
       const selected=item.review?.reason||'';
 
-      return `<div class="weekly-review-item"><div class="weekly-review-head"><div><b>${esc(item.t.name)}</b><small>目標 ${item.w.target} 分 · 實際 ${item.w.actual} 分 · 未完成 ${item.shortfall} 分</small></div><span class="pill">${calc(item.t)}%</span></div><div class="review-reasons">${reasons.map(reason=>`<button type="button" class="review-reason ${selected===reason?'active':''}" onclick="setWeeklyReview('${String(item.t.id).replace(/'/g,"\\'")}','${reason}', '${date}')">${reason}</button>`).join('')}</div>${selected?`<div class="review-saved">已記錄：${esc(selected)}</div>`:''}</div>`;
+      return `<div class="weekly-review-item"><div class="weekly-review-head"><div><b>${esc(item.t.name)}</b><small>目標 ${TimeFormat.minutes(item.w.target)} 分 · 實際 ${TimeFormat.minutes(item.w.actual)} 分 · 未完成 ${TimeFormat.minutes(item.shortfall)} 分</small></div><span class="pill">${calc(item.t)}%</span></div><div class="review-reasons">${reasons.map(reason=>`<button type="button" class="review-reason ${selected===reason?'active':''}" onclick="setWeeklyReview('${String(item.t.id).replace(/'/g,"\\'")}','${reason}', '${date}')">${reason}</button>`).join('')}</div>${selected?`<div class="review-saved">已記錄：${esc(selected)}</div>`:''}</div>`;
     }).join('');
   }
 

@@ -1,10 +1,15 @@
 /* Dashboard page renderer. Business priorities stay in app/domain services. */
 (function(root,factory){
-  const api=factory();
+  const time=typeof module==='object'&&module.exports
+    ?require('../time-format.js')
+    :root.TimeFormat;
+  const api=factory(time);
   if(typeof module==='object'&&module.exports)module.exports=api;
   root.DashboardPage=api;
-})(typeof globalThis!=='undefined'?globalThis:this,function(){
+})(typeof globalThis!=='undefined'?globalThis:this,function(TimeFormat){
   'use strict';
+
+  if(!TimeFormat)throw new Error('DashboardPage requires TimeFormat');
 
   function executeListHTML(items,{
     currentWeekSummary,
@@ -19,7 +24,7 @@
         const week=currentWeekSummary(task);
         const parent=ancestors(task.id).slice(-2,-1)[0]?.name||'';
 
-        return `<div class="listitem dash-exec"><div><b>${esc(task.name)}</b><small>${calc(task)}% · 本週 ${week.actual}/${week.target} 分 · 剩餘 ${week.remaining} 分${parent?' · '+esc(parent):''}</small></div><button class="btn primary" onclick="executeFromDashboard('${task.id}')">開始</button></div>`;
+        return `<div class="listitem dash-exec"><div><b>${esc(task.name)}</b><small>${calc(task)}% · 本週 ${TimeFormat.minutes(week.actual)}/${TimeFormat.minutes(week.target)} 分 · 剩餘 ${TimeFormat.minutes(week.remaining)} 分${parent?' · '+esc(parent):''}</small></div><button class="btn primary" onclick="executeFromDashboard('${task.id}')">開始</button></div>`;
       }).join('')
       :'<div class="empty">本週沒有待辦執行事項。</div>';
   }
@@ -54,7 +59,7 @@
             ?'已截止'
             :`${item.days} 天後`;
 
-        return `<div class="decision-item ${item.state}"><span class="decision-rank">${index+1}</span><div class="decision-main"><b>${esc(item.t.name)}</b><small>${item.progress}% · 本週剩餘 ${item.w.remaining} 分 · ${item.gap>0?'進度落後約 '+item.gap+'%':'進度正常'} · ${due}</small></div><span class="decision-badge ${item.state}">${item.label}</span></div>`;
+        return `<div class="decision-item ${item.state}"><span class="decision-rank">${index+1}</span><div class="decision-main"><b>${esc(item.t.name)}</b><small>${item.progress}% · 本週剩餘 ${TimeFormat.minutes(item.w.remaining)} 分 · ${item.gap>0?'進度落後約 '+item.gap+'%':'進度正常'} · ${due}</small></div><span class="decision-badge ${item.state}">${item.label}</span></div>`;
       }).join('')
       :'<div class="empty">目前沒有需要優先處理的事項。</div>';
   }
@@ -129,11 +134,14 @@
     document.getElementById('dOverall').textContent=overall+'%';
     document.getElementById('dToday').textContent=todayItemCount;
     document.getElementById('dRun').textContent=
-      (weeklyTargetMinutes/60).toFixed(1).replace('.0','')+'h';
-    document.getElementById('dMin').textContent=weekActualMinutes;
+      TimeFormat.hoursLabel(weeklyTargetMinutes);
+    document.getElementById('dMin').textContent=
+      TimeFormat.minutes(weekActualMinutes);
 
     const todayActual=document.getElementById('dTodayMin');
-    if(todayActual)todayActual.textContent=todayActualMinutes;
+    if(todayActual){
+      todayActual.textContent=TimeFormat.minutes(todayActualMinutes);
+    }
 
     const dateEl=document.getElementById('homeDateLabel');
     if(dateEl){

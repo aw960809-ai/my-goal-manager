@@ -29,6 +29,7 @@ const runtimeModules=[
   'js/data/persistence.js',
   'js/data/history-guard.js',
   'js/application/orchestrator.js',
+  'js/ui/time-format.js',
   'js/ui/pages/dashboard-page.js',
   'js/ui/pages/goals-page.js',
   'js/ui/pages/execution-page.js',

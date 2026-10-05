@@ -185,7 +185,7 @@ assert 'source.match(/const\\s+PWA_VERSION' not in pwa, 'stale SW literal-versio
 
 assert "const KEY='lawLangGoalSystemV92'" in app and 'BACKUP_KEYS' in app, 'persistent keys must remain stable'
 
-assert "GOAL_MANAGER_VERSION='98.11.2'" in version_js, 'V98.11.2 version source missing'
+assert "GOAL_MANAGER_VERSION='98.11.3'" in version_js, 'V98.11.3 version source missing'
 
 
 
@@ -223,7 +223,7 @@ assert 'guard:({oldRaw,nextData})' in app, 'DataPersistence history guard wiring
 assert 'Rotate only after the new primary copy has passed integrity checks' in persistence_guard, 'backup rotation must happen after verified primary write'
 assert 'Best-effort rollback of the primary copy' in persistence_guard, 'verified-write rollback missing'
 assert '歷程安全基準' in settings_guard, 'settings history anchor visibility missing'
-assert "GOAL_MANAGER_VERSION='98.11.2'" in version_js, 'V98.11.2 version source missing'
+assert "GOAL_MANAGER_VERSION='98.11.3'" in version_js, 'V98.11.3 version source missing'
 
 
 # V98.11.2 radar UI and source-health coherence
@@ -233,7 +233,7 @@ assert '<option value="海外／國際">④ 海外／國際</option>' not in htm
 assert '<b>③ 中部</b>' in html and '<b>④ 全國</b>' in html, 'activity radar guide is stale'
 autofetch_health=(root/'js'/'autofetch-health.js').read_text(encoding='utf-8')
 assert 'syncActivityLoadState' in autofetch_health and '__activityRemoteRetryDone' in autofetch_health, 'activity source-health/list-load retry bridge missing'
-assert "GOAL_MANAGER_VERSION='98.11.2'" in version_js, 'V98.11.2 version source missing'
+assert "GOAL_MANAGER_VERSION='98.11.3'" in version_js, 'V98.11.3 version source missing'
 
 activity_runtime=(root/'js'/'activity.js').read_text(encoding='utf-8')
 assert 'function activitySort(a,b)' in activity_runtime, 'activitySort comparator missing; activity list render will fail'
@@ -248,7 +248,7 @@ assert 'activity-review-disclosure' in activity_runtime and '暫不列入推薦 
 activity_runtime=(root/'js'/'activity.js').read_text(encoding='utf-8')
 assert '<details class="activity-review-disclosure">' in activity_runtime, 'source-review collapse markup missing'
 assert '暫不列入推薦 · 點擊展開' in activity_runtime, 'source-review collapse summary missing'
-assert "GOAL_MANAGER_VERSION='98.11.2'" in version_js, 'V98.11.2 version source missing'
+assert "GOAL_MANAGER_VERSION='98.11.3'" in version_js, 'V98.11.3 version source missing'
 
 
 # V98.11.2 global time-accounting invariants
@@ -283,7 +283,7 @@ assert 'executionPlans=Array.isArray(d.executionPlans)?d.executionPlans:[]' in a
 assert 'ExecutionService.applyActualMinutes' in app, 'old restored timer planId compatibility must remain'
 assert 'plannedQueueHTML' not in execution_ui_direct and 'renderPlannedQueue' not in execution_ui_direct, 'dead schedule queue renderer remains'
 assert 'weeklyTargetMinutes' in dashboard_ui_direct and 'weeklyPlanMinutes' not in dashboard_ui_direct, 'dashboard must show weekly goal target, not scheduled-plan time'
-assert 'weeklyDirectionSummary' in analytics_domain and all(x in analytics_ui_direct for x in ['實際 ${actual} 分','有效 ${credited} 分','超時 ${overrun} 分','目標 ${target} 分']), 'direction analytics must show real weekly accounting'
+assert 'weeklyDirectionSummary' in analytics_domain and all(x in analytics_ui_direct for x in ['實際 ${TimeFormat.minutes(actual)} 分','有效 ${TimeFormat.minutes(credited)} 分','超時 ${TimeFormat.minutes(overrun)} 分','目標 ${TimeFormat.minutes(target)} 分']), 'direction analytics must show real weekly accounting'
 assert 'executionAnalysisHTML' not in analytics_ui_direct and 'renderExecutionAnalysis' not in analytics_ui_direct, 'plan-centric analytics UI remains active'
 assert 'stats-week-ratio' in html and 'stats-week-ratio' in design, 'mobile weekly ratio nowrap fix missing'
 
@@ -309,3 +309,10 @@ assert 'freeStudyQuickStart' in html and 'freeStudyName' in html and 'startFreeS
 assert 'function startFreeStudyTimer()' in app and 'TimerService.selectOther(name)' in app, 'free-study timer runtime missing'
 assert 'function selectOtherStudyTimer()' not in app and 'selectOtherStudyTimer()' not in html, 'timer must not live inside the backfill workflow'
 assert 'free-study-quick-start' in design and 'free-study-quick-row' in design, 'free-study mobile styles missing'
+
+# V98.11.3 shared time-display boundary
+time_format=(root/'js'/'ui'/'time-format.js').read_text(encoding='utf-8')
+assert './js/ui/time-format.js' in html and html.find('./js/ui/time-format.js') < html.find('./js/ui/pages/calendar-page.js'), 'TimeFormat must load before page renderers'
+assert './js/ui/time-format.js' in sw, 'service worker missing TimeFormat'
+assert all(x in time_format for x in ['wholeMinutes','hoursLabel','human','shortEnglish']), 'TimeFormat API incomplete'
+assert all('TimeFormat.minutes' in page for page in [dashboard_page,execution_page,goals_page,analytics_page]), 'page renderers must share TimeFormat minute formatting'

@@ -1,10 +1,15 @@
 /* Goals page renderer. Hierarchy and period rules stay in GoalDomain. */
 (function(root,factory){
-  const api=factory();
+  const time=typeof module==='object'&&module.exports
+    ?require('../time-format.js')
+    :root.TimeFormat;
+  const api=factory(time);
   if(typeof module==='object'&&module.exports)module.exports=api;
   root.GoalsPage=api;
-})(typeof globalThis!=='undefined'?globalThis:this,function(){
+})(typeof globalThis!=='undefined'?globalThis:this,function(TimeFormat){
   'use strict';
+
+  if(!TimeFormat)throw new Error('GoalsPage requires TimeFormat');
 
   function browseMeta(task,{
     kids,
@@ -17,7 +22,7 @@
 
     if(task.level===4){
       const summary=executionSummary(task);
-      return `本週 ${summary.weeklyActual}/${summary.weeklyTarget} 分 · 剩餘 ${summary.weeklyRemaining} 分 · 累計 ${calc(task)}%`;
+      return `本週 ${TimeFormat.minutes(summary.weeklyActual)}/${TimeFormat.minutes(summary.weeklyTarget)} 分 · 剩餘 ${TimeFormat.minutes(summary.weeklyRemaining)} 分 · 累計 ${calc(task)}%`;
     }
 
     if(task.level===3){
@@ -210,7 +215,7 @@
     const meta=task.level===3
       ?('期間 '+periodLabel(task))
       :task.level===4
-        ?`本週 ${summary.weeklyActual}/${summary.weeklyTarget} 分 · 剩餘 ${summary.weeklyRemaining} 分 · 累計 ${summary.totalActual} 分 · 期間 ${periodLabel(task)}${planned.length?` · 已安排 ${planned.length} 次`:''}`
+        ?`本週 ${TimeFormat.minutes(summary.weeklyActual)}/${TimeFormat.minutes(summary.weeklyTarget)} 分 · 剩餘 ${TimeFormat.minutes(summary.weeklyRemaining)} 分 · 累計 ${TimeFormat.minutes(summary.totalActual)} 分 · 期間 ${periodLabel(task)}${planned.length?` · 已安排 ${planned.length} 次`:''}`
         :'期間由下層子任務決定';
 
     return `<div class="task ${hit?'search-hit':''}" id="task-${task.id}"><div class="taskline"><button class="chev ${children.length?'has-kids':''}" aria-label="${children.length?(open?'收合下層':'展開下層'):'無下層'}" title="${children.length?(open?'點擊收合下層':'點擊展開下層'):'沒有下層'}" onclick="toggleKids('${task.id}')">${children.length?(open?'▾':'▸'):'•'}</button><button class="taskname" aria-label="查看 ${esc(task.name)}" onclick="openGoalInfoModal('${task.id}')"><span>${esc(task.name)}</span><small>${levelLabels[task.level]} · ${meta}</small></button><span class="pill ${task.status==='已完成'?'done':task.status==='進行中'?'run':''}">${task.status}</span><span class="pct">${progress}%</span><span class="mini"><button type="button" title="查看資訊" aria-label="查看資訊" onclick="openGoalInfoModal('${task.id}')">ⓘ</button>${task.level===4?`<button type="button" title="安排執行" aria-label="安排執行" onclick="openGoalInfoModal('${task.id}',true)">＋</button>`:''}</span></div><div class="barwrap"><div class="bar" style="width:${progress}%"></div></div>${children.length&&open?`<div class="kids">${children.map(child=>taskNode(child,{calc,kids,isOpen,isHit,executionSummary,executionPlans,activeExecutionPlan,periodLabel,levelLabels,esc})).join('')}</div>`:''}</div>`;
