@@ -185,7 +185,7 @@ assert 'source.match(/const\\s+PWA_VERSION' not in pwa, 'stale SW literal-versio
 
 assert "const KEY='lawLangGoalSystemV92'" in app and 'BACKUP_KEYS' in app, 'persistent keys must remain stable'
 
-assert "GOAL_MANAGER_VERSION='98.11.3'" in version_js, 'V98.11.3 version source missing'
+assert "GOAL_MANAGER_VERSION='98.11.4'" in version_js, 'V98.11.4 version source missing'
 
 
 
@@ -223,7 +223,7 @@ assert 'guard:({oldRaw,nextData})' in app, 'DataPersistence history guard wiring
 assert 'Rotate only after the new primary copy has passed integrity checks' in persistence_guard, 'backup rotation must happen after verified primary write'
 assert 'Best-effort rollback of the primary copy' in persistence_guard, 'verified-write rollback missing'
 assert '歷程安全基準' in settings_guard, 'settings history anchor visibility missing'
-assert "GOAL_MANAGER_VERSION='98.11.3'" in version_js, 'V98.11.3 version source missing'
+assert "GOAL_MANAGER_VERSION='98.11.4'" in version_js, 'V98.11.4 version source missing'
 
 
 # V98.11.2 radar UI and source-health coherence
@@ -233,7 +233,7 @@ assert '<option value="海外／國際">④ 海外／國際</option>' not in htm
 assert '<b>③ 中部</b>' in html and '<b>④ 全國</b>' in html, 'activity radar guide is stale'
 autofetch_health=(root/'js'/'autofetch-health.js').read_text(encoding='utf-8')
 assert 'syncActivityLoadState' in autofetch_health and '__activityRemoteRetryDone' in autofetch_health, 'activity source-health/list-load retry bridge missing'
-assert "GOAL_MANAGER_VERSION='98.11.3'" in version_js, 'V98.11.3 version source missing'
+assert "GOAL_MANAGER_VERSION='98.11.4'" in version_js, 'V98.11.4 version source missing'
 
 activity_runtime=(root/'js'/'activity.js').read_text(encoding='utf-8')
 assert 'function activitySort(a,b)' in activity_runtime, 'activitySort comparator missing; activity list render will fail'
@@ -248,7 +248,7 @@ assert 'activity-review-disclosure' in activity_runtime and '暫不列入推薦 
 activity_runtime=(root/'js'/'activity.js').read_text(encoding='utf-8')
 assert '<details class="activity-review-disclosure">' in activity_runtime, 'source-review collapse markup missing'
 assert '暫不列入推薦 · 點擊展開' in activity_runtime, 'source-review collapse summary missing'
-assert "GOAL_MANAGER_VERSION='98.11.3'" in version_js, 'V98.11.3 version source missing'
+assert "GOAL_MANAGER_VERSION='98.11.4'" in version_js, 'V98.11.4 version source missing'
 
 
 # V98.11.2 global time-accounting invariants
@@ -316,3 +316,23 @@ assert './js/ui/time-format.js' in html and html.find('./js/ui/time-format.js') 
 assert './js/ui/time-format.js' in sw, 'service worker missing TimeFormat'
 assert all(x in time_format for x in ['wholeMinutes','hoursLabel','human','shortEnglish']), 'TimeFormat API incomplete'
 assert all('TimeFormat.minutes' in page for page in [dashboard_page,execution_page,goals_page,analytics_page]), 'page renderers must share TimeFormat minute formatting'
+
+
+# V98.11.4 compact actual-history journal
+history_ui=(root/'js'/'ui'/'pages'/'analytics-page.js').read_text(encoding='utf-8')
+history_css=(root/'css'/'app-ui.css').read_text(encoding='utf-8')
+assert all(x in history_ui for x in [
+  'actualHistoryDayLabel',
+  'actualHistoryClusterKey',
+  'actual-history-cluster',
+  'actual-history-filter',
+  'TimeFormat.human'
+]), 'compact actual-history journal helpers missing'
+assert all(x in history_css for x in [
+  '.actual-history-toolbar',
+  '.actual-history-filter',
+  '.actual-history-cluster',
+  '.actual-history-row-compact'
+]), 'compact actual-history styles missing'
+assert '累積紀錄' in html and '<div class="mini-label">筆</div>' in html, 'actual-log KPI wording must describe persistent records'
+assert 'same.length<3' in history_ui, 'adaptive history grouping threshold changed'
