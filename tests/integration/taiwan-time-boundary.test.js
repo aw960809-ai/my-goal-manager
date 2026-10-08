@@ -1,0 +1,26 @@
+'use strict';
+const assert=require('assert');
+const fs=require('fs');
+const path=require('path');
+const read=p=>fs.readFileSync(path.join(__dirname,'../..',p),'utf8');
+const html=read('index.html');
+const sw=read('sw.js');
+const app=read('js/app.js');
+const study=read('js/domain/study-logs.js');
+const analytics=read('js/ui/pages/analytics-page.js');
+const timeFormat=read('js/ui/time-format.js');
+
+const core='./js/core/taiwan-time.js';
+assert(html.includes(core),'TaiwanTime must be loaded');
+assert(sw.includes(core),'PWA must cache TaiwanTime');
+assert(html.indexOf(core)<html.indexOf('./js/domain/study-logs.js'));
+assert(html.indexOf(core)<html.indexOf('./js/ui/time-format.js'));
+assert(study.includes('TaiwanTime.dateKey(value)'), 'aggregated calendar date must use TaiwanTime');
+assert(analytics.includes('TimeFormat.dateKey(log?.time)'), 'history date must use TaiwanTime');
+assert(analytics.includes('TimeFormat.clock(log?.time)'), 'history clock must use TaiwanTime');
+assert(analytics.includes('TimeFormat.dateTimeLabel(log.time)'), 'deleted logs must use TaiwanTime');
+assert(timeFormat.includes('dateTimeLabel:TaiwanTime.dateTimeLabel'));
+assert(app.includes('TimeFormat.timestamp(b.time)'), 'sort by instant, not ISO lexicographic order');
+assert(app.includes('const ms=TimeFormat.timestamp(log.time)'), 'history filter must handle timezone-free legacy time');
+assert(!analytics.includes('raw.slice(11,16)'), 'no raw UTC display in history');
+console.log('OK: canonical Taiwan timezone wired before study/UI and cached by PWA');
