@@ -1407,72 +1407,144 @@ function bindInteractionFeedback(){document.querySelectorAll('button').forEach(b
 
 
 
+/* Calendar V98.12: one derived timeline for school, personal plans and goal deadlines.
+   Data mutations remain in the pre-existing save/cancel/delete functions. */
+let calendarViewMode='month';
+let calendarCategory='all';
 function calendarEventsForDate(key){
  return CalendarDomain.eventsForDate({
   schoolCalendar:db.schoolCalendar,
   calendarEvents:db.calendarEvents,
+  tasks:db.tasks,
+  periodForTask,
   key,
   enrichEvent:e=>{
    const a=e.refId?catalogItemById(e.refId):null;
-   return {...e,type:e.type||'activity',title:e.title||a?.title||'已確認活動',time:e.time||a?.time||'',url:e.url||a?.url||a?.externalUrl||a?.sourceUrl||'',meta:(e.meta||'已確認')+' · 已確認'};
+   const activity=e.type==='activity';
+   return {...e,type:e.type||(activity?'activity':'manual'),
+    title:e.title||a?.title||'已加入行事曆',time:e.time||a?.time||'',
+    url:e.url||a?.url||a?.externalUrl||a?.sourceUrl||'',
+    meta:e.meta||(activity?'已確認活動':'手動行程')};
   }
  });
 }
 function calendarBaseDate(){return new Date(calendarCursor)}
 function dateKey(d){return CalendarDomain.dateKey(d)}
 function calendarDays(){return CalendarDomain.monthGridKeys(calendarBaseDate())}
+function calendarDisplayDate(){
+ const base=calendarBaseDate(),prefix=`${base.getFullYear()}-${String(base.getMonth()+1).padStart(2,'0')}`;
+ const stored=String(db.calendarSelected||'');
+ if(CalendarDomain.validKey(stored)&&stored.startsWith(prefix))return stored;
+ const today=todayKey();
+ return today.startsWith(prefix)?today:`${prefix}-01`;
+}
 function calendarSummaryButton(label,count,mode,active=false){return CalendarPage.summaryButton(esc(label),count,mode,active)}
-function calendarDetailHTML(title,subtitle,events){
-  const list=events||[];
-  const body=list.length?`<div class="calendar-detail-list">${list.map(e=>{
-    const isAct=e.type==='activity', confirmed=String(e.meta||'').includes('已確認');
-    const manual=e.type==='manual';
-    return `<div class="calendar-detail-item ${manual?'manual':(isAct?'activity':'school')}"><span class="dot"></span><div><b>${esc(e.title||'未命名行程')}</b><small>${esc(e.date||'')}${e.time?' · '+esc(e.time):''}${e.location?' · '+esc(e.location):''} · ${esc(e.meta|| (isAct?'活動':'學校行事'))}</small>${e.note?`<small>${esc(e.note)}</small>`:''}${e.score?`<span class="calendar-detail-reco">推薦 ${e.score} 分</span>`:''}</div><div class="detail-actions">${isAct&&e.url?`<a class="btn" href="${esc(safeExternalUrl(e.url))}" target="_blank" rel="noopener">外部資訊</a>`:''}${isAct?`<button class="dangerbtn" type="button" onclick="cancelCalendarActivity('${esc(e.id)}')">取消加入</button>`:''}${manual?`<button class="btn" type="button" onclick="deleteCalendarManualEvent('${e.id}')">刪除</button>`:''}</div></div>`;
-  }).join('')}</div>`:'<div class="calendar-detail-empty">這個分類目前沒有項目。</div>';
-  const el=document.getElementById('calendarDetail');if(!el)return;
-  el.style.display='block';
-  const selected=db.calendarSelected||todayKey();
-  el.innerHTML=`<div class="calendar-detail-head"><div><h3>${esc(title)}</h3><p>${esc(subtitle||'')}</p></div><div class="calendar-detail-head-actions"><button class="btn gold" type="button" onclick="openCalendarAddModal('${selected}')">＋新增活動</button><button class="calendar-detail-close" type="button" onclick="hideCalendarDetail()">收合</button></div></div>${body}`;
-  el.scrollIntoView({behavior:'smooth',block:'nearest'});
+function calendarDetailHTML(title,subtitle,events,dateKeyForAdd){
+ const day=CalendarDomain.validKey(dateKeyForAdd)?dateKeyForAdd:calendarDisplayDate();
+ const list=Array.isArray(events)?events:[];
+ const body=list.length?`<div class="cal-detail-list">${list.map(e=>{
+  const category=CalendarDomain.eventCategory(e);
+  const act=e.type==='activity',manual=e.type==='manual',due=category==='deadline';
+  const name={school:'校曆',planned:manual?'自行安排':'已加入',deadline:'目標截止'}[category];
+  const time=[e.time,e.location].filter(Boolean).map(esc).join(' · ');
+  const sub=[time,esc(e.meta||'')].filter(Boolean).join(' · ');
+  const url=act&&e.url?safeExternalUrl(e.url):'';
+  const buttons=[
+   url&&url!=='#'?`<a class="cal-detail-action" href="${esc(url)}" target="_blank" rel="noopener noreferrer">官方資訊 ↗</a>`:'',
+   act?`<button class="cal-detail-action" type="button" data-event-id="${esc(e.id||'')}" onclick="cancelCalendarActivity(this.dataset.eventId)">取消安排</button>`:'',
+   manual?`<button class="cal-detail-action danger" type="button" data-event-id="${esc(e.id||'')}" onclick="deleteCalendarManualEvent(this.dataset.eventId)">刪除</button>`:'',
+   due?`<button class="cal-detail-action" type="button" data-task-id="${esc(e.taskId||'')}" onclick="openGoalInfoModal(this.dataset.taskId)">查看目標</button>`:''
+  ].filter(Boolean).join('');
+  return `<article class="cal-detail-row ${category}"><i class="cal-dot ${category}" aria-hidden="true"></i>
+   <div class="cal-detail-main"><span class="cal-detail-kind">${name}</span><b>${esc(e.title||'未命名')}</b>${sub?`<small>${sub}</small>`:''}${e.note?`<small>${esc(e.note)}</small>`:''}</div>
+   ${buttons?`<div class="cal-detail-actions">${buttons}</div>`:''}</article>`;
+ }).join('')}</div>`:'<div class="calendar-detail-empty">這一天目前沒有符合篩選的行程。可以新增個人行程，或在活動雷達安排已確認的活動。</div>';
+ const el=document.getElementById('calendarDetail');if(!el)return;
+ el.style.display='block';
+ el.innerHTML=`<div class="calendar-detail-head"><div><h3>${esc(title)}</h3><p>${esc(subtitle)}</p></div>
+  <div class="calendar-detail-head-actions"><button type="button" class="btn primary" data-date="${day}" onclick="openCalendarAddModal(this.dataset.date)">＋ 新增行程</button></div></div>${body}`;
 }
 function showCalendarDay(key,scroll=true){
-  db.calendarSelected=key;save();
-  const es=calendarEventsForDate(key),d=new Date(key+'T00:00:00');
-  const label=`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}（${['日','一','二','三','四','五','六'][d.getDay()]}）`;
-  renderCalendar();
-  calendarDetailHTML(label,'當日行程與活動',es);
-  if(scroll)document.getElementById('calendarDetail')?.scrollIntoView({behavior:'smooth',block:'start'});
+ if(!CalendarDomain.validKey(key)){toast('日期格式無效');return}
+ const previous=db.calendarSelected,oldCursor=calendarCursor;
+ const d=CalendarDomain.fromKey(key);
+ calendarCursor=new Date(d.getFullYear(),d.getMonth(),1);
+ db.calendarSelected=key;
+ if(!save()){db.calendarSelected=previous;calendarCursor=oldCursor;toast('日期選擇未能保存');return}
+ renderCalendar();
+ if(scroll)document.getElementById('calendarDetail')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function showCalendarSummary(mode){
-  const base=calendarBaseDate(),days=calendarDays(),monthPrefix=`${base.getFullYear()}-${String(base.getMonth()+1).padStart(2,'0')}`;
-  let events=[],title='',subtitle='';
-  if(mode==='today'){const key=todayKey();events=calendarEventsForDate(key);title='今天';subtitle=key;db.calendarSelected=key;}
-  else if(mode==='school'){events=days.flatMap(calendarEventsForDate).filter(e=>e.type==='school');title='本月學校行事';subtitle=`${base.getFullYear()} 年 ${base.getMonth()+1} 月 · ${events.length} 項`;}
-  else if(mode==='confirmed'){events=days.flatMap(calendarEventsForDate).filter(e=>(e.type==='activity'||e.type==='manual')&&String(e.meta||'').includes('已確認'));title='本月已確認活動';subtitle=`${base.getFullYear()} 年 ${base.getMonth()+1} 月 · ${events.length} 項`;}
-  save();renderCalendar();calendarDetailHTML(title,subtitle,events);
+ if(mode==='today'){
+  calendarToday();calendarViewMode='day';renderCalendar();return;
+ }
+ const category={school:'school',confirmed:'planned',deadline:'deadline'}[mode];
+ if(!category)return;
+ calendarCategory=calendarCategory===category?'all':category;
+ renderCalendar();
 }
-function hideCalendarDetail(){const el=document.getElementById('calendarDetail');if(el){el.style.display='none';el.innerHTML='';}}
+function calendarSetMode(mode){
+ if(!['year','month','day'].includes(mode))return;
+ calendarViewMode=mode;renderCalendar();
+}
+function calendarFilterAll(){calendarCategory='all';renderCalendar()}
+function calendarPickMonth(year,month){
+ const y=Number(year),m=Number(month);
+ if(!Number.isInteger(y)||y<1900||y>2200||!Number.isInteger(m)||m<1||m>12)return;
+ calendarCursor=new Date(y,m-1,1);
+ calendarViewMode='month';
+ // This is navigation state only. Do not alter any event or goal record.
+ renderCalendar();
+}
+function hideCalendarDetail(){
+ const el=document.getElementById('calendarDetail');if(el){el.style.display='none';el.innerHTML=''}
+}
 function renderCalendar(){
- ensureSchoolCalendar();syncCalendarDatePicker();
+ ensureSchoolCalendar();
  const base=calendarBaseDate(),days=calendarDays(),today=todayKey();
+ const displayDate=calendarDisplayDate();
+ syncCalendarDatePicker();
  CalendarPage.render({
-  document,
-  baseDate:base,
-  days,
-  today,
-  selectedDate:db.calendarSelected,
-  eventsForDate:calendarEventsForDate,
-  esc,
-  detailHTML:calendarDetailHTML,
-  hideDetail:hideCalendarDetail
+  document,baseDate:base,days,today,selectedDate:displayDate,
+  eventsForDate:calendarEventsForDate,esc,
+  mode:calendarViewMode,category:calendarCategory,
+  categorize:CalendarDomain.eventCategory,
+  addDays:CalendarDomain.addDays,
+  detailHTML:calendarDetailHTML,hideDetail:hideCalendarDetail
  });
 }
 function calendarSelectDay(key){showCalendarDay(key,true)}
-
-function calendarGoToPickedDate(){const input=document.getElementById('calendarDatePicker');const value=input?.value||'';if(!/^\d{4}-\d{2}-\d{2}$/.test(value)){toast('請先選擇完整日期');return}const d=new Date(value+'T00:00:00');if(Number.isNaN(d.getTime())){toast('日期格式無效');return}calendarCursor=new Date(d.getFullYear(),d.getMonth(),1);db.calendarSelected=value;save();renderCalendar();toast(`已前往 ${value}`)}
-function syncCalendarDatePicker(){const input=document.getElementById('calendarDatePicker');if(input)input.value=db.calendarSelected||todayKey()}
-function calendarShift(months){const d=calendarBaseDate();calendarCursor=new Date(d.getFullYear(),d.getMonth()+months,1);renderCalendar()}
-function calendarToday(){calendarCursor=new Date();db.calendarSelected=todayKey();save();renderCalendar();toast('已回到今天')}
+function calendarGoToPickedDate(){
+ const value=document.getElementById('calendarDatePicker')?.value||'';
+ if(!CalendarDomain.validKey(value)){toast('日期格式無效，請重新選擇');return}
+ calendarViewMode='month';showCalendarDay(value,false);
+}
+function syncCalendarDatePicker(){
+ const input=document.getElementById('calendarDatePicker');if(input)input.value=calendarDisplayDate();
+}
+function calendarShift(amount){
+ const base=calendarBaseDate();
+ if(calendarViewMode==='year'){
+  calendarCursor=new Date(base.getFullYear()+amount,base.getMonth(),1);
+  renderCalendar();return;
+ }
+ const focused=calendarDisplayDate();
+ const target=calendarViewMode==='day'?CalendarDomain.addDays(focused,amount):CalendarDomain.shiftMonth(focused,amount);
+ if(!target)return;
+ const d=CalendarDomain.fromKey(target);calendarCursor=new Date(d.getFullYear(),d.getMonth(),1);
+ const previous=db.calendarSelected;
+ db.calendarSelected=target;
+ if(!save()){db.calendarSelected=previous;calendarCursor=base;toast('日期切換未保存');return}
+ renderCalendar();
+}
+function calendarToday(){
+ const key=todayKey(),d=CalendarDomain.fromKey(key);
+ if(!d)return;
+ const previous=db.calendarSelected,base=calendarCursor;
+ calendarCursor=new Date(d.getFullYear(),d.getMonth(),1);db.calendarSelected=key;
+ if(!save()){db.calendarSelected=previous;calendarCursor=base;toast('日期切換未保存');return}
+ calendarViewMode='month';calendarCategory='all';renderCalendar();
+}
 function renderAll(){
  AppOrchestrator.renderAll({
   normalizeState:()=>{db=normalize(db)},

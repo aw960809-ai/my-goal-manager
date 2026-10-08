@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="./css/base.css">
 <link rel="stylesheet" href="./css/app-ui.css">
 <link rel="stylesheet" href="./css/design-system.css">
+<link rel="stylesheet" href="./css/calendar.css">
 
 
 <meta name="theme-color" content="#596A85">
@@ -196,30 +197,38 @@
   </div>
 </section>
 
-<section id="calendar" class="view">
+<section id="calendar" class="view" aria-label="行事曆">
   <div class="calendar-shell">
-    <div class="calendar-hero">
-      <div><h2>學校行事曆</h2></div>
-      
-    </div>
+    <header class="calendar-hero">
+      <h2>行事曆</h2>
+      <p>學校行事、已安排活動與目標截止日，集中在同一條時間軸。</p>
+    </header>
     <div class="calendar-toolbar">
-      <div class="calendar-title"><b id="calMonthTitle">—</b><span id="calMonthSub">115 學年度</span></div>
-      <div class="calendar-nav">
-        <button type="button" onclick="calendarShift(-1)" aria-label="上個月">‹ 上月</button>
+      <div class="calendar-title"><b id="calMonthTitle">—</b><span id="calMonthSub">東海校曆與我的日程</span></div>
+      <div class="calendar-nav" aria-label="日期切換">
+        <button id="calendarPrev" type="button" onclick="calendarShift(-1)" aria-label="上一個月份">‹ 上月</button>
         <button type="button" class="today" onclick="calendarToday()">今天</button>
-        <button type="button" onclick="calendarShift(1)" aria-label="下個月">下月 ›</button>
+        <button id="calendarNext" type="button" onclick="calendarShift(1)" aria-label="下一個月份">下月 ›</button>
       </div>
     </div>
-    <div class="calendar-date-picker" aria-label="選擇年月日">
-      <label>選擇日期 <input id="calendarDatePicker" type="date" aria-label="選擇年月日"></label>
-      <button class="btn primary" type="button" onclick="calendarGoToPickedDate()">前往</button>
-      <button class="btn gold" type="button" onclick="openCalendarAddModal(db.calendarSelected||todayKey())">＋新增活動</button>
+    <nav id="calendarModeTabs" class="calendar-mode-tabs" aria-label="年、月、日檢視"></nav>
+    <div class="calendar-date-picker" aria-label="選擇日期或新增行程">
+      <label for="calendarDatePicker">選擇日期
+        <input id="calendarDatePicker" type="date" aria-label="選擇年月日">
+      </label>
+      <button class="btn" type="button" onclick="calendarGoToPickedDate()">前往</button>
+      <button class="btn primary calendar-add-button" type="button" onclick="openCalendarAddModal(calendarDisplayDate())">＋ 新增行程</button>
     </div>
-    <div class="calendar-summary" id="calendarSummary" aria-label="行事曆摘要"></div>
-    
-    <div class="calendar-month-grid" id="calendarAgenda"></div>
+    <div class="calendar-summary" id="calendarSummary" aria-label="本月分類篩選"></div>
+    <div class="calendar-month-grid" id="calendarAgenda" aria-label="日曆日期"></div>
     <section id="calendarDetail" class="calendar-detail" aria-live="polite" style="display:none"></section>
-    <div class="calendar-legend"><span><i class="school"></i>學校行事</span><span><i class="activity"></i>已確認活動</span><span><i class="today"></i>今天</span></div>
+    <div class="calendar-legend" aria-label="分類圖例">
+      <span><i class="school"></i>東海校曆</span>
+      <span><i class="planned"></i>已安排活動</span>
+      <span><i class="deadline"></i>子任務截止</span>
+    </div>
+    <p class="calendar-source-note">校曆採用系統已載入的東海行事資料，非即時官方同步；活動需先加入行事曆才會列入。</p>
+    <section class="cal-upcoming" id="calendarUpcoming" aria-label="接下來兩週行程"></section>
   </div>
 </section>
 
