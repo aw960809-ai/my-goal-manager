@@ -12,6 +12,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import parse_qs, urljoin, urlparse
 from lifecycle_archive import archive_document, atomic_write_json, reconcile_activity_catalog
+from central_official import REGIONS as CENTRAL_REGIONS, run_source as run_central_source
 
 USER_AGENT = 'GoalManager-AutoFetch/96.6.11.1 (+https://github.com/aw960809-ai/my-goal-manager)'
 MAX_BYTES = 2_000_000
@@ -331,6 +332,18 @@ SOURCES = {
     ],
 }
 
+
+
+# Central Circle 3: four verified government/cultural bureau data sources.
+# Only these explicit HTTPS addresses are eligible; no domain-wide crawling.
+for _regional_id, _regional in CENTRAL_REGIONS.items():
+    SOURCES['sources'].append({
+        'id':_regional_id, 'name':_regional['name'], 'scope':'regional',
+        'priority':3, 'domain_allowlist':[_regional['host']], 'enabled':_regional['enabled'],
+        'start_urls':[_regional['url']], 'fetch_type':'html',
+        'trust_level':'official',
+        'notes':'Circle 3 bounded official HTML adapter; skip unverified dates and restricted entries.',
+    })
 
 def now_iso():
     return datetime.now(timezone.utc).isoformat()
@@ -1952,6 +1965,9 @@ CIRCLE_META = {
     'mofa_working_holiday': (4, '海外／國際', 0),
 }
 
+# Regional-source location follows the existing four-circle geography policy.
+CIRCLE_META.update({_sid:(3,'中部',2) for _sid in CENTRAL_REGIONS})
+
 LOW_VALUE_PATTERNS = [
     (r'適性就業輔導促進就業計畫', -24, '一般就業輔導，與目前學生目標連結較弱'),
     (r'就業博覽會|聯合徵才|單一徵才|徵才活動', -22, '以徵才媒合為主，非目前優先自我精進項目'),
@@ -2295,6 +2311,13 @@ def run(repo, limit, apply):
         results.append(run_pathfinder_source(limit))
     if 'mofa_working_holiday' in enabled:
         results.append(run_mofa_working_holiday_source(limit))
+
+    # Fail-closed regional adapters: never insert synthetic opportunities.
+    for _regional_id in CENTRAL_REGIONS:
+        if _regional_id in enabled:
+            results.append(run_central_source(
+                _regional_id, fetch_fn=fetch, parse_lines=parse_plain_lines,
+                stamp=now_iso(), limit=min(limit,7), logger=log))
 
     if not results:
         raise RuntimeError('沒有啟用任何 AutoFetch 來源')

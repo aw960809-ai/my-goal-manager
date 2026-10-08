@@ -83,6 +83,70 @@
       "fetch_type": "html",
       "trust_level": "official",
       "notes": "V96.6.11.1.1 青年署專用結構化 adapter。"
+    },
+    {
+      "id": "miaoli_government",
+      "name": "苗栗縣政府活動訊息",
+      "scope": "regional",
+      "priority": 3,
+      "domain_allowlist": [
+        "www.miaoli.gov.tw"
+      ],
+      "enabled": false,
+      "start_urls": [
+        "https://www.miaoli.gov.tw/News.aspx?n=286&sms=9463"
+      ],
+      "fetch_type": "html",
+      "trust_level": "official",
+      "notes": "Circle 3 bounded official HTML adapter; strict date and eligibility verification."
+    },
+    {
+      "id": "changhua_government",
+      "name": "彰化縣政府活動快訊",
+      "scope": "regional",
+      "priority": 3,
+      "domain_allowlist": [
+        "www.chcg.gov.tw"
+      ],
+      "enabled": true,
+      "start_urls": [
+        "https://www.chcg.gov.tw/ch2/actives.aspx"
+      ],
+      "fetch_type": "html",
+      "trust_level": "official",
+      "notes": "Circle 3 bounded official HTML adapter; strict date and eligibility verification."
+    },
+    {
+      "id": "nantou_culture",
+      "name": "南投縣政府文化局藝文活動",
+      "scope": "regional",
+      "priority": 3,
+      "domain_allowlist": [
+        "www.nthcc.gov.tw"
+      ],
+      "enabled": true,
+      "start_urls": [
+        "https://www.nthcc.gov.tw/A4_1/list2"
+      ],
+      "fetch_type": "html",
+      "trust_level": "official",
+      "notes": "Circle 3 bounded official HTML adapter; strict date and eligibility verification."
+    },
+    {
+      "id": "yunlin_government",
+      "name": "雲林縣政府活動行事曆",
+      "scope": "regional",
+      "priority": 3,
+      "domain_allowlist": [
+        "www.yunlin.gov.tw"
+      ],
+      "enabled": false,
+      "start_urls": [
+        "https://www.yunlin.gov.tw/News.aspx?_CSN=811&n=1245&sms=16727"
+      ],
+      "fetch_type": "html",
+      "trust_level": "official",
+      "notes": "Circle 3 bounded official HTML adapter; strict date and eligibility verification."
     }
   ]
 }
