@@ -433,6 +433,58 @@ html[data-reduced-motion="true"] *,html[data-reduced-motion="true"] *::before,ht
 #activity .radar-ring.extended{border-left:3px solid var(--gm-text-muted)!important}
 #activity .radar-ring.explore{border-left:3px solid var(--gm-accent)!important}
 
+/* GM-ACTIVITY-CIRCLE-CARDS-20261008: four genuine filters, no duplicate selector.
+   Fallback: when JS is unavailable, the original select remains visible. */
+#activity .activity-radar-guide{gap:8px!important;margin:10px 0 12px!important}
+#activity .activity-radar-guide::before{
+  content:'圈層篩選 · 點選卡片，再按一次顯示全部';
+  grid-column:1/-1;font-size:12px;font-weight:650;
+  color:var(--gm-text-secondary);line-height:1.4;
+}
+#activity .activity-radar-guide .radar-ring{
+  display:block;width:100%;min-height:82px;
+  appearance:none;-webkit-appearance:none;
+  padding:10px 12px!important;position:relative;
+  text-align:left;cursor:pointer;color:var(--gm-text)!important;
+  border-radius:12px!important;background:var(--gm-surface)!important;
+  -webkit-tap-highlight-color:transparent;
+}
+#activity .activity-radar-guide .radar-ring b{
+  color:var(--gm-text)!important;font-size:14px!important;font-weight:700;
+}
+#activity .activity-radar-guide .radar-ring small{
+  color:var(--gm-text-secondary)!important;font-size:11px!important;line-height:1.45!important;
+}
+#activity .activity-radar-guide .radar-ring.active{
+  border-color:var(--gm-primary)!important;
+  background:var(--gm-primary-soft)!important;
+  box-shadow:inset 0 0 0 1px var(--gm-primary)!important;
+}
+#activity .activity-radar-guide .radar-ring.active::after{
+  content:'✓';position:absolute;right:7px;top:5px;
+  font-weight:800;font-size:14px;color:var(--gm-primary-deep);
+}
+#activity .activity-radar-guide .radar-ring:focus-visible{
+  outline:3px solid var(--gm-focus)!important;outline-offset:2px!important;
+}
+#activity .activity-filter-row.radar-filters-ready{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;
+}
+#activity .activity-filter-row.radar-filters-ready .activity-scope-legacy{display:none!important}
+#activity .activity-filter-row.radar-filters-ready .filter-control{min-width:0!important}
+#activity .activity-filter-row.radar-filters-ready select{min-width:0;width:100%;font-size:13px!important}
+@media(max-width:700px){
+  #activity .activity-filter-row.radar-filters-ready{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  #activity .activity-filter-row.radar-filters-ready>.filter-control:last-child{
+    grid-column:1/-1;
+  }
+  #activity .activity-radar-guide{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #activity .activity-radar-guide .radar-ring{min-height:84px}
+}
+
+
 /* Calendar categories no longer use legacy green/gold as identity colors. */
 #calendar .cell-event.school i,
 #calendar .calendar-legend i.school{

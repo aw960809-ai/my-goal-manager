@@ -1,6 +1,65 @@
 /* V96.5 Navigation layer: isolated bottom-nav routing + adaptive mobile gesture. */
 (function(){
   'use strict';
+  /* GM-ACTIVITY-CIRCLE-CARDS-20261008: presentation-only circle navigation.
+     The existing select remains the sole source of filter values and the
+     existing onchange callback continues to own filtering and pagination. */
+  function setupActivityCircleNavigation(){
+    const guide=document.querySelector('#activity .activity-radar-guide');
+    const select=document.getElementById('activityScope');
+    const stats=document.getElementById('activityStats');
+    if(!guide||!select||guide.dataset.circleNavReady==='1')return;
+
+    const circles=[
+      ['東海校內','core'],['台中','near'],
+      ['中部','extended'],['全國','explore']
+    ];
+    const slots=circles.map(([,cssClass])=>guide.querySelector('.radar-ring.'+cssClass));
+    const values=Array.from(select.options||[]).map(option=>option.value);
+    if(slots.some(element=>!element)||!circles.every(([value])=>values.includes(value)))return;
+
+    const controls=[];
+    function syncCircleSelection(){
+      controls.forEach(button=>{
+        const selected=button.dataset.circle===select.value;
+        button.classList.toggle('active',selected);
+        button.setAttribute('aria-pressed',String(selected));
+        button.setAttribute('aria-label',selected
+          ?'取消'+button.dataset.circle+'圈層篩選'
+          :'篩選'+button.dataset.circle+'圈層活動');
+      });
+    }
+
+    circles.forEach(([value],index)=>{
+      const original=slots[index];
+      const button=document.createElement('button');
+      button.type='button';
+      button.className=original.className;
+      button.dataset.circle=value;
+      while(original.firstChild)button.appendChild(original.firstChild);
+      original.replaceWith(button);
+      controls.push(button);
+      button.addEventListener('click',()=>{
+        select.value=select.value===value?'全部':value;
+        select.dispatchEvent(new Event('change',{bubbles:true}));
+        syncCircleSelection();
+      });
+    });
+
+    guide.setAttribute('role','group');
+    guide.setAttribute('aria-label','活動圈層篩選；再按同一圈層可顯示全部');
+    guide.dataset.circleNavReady='1';
+    select.closest('.filter-control')?.classList.add('activity-scope-legacy');
+    select.closest('.activity-filter-row')?.classList.add('radar-filters-ready');
+    select.addEventListener('change',syncCircleSelection);
+    // Reset and remote rendering write activityStats but do not dispatch
+    // select/change. Observe only that summary, never the guide itself.
+    if(stats&&typeof MutationObserver==='function'){
+      new MutationObserver(syncCircleSelection).observe(stats,{childList:true});
+    }
+    syncCircleSelection();
+  }
+
   function setup(){
     const nav=document.querySelector('.bottom-nav');
     if(!nav)return;
@@ -61,6 +120,7 @@
     nav.addEventListener('touchstart',show,{passive:true});
     window.addEventListener('resize',scheduleSync,{passive:true});
     window.addEventListener('orientationchange',()=>setTimeout(scheduleSync,120),{passive:true});
+    setupActivityCircleNavigation();
     sync();
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});
