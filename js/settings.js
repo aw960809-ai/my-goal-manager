@@ -2,6 +2,8 @@
 const SETTINGS_KEY='lawLangGoalSystem_settings_v1';
 const DEFAULT_SETTINGS=Object.freeze({
   appearance:'system',
+  accent:'slate',
+  textSize:'normal',
   density:'comfortable',
   reducedMotion:false,
   dateFormat:'yyyy/mm/dd',
@@ -12,44 +14,100 @@ const DEFAULT_SETTINGS=Object.freeze({
 });
 let appSettings=loadAppSettings();
 function loadAppSettings(){
-  try{const raw=localStorage.getItem(SETTINGS_KEY);const parsed=raw?JSON.parse(raw):{};return {...DEFAULT_SETTINGS,...(parsed&&typeof parsed==='object'?parsed:{})}}catch(e){return {...DEFAULT_SETTINGS}}
+  try{
+    const raw=localStorage.getItem(SETTINGS_KEY);
+    const parsed=raw?JSON.parse(raw):{};
+    if(!parsed||typeof parsed!=='object'||Array.isArray(parsed))return {...DEFAULT_SETTINGS};
+    const safe={...DEFAULT_SETTINGS};
+    const allowed={
+      appearance:['system','light','dark'],
+      accent:['slate','sage','plum','charcoal'],
+      textSize:['normal','large'],
+      density:['comfortable','standard','compact'],
+      dateFormat:['yyyy/mm/dd','yyyy-mm-dd'],
+      timeFormat:['24','12']
+    };
+    for(const [key,values] of Object.entries(allowed)){
+      if(values.includes(parsed[key]))safe[key]=parsed[key];
+    }
+    for(const key of ['reducedMotion','activityReminder','scholarshipReminder']){
+      if(typeof parsed[key]==='boolean')safe[key]=parsed[key];
+    }
+    if(Number.isFinite(Number(parsed.reminderDays)))
+      safe.reminderDays=Math.max(1,Math.min(30,Math.trunc(Number(parsed.reminderDays))));
+    return safe;
+  }catch(e){return {...DEFAULT_SETTINGS}}
 }
 function saveAppSettings(){
- try{
-  const raw=JSON.stringify(appSettings);
-  localStorage.setItem(SETTINGS_KEY,raw);
-  return localStorage.getItem(SETTINGS_KEY)===raw;
- }catch(e){return false}
+  try{
+    const raw=JSON.stringify(appSettings);
+    localStorage.setItem(SETTINGS_KEY,raw);
+    return localStorage.getItem(SETTINGS_KEY)===raw;
+  }catch(e){return false}
+}
+function isAppDark(){
+  if(appSettings.appearance==='dark')return true;
+  if(appSettings.appearance==='light')return false;
+  try{return !!window.matchMedia?.('(prefers-color-scheme: dark)').matches}catch(e){return false}
 }
 function applyAppSettings(persist=true){
   const root=document.documentElement;
   root.dataset.appearance=appSettings.appearance;
+  root.dataset.accent=appSettings.accent;
+  root.dataset.textSize=appSettings.textSize;
   root.dataset.density=appSettings.density;
   root.dataset.reducedMotion=appSettings.reducedMotion?'true':'false';
   root.dataset.timeFormat=appSettings.timeFormat;
-  if(appSettings.appearance==='dark')root.classList.add('app-dark');else root.classList.remove('app-dark');
- return persist?saveAppSettings():true;
+  if(isAppDark())root.classList.add('app-dark');else root.classList.remove('app-dark');
+  return persist?saveAppSettings():true;
 }
 function resetAppSettings(){
- const old={...appSettings};appSettings={...DEFAULT_SETTINGS};
- if(!applyAppSettings()){
-  appSettings=old;applyAppSettings(false);renderSettings();toast('無法儲存預設設定，已恢復原設定');return;
- }
- renderSettings();toast('已恢復預設設定');
+  const old={...appSettings};appSettings={...DEFAULT_SETTINGS};
+  if(!applyAppSettings()){
+    appSettings=old;applyAppSettings(false);renderSettings();toast('無法儲存預設設定，已恢復原設定');return;
+  }
+  renderSettings();toast('已恢復預設外觀與提醒偏好');
 }
 function setAppSetting(key,value){
- if(!(key in DEFAULT_SETTINGS))return;
- if(key==='reducedMotion'||key==='activityReminder'||key==='scholarshipReminder')value=!!value;
- if(key==='reminderDays')value=Math.max(1,Math.min(30,Number(value)||3));
- if(appSettings[key]===value)return;
- const old={...appSettings};appSettings[key]=value;
- if(!applyAppSettings()){
-  appSettings=old;applyAppSettings(false);renderSettings();toast('設定未能永久保存，已恢復原值');return;
- }
- renderSettings();toast('設定已保存');
+  if(!(key in DEFAULT_SETTINGS))return;
+  const allowed={
+    appearance:['system','light','dark'],
+    accent:['slate','sage','plum','charcoal'],
+    textSize:['normal','large'],
+    density:['comfortable','standard','compact'],
+    dateFormat:['yyyy/mm/dd','yyyy-mm-dd'],
+    timeFormat:['24','12']
+  };
+  if(Object.prototype.hasOwnProperty.call(allowed,key)){
+    if(!allowed[key].includes(value))return;
+  }else if(key==='reducedMotion'||key==='activityReminder'||key==='scholarshipReminder'){
+    value=!!value;
+  }else if(key==='reminderDays'){
+    if(!Number.isFinite(Number(value)))return;
+    value=Math.max(1,Math.min(30,Math.trunc(Number(value))));
+  }else return;
+  if(appSettings[key]===value)return;
+  const old={...appSettings};appSettings[key]=value;
+  if(!applyAppSettings()){
+    appSettings=old;applyAppSettings(false);renderSettings();toast('設定未能永久保存，已恢復原值');return;
+  }
+  // Avoid re-rendering the whole modal: retain focus and scroll position.
+  const feedback=document.getElementById('settingsSaveStatus');
+  if(feedback)feedback.textContent='已儲存於本機（不修改目標與學習紀錄）';
 }
 // Restore persisted appearance at each startup without writing to storage.
 applyAppSettings(false);
+// Follow OS appearance changes without writing to local storage or showing notifications.
+try{
+  const gmScheme=window.matchMedia?.('(prefers-color-scheme: dark)');
+  const refreshScheme=()=>{if(appSettings.appearance==='system')applyAppSettings(false)};
+  if(gmScheme?.addEventListener)gmScheme.addEventListener('change',refreshScheme);
+  else if(gmScheme?.addListener)gmScheme.addListener(refreshScheme);
+}catch(e){}
+// Close only the settings dialog when Escape is pressed.
+document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&document.getElementById('settingsModal')?.classList.contains('show'))closeSettings();
+});
 function openSettings(){
   const modal=document.getElementById('settingsModal');if(!modal)return false;
   renderSettings();
@@ -66,52 +124,112 @@ function closeSettings(){
 }
 function settingsSelect(key,options){return `<select onchange="setAppSetting('${key}',this.value)">${options.map(([v,t])=>`<option value="${v}" ${String(appSettings[key])===String(v)?'selected':''}>${t}</option>`).join('')}</select>`}
 function settingsSwitch(key,label){return `<label class="settings-switch"><span>${label}</span><input type="checkbox" ${appSettings[key]?'checked':''} onchange="setAppSetting('${key}',this.checked)"><i></i></label>`}
+/* GM-SETTINGS-HUB-20261008: five sections, one surface, local-only preferences. */
+let settingsOpenPanel='appearance';
+function settingsPanelMarkup(id,number,title,description,content){
+  return `<details id="settings-panel-${id}" class="settings-hub-panel" data-section="${id}" ${settingsOpenPanel===id?'open':''}>
+    <summary class="settings-hub-summary"><span class="settings-hub-number">${number}</span><span class="settings-hub-label"><b>${title}</b><small>${description}</small></span><span class="settings-hub-chevron" aria-hidden="true">⌄</span></summary>
+    <div class="settings-hub-content">${content}</div>
+  </details>`;
+}
+function syncSettingsHubNav(){
+  const body=document.getElementById('settingsBody');if(!body)return;
+  body.querySelectorAll('[data-settings-jump]').forEach(button=>{
+    const active=button.dataset.settingsJump===settingsOpenPanel;
+    button.classList.toggle('active',active);
+    button.setAttribute('aria-pressed',String(active));
+  });
+}
+function showSettingsSection(section){
+  const body=document.getElementById('settingsBody');if(!body)return;
+  const target=body.querySelector('#settings-panel-'+section);if(!target)return;
+  settingsOpenPanel=section;
+  body.querySelectorAll('.settings-hub-panel').forEach(panel=>{panel.open=panel===target;});
+  syncSettingsHubNav();
+  target.scrollIntoView?.({block:'start',behavior:appSettings.reducedMotion?'auto':'smooth'});
+}
 function renderSettings(){
- const b=document.getElementById('settingsBody');if(!b)return;
- const notif=('Notification' in window)?(Notification.permission||'default'):'unsupported';
- b.innerHTML=`
-  <div class="settings-section">
-   <div class="settings-section-head"><div><h3>外觀與操作</h3><p>只影響本機顯示，不改變目標、活動或獎學金資料。</p></div></div>
-   <div class="settings-row"><div><b>外觀</b><small>跟隨裝置、淺色或深色</small></div>${settingsSelect('appearance',[['system','跟隨系統'],['light','淺色'],['dark','深色']])}</div>
-   <div class="settings-row"><div><b>資訊密度</b><small>控制卡片與區塊的垂直間距</small></div>${settingsSelect('density',[['comfortable','舒適'],['standard','標準'],['compact','精簡']])}</div>
-   <div class="settings-row"><div><b>減少動畫</b><small>降低轉場與動態效果</small></div>${settingsSwitch('reducedMotion','啟用')}</div>
-   <div class="settings-row"><div><b>日期格式</b><small>系統資料仍使用標準 ISO 日期保存</small></div>${settingsSelect('dateFormat',[['yyyy/mm/dd','2026/09/06'],['yyyy-mm-dd','2026-09-06']])}</div>
-   <div class="settings-row"><div><b>時間格式</b><small>影響未來可支援的時間顯示</small></div>${settingsSelect('timeFormat',[['24','24 小時'],['12','12 小時']])}</div>
-  </div>
-  <div class="settings-section">
-   <div class="settings-section-head"><div><h3>提醒與通知</h3><p>提醒偏好先保存在本機；瀏覽器背景通知是否能執行，仍取決於裝置與瀏覽器。</p></div></div>
-   ${settingsSwitch('activityReminder','活動截止提醒')}
-   ${settingsSwitch('scholarshipReminder','獎學金截止提醒')}
-   <div class="settings-row"><div><b>提前天數</b><small>活動／獎學金提醒偏好</small></div>${settingsSelect('reminderDays',[['1','1 天前'],['3','3 天前'],['7','7 天前'],['14','14 天前']])}</div>
-   <div class="settings-permission"><span>瀏覽器通知權限：<b>${notif==='granted'?'已允許':notif==='denied'?'已拒絕':notif==='unsupported'?'不支援':'尚未設定'}</b></span><button class="btn" type="button" onclick="requestNotificationPermission()">${notif==='granted'?'重新確認':'允許通知'}</button></div>
-  </div>
-  ${typeof pwaSettingsPanelHTML==='function'?pwaSettingsPanelHTML():''}
-  <div class="settings-section">
-   <div class="settings-section-head"><div><h3>資料管理</h3><p>你的使用者資料以本機保存為主。匯入會先驗證格式與完整性。</p></div></div>
-   <div class="settings-action-grid">
-    <button class="btn primary" onclick="exportDBWithFeedback()">↥ 匯出全部資料</button>
-    <button class="btn" onclick="importDB();closeSettings()">↧ 匯入資料</button>
-    <button class="btn" onclick="createRestorePoint()">✦ 建立復原點</button>
-    <button class="btn" onclick="restoreLatestBackup()">↶ 還原最近備份</button>
-   </div>
-   <div class="settings-data-status" id="settingsDataStatus">正在檢查資料狀態…</div>
-   <div class="settings-danger"><div><b>危險區域</b><small>清除前會要求確認；建議先匯出備份。</small></div><button class="dangerbtn" onclick="resetUserData()">清除本機使用者資料</button></div>
-  </div>
-  <div class="settings-section">
-   <div class="settings-section-head"><div><h3>系統診斷</h3><p>檢查資料結構、儲存空間、版本與快取狀態。</p></div><button class="btn gold" onclick="runDiagnostics()">執行完整檢查</button></div>
-   <div id="diagnosticResult" class="diagnostic-result"><div class="diagnostic-empty">尚未執行完整檢查。</div></div>
-   <div class="settings-repair"><b>進階修復</b><div class="settings-action-grid"><button class="btn" onclick="clearCacheOnly();closeSettings()">↻ 清除快取</button><button class="btn" onclick="rebuildLocalIndexes()">⟳ 重建資料索引</button></div></div>
-  </div>
-  <div class="settings-section">
-   <div class="settings-section-head"><div><h3>隱私與安全</h3><p>這是純前端 GitHub Pages 應用程式，不能把前端 JS 視為秘密。</p></div></div>
-   <div class="security-facts"><div><b>資料位置</b><span>本機瀏覽器</span></div><div><b>遠端上傳</b><span>目前沒有內建使用者資料伺服器</span></div><div><b>輸入保護</b><span>URL 白名單、資料驗證、Checksum、SHA-256 備份</span></div><div><b>程式可見性</b><span>前端程式可被瀏覽器讀取</span></div></div>
-  </div>
-  <div class="settings-section about-section">
-   <div class="settings-section-head"><div><h3>關於系統</h3><p>個人目標與學習行動管理系統</p></div></div>
-   <div class="about-version"><b id="settingsVersion">${window.AppConfig?.version||'V97.3.0'}</b><span>七模組工作層＋系統控制層</span></div>
-   ${window.__DEV_PREVIEW__===true?'<button class="text-button developer-entry" type="button" onclick="registerDeveloperTap()">檢視進階系統資訊</button><div class="developer-hint">預覽／開發環境限定：連續點擊版本 7 次可開啟進階測試工具</div>':''}
-  </div>`;
- updateSettingsDataStatus();
+  const b=document.getElementById('settingsBody');if(!b)return;
+  const modal=document.getElementById('settingsModal');
+  const scrollTop=modal?.scrollTop||0;
+  const notif=('Notification' in window)?(Notification.permission||'default'):'unsupported';
+  const notice=notif==='granted'?'已允許':notif==='denied'?'已拒絕':notif==='unsupported'?'不支援':'尚未設定';
+  const colors=[['slate','霧藍'],['sage','鼠尾草綠'],['plum','灰紫'],['charcoal','石墨灰']];
+  const colorOptions=colors.map(([value,label])=>`<label class="settings-hub-color-option">
+      <input type="radio" name="settingsAccent" value="${value}" ${appSettings.accent===value?'checked':''} onchange="setAppSetting('accent',this.value)">
+      <span class="settings-hub-color-swatch" data-swatch="${value}" aria-hidden="true"></span><span>${label}</span>
+    </label>`).join('');
+  const appearance=`
+    <div class="settings-section">
+      <div class="settings-row"><div><b>顯示模式</b><small>跟隨系統、淺色或深色；隨裝置切換</small></div>${settingsSelect('appearance',[['system','跟隨系統'],['light','淺色'],['dark','深色']])}</div>
+      <div class="settings-row settings-hub-colors"><div><b>全站主色</b><small>套用至主要按鈕、導覽與統一設計元件</small></div><div class="settings-hub-color-options" role="group" aria-label="全站主色">${colorOptions}</div></div>
+      <div class="settings-row"><div><b>字體大小</b><small>依手機閱讀需求調整字體</small></div>${settingsSelect('textSize',[['normal','標準'],['large','加大']])}</div>
+      <div class="settings-row"><div><b>資訊密度</b><small>調整卡片間距，避免資訊過度擁擠</small></div>${settingsSelect('density',[['comfortable','舒適'],['standard','標準'],['compact','精簡']])}</div>
+      <div class="settings-row">${settingsSwitch('reducedMotion','減少轉場動畫')}</div>
+      <div class="settings-hub-inline-actions"><button class="btn" type="button" onclick="resetAppSettings()">恢復顯示與提醒預設</button></div>
+    </div>`;
+  const notification=`
+    <div class="settings-section">
+      <p class="settings-hub-note">以下為本機提醒偏好；目前不保證 App 關閉後的定時背景推播。系統不會因開啟權限而自行發送通知。</p>
+      ${settingsSwitch('activityReminder','活動截止提醒偏好')}
+      ${settingsSwitch('scholarshipReminder','獎學金截止提醒偏好')}
+      <div class="settings-row"><div><b>提前天數</b><small>供支援提醒的功能使用</small></div>${settingsSelect('reminderDays',[['1','1 天前'],['3','3 天前'],['7','7 天前'],['14','14 天前']])}</div>
+      <div class="settings-permission"><div>瀏覽器通知權限：<b>${notice}</b><small>${notif==='denied'?'請在瀏覽器網站設定中調整權限':'權限狀態不等於已啟用背景通知'}</small></div><button class="btn" type="button" onclick="requestNotificationPermission()" ${notif==='unsupported'||notif==='denied'?'disabled':''}>${notif==='granted'?'確認權限':'請求權限'}</button></div>
+    </div>`;
+  const application=`
+    ${typeof pwaSettingsPanelHTML==='function'?pwaSettingsPanelHTML():'<div class="settings-section">PWA 更新資訊載入中，仍可透過瀏覽器重新開啟。</div>'}
+    <div class="settings-section about-section"><div class="settings-section-head"><div><h3>版本與應用程式資訊</h3><p>此處只呈現系統版本，不會修改使用者資料。</p></div></div>
+      <div class="about-version"><b id="settingsVersion">${window.AppConfig?.version||'V98.12.0'}</b><span>個人目標與學習行動管理系統｜資料結構 V${globalThis.GOAL_MANAGER_SCHEMA_VERSION||6}</span></div>
+      ${window.__DEV_PREVIEW__===true?'<button class="text-button developer-entry" type="button" onclick="registerDeveloperTap()">檢視進階系統資訊</button>':''}
+    </div>`;
+  const data=`
+    <div class="settings-section">
+      <div class="settings-section-head"><div><h3>匯出與還原</h3><p>備份與檢查不會改變現有目標；匯入及還原會先驗證資料。</p></div></div>
+      <div class="settings-action-grid">
+        <button class="btn primary" type="button" onclick="exportDBWithFeedback()">匯出全部資料</button>
+        <button class="btn" type="button" onclick="importDB()">匯入備份檔</button>
+        <button class="btn" type="button" onclick="createRestorePoint()">建立復原點</button>
+        <button class="btn" type="button" onclick="restoreLatestBackup()">還原最近備份</button>
+      </div>
+      <div class="settings-data-status" id="settingsDataStatus">正在檢查資料狀態…</div>
+      <div class="security-facts settings-hub-security"><div><b>使用者資料</b><span>主要儲存在本機瀏覽器</span></div><div><b>資料保護</b><span>多份備份、驗證與歷程保護維持不變</span></div></div>
+      <details class="settings-hub-advanced"><summary>進階資料操作（須再次確認）</summary>
+        <div class="settings-hub-advanced-body"><p>只有明確選擇修復或清除時才會執行；請先匯出備份。</p>
+          <div class="settings-action-grid"><button class="btn" type="button" onclick="clearCacheOnly()">僅清除應用快取</button><button class="btn" type="button" onclick="rebuildLocalIndexes()">重建資料索引</button></div>
+          <div class="settings-danger"><div><b>危險操作</b><small>清除本機資料前會再次確認並建立備份；唯讀救援模式禁止執行。</small></div><button class="dangerbtn" type="button" onclick="resetUserData()">清除本機使用者資料</button></div>
+        </div>
+      </details>
+    </div>`;
+  const health=`
+    <div class="settings-section">
+      <div class="settings-section-head"><div><h3>系統診斷</h3><p>檢查資料完整性、程式邊界、快取與儲存；不執行資料修復。</p></div><button class="btn gold" type="button" onclick="runDiagnostics()">執行檢查</button></div>
+      <div id="diagnosticResult" class="diagnostic-result"><div class="diagnostic-empty">尚未執行完整檢查。</div></div>
+    </div>
+    <div id="settingsHealthMount" aria-label="自動資料健康與汰除歷程"><p class="settings-hub-note">活動雷達、獎學金及汰除歷程的監測資訊正在載入。</p></div>`;
+  const tabs=[['appearance','外觀顯示'],['notification','提醒通知'],['application','應用程式'],['data','資料備份'],['health','系統健康']];
+  b.innerHTML=`<div class="settings-hub-intro"><div><strong>系統控制中心</strong><small>5 個區塊，集中設定與檢查；目標資料不受外觀更改影響。</small></div><span>${window.AppConfig?.version||'V98.12.0'}</span></div>
+    <nav class="settings-hub-nav" aria-label="設定區域">${tabs.map(([id,label])=>`<button type="button" data-settings-jump="${id}" aria-pressed="false" onclick="showSettingsSection('${id}')">${label}</button>`).join('')}</nav>
+    <p class="settings-hub-save-status" id="settingsSaveStatus" role="status" aria-live="polite">偏好儲存於這台裝置，與目標／學習紀錄分離。</p>`+
+    settingsPanelMarkup('appearance','01','外觀與顯示','深淺模式、主色、字體、資訊密度',appearance)+
+    settingsPanelMarkup('notification','02','提醒與通知','提醒偏好與通知權限',notification)+
+    settingsPanelMarkup('application','03','應用程式','PWA 安裝、更新與版本',application)+
+    settingsPanelMarkup('data','04','資料與備份','匯入匯出、復原與資料安全',data)+
+    settingsPanelMarkup('health','05','系統健康','資料來源、汰除歷程與診斷',health);
+  if(b.dataset.settingsHubBound!=='1'){
+    b.addEventListener('toggle',event=>{
+      const panel=event.target;
+      if(!panel?.classList?.contains('settings-hub-panel'))return;
+      if(panel.open){
+        settingsOpenPanel=panel.dataset.section;
+        b.querySelectorAll('.settings-hub-panel').forEach(other=>{if(other!==panel)other.open=false;});
+      }else if(settingsOpenPanel===panel.dataset.section)settingsOpenPanel=null;
+      syncSettingsHubNav();
+    },true);
+    b.dataset.settingsHubBound='1';
+  }
+  syncSettingsHubNav();
+  if(modal)modal.scrollTop=scrollTop;
+  updateSettingsDataStatus();
 }
 async function updateSettingsDataStatus(){
  const el=document.getElementById('settingsDataStatus');if(!el)return;

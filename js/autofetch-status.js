@@ -383,6 +383,8 @@
     document.getElementById(PANEL_ID)?.remove();
     const lifecycle=document.getElementById("gmCatalogLifecyclePanel");
     const html=panelHtml();
+    const mount=document.getElementById("settingsHealthMount");
+    if(mount){mount.insertAdjacentHTML("beforeend",html);return;}
     if(lifecycle)lifecycle.insertAdjacentHTML("afterend",html);
     else body.insertAdjacentHTML("beforeend",html);
     reorderSettingsSections();
