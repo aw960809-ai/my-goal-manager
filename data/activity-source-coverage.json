@@ -1,6 +1,6 @@
 {
   "schemaVersion": "7B.2-coverage-1",
-  "generatedAt": "2026-10-08T05:49:56.574135+00:00",
+  "generatedAt": "2026-10-08T07:48:14.681698+00:00",
   "policy": {
     "localCoverageMustMatchUserProfile": true,
     "uncoveredLocalScopeFailClosed": true,
@@ -31,6 +31,24 @@
         "thu_official",
         "taichung_job"
       ]
+    },
+    {
+      "canonical": "彰化縣",
+      "aliases": [
+        "彰化縣"
+      ],
+      "sourceIds": [
+        "changhua_government"
+      ]
+    },
+    {
+      "canonical": "南投縣",
+      "aliases": [
+        "南投縣"
+      ],
+      "sourceIds": [
+        "nantou_culture"
+      ]
     }
   ],
   "scopes": {
@@ -46,6 +64,10 @@
     ],
     "nationwide": [
       "yda_official"
+    ],
+    "regional": [
+      "changhua_government",
+      "nantou_culture"
     ]
   },
   "sources": [
@@ -137,6 +159,86 @@
       "profileMatch": {
         "country": "TW",
         "cities": [],
+        "schoolNames": []
+      }
+    },
+    {
+      "id": "miaoli_government",
+      "name": "苗栗縣政府活動訊息",
+      "enabled": false,
+      "scope": "regional",
+      "categories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "youth_program",
+        "public_activity"
+      ],
+      "profileMatch": {
+        "country": "TW",
+        "cities": [
+          "苗栗縣"
+        ],
+        "schoolNames": []
+      }
+    },
+    {
+      "id": "changhua_government",
+      "name": "彰化縣政府活動快訊",
+      "enabled": true,
+      "scope": "regional",
+      "categories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "youth_program",
+        "public_activity"
+      ],
+      "profileMatch": {
+        "country": "TW",
+        "cities": [
+          "彰化縣"
+        ],
+        "schoolNames": []
+      }
+    },
+    {
+      "id": "nantou_culture",
+      "name": "南投縣政府文化局藝文活動",
+      "enabled": true,
+      "scope": "regional",
+      "categories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "youth_program",
+        "public_activity"
+      ],
+      "profileMatch": {
+        "country": "TW",
+        "cities": [
+          "南投縣"
+        ],
+        "schoolNames": []
+      }
+    },
+    {
+      "id": "yunlin_government",
+      "name": "雲林縣政府活動行事曆",
+      "enabled": false,
+      "scope": "regional",
+      "categories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "youth_program",
+        "public_activity"
+      ],
+      "profileMatch": {
+        "country": "TW",
+        "cities": [
+          "雲林縣"
+        ],
         "schoolNames": []
       }
     }
