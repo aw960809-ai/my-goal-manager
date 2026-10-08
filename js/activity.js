@@ -129,7 +129,18 @@ function applyActivitySearch(){bindActivitySearch();activityPage=1;const b=docum
 function activityIsEligible(a){return activityTimeState(a).eligible}
 function activityExternalUrl(a){return String(a?.url||a?.externalUrl||a?.sourceUrl||'').trim()}
 let remoteActivityCatalog=[];
+let activityRemoteLoaded=false;
 let activityAutoMeta={updatedAt:'',sources:0,events:0,ok:0,failed:0};
+/* Read-only counts: official current catalog versus additional retained local rows.
+   Never remove or rewrite a stored activity to make the totals match. */
+function activityReviewSummary(){
+ const blocked=activityStore().filter(a=>RadarPolicy.activityReviewState(a).blocked);
+ if(!activityRemoteLoaded)return {all:blocked.length,latest:null,retained:null};
+ const remoteIds=new Set(remoteActivityCatalog.map(a=>String(a.id)));
+ const latest=remoteActivityCatalog.filter(a=>RadarPolicy.activityReviewState(a).blocked).length;
+ const retained=blocked.filter(a=>!remoteIds.has(String(a.id))).length;
+ return {all:blocked.length,latest,retained};
+}
 function normalizeRemoteActivity(a,i){
   const x={...(a||{})};x.id=String(x.id||('auto-'+i+'-'+Math.abs(hashCode(String(x.title||'activity')+String(x.date||'')))));
   x.title=String(x.title||'未命名活動').trim();x.date=String(x.date||'').trim();x.time=String(x.time||'').trim();x.deadline=String(x.deadline||'').trim();x.scope=String(x.scope||x.circleLabel||'全國').trim();x.type=String(x.type||'公共參與').trim();x.kind=x.kind||'event';
@@ -150,6 +161,7 @@ async function loadRemoteActivities(){
    activityAutoMeta=payload.meta||{mode:'standalone-preview'};
    db.scholarships=mergeScholarshipCatalog([...(Array.isArray(db.scholarships)?db.scholarships:[]),...scholarshipItems.map(normalizeRemoteActivity)]);
    db.activities=mergeActivityCatalog([...(Array.isArray(db.activities)?db.activities:[]),...remoteActivityCatalog]);
+   activityRemoteLoaded=true;
    activityPage=1;renderActivities();renderScholarships();
    const box=document.getElementById('activityAutoStatus');
    if(box){box.style.display='block';const u=document.getElementById('activityAutoUpdated'),m=document.getElementById('activityAutoMeta');if(u)u.textContent='獨立預覽資料';if(m)m.textContent=`預覽模式 · 活動 ${remoteActivityCatalog.length} · 獎學金 ${scholarshipItems.length}`}
@@ -168,9 +180,10 @@ async function loadRemoteActivities(){
   const remoteScholarships=[...normalizedItems.filter(x=>x.scholarship||x.type==='獎學金／助學金'||x.kind==='scholarship'),...normalizedScholarships];
   remoteActivityCatalog=normalizedItems.filter(x=>!x.scholarship&&x.type!=='獎學金／助學金'&&x.kind!=='scholarship');activityAutoMeta=payload.meta||{};
   db.scholarships=mergeScholarshipCatalog([...(Array.isArray(db.scholarships)?db.scholarships:[]),...remoteScholarships]);db.activities=mergeActivityCatalog([...(Array.isArray(db.activities)?db.activities:[]),...remoteActivityCatalog]);
+  activityRemoteLoaded=true;
   activityPage=1;renderActivities();renderScholarships();
-  const box=document.getElementById('activityAutoStatus');if(box){box.dataset.remoteState='loaded';box.style.display='block';const u=document.getElementById('activityAutoUpdated'),m=document.getElementById('activityAutoMeta');if(u)u.textContent=activityAutoMeta.updatedAt?('更新 '+new Date(activityAutoMeta.updatedAt).toLocaleString('zh-TW',{hour12:false})):'自動資料';if(m)m.textContent=`來源 ${activityAutoMeta.sources||0} · 活動 ${items.length} · 獎學金 ${scholarshipItems.length} · 成功 ${activityAutoMeta.ok||0} · 失敗 ${activityAutoMeta.failed||0}`}
- }catch(e){console.warn('remote activity catalog load failed',e);const box=document.getElementById('activityAutoStatus');if(box){box.dataset.remoteState='load-failed';box.style.display='block';const u=document.getElementById('activityAutoUpdated'),m=document.getElementById('activityAutoMeta');if(u)u.textContent='即時列表載入未完成';if(m)m.textContent='目前保留既有／內建活動資料；來源健康監測會再次確認並自動重試一次。'}}
+  const box=document.getElementById('activityAutoStatus');if(box){box.dataset.remoteState='loaded';box.style.display='block';const u=document.getElementById('activityAutoUpdated'),m=document.getElementById('activityAutoMeta');if(u)u.textContent=activityAutoMeta.updatedAt?('更新 '+new Date(activityAutoMeta.updatedAt).toLocaleString('zh-TW',{hour12:false})):'自動資料';if(m)m.textContent=`來源健康 ${activityAutoMeta.healthySources??activityAutoMeta.sources??0}/${activityAutoMeta.totalSources??activityAutoMeta.sources??0} · 活動 ${items.length} · 獎學金 ${scholarshipItems.length} · 項目抓取成功 ${activityAutoMeta.ok??0} · 項目抓取失敗 ${activityAutoMeta.fetchFailedItems??activityAutoMeta.failed??0}`}
+ }catch(e){activityRemoteLoaded=false;console.warn('remote activity catalog load failed',e);const box=document.getElementById('activityAutoStatus');if(box){box.dataset.remoteState='load-failed';box.style.display='block';const u=document.getElementById('activityAutoUpdated'),m=document.getElementById('activityAutoMeta');if(u)u.textContent='即時列表載入未完成';if(m)m.textContent='目前保留既有／內建活動資料；來源健康監測會再次確認並自動重試一次。'}}
 }
 function activityCardHTML(a,today){
   const f=a.fit,tierClass=activityFitClass(f.tier),deadline=activityDeadlineInfo(a),goals=activityGoalLabels(a,f);
@@ -191,8 +204,11 @@ function renderActivities(){
   ensureActivities();bindActivitySearch();const q=(document.getElementById('activitySearch')?.value||'').trim().toLowerCase(),circleFilter=document.getElementById('activityScope')?.value||'全部',type=document.getElementById('activityType')?.value||'全部',tierFilter=document.getElementById('activityFitTier')?.value||'全部',today=todayKey();
   let arr=activityStore().filter(activityIsEligible).map(a=>({...a,type:activityAutoClass(a),fit:activityFit(a)})).filter(a=>{const hay=[a.title,a.keywords,a.scope,a.source,a.organizer,...(a.goalMatches||[])].join(' ').toLowerCase();return (!q||hay.includes(q))&&(circleFilter==='全部'||a.fit.circleLabel===circleFilter)&&(type==='全部'||a.type===type)&&(tierFilter==='全部'||a.fit.tier===tierFilter)});
   arr.sort(activitySort);const tierCounts={high:arr.filter(a=>a.fit.tier==='高適配').length,mid:arr.filter(a=>a.fit.tier==='中適配').length,explore:arr.filter(a=>a.fit.tier==='探索').length},pages=Math.max(1,Math.ceil(arr.length/ACTIVITY_PAGE_SIZE));activityPage=Math.min(Math.max(1,activityPage),pages);const pageItems=arr.slice((activityPage-1)*ACTIVITY_PAGE_SIZE,activityPage*ACTIVITY_PAGE_SIZE);
-  const reviewCount=activityStore().filter(a=>RadarPolicy.activityReviewState(a).blocked).length;
-  const stats=document.getElementById('activityStats');if(stats)stats.innerHTML=`目前 <b>${arr.length}</b> 項 · 高適配 ${tierCounts.high} · 中適配 ${tierCounts.mid} · 探索 ${tierCounts.explore} · 待複核 ${reviewCount}（不列入推薦）。`;
+  const review=activityReviewSummary();
+  const reviewText=review.latest===null
+    ?`待複核 ${review.all}（本機資料；最新遠端尚未核對）`
+    :`待複核 ${review.all}（本輪來源 ${review.latest} · 本機額外保留 ${review.retained}）`;
+  const stats=document.getElementById('activityStats');if(stats)stats.innerHTML=`目前 <b>${arr.length}</b> 項 · 高適配 ${tierCounts.high} · 中適配 ${tierCounts.mid} · 探索 ${tierCounts.explore} · ${reviewText}；待複核不列入推薦。`;
   const st=document.getElementById('activitySearchStatus');if(st)st.textContent=q?`搜尋「${q}」：找到 ${arr.length} 項`:`依適配度排序；同分時優先較近的同心圓`;
   const list=document.getElementById('activityList');if(!pageItems.length){list.innerHTML='<div class="empty">目前沒有符合條件的活動。可調整搜尋、圈層、類型或適配度。</div>';renderActivityPagination(0);renderActivityReferences();return}
   const pageGroups={1:[],2:[],3:[],4:[]};pageItems.forEach(a=>(pageGroups[a.fit.circleLevel]||pageGroups[3]).push(a));
@@ -210,8 +226,12 @@ function renderActivityReferences(){
  const box=document.getElementById('activityReferences');if(!box)return;
  const refs=activityStore().filter(a=>a.kind==='reference'&&activityExternalUrl(a));
  const review=activityStore().filter(a=>RadarPolicy.activityReviewState(a).blocked);
+ const summary=activityReviewSummary();
+ const reviewDescription=summary.latest===null
+   ?`${review.length} 項（本機資料，遠端尚未核對）`
+   :`${review.length} 項（本輪來源 ${summary.latest} · 本機額外保留 ${summary.retained}）`;
  const refHTML=refs.length?`<div class="reference-title">📚 相關計畫資料（不列入可直接參加活動）</div>`+refs.map(a=>`<div class="reference-item"><div><b>${esc(a.title)}</b><small>${esc(a.statusText||'參考資料')} · ${esc(a.source||'官方來源')}</small></div><a class="btn" href="${esc(safeExternalUrl(activityExternalUrl(a)))}" target="_blank" rel="noopener noreferrer">查看官方資訊</a></div>`).join(''):'';
- const reviewHTML=review.length?`<details class="activity-review-disclosure"><summary><span>⚠ 來源待複核</span><small>${review.length} 項 · 暫不列入推薦 · 點擊展開</small></summary><div class="activity-review-list">${review.map(a=>{const state=RadarPolicy.activityReviewState(a);return `<div class="reference-item"><div><b>${esc(a.title)}</b><small>${esc(state.reason)} · ${esc(a.source||a.organizer||'官方來源')}</small></div>${activityExternalUrl(a)?`<a class="btn" href="${esc(safeExternalUrl(activityExternalUrl(a)))}" target="_blank" rel="noopener noreferrer">查看來源</a>`:''}</div>`}).join('')}</div></details>`:'';
+ const reviewHTML=review.length?`<details class="activity-review-disclosure"><summary><span>⚠ 來源待複核</span><small>${reviewDescription} · 暫不列入推薦 · 點擊展開</small></summary><div class="activity-review-list">${review.map(a=>{const state=RadarPolicy.activityReviewState(a);return `<div class="reference-item"><div><b>${esc(a.title)}</b><small>${esc(state.reason)} · ${esc(a.source||a.organizer||'官方來源')}</small></div>${activityExternalUrl(a)?`<a class="btn" href="${esc(safeExternalUrl(activityExternalUrl(a)))}" target="_blank" rel="noopener noreferrer">查看來源</a>`:''}</div>`}).join('')}</div></details>`:'';
  box.innerHTML=refHTML+reviewHTML;
 }
 function activityResetFilters(){['activitySearch'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});['activityScope','activityType','activityFitTier'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='全部'});activityPage=1;renderActivities()}

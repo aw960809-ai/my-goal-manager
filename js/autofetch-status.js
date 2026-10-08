@@ -90,7 +90,7 @@
     if(kind==="activity"){
       const total=pickNumber(m,["sources","sourceCount","totalSources"],0);
       const healthy=pickNumber(m,["healthySources","okSources","successSources","ok"],total);
-      const failed=pickNumber(m,["failedSources","failureSources","failed"],Math.max(0,total-healthy));
+      const failed=pickNumber(m,["failedSources","failureSources"],Math.max(0,total-healthy));
       return {total,healthy,failed};
     }
     const total=pickNumber(m,["categories","sourceCount","totalSources"],0);
@@ -142,6 +142,7 @@
     return {
       kind,count:list.length,autoCount:autoCount(list),meta:m,updatedAt:m.updatedAt||m.fetchedAt||"",
       sources:sourceStats(m,kind),failures:collectFailures(m),
+      itemFailures:kind==="activity"?pickNumber(m,["fetchFailedItems","failed"],0):0,
       failedRetained:pickNumber(m,["retainedOnFailure","preservedFailedAuto","preserveOnFailure"],0),
       duplicates:pickNumber(m,["duplicatesMerged","duplicateMerged","semanticDuplicates"],0),
       activeAuto:pickNumber(m,["activeAuto","freshAuto"],autoCount(list)),
@@ -197,6 +198,7 @@
   function statusInfo(item){
     if(!item)return {cls:"warn",text:"待讀取"};
     if(item.sources.failed>0)return {cls:"warn",text:"來源異常"};
+    if(item.itemFailures>0)return {cls:"warn",text:"部分項目抓取失敗"};
     if(item.kind==="scholarship"&&item.detail?.unverified>0)return {cls:"progress",text:"來源正常｜資格補抓中"};
     return {cls:"ok",text:"正常"};
   }
@@ -221,6 +223,7 @@
       archivedNow>0?metric("目前封存總數",archivedNow):"",
       retiredThisRun>0?metric("本次 AutoFetch 封存",retiredThisRun):"",
       item.sources.failed>0?metric("來源失敗",item.sources.failed):"",
+      item.itemFailures>0?metric("個別項目抓取失敗",item.itemFailures):"",
       item.failedRetained>0?metric("失敗保留",item.failedRetained):""
     ].filter(Boolean).join("");
 
@@ -271,9 +274,11 @@
   function panelHtml(){
     const a=state.activity,s=state.scholarship,next=nextSchedule();
     const sourceFail=(a?.sources.failed||0)+(s?.sources.failed||0);
+    const itemFail=a?.itemFailures||0;
     const backlog=s?.detail?.unverified||0;
     let overall={cls:"ok",text:"系統正常"};
     if(state.error||sourceFail)overall={cls:"warn",text:"部分來源異常"};
+    else if(itemFail)overall={cls:"warn",text:"部分項目抓取失敗"};
     else if(backlog)overall={cls:"progress",text:"來源正常｜資格補抓中"};
 
     return `<section class="settings-section gm-af-section" id="${PANEL_ID}">
