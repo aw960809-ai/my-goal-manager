@@ -103,19 +103,16 @@
   function deletedLogsHTML(logs,{esc,getTask}){
     const rows=Array.isArray(logs)?logs:[];
     return rows.length
-      ?rows.map(log=>`<div class="listitem deleted-log-row"><div><b>${esc(log.name||getTask(log.taskId)?.name||'未命名行動')}</b><small class="muted" style="display:block">${esc((log.time||'').slice(0,16).replace('T',' · '))} · ${TimeFormat.minutes(log.minutes)} 分 · 已刪除</small></div><button class="btn" type="button" onclick="restoreActualLog('${esc(log.id)}')">恢復紀錄</button></div>`).join('')
+      ?rows.map(log=>`<div class="listitem deleted-log-row"><div><b>${esc(log.name||getTask(log.taskId)?.name||'未命名行動')}</b><small class="muted" style="display:block">${esc(TimeFormat.dateTimeLabel(log.time)||'—')} · ${TimeFormat.minutes(log.minutes)} 分 · 已刪除</small></div><button class="btn" type="button" onclick="restoreActualLog('${esc(log.id)}')">恢復紀錄</button></div>`).join('')
       :'<div class="empty">尚無已刪除的實際紀錄。</div>';
   }
 
   function actualHistoryDateKey(log){
-    return String(log?.time||'').slice(0,10)||'無日期';
+    return TimeFormat.dateKey(log?.time)||'無日期';
   }
 
   function actualHistoryTimeLabel(log){
-    const raw=String(log?.time||'');
-    const date=raw.slice(0,10)||'—';
-    const time=raw.slice(11,16)||'';
-    return time?date+' · '+time:date;
+    return TimeFormat.dateTimeLabel(log?.time)||'—';
   }
 
   function recentActualLogsHTML(logs,{esc,getTask,isOtherStudyLog}){
@@ -147,7 +144,7 @@
  </div>`;
   }
 
-  function actualHistoryDayLabel(date,currentYear=new Date().getFullYear()){
+  function actualHistoryDayLabel(date,currentYear=Number(TimeFormat.dateKey(new Date()).slice(0,4))){
     const raw=String(date||'');
     const parts=raw.split('-').map(Number);
     if(parts.length!==3||parts.some(x=>!Number.isFinite(x))){
@@ -165,8 +162,7 @@
   }
 
   function actualHistoryClockLabel(log){
-    const raw=String(log?.time||'');
-    return raw.slice(11,16)||'—';
+    return TimeFormat.clock(log?.time)||'—';
   }
 
   function actualHistoryLogName(log,{getTask}){
@@ -308,7 +304,7 @@
     esc,
     getTask,
     isOtherStudyLog,
-    currentYear=new Date().getFullYear()
+    currentYear=Number(TimeFormat.dateKey(new Date()).slice(0,4))
   }){
     const rows=Array.isArray(filtered)?filtered:[];
     const groups=new Map();

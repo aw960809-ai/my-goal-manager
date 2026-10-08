@@ -1,10 +1,15 @@
 /* Study log domain: classification, normalization and aggregation. */
 (function(root,factory){
-  const api=factory();
+  const taiwanTime=typeof module==='object'&&module.exports
+    ?require('../core/taiwan-time.js')
+    :root.TaiwanTime;
+  const api=factory(taiwanTime);
   if(typeof module==='object'&&module.exports)module.exports=api;
   root.StudyLogDomain=api;
-})(typeof globalThis!=='undefined'?globalThis:this,function(){
+})(typeof globalThis!=='undefined'?globalThis:this,function(TaiwanTime){
   'use strict';
+
+  if(!TaiwanTime)throw new Error('StudyLogDomain requires TaiwanTime');
 
   const KIND=Object.freeze({
     GOAL:'goal-study',
@@ -35,9 +40,7 @@
   }
 
   function logDate(value){
-    const d=new Date(value);
-    if(Number.isNaN(d.getTime()))return '';
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    return TaiwanTime.dateKey(value);
   }
 
   function isCountableActualLog(log){

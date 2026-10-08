@@ -799,7 +799,14 @@ function actualHistorySource(){
  return (Array.isArray(db.logs)?db.logs:[])
   .filter(isCountableActualLog)
   .slice()
-  .sort((a,b)=>String(b.time||'').localeCompare(String(a.time||'')));
+  .sort((a,b)=>{
+    const newer=TimeFormat.timestamp(b.time);
+    const older=TimeFormat.timestamp(a.time);
+    if(Number.isFinite(newer)&&Number.isFinite(older))return newer-older;
+    if(Number.isFinite(newer))return -1;
+    if(Number.isFinite(older))return 1;
+    return String(b.time||'').localeCompare(String(a.time||''));
+  });
 }
 function actualHistoryDateKey(log){return AnalyticsPage.actualHistoryDateKey(log)}
 function actualHistoryTimeLabel(log){return AnalyticsPage.actualHistoryTimeLabel(log)}
@@ -810,7 +817,7 @@ function actualHistoryFiltered(){
    if(actualHistoryTask==='__other-study__'&&!isOtherStudyLog(log))return false;
    if(actualHistoryTask!=='all'&&actualHistoryTask!=='__other-study__'&&(isOtherStudyLog(log)||String(log.taskId||'')!==String(actualHistoryTask)))return false;
    if(days===null)return true;
-   const ms=Date.parse(log.time||'');
+   const ms=TimeFormat.timestamp(log.time);
    return Number.isFinite(ms)&&(now-ms)<=days*24*60*60*1000;
  });
 }

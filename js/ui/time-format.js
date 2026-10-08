@@ -1,10 +1,15 @@
 /* UI time formatting boundary: raw study minutes stay precise; presentation is rounded here. */
 (function(root,factory){
-  const api=factory();
+  const taiwanTime=typeof module==='object'&&module.exports
+    ?require('../core/taiwan-time.js')
+    :root.TaiwanTime;
+  const api=factory(taiwanTime);
   if(typeof module==='object'&&module.exports)module.exports=api;
   root.TimeFormat=api;
-})(typeof globalThis!=='undefined'?globalThis:this,function(){
+})(typeof globalThis!=='undefined'?globalThis:this,function(TaiwanTime){
   'use strict';
+
+  if(!TaiwanTime)throw new Error('TimeFormat requires TaiwanTime');
 
   function wholeMinutes(value){
     const n=Number(value);
@@ -41,6 +46,10 @@
     minutes,
     hoursLabel,
     human,
-    shortEnglish
+    shortEnglish,
+    dateKey:TaiwanTime.dateKey,
+    clock:TaiwanTime.clock,
+    dateTimeLabel:TaiwanTime.dateTimeLabel,
+    timestamp:TaiwanTime.timestamp
   });
 });
