@@ -164,7 +164,7 @@
     {
       "id": "miaoli_government",
       "name": "苗栗縣政府活動訊息",
-      "enabled": true,
+      "enabled": false,
       "adapter": "miaoli_government",
       "scope": "regional",
       "categories": [
@@ -260,7 +260,7 @@
     {
       "id": "yunlin_government",
       "name": "雲林縣政府活動行事曆",
-      "enabled": true,
+      "enabled": false,
       "adapter": "yunlin_government",
       "scope": "regional",
       "categories": [

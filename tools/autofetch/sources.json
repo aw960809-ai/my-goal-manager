@@ -92,7 +92,7 @@
       "domain_allowlist": [
         "www.miaoli.gov.tw"
       ],
-      "enabled": true,
+      "enabled": false,
       "start_urls": [
         "https://www.miaoli.gov.tw/News.aspx?n=286&sms=9463"
       ],
@@ -140,7 +140,7 @@
       "domain_allowlist": [
         "www.yunlin.gov.tw"
       ],
-      "enabled": true,
+      "enabled": false,
       "start_urls": [
         "https://www.yunlin.gov.tw/News.aspx?_CSN=811&n=1245&sms=16727"
       ],

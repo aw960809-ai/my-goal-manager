@@ -14,21 +14,25 @@ from urllib.parse import parse_qs, urljoin, urlparse
 
 REGIONS = {
     'miaoli_government': {
+        'enabled': False,
         'county': '苗栗', 'name': '苗栗縣政府活動訊息', 'host': 'www.miaoli.gov.tw',
         'url': 'https://www.miaoli.gov.tw/News.aspx?n=286&sms=9463',
         'prefix': 'auto-central-ml-', 'site': 'miaoli',
     },
     'changhua_government': {
+        'enabled': True,
         'county': '彰化', 'name': '彰化縣政府活動快訊', 'host': 'www.chcg.gov.tw',
         'url': 'https://www.chcg.gov.tw/ch2/actives.aspx',
         'prefix': 'auto-central-ch-', 'site': 'changhua',
     },
     'nantou_culture': {
+        'enabled': True,
         'county': '南投', 'name': '南投縣政府文化局藝文活動', 'host': 'www.nthcc.gov.tw',
         'url': 'https://www.nthcc.gov.tw/A4_1/list2',
         'prefix': 'auto-central-nt-', 'site': 'nantou',
     },
     'yunlin_government': {
+        'enabled': False,
         'county': '雲林', 'name': '雲林縣政府活動行事曆', 'host': 'www.yunlin.gov.tw',
         'url': 'https://www.yunlin.gov.tw/News.aspx?_CSN=811&n=1245&sms=16727',
         'prefix': 'auto-central-yl-', 'site': 'yunlin',
@@ -210,13 +214,30 @@ def is_allowed_audience(title, lines):
 
 
 def _extract_lines(body, title, parse_lines):
-    lines=parse_lines(body)
-    key=re.sub(r'\s+','',title)[:18]
-    for i,line in enumerate(lines):
-        if key and key in re.sub(r'\s+','',line):
-            return lines[i:i+115]
-    # Fail-closed for an unrelated/generic detail page.
-    return []
+    """Use the actual article heading, not the first <title> in the HTML head.
+
+    Official detail pages can repeat the heading in their browser title before
+    150+ navigation entries. Returning the first match discarded 活動日期 below.
+    We still fail closed when the event heading cannot be verified.
+    """
+    lines = parse_lines(body)
+    normalized = re.sub(r'\s+', '', title)
+    key = normalized[:18]
+    if not key:
+        return []
+    matches = [i for i, line in enumerate(lines) if key in re.sub(r'\s+', '', line)]
+    if not matches:
+        return []
+    exact = [i for i in matches if re.sub(r'\s+', '', lines[i]) == normalized]
+    candidates = exact or matches
+    marker = re.compile(r'^(?:活動日期|活動日期\(起\)|展覽日期|演出日期)\s*[：:]?')
+    for i in reversed(candidates):
+        portion = lines[i:i+115]
+        if any(marker.search(line) for line in portion):
+            return portion
+    # If there was no date label, return the actual heading neighborhood, not
+    # a publication date elsewhere on the page; the date gate will exclude it.
+    return lines[candidates[-1]:candidates[-1]+115]
 
 
 def build_candidate(record, detail_body, src, parse_lines, stamp):

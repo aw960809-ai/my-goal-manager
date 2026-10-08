@@ -18,7 +18,9 @@ assert.deepStrictEqual(new Set(names),new Set(publicRegistry.sources.map(s=>s.id
 for(const id of ids){
  const a=manifest.sources.find(s=>s.id===id);
  const b=publicRegistry.sources.find(s=>s.id===id);
- assert(a&&b&&a.enabled&&b.enabled,`enabled official source ${id}`);
+ assert(a&&b&&a.enabled===b.enabled,`manifest parity ${id}`);
+ const enabled=['changhua_government','nantou_culture'].includes(id);
+ assert.strictEqual(a.enabled,enabled,`source enabled only after live health test ${id}`);
  assert(a.scope==='regional'&&b.scope==='regional',`Circle 3 ${id}`);
  assert(a.start_urls.length===1&&a.start_urls[0].startsWith('https://'),`https ${id}`);
  assert(b.startUrls[0]===a.start_urls[0],`manifest consistency ${id}`);
@@ -32,5 +34,5 @@ assert(activity.includes('reconcile_activity_catalog('), 'do not bypass existing
 assert(pythonSource.includes('network_errors==0 and structural_errors==0'), 'source outage must be fail-closed');
 const test=spawnSync('python3',['tests/autofetch/test_central_official.py'],{cwd:root,encoding:'utf8',timeout:30000});
 assert.strictEqual(test.status,0,`${test.stdout}\n${test.stderr}`);
-assert(test.stderr.includes('Ran 9 tests'));
+assert(test.stderr.includes('Ran 10 tests'));
 console.log('OK: four independent county-government adapters, nine-source registry, fail-closed and offline regression');

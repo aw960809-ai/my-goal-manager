@@ -339,7 +339,7 @@ SOURCES = {
 for _regional_id, _regional in CENTRAL_REGIONS.items():
     SOURCES['sources'].append({
         'id':_regional_id, 'name':_regional['name'], 'scope':'regional',
-        'priority':3, 'domain_allowlist':[_regional['host']], 'enabled':True,
+        'priority':3, 'domain_allowlist':[_regional['host']], 'enabled':_regional['enabled'],
         'start_urls':[_regional['url']], 'fetch_type':'html',
         'trust_level':'official',
         'notes':'Circle 3 bounded official HTML adapter; skip unverified dates and restricted entries.',

@@ -71,6 +71,8 @@ class OfficialRegionTests(unittest.TestCase):
 
     def test_official_registry(self):
         self.assertEqual(len(region.REGIONS),4)
+        self.assertEqual({sid for sid,x in region.REGIONS.items() if x['enabled']},
+                         {'changhua_government','nantou_culture'})
         for sid,v in region.REGIONS.items():
             self.assertEqual(v['url'].split('/')[2],v['host'])
             self.assertTrue(v['url'].startswith('https://'))
@@ -131,6 +133,22 @@ class OfficialRegionTests(unittest.TestCase):
         body=f'<h2>{rec["title"]}</h2><p>活動日期</p><p>{old.isoformat()}</p>'
         c,reason=region.build_candidate(rec,body.encode(),src,self.parser,self.stamp)
         self.assertIsNone(c);self.assertEqual(reason,'event_started_before_today')
+
+    def test_changhua_real_page_title_precedes_navigation(self):
+        src=region.REGIONS['changhua_government']
+        title='青年法律與職涯講座'
+        rec={'title':title,'url':'https://www.chcg.gov.tw/ch2/active.aspx?bull_id=435390'}
+        # Real county pages repeat article title in <title> above long navigation.
+        navigation=''.join(f'<li>選單項目 {i}</li>' for i in range(150))
+        future=f'{self.d.year-1911}/{self.d.month:02}/{self.d.day:02}'
+        body=(f'<html><head><title>{title}-彰化縣政府</title></head>'
+              f'<body>{navigation}<h2>{title}</h2><p>發布日期</p>'
+              f'<p>115/01/01～115/12/31</p><p>活動日期</p>'
+              f'<p>{future}～{future}</p></body></html>').encode()
+        candidate,reason=region.build_candidate(rec,body,src,self.parser,self.stamp)
+        self.assertIsNone(reason,reason)
+        self.assertEqual(candidate['date'],self.d.isoformat())
+        self.assertNotEqual(candidate['date'],'2026-01-01', 'published date is never an event date')
 
     def test_failed_listing_is_unhealthy_and_does_not_produce_candidates(self):
         for sid in region.REGIONS:
