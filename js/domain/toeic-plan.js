@@ -117,14 +117,10 @@
         task={...spec,status:'未開始',progress:0};
         rows.push(task);changed=true;added++;return;
       }
-      let touched=false;
-      touched=set(task,'name',spec.name)||touched;
-      touched=set(task,'level',spec.level)||touched;
-      touched=set(task,'parent',spec.parent)||touched;
-      touched=set(task,'weeklyMinutes',spec.weeklyMinutes)||touched;
-      touched=set(task,'start',spec.start)||touched;
-      touched=set(task,'due',spec.due)||touched;
-      if(touched)repaired++;
+      // Once created, existing plans are user-owned. Never silently revert their
+      // titles, dates, parent choices, or weekly-minute settings on startup.
+      // Invalid structures are handled by the existing separate validation layer.
+      return;
     });
 
     const archiveIds=new Set(LEGACY_IDS);

@@ -6,6 +6,8 @@ const ACTIVE_TIMER_KEY='lawLangGoalActiveTimerV1';
 const HISTORY_ANCHOR_KEY='lawLangGoalSystemV92_historyAnchorV1';
 const L={1:'方向／重要目標',2:'階段目標',3:'子任務',4:'具體行動'};
 let recoveryNotice='';
+let persistenceRecoveryBlocked=false;
+let db=null;
 function isUsableData(d){return !!d&&Array.isArray(d.tasks)&&Array.isArray(d.logs)}
 function preparePersistentData(d){
  const normalized=normalize(d);
@@ -20,6 +22,7 @@ function persistEnvelope(d,{
  backup=true,
  allowLogReplacement=false
 }={}){
+ if(persistenceRecoveryBlocked)throw new Error('主資料及備份均無法安全解碼；已進入唯讀保護模式，請先救援原始資料');
  const normalized=DataPersistence.persist(d,{
   prepare:preparePersistentData,
   read:storeGet,
@@ -81,7 +84,12 @@ function historyAnchorSummary(){
 let calendarCursor=new Date(),selected=null,timer=TimerService.empty(),goalPath={long:null,mid:null,short:null,exec:null};
 
 function timerPayload(){return TimerService.payload(timer)}
-function saveActiveTimer(){try{storeSet(ACTIVE_TIMER_KEY,JSON.stringify(timerPayload()))}catch(e){console.warn('active timer persistence failed',e)}}
+function saveActiveTimer(){
+ try{
+  const ok=storeSet(ACTIVE_TIMER_KEY,JSON.stringify(timerPayload()));
+  return !!ok&&(!storeWriteStatus||storeWriteStatus().persistent!==false);
+ }catch(e){console.warn('active timer persistence failed',e);return false}
+}
 function clearActiveTimer(){try{localStorage.removeItem(ACTIVE_TIMER_KEY)}catch(e){try{delete memoryStore[ACTIVE_TIMER_KEY]}catch(_){}}}
 function restoreActiveTimer(){
  try{
@@ -160,9 +168,23 @@ function ensureSchoolCalendar(){
 const IDB_NAME='lawLangGoalSystemPersistentV87';
 const IDB_STORE='snapshots';
 function idbOpen(){return new Promise((resolve,reject)=>{try{if(!window.indexedDB)return reject(new Error('IndexedDB unavailable'));const r=indexedDB.open(IDB_NAME,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(IDB_STORE))r.result.createObjectStore(IDB_STORE)};r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)}catch(e){reject(e)}})}
-async function idbMirrorSave(){try{const dbx=await idbOpen();const tx=dbx.transaction(IDB_STORE,'readwrite');tx.objectStore(IDB_STORE).put(storeGet(KEY)||'',KEY);await new Promise((res,rej)=>{tx.oncomplete=res;tx.onerror=()=>rej(tx.error)});dbx.close()}catch(e){}}
+async function idbMirrorSave(){
+ // A missing/corrupt primary or read-only recovery must never poison the last IDB mirror.
+ if(persistenceRecoveryBlocked)return false;
+ const raw=storeGet(KEY);
+ if(!raw||!tryReadCandidate(raw,'idb-mirror'))return false;
+ let mirror=null;
+ try{
+  mirror=await idbOpen();
+  const tx=mirror.transaction(IDB_STORE,'readwrite');
+  tx.objectStore(IDB_STORE).put(raw,KEY);
+  await new Promise((res,rej)=>{tx.oncomplete=res;tx.onerror=()=>rej(tx.error);tx.onabort=()=>rej(tx.error)});
+  return true;
+ }catch(e){console.warn('IDB mirror write failed',e);return false}
+ finally{try{mirror?.close()}catch(_){}}
+}
 const THU_1151_LAW_PLAN_MARKER='thuPersonalMigration:1151-law-preview:v2';
-let db=loadDB();
+db=loadDB();
 ensureHistoryAnchor();
 removeLegacyStandaloneToeicGoals();
 ensureSchoolCalendar();
@@ -327,16 +349,41 @@ function loadDB(){
   return found.data;
  }
 
- const fresh=normalize(seed());
- try{persistEnvelope(fresh,{backup:false,allowLogReplacement:true})}catch(e){
-  storeSet(KEY,JSON.stringify(makeEnvelope(fresh)));
+ // Do not silently replace an unreadable current/backup/legacy dataset with a seed.
+ const storedKeys=[KEY,...BACKUP_KEYS,...legacyStorageKeys()];
+ if(storedKeys.some(k=>storeGet(k)!==null)){
+  persistenceRecoveryBlocked=true;
+  recoveryNotice='偵測到無法解碼的既有資料；已禁止儲存與自動清除，請先使用資料救援檢查器。';
+  console.error('[Goal Manager] read-only recovery mode:',recoveryNotice);
+  return normalize(seed()); // Temporary in-memory display only; never persisted.
  }
+ const fresh=normalize(seed());
+ try{persistEnvelope(fresh,{backup:false,allowLogReplacement:true})}
+ catch(e){console.error('Fresh dataset could not be persisted',e)}
  return fresh;
 }
 async function clearApplicationCaches(){
  let removed=0;
- try{if('caches' in window){const keys=await caches.keys();for(const k of keys){try{if(await caches.delete(k))removed++}catch(e){}}}}catch(e){}
- try{if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();for(const r of regs){try{if(await r.unregister())removed++}catch(e){}}}}catch(e){}
+ // CacheStorage and ServiceWorker registrations are origin-wide, not app-wide.
+ try{
+  if('caches' in window){
+   const keys=await caches.keys();
+   for(const key of keys){
+    if(!key.startsWith('thu-goal-personal-v')&&!key.startsWith('law-goal-web-v'))continue;
+    try{if(await caches.delete(key))removed++}catch(e){console.warn('cache deletion failed',e)}
+   }
+  }
+ }catch(e){console.warn('cache inspection failed',e)}
+ try{
+  if('serviceWorker' in navigator){
+   const intendedScope=new URL('./',location.href).href;
+   const regs=await navigator.serviceWorker.getRegistrations();
+   for(const reg of regs){
+    if(reg.scope!==intendedScope)continue;
+    try{if(await reg.unregister())removed++}catch(e){console.warn('SW unregister failed',e)}
+   }
+  }
+ }catch(e){console.warn('SW inspection failed',e)}
  return removed;
 }
 async function clearCacheOnly(){
@@ -347,6 +394,7 @@ async function clearCacheOnly(){
  setTimeout(()=>location.reload(),350);
 }
 function cleanupLegacyStorage(){
+ if(persistenceRecoveryBlocked||!initialPersonalSaveOk)return 0;
  const obsolete=['lawLangGoalSystemV81','lawLangGoalSystemV79','lawLangGoalSystemV78','lawLangGoalSystemV77','lawLangGoalSystemV76','lawLangGoalSystemV75','lawLangGoalSystemV74','lawLangGoalSystemV73','lawLangGoalSystemV72','lawLangGoalSystemV71','lawLangGoalSystemV70','lawLangGoalSystemV69','lawLangGoalSystemV68','lawLangGoalSystemV67','lawLangGoalSystemV66','lawLangGoalSystemV65','lawLangGoalSystemV63','lawLangGoalSystemV62','lawLangGoalSystemV61','lawLangGoalSystemV60','today'+'Queue'];
  let removed=0;for(const k of obsolete){try{if(localStorage.getItem(k)!==null){localStorage.removeItem(k);removed++}}catch(e){}}return removed;
 }
@@ -424,8 +472,9 @@ function ensureThu1151LawPreviewPlan(){
    });
  };
 
- if(storeGet(THU_1151_LAW_PLAN_MARKER)==='1'&&structurallyComplete()){
-   return {applied:false,reason:'already-complete',weeklyTotal:390};
+ // A previously installed plan belongs to the user: do not reset customized hours or dates.
+ if(storeGet(THU_1151_LAW_PLAN_MARKER)==='1'||subjects.every(x=>!!byId(x.sid))){
+   return {applied:false,reason:'existing-plan-preserved',weeklyTotal:390};
  }
 
  if(!stage){
@@ -712,14 +761,30 @@ function renderWeeklyReview(date=todayKey()){
  if(!log||!isCountableActualLog(log)){toast(log?.status==='已刪除'?'這筆紀錄已刪除':'找不到可刪除的實際紀錄');return}
  const impact=isOtherStudyLog(log)?'總讀書時數與其他讀書分析':'完成度與實際時數分析';
  if(!confirm(`確定刪除「${log.name||getTask(log.taskId)?.name||'這筆實際紀錄'}」的 ${Math.max(0,+log.minutes||0)} 分鐘實際投入紀錄？\n\n刪除後將不再計入${impact}，但紀錄可恢復。`))return;
- log.status='已刪除';log.deletedAt=new Date().toISOString();rebuildExecutionPlanActuals();
- save();renderAll();toast('已刪除實際紀錄；相關分析已排除');
+ const oldLogs=db.logs,oldPlans=db.executionPlans;
+ db.logs=oldLogs.map(x=>x===log?{...x,status:'已刪除',deletedAt:new Date().toISOString()}:x);
+ rebuildExecutionPlanActuals();
+ if(!save()){
+  db.logs=oldLogs;db.executionPlans=oldPlans;
+  toast('無法保存刪除狀態；原紀錄已保留');return;
+ }
+ renderAll();toast('已刪除實際紀錄；相關分析已排除');
 }
 function restoreActualLog(id){
  const log=(Array.isArray(db.logs)?db.logs:[]).find(x=>String(x.id)===String(id)&&x.status==='已刪除');
  if(!log){toast('找不到可恢復的紀錄');return}
- log.status='有效';delete log.deletedAt;rebuildExecutionPlanActuals();
- save();renderAll();toast('已恢復實際紀錄；相關分析已重新計入');
+ const oldLogs=db.logs,oldPlans=db.executionPlans;
+ db.logs=oldLogs.map(x=>{
+  if(x!==log)return x;
+  const restored={...x,status:'有效'};
+  delete restored.deletedAt;return restored;
+ });
+ rebuildExecutionPlanActuals();
+ if(!save()){
+  db.logs=oldLogs;db.executionPlans=oldPlans;
+  toast('無法保存還原狀態；原紀錄未變更');return;
+ }
+ renderAll();toast('已恢復實際紀錄；相關分析已重新計入');
 }
 function renderDeletedLogs(){
  const el=document.getElementById('deletedLogs');if(!el)return;
@@ -1018,10 +1083,13 @@ function startFreeStudyTimer(){
   document.getElementById('freeStudyName')?.focus();
   return;
  }
+ const previousTimer=timer;
  timer=TimerService.selectOther(name);
- saveActiveTimer();
+ if(!saveActiveTimer()){
+  timer=previousTimer;toast('自由計時選擇無法保存；請檢查儲存空間');return;
+ }
  renderTimerState();
- startTimer();
+ if(!startTimer())return;
  const input=document.getElementById('freeStudyName');
  if(input)input.value='';
 }
@@ -1032,8 +1100,15 @@ function addOtherStudyLog(){
  if(mins<=0){toast('補登分鐘必須大於 0');return}
  const when=date===todayKey()?new Date():new Date(date+'T12:00:00');
  if(Number.isNaN(when.getTime())){toast('日期格式無效');return}
- db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:null,name,time:when.toISOString(),minutes:mins,actual:true,kind:STUDY_LOG_KIND.OTHER,source:'manual'});
- save();renderAll();toast(`已補登其他讀書 ${mins} 分鐘；不影響目標完成度`);
+ const previousLogs=db.logs;
+ const record={id:'log'+Date.now()+Math.random(),taskId:null,name,time:when.toISOString(),minutes:mins,actual:true,kind:STUDY_LOG_KIND.OTHER,source:'manual'};
+ db.logs=[record,...previousLogs];
+ if(!save()){
+  db.logs=previousLogs;
+  toast('其他讀書補登未保存；已保留原紀錄');
+  return;
+ }
+ renderAll();toast(`已補登其他讀書 ${mins} 分鐘；不影響目標完成度`);
 }
 function timerHasSelection(){return TimerService.hasSelection(timer)}
 
@@ -1058,27 +1133,78 @@ function cancelTodaySelection(){if(timer.running){toast('計時進行中，請�
 function startTodayExecution(id){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中');return}selectTodayExecution(id);startTimer()}
 function useTimer(id){selected=id;timer=TimerService.selectGoal(id,null);saveActiveTimer();document.getElementById('timerTask').textContent=getTask(id)?.name||'';go('today');updateClock();updateTimerButtons();toast('已選擇具體行動，可開始計時')}
 function startTimer(){
- if(!timerHasSelection()){toast('請先選擇具體行動或其他讀書');return}
- if(timer.running){toast('計時已在進行中');return}
- if(timer.kind==='goal'){const t=getTask(timer.id);if(!t){toast('找不到目前執行的具體行動');return}t.status='進行中';save()}
- timer=TimerService.start(timer,Date.now());saveActiveTimer();updateTimerButtons();timerLoop();toast(timer.kind==='other-study'?'已開始自由計時':'已開始計時')
+ if(!timerHasSelection()){toast('請先選擇具體行動或其他讀書');return false}
+ if(timer.running){toast('計時已在進行中');return false}
+ const previousTimer=timer;
+ if(timer.kind==='goal'){
+  const t=getTask(timer.id);
+  if(!t){toast('找不到目前執行的具體行動');return false}
+  const oldStatus=t.status;
+  t.status='進行中';
+  if(!save()){t.status=oldStatus;toast('無法保存目標狀態；未開始計時');return false}
+ }
+ timer=TimerService.start(timer,Date.now());
+ if(!saveActiveTimer()){
+  timer=previousTimer;
+  toast('計時器無法安全保存；未開始計時，請檢查儲存空間');
+  updateTimerButtons();return false;
+ }
+ updateTimerButtons();timerLoop();
+ toast(timer.kind==='other-study'?'已開始自由計時':'已開始計時');
+ return true;
 }
-function pauseTimer(){if(!timer.running){toast('目前沒有進行中的計時');return}timer=TimerService.pause(timer,Date.now());saveActiveTimer();updateClock();updateTimerButtons();toast('計時已暫停')}
+function pauseTimer(){
+ if(!timer.running){toast('目前沒有進行中的計時');return}
+ const previousTimer=timer;
+ timer=TimerService.pause(timer,Date.now());
+ if(!saveActiveTimer()){
+  timer=previousTimer;
+  toast('計時器暫停狀態無法保存；仍維持計時中');
+  updateClock();updateTimerButtons();return;
+ }
+ updateClock();updateTimerButtons();toast('計時已暫停');
+}
 function finishTimer(){
  if(!timerHasSelection()){toast('請先選擇具體行動或其他讀書');return}
- const finished=TimerService.finish(timer,Date.now());timer=finished.timer;
- const mins=finished.minutes;
- if(timer.kind==='other-study'){
-  const name=timer.label||'其他讀書';
-  db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:null,name,time:new Date().toISOString(),minutes:mins,actual:true,kind:STUDY_LOG_KIND.OTHER,source:'timer'});
-  save();timer=TimerService.empty();clearActiveTimer();renderAll();
-  document.getElementById('timerTask').textContent='已記錄其他讀書：'+name;document.getElementById('timerTaskCancel').style.display='none';updateClock();updateTimerButtons();toast(`已記錄其他讀書 ${mins} 分鐘；不影響目標完成度`);return;
+ const finished=TimerService.finish(timer,Date.now());
+ const paused=finished.timer,mins=finished.minutes;
+ const previousLogs=db.logs;
+ const previousPlans=db.executionPlans;
+ if(paused.kind==='other-study'){
+  const name=paused.label||'其他讀書';
+  db.logs=[{id:'log'+Date.now()+Math.random(),taskId:null,name,time:new Date().toISOString(),minutes:mins,actual:true,kind:STUDY_LOG_KIND.OTHER,source:'timer'},...previousLogs];
+  if(!save()){
+   db.logs=previousLogs;
+   timer=paused;saveActiveTimer();renderTimerState();
+   toast('讀書紀錄未保存，計時器已暫停保留；請檢查儲存空間');return;
+  }
+  timer=TimerService.empty();clearActiveTimer();renderAll();
+  document.getElementById('timerTask').textContent='已記錄其他讀書：'+name;
+  document.getElementById('timerTaskCancel').style.display='none';
+  updateClock();updateTimerButtons();toast(`已記錄其他讀書 ${mins} 分鐘；不影響目標完成度`);return;
  }
- const t=getTask(timer.id);if(!t){toast('找不到目前執行的具體行動');return}
- // 舊版相容：若更新前已有進行中的 timer，仍尊重其 planId；新流程不再產生 planId。
- const planId=timer.planId||null;db.logs.unshift({id:'log'+Date.now()+Math.random(),taskId:t.id,name:t.name,time:new Date().toISOString(),minutes:mins,actual:true,planId});
- if(planId){const plan=(db.executionPlans||[]).find(x=>String(x.id)===String(planId));if(plan&&plan.status!=='已取消')Object.assign(plan,ExecutionService.applyActualMinutes(plan,mins,new Date().toISOString()))}
- save();const done=timer.id;timer=TimerService.empty();clearActiveTimer();renderAll();document.getElementById('timerTask').textContent='已記錄：'+(t.name||done);document.getElementById('timerTaskCancel').style.display='none';updateClock();updateTimerButtons();toast(planId?`已記錄 ${mins} 分鐘；本次安排累計已實際 ${db.executionPlans.find(x=>String(x.id)===String(planId))?.actualMinutes||mins} 分鐘`:`已記錄 ${mins} 分鐘；完成度已更新`)
+ const t=getTask(paused.id);
+ if(!t){toast('找不到目前執行的具體行動');return}
+ const planId=paused.planId||null;
+ db.logs=[{id:'log'+Date.now()+Math.random(),taskId:t.id,name:t.name,time:new Date().toISOString(),minutes:mins,actual:true,planId},...previousLogs];
+ if(planId){
+  db.executionPlans=(previousPlans||[]).map(plan=>
+   String(plan.id)===String(planId)&&plan.status!=='已取消'
+    ?{...plan,...ExecutionService.applyActualMinutes(plan,mins,new Date().toISOString())}
+    :plan
+  );
+ }
+ if(!save()){
+  db.logs=previousLogs;db.executionPlans=previousPlans;
+  timer=paused;saveActiveTimer();renderTimerState();
+  toast('目標紀錄未保存，計時器已暫停保留；請檢查儲存空間');return;
+ }
+ const done=paused.id;
+ timer=TimerService.empty();clearActiveTimer();renderAll();
+ document.getElementById('timerTask').textContent='已記錄：'+(t.name||done);
+ document.getElementById('timerTaskCancel').style.display='none';
+ updateClock();updateTimerButtons();
+ toast(planId?`已記錄 ${mins} 分鐘；本次安排累計已實際 ${db.executionPlans.find(x=>String(x.id)===String(planId))?.actualMinutes||mins} 分鐘`:`已記錄 ${mins} 分鐘；完成度已更新`);
 }
 function updateTimerButtons(){const bs=document.querySelectorAll('.timerbtns button'),has=timerHasSelection(),panel=document.getElementById('executionNowPanel');if(panel){panel.classList.toggle('has-selection',has);panel.classList.toggle('is-running',!!timer.running)}if(bs.length<3)return;bs[0].disabled=!!timer.running||!has;bs[1].disabled=!timer.running;bs[2].disabled=!has||timer.elapsed<=0;bs[0].textContent=timer.running?'計時中…':'開始';bs[1].textContent='暫停';bs[2].textContent=has&&timer.elapsed>0?'完成並記錄':'完成'}
 function selectTask(id,focusEdit=false){const t=getTask(id);if(!t)return;selected=id;const chain=ancestors(id);goalPath={long:chain.find(x=>x.level===1)?.id||null,mid:chain.find(x=>x.level===2)?.id||null,short:chain.find(x=>chain.find(y=>y.level===3)?.id===x.id)?.id||chain.find(x=>x.level===3)?.id||null,exec:chain.find(x=>x.level===4)?.id||null};renderTree();updateHubContext();if(focusEdit)openEditModal(id)}
@@ -1103,7 +1229,13 @@ function saveEditModal(){
  const draft={name,parent:newParent};
  if(t.level===3){const st=document.getElementById('mStart')?.value||'',du=document.getElementById('mDue')?.value||'';if(!st||!du){toast('子任務必須設定始期與終期');return}if(st>du){toast('始期不能晚於終期');return}draft.start=st;draft.due=du}
  if(t.level===4){const pp=periodForTask(getTask(newParent));if(!pp?.start||!pp?.due){toast('請先為所屬子任務設定完整期間');return}const n=Math.max(0,+document.getElementById('mWeekly').value||0),u=document.getElementById('mWeeklyUnit').value;draft.weeklyMinutes=u==='hour'?Math.round(n*60):Math.round(n)}
- Object.assign(t,draft);recalcAllStatuses();save();closeEditModal();renderAll();toast('修改已保存；本週時數邏輯已同步全部模組')
+ const before=JSON.parse(JSON.stringify(db));
+ Object.assign(t,draft);recalcAllStatuses();
+ if(!save()){
+  db=before;
+  toast('修改未保存，原目標內容已恢復');return;
+ }
+ closeEditModal();renderAll();toast('修改已保存；本週時數邏輯已同步全部模組')
 }
 
 function wouldCycle(id,parent){let cur=parent,guard=0;while(cur&&guard++<10){if(cur===id)return true;cur=getTask(cur)?.parent}return false}
@@ -1515,34 +1647,51 @@ function saveCalendarManualEvent(){
  const note=(document.getElementById('caNote')?.value||'').trim();
  if(!title){toast('請輸入活動名稱');return}
  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){toast('請選擇日期');return}
- db.calendarEvents=db.calendarEvents||[];
- db.calendarEvents.push({id:'manual-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),type:'manual',date,time,title,location,note,meta:'手動新增'});
- db.calendarSelected=date;calendarCursor=new Date(Number(date.slice(0,4)),Number(date.slice(5,7))-1,1);
- save();closeCalendarAddModal();renderCalendar();
+ const previousEvents=db.calendarEvents,previousSelected=db.calendarSelected,previousCursor=calendarCursor;
+ db.calendarEvents=[...(previousEvents||[]),{id:'manual-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),type:'manual',date,time,title,location,note,meta:'手動新增'}];
+ db.calendarSelected=date;
+ calendarCursor=new Date(Number(date.slice(0,4)),Number(date.slice(5,7))-1,1);
+ if(!save()){
+  db.calendarEvents=previousEvents;db.calendarSelected=previousSelected;calendarCursor=previousCursor;
+  toast('行事曆新增失敗，原資料未變更');return;
+ }
+ closeCalendarAddModal();renderCalendar();
  calendarDetailHTML(`${date.slice(0,4)}/${Number(date.slice(5,7))}/${Number(date.slice(8,10))}`,'已新增活動',calendarEventsForDate(date));
  toast('活動已加入行事曆');
 }
 function deleteCalendarManualEvent(id){
  if(!confirm('確定刪除這個手動新增的活動？'))return;
- db.calendarEvents=(db.calendarEvents||[]).filter(e=>String(e.id)!==String(id));
- save();renderCalendar();
+ const previousEvents=db.calendarEvents;
+ db.calendarEvents=(previousEvents||[]).filter(e=>String(e.id)!==String(id));
+ if(!save()){
+  db.calendarEvents=previousEvents;toast('刪除失敗，原行事已保留');return;
+ }
+ renderCalendar();
  if(db.calendarSelected)showCalendarDay(db.calendarSelected,false);
  toast('活動已刪除');
 }
 function cancelCalendarActivity(id){
- const e=(Array.isArray(db.calendarEvents)?db.calendarEvents:[]).find(x=>String(x.id)===String(id)&&x.type==='activity');
- if(!e)return;
- if(!confirm(`確定取消「${e.title||'這個活動'}」的行事曆安排？`))return;
- e.status='已取消';e.cancelledAt=new Date().toISOString();
- save();renderAll();
+ const previousEvents=Array.isArray(db.calendarEvents)?db.calendarEvents:[];
+ const item=previousEvents.find(x=>String(x.id)===String(id)&&x.type==='activity');
+ if(!item)return;
+ if(!confirm(`確定取消「${item.title||'這個活動'}」的行事曆安排？`))return;
+ db.calendarEvents=previousEvents.map(x=>x===item?{...x,status:'已取消',cancelledAt:new Date().toISOString()}:x);
+ if(!save()){
+  db.calendarEvents=previousEvents;toast('取消安排未保存，原安排已保留');return;
+ }
+ renderAll();
  if(db.calendarSelected)showCalendarDay(db.calendarSelected,false);
  toast('已取消加入行事曆；活動雷達資料仍保留');
 }
 function addActivityToCalendar(id){
  const a=catalogItemById(id);if(!a)return;
- db.calendarEvents=db.calendarEvents||[];
- const active=db.calendarEvents.some(e=>e.type==='activity'&&String(e.refId)===String(id)&&e.status!=='已取消');
- if(active){toast('這個活動已在行事曆中');return}
- db.calendarEvents.push({id:'ce'+Date.now()+Math.random(),type:'activity',refId:id,date:a.date,time:a.time||'',title:a.title,url:activityExternalUrl(a),meta:'已確認',status:'已確認',createdAt:new Date().toISOString()});
- save();renderCalendar();toast('已確認加入行事曆');
+ const previousEvents=Array.isArray(db.calendarEvents)?db.calendarEvents:[];
+ if(previousEvents.some(e=>e.type==='activity'&&String(e.refId)===String(id)&&e.status!=='已取消')){
+  toast('這個活動已在行事曆中');return;
+ }
+ db.calendarEvents=[...previousEvents,{id:'ce'+Date.now()+Math.random(),type:'activity',refId:id,date:a.date,time:a.time||'',title:a.title,url:activityExternalUrl(a),meta:'已確認',status:'已確認',createdAt:new Date().toISOString()}];
+ if(!save()){
+  db.calendarEvents=previousEvents;toast('加入行事曆失敗，原資料未變更');return;
+ }
+ renderCalendar();toast('已確認加入行事曆');
 }
