@@ -215,15 +215,30 @@ function renderActivities(){
   list.innerHTML=Object.entries(pageGroups).filter(([,items])=>items.length).map(([level,items])=>`<section class="activity-group circle${level}"><div class="activity-group-head"><div class="activity-group-title"><i></i>${activityCircleLabel(level)}</div><small>${level==='1'?'最低執行成本':level==='2'?'台中可直接行動':level==='3'?'中部可行動機會':'全國機會'}</small></div><div class="list">${items.map(a=>activityCardHTML(a,today)).join('')}</div></section>`).join('');
   renderActivityPagination(arr.length);renderActivityReferences();
 }
-function ensureActivityReviewDisclosureStyle(){
- if(document.getElementById('activityReviewDisclosureStyle'))return;
- const style=document.createElement('style');style.id='activityReviewDisclosureStyle';
- style.textContent='.activity-review-disclosure{margin-top:14px;border:1px solid rgba(89,106,133,.18);border-radius:16px;background:rgba(255,255,255,.35);overflow:hidden}.activity-review-disclosure>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;font-weight:800}.activity-review-disclosure>summary::-webkit-details-marker{display:none}.activity-review-disclosure>summary small{font-weight:500;color:var(--muted,#6f7782);text-align:right}.activity-review-list{padding:0 12px 12px}.activity-review-list .reference-item{margin-top:8px}@media(max-width:520px){.activity-review-disclosure>summary{align-items:flex-start;flex-direction:column}.activity-review-disclosure>summary small{text-align:left}}';
- document.head.appendChild(style);
+/* GM-REVIEW-COMPACT-20261008: read-only five-at-a-time source-review journal.
+   Only the presentation is paginated; neither source rows nor local records change. */
+const ACTIVITY_REVIEW_PAGE_SIZE=5;
+let activityReviewVisibleCount=ACTIVITY_REVIEW_PAGE_SIZE;
+function activityReviewRowHTML(a){
+ const review=RadarPolicy.activityReviewState(a);
+ const lastSeen=String(a.lastSeen||a.fetchedAt||a.updatedAt||'').slice(0,10);
+ const missCount=Math.max(0,Number(a.missCount||0));
+ const age=lastSeen?'最後確認 '+esc(lastSeen):'最後確認未記錄';
+ const misses=missCount?` · 缺失 ${missCount} 次`:' · 待核對來源';
+ const source=esc(a.source||a.organizer||'官方來源');
+ const url=activityExternalUrl(a);
+ const sourceLink=url
+   ?`<a class="activity-review-source" href="${esc(safeExternalUrl(url))}" target="_blank" rel="noopener noreferrer" aria-label="查看${esc(a.title||'活動')}的官方來源">來源 ↗</a>`
+   :'<span class="activity-review-source unavailable">無來源連結</span>';
+ return `<div class="activity-review-compact-row">
+    <div class="activity-review-compact-main"><b>${esc(a.title||'未命名活動')}</b><small>${age}${misses} · ${source}</small></div>
+    ${sourceLink}
+    <details class="activity-review-why"><summary>複核原因</summary><p>${esc(review.reason||'來源尚待再次確認，暫不列入推薦。')}</p></details>
+  </div>`;
 }
 function renderActivityReferences(){
- ensureActivityReviewDisclosureStyle();
  const box=document.getElementById('activityReferences');if(!box)return;
+ const wasOpen=!!box.querySelector('.activity-review-disclosure')?.open;
  const refs=activityStore().filter(a=>a.kind==='reference'&&activityExternalUrl(a));
  const review=activityStore().filter(a=>RadarPolicy.activityReviewState(a).blocked);
  const summary=activityReviewSummary();
@@ -231,8 +246,23 @@ function renderActivityReferences(){
    ?`${review.length} 項（本機資料，遠端尚未核對）`
    :`${review.length} 項（本輪來源 ${summary.latest} · 本機額外保留 ${summary.retained}）`;
  const refHTML=refs.length?`<div class="reference-title">📚 相關計畫資料（不列入可直接參加活動）</div>`+refs.map(a=>`<div class="reference-item"><div><b>${esc(a.title)}</b><small>${esc(a.statusText||'參考資料')} · ${esc(a.source||'官方來源')}</small></div><a class="btn" href="${esc(safeExternalUrl(activityExternalUrl(a)))}" target="_blank" rel="noopener noreferrer">查看官方資訊</a></div>`).join(''):'';
- const reviewHTML=review.length?`<details class="activity-review-disclosure"><summary><span>⚠ 來源待複核</span><small>${reviewDescription} · 暫不列入推薦 · 點擊展開</small></summary><div class="activity-review-list">${review.map(a=>{const state=RadarPolicy.activityReviewState(a);return `<div class="reference-item"><div><b>${esc(a.title)}</b><small>${esc(state.reason)} · ${esc(a.source||a.organizer||'官方來源')}</small></div>${activityExternalUrl(a)?`<a class="btn" href="${esc(safeExternalUrl(activityExternalUrl(a)))}" target="_blank" rel="noopener noreferrer">查看來源</a>`:''}</div>`}).join('')}</div></details>`:'';
+ const visibleCount=Math.min(review.length,activityReviewVisibleCount);
+ const visible=review.slice(0,visibleCount).map(activityReviewRowHTML).join('');
+ const remaining=review.length-visibleCount;
+ const more=remaining>0
+   ?`<button id="activityReviewMore" class="activity-review-more" type="button" onclick="activityShowMoreReviews()">再顯示 ${Math.min(ACTIVITY_REVIEW_PAGE_SIZE,remaining)} 項 ↓</button>`:'';
+ const reviewHTML=review.length?`<details class="activity-review-disclosure"><summary><span>來源待複核</span><small>${reviewDescription} · 暫不列入推薦 · 點擊展開</small></summary>
+   <div class="activity-review-list"><p class="activity-review-context">來源尚待再次確認，暫不列入推薦；保留來源與最後確認紀錄。</p>
+   ${visible}<div class="activity-review-footer"><small>已顯示 ${visibleCount}/${review.length} 項</small>${more}</div></div>
+   </details>`:'';
  box.innerHTML=refHTML+reviewHTML;
+ const disclosure=box.querySelector('.activity-review-disclosure');
+ if(disclosure&&wasOpen)disclosure.open=true;
+}
+function activityShowMoreReviews(){
+ activityReviewVisibleCount+=ACTIVITY_REVIEW_PAGE_SIZE;
+ renderActivityReferences();
+ document.getElementById('activityReviewMore')?.focus?.({preventScroll:true});
 }
 function activityResetFilters(){['activitySearch'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});['activityScope','activityType','activityFitTier'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='全部'});activityPage=1;renderActivities()}
 
