@@ -200,10 +200,10 @@ textarea{min-height:104px}
 }
 .bottom-nav button{min-height:52px;color:var(--gm-text-secondary)!important}
 .bottom-nav button.active{color:var(--gm-primary)!important}
-html[data-density="comfortable"] .panel{padding:var(--gm-space-6)!important}
+
 html[data-density="comfortable"] .list{gap:var(--gm-space-4)!important}
 html[data-density="compact"] body{font-size:15px!important}
-html[data-density="compact"] .panel{padding:var(--gm-space-4)!important}
+
 html[data-reduced-motion="true"] *,html[data-reduced-motion="true"] *::before,html[data-reduced-motion="true"] *::after{
   scroll-behavior:auto!important;
   transition-duration:.01ms!important;
@@ -213,7 +213,7 @@ html[data-reduced-motion="true"] *,html[data-reduced-motion="true"] *::before,ht
 @media(max-width:700px){
   .app{padding:var(--gm-space-4) var(--gm-space-4) calc(98px + env(safe-area-inset-bottom))!important}
   .panel{padding:var(--gm-space-4)!important}
-  html[data-density="comfortable"] .panel{padding:var(--gm-space-5)!important}
+
   .overview-head h2,.stats-hero h2,.goalnav-head h2,.calendar-hero h2{font-size:24px!important}
   .section-title h2,.panel>h2,.settings-head h2{font-size:19px!important}
   .big{font-size:30px!important}
@@ -885,15 +885,17 @@ html[data-reduced-motion="true"] *,html[data-reduced-motion="true"] *::before,ht
   .free-study-quick-row .btn{width:100%}
 }
 
+/* GM-PHASE3-MOBILE-REVIEW-20261008: consolidates existing Phase-3 rules */
 /* GM-VISUAL-PHASE3-20261008-BEGIN: editorial type, compact rhythm, safe mobile UI */
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{letter-spacing:.006em!important}
+.app{position:relative!important}
 body,button,input,select,textarea{font-family:var(--gm-font-sans)!important}
 .home-hero h2,.execution-page-head h2,.goal-page-head h2,
 .stats-hero h2,#calendar .calendar-hero h2,
 #activity .section-title h2,#scholarship .section-title h2{
   color:var(--gm-text)!important;
-  font-size:clamp(25px,3.5vw,29px)!important;
+  font-size:clamp(23px,3.5vw,28px)!important;
   line-height:1.22!important;
   font-weight:700!important;
   letter-spacing:-.025em!important;
@@ -927,8 +929,6 @@ body,button,input,select,textarea{font-family:var(--gm-font-sans)!important}
   letter-spacing:-.035em!important;
 }
 .panel{padding:var(--gm-layout-pad)!important}
-html[data-density="comfortable"] .panel,
-html[data-density="compact"] .panel{padding:var(--gm-layout-pad)!important}
 .card{padding:var(--gm-layout-card)!important}
 .list,.goal-browse-list,.actual-history-groups{gap:var(--gm-layout-gap)!important}
 .view>.panel,.view>.calendar-shell{margin-bottom:var(--gm-layout-gap)!important}
@@ -941,7 +941,7 @@ html[data-density="compact"] .panel{padding:var(--gm-layout-pad)!important}
 .listitem,.goal-result-card,.actual-log-compact-row{
   border-color:var(--gm-line)!important;
 }
-.listitem{padding:11px 13px!important}
+.listitem{padding:10px 12px!important}
 .section-title{gap:10px!important;margin-bottom:13px!important}
 .home-hero,.goal-page-head,.execution-page-head{
   margin-bottom:var(--gm-layout-gap)!important;
@@ -986,6 +986,40 @@ html[data-density="compact"] .panel{padding:var(--gm-layout-pad)!important}
 #activity .filter-control select,#scholarship .filter-control select{
   background:transparent!important;color:var(--gm-text)!important;
 }
+
+/* Phase-3 shared header action: settings is a page-top control on all screens,
+   not a fixed overlay that covers cards while reading. */
+.settings-trigger{
+  position:absolute!important;top:12px!important;right:14px!important;
+  width:42px!important;height:42px!important;z-index:40!important;
+  border:1px solid var(--gm-line)!important;border-radius:13px!important;
+  background:var(--gm-surface-elevated)!important;
+  color:var(--gm-primary-deep)!important;box-shadow:var(--gm-shadow-sm)!important;
+}
+.home-hero>div:first-child,.goal-page-head>div:first-child,
+.execution-page-head>div:first-child{padding-right:50px!important}
+#scholarship>.panel>.section-title:first-child,
+#activity>.panel>.section-title:first-child,
+#stats .stats-hero,#calendar .calendar-hero{padding-right:54px!important}
+
+/* Phase-3 canonical scholarship text: visual styles only. */
+#scholarship .scholarship-action-row{
+  background:var(--gm-surface-elevated)!important;
+  color:var(--gm-text)!important;
+  border-color:var(--gm-line)!important;
+}
+#scholarship .scholarship-action-row .main{min-width:0!important}
+#scholarship .scholarship-action-row .title{
+  color:var(--gm-text)!important;
+  overflow-wrap:break-word!important;
+  word-break:normal!important;
+}
+#scholarship .scholarship-action-row .meta{
+  color:var(--gm-text-secondary)!important;
+  overflow-wrap:break-word!important;
+}
+#scholarship .scholarship-chevron{color:var(--gm-text-muted)!important}
+
 #calendar .calendar-legend,.calendar-detail-head p{color:var(--gm-text-secondary)!important}
 .btn.primary,.btn.gold,#activity .search-submit,
 .other-study-actions .btn.gold,.calendar-detail-head-actions .btn.gold,
@@ -1008,18 +1042,115 @@ select:focus-visible,textarea:focus-visible{outline:3px solid var(--gm-focus)!im
 .bottom-nav button.tap-flash{box-shadow:none!important}
 .bottom-nav button.is-pressed{filter:none!important}
 @media(max-width:700px){
+
+  /* Mobile UI: keep the settings control at the page top, not floating on top
+     of every scholarship/task card when scrolling. */
+  .settings-trigger{top:10px!important;width:40px!important;height:40px!important}
+  #scholarship .section-title{
+    display:flex!important;flex-wrap:wrap!important;
+    justify-content:flex-start!important;align-items:flex-start!important;
+    gap:2px!important;margin-bottom:9px!important;
+  }
+  #scholarship .section-title h2{
+    font-size:23px!important;line-height:1.3!important;
+  }
+  #scholarship .section-title>.muted{
+    display:block!important;flex:0 0 100%!important;
+    margin-top:2px!important;
+    font-size:12px!important;line-height:1.45!important;
+    color:var(--gm-text-secondary)!important;
+  }
+
+  /* Scholarship rows: titles get the entire width; status moves below.
+     Every row remains one button with the original click and screen-reader text. */
+  #scholarship .scholarship-panel{padding:14px!important}
+  #scholarship .activity-filter-row{margin:0 0 6px!important}
+  #scholarship .filter-control{padding:6px 10px!important;border-radius:12px!important}
+  #scholarship .filter-control>span{font-size:11px!important}
+  #scholarship .filter-control select{font-size:14px!important;min-height:44px!important}
+  #scholarship #scholarshipStats{
+    margin:9px 0 12px!important;
+    padding:9px 12px!important;
+    border-radius:12px!important;
+    background:var(--gm-primary-soft)!important;
+    color:var(--gm-text-secondary)!important;
+    font-size:12px!important;line-height:1.45!important;
+  }
+  #scholarship #scholarshipStats b{color:var(--gm-text)!important}
+  #scholarship #scholarshipList{gap:9px!important}
+  #scholarship .scholarship-action-row{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 18px!important;
+    grid-template-areas:'main main' 'badge chevron'!important;
+    column-gap:6px!important;row-gap:7px!important;
+    min-height:0!important;padding:12px 13px!important;
+    align-items:start!important;justify-content:stretch!important;
+    border-radius:14px!important;
+    text-align:left!important;
+  }
+  #scholarship .scholarship-action-row .main{grid-area:main!important;display:block!important;width:100%!important}
+  #scholarship .scholarship-action-row .title{
+    font-size:15px!important;line-height:1.38!important;
+    font-weight:650!important;letter-spacing:0!important;
+  }
+  #scholarship .scholarship-action-row .meta{
+    display:block!important;margin-top:4px!important;
+    font-size:12px!important;line-height:1.4!important;
+  }
+  #scholarship .scholarship-action-row .badge{
+    grid-area:badge!important;justify-self:start!important;
+    padding:4px 9px!important;font-size:11px!important;
+    border-radius:999px!important;font-weight:650!important;
+  }
+  #scholarship .scholarship-chevron{
+    grid-area:chevron!important;align-self:center!important;
+    font-size:19px!important;line-height:1!important;
+  }
+
+  /* Home: status badge shares the first row rather than creating a second
+     padded line beneath the priority item. */
+  #dash .home-focus-panel{padding:14px!important;margin-bottom:12px!important}
+  #dash .home-focus-panel .section-title{margin-bottom:8px!important}
+  #dash .home-focus-panel .section-title h2{font-size:18px!important}
+  #dash .home-focus-panel .decision-item{
+    display:grid!important;
+    grid-template-columns:27px minmax(0,1fr) auto!important;
+    gap:8px!important;align-items:start!important;
+    padding:8px 0!important;
+  }
+  #dash .home-focus-panel .decision-rank{
+    width:27px!important;height:27px!important;margin-top:2px!important;
+    font-size:12px!important;
+  }
+  #dash .home-focus-panel .decision-main{min-width:0!important}
+  #dash .home-focus-panel .decision-main b{
+    font-size:15px!important;line-height:1.4!important;font-weight:650!important;
+  }
+  #dash .home-focus-panel .decision-main small{
+    font-size:12px!important;line-height:1.4!important;margin-top:3px!important;
+  }
+  #dash .home-focus-panel .decision-item>.decision-badge{
+    grid-column:3!important;grid-row:1!important;
+    justify-self:end!important;align-self:start!important;
+    max-width:74px!important;padding:5px 8px!important;
+    font-size:11px!important;white-space:normal!important;text-align:center!important;
+  }
+  #dash .home-focus-panel .home-inline-link{padding-top:6px!important;font-size:12px!important}
+  #dash .home-meta-row{margin-bottom:12px!important}
+  #dash .home-grid-two{gap:11px!important}
+  #dash .dash-exec{gap:8px!important}
+  #dash .dash-exec .btn{min-width:72px!important;padding:0 10px!important;font-size:13px!important}
+  #dash .dash-exec .listitem{padding:10px!important}
   .app{padding:12px 14px calc(86px + env(safe-area-inset-bottom))!important}
   .view{min-width:0;padding-bottom:10px!important}
   .view>.panel{width:100%!important;margin-left:0!important;margin-right:0!important}
-  .panel{padding:16px!important}
-  html[data-density="comfortable"] .panel{padding:17px!important}
-  html[data-density="compact"] .panel{padding:13px!important}
+  .panel{padding:clamp(12px,calc(var(--gm-layout-pad) - 3px),17px)!important}
   .card{padding:12px!important}
   .view>.panel,.view>.calendar-shell{margin-bottom:12px!important}
   .home-hero,.goal-page-head,.execution-page-head{margin-top:1px!important}
   .home-metrics{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
-  .home-metric{min-height:93px!important;padding:10px!important}
-  .home-metric b{font-size:clamp(20px,5.8vw,27px)!important}
+  .home-metric{min-height:83px!important;padding:9px!important}
+  .home-metric b{font-size:clamp(20px,5.6vw,26px)!important}
   .home-metric small{font-size:11px!important}
   .home-meta-row>div{gap:6px!important;padding:9px 10px!important}
   .home-meta-row b{font-size:15px!important}
