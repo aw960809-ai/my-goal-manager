@@ -1,11 +1,13 @@
 {
   "meta": {
-    "updatedAt": "2026-10-02T07:05:01.120520+00:00",
+    "updatedAt": "2026-10-08T05:49:56.533477+00:00",
     "sources": 5,
-    "events": 47,
-    "ok": 18,
-    "failed": 0,
-    "errors": [],
+    "events": 42,
+    "ok": 15,
+    "failed": 1,
+    "errors": [
+      "curl: (28) SSL connection timeout"
+    ],
     "generator": "V96.6.11.1.1 Multi-Source AutoFetch + Activity Radar",
     "sourcePolicy": "政府資訊為主；東海官方活動為活動核心；獎學金獨立資料集合與獨立判斷",
     "scholarships": 7,
@@ -13,16 +15,16 @@
     "healthySources": 5,
     "failedSources": 0,
     "rejectedItems": 0,
-    "fetchFailedItems": 0,
-    "skippedPast": 14,
-    "fitFiltered": 30,
+    "fetchFailedItems": 1,
+    "skippedPast": 12,
+    "fitFiltered": 29,
     "semanticDuplicates": 0,
-    "retiredThisRun": 0,
+    "retiredThisRun": 9,
     "revivedThisRun": 0,
-    "archiveCount": 17,
+    "archiveCount": 26,
     "retainedOnFailure": 0,
-    "carriedMissing": 23,
-    "needsReview": 21,
+    "carriedMissing": 21,
+    "needsReview": 14,
     "lifecyclePolicy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "events": [
@@ -132,6 +134,1125 @@
       "sourcePriority": "core"
     },
     {
+      "id": "auto-thu-2026100008",
+      "title": "東海大學青年創業實戰培訓微學分系列學程",
+      "date": "2026-10-20",
+      "time": "",
+      "scope": "東海校內",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=1&conference_code=2026100008",
+      "keywords": "東海大學青年創業實戰培訓微學分系列學程 東海大學 創新創業中心 學術活動 教職員，費用：0；學生，費用：0 學術／講座 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 創新創業中心；活動日 2026-10-20；截止 2026-12-31",
+      "government": false,
+      "deadline": "2026-12-31",
+      "eventEndDate": "2026-10-20",
+      "location": "第二校區產學中心-ICE208",
+      "organizer": "創新創業中心",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026100008",
+        "fetchedAt": "2026-10-08T05:48:29.525897+00:00"
+      },
+      "fitScore": 76,
+      "fitTier": "高適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "青少年／營隊／教學+34",
+        "職涯／實習+20",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "青少年／營隊／教學",
+        "職涯／實習"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-10-08T05:49:56.532833+00:00",
+      "lastSeen": "2026-10-08T05:49:56.532833+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic"
+    },
+    {
+      "id": "auto-thu-2026090065",
+      "title": "【富邦產險】企業參訪暨實習說明會(參加抽全聯禮券、星巴克兌換券、環保袋、東海專屬禮品....)",
+      "date": "2026-10-29",
+      "time": "",
+      "scope": "東海校內",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=1&conference_code=2026090065",
+      "keywords": "【富邦產險】企業參訪暨實習說明會(參加抽全聯禮券、星巴克兌換券、環保袋、東海專屬禮品....) 東海大學 實習與學生成就中心 教育活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 實習與學生成就中心；活動日 2026-10-29；截止 2026-10-19",
+      "government": false,
+      "deadline": "2026-10-19",
+      "eventEndDate": "2026-10-29",
+      "location": "富邦產險台中分公司",
+      "organizer": "實習與學生成就中心",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090065",
+        "fetchedAt": "2026-10-08T05:48:30.548792+00:00"
+      },
+      "fitScore": 67,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "職涯／實習+20",
+        "直接連結法律學習目標+15",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "職涯／實習"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-21T06:32:35.703147+00:00",
+      "lastSeen": "2026-10-08T05:49:56.532833+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic"
+    },
+    {
+      "id": "auto-thu-2026100015",
+      "title": "【行政講堂】10/15(四)，新南向教育政策—印度概述，陳立穎 (教育部國際及兩岸教育司 副司長)",
+      "date": "2026-10-15",
+      "time": "",
+      "scope": "東海校內",
+      "type": "語言／國際",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=2&conference_code=2026100015",
+      "keywords": "【行政講堂】10/15(四)，新南向教育政策—印度概述，陳立穎 (教育部國際及兩岸教育司 副司長) 東海大學 行政管理暨政策學系 學術活動 教職員，費用：0；學生，費用：0 學術／講座 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 行政管理暨政策學系；活動日 2026-10-15；截止 2026-10-15",
+      "government": false,
+      "deadline": "2026-10-15",
+      "eventEndDate": "2026-10-15",
+      "location": "",
+      "organizer": "行政管理暨政策學系",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026100015",
+        "fetchedAt": "2026-10-08T05:48:35.601312+00:00"
+      },
+      "fitScore": 52,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "語言／國際／海外+40",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "語言／國際／海外"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-10-08T05:49:56.532833+00:00",
+      "lastSeen": "2026-10-08T05:49:56.532833+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic"
+    },
+    {
+      "id": "auto-thu-2026090067",
+      "title": "【企業人才招募暨產業趨勢分享會】裕隆集團-新鑫股份有限公司",
+      "date": "2026-10-13",
+      "time": "",
+      "scope": "東海校內",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=3&conference_code=2026090067",
+      "keywords": "【企業人才招募暨產業趨勢分享會】裕隆集團-新鑫股份有限公司 東海大學 實習與學生成就中心 教育活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 實習與學生成就中心；活動日 2026-10-13；截止 2026-10-12",
+      "government": false,
+      "deadline": "2026-10-12",
+      "eventEndDate": "2026-10-13",
+      "location": "",
+      "organizer": "實習與學生成就中心",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090067",
+        "fetchedAt": "2026-10-08T05:48:37.430133+00:00"
+      },
+      "fitScore": 50,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "職涯／實習+5",
+        "直接連結法律學習目標+15",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "職涯／實習"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
+      "lastSeen": "2026-10-08T05:49:56.532833+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic"
+    },
+    {
+      "id": "auto-thu-2026060032",
+      "title": "讓情緒被聽見❤️AI虛擬療癒師洋洋2.0",
+      "date": "2026-10-07",
+      "time": "",
+      "scope": "東海校內",
+      "type": "法律／學術",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=3&conference_code=2026060032",
+      "keywords": "讓情緒被聽見❤️AI虛擬療癒師洋洋2.0 東海大學 健康暨諮商中心 其他活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 健康暨諮商中心；活動日 2026-10-07；截止 2026-12-23",
+      "government": false,
+      "deadline": "2026-12-23",
+      "eventEndDate": "",
+      "location": "",
+      "organizer": "健康暨諮商中心",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026060032",
+        "fetchedAt": "2026-10-08T05:48:38.303475+00:00"
+      },
+      "fitScore": 51,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "通用能力／AI工具+14",
+        "直接連結法律學習目標+15",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "通用能力／AI工具"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-16T06:07:49.530864+00:00",
+      "lastSeen": "2026-10-08T05:49:56.532833+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic"
+    },
+    {
+      "id": "auto-thu-2026100010",
+      "title": "從國際學生證到朝聖者護照",
+      "date": "2026-11-11",
+      "time": "",
+      "scope": "東海校內",
+      "type": "語言／國際",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026100010",
+      "keywords": "從國際學生證到朝聖者護照 東海大學 創新創業中心 學術活動 教職員，費用：0；學生，費用：0；校外人士，費用：0 學術／講座 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 創新創業中心；活動日 2026-11-11；截止 2026-11-11",
+      "government": false,
+      "deadline": "2026-11-11",
+      "eventEndDate": "2026-11-11",
+      "location": "",
+      "organizer": "創新創業中心",
+      "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026100010",
+        "fetchedAt": "2026-10-08T05:48:42.610174+00:00"
+      },
+      "fitScore": 57,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "語言／國際／海外+40",
+        "職涯／實習+5",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "語言／國際／海外",
+        "職涯／實習"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-10-08T05:49:56.532833+00:00",
+      "lastSeen": "2026-10-08T05:49:56.532833+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic"
+    },
+    {
+      "id": "auto-thu-2026100009",
+      "title": "知法.懂法-你該知道的法律問題",
+      "date": "2026-10-20",
+      "time": "",
+      "scope": "東海校內",
+      "type": "法律／學術",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026100009",
+      "keywords": "知法.懂法-你該知道的法律問題 東海大學 課外活動暨學生發展組 教育活動 學生，費用：0；說明：僅限社團、系學會成員 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 課外活動暨學生發展組；活動日 2026-10-20；截止 2026-10-18",
+      "government": false,
+      "deadline": "2026-10-18",
+      "eventEndDate": "2026-10-20",
+      "location": "",
+      "organizer": "課外活動暨學生發展組",
+      "audience": "學生，費用：0；說明：僅限社團、系學會成員",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026100009",
+        "fetchedAt": "2026-10-08T05:48:43.967536+00:00"
+      },
+      "fitScore": 77,
+      "fitTier": "高適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+42",
+        "青少年／營隊／教學+8",
+        "直接連結法律學習目標+15",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "青少年／營隊／教學"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-10-08T05:49:56.532833+00:00",
+      "lastSeen": "2026-10-08T05:49:56.532833+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic"
+    },
+    {
+      "id": "auto-thu-2026090055",
+      "title": "115-1職涯諮詢、履歷自傳健診、面試技巧–個人諮詢 (10月場次開放預約)",
+      "date": "2026-10-05",
+      "time": "",
+      "scope": "東海校內",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026090055",
+      "keywords": "115-1職涯諮詢、履歷自傳健診、面試技巧–個人諮詢 (10月場次開放預約) 東海大學 實習與學生成就中心 教育活動 學生，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 實習與學生成就中心；活動日 2026-10-05–2026-10-30；截止 2026-10-30",
+      "government": false,
+      "deadline": "2026-10-30",
+      "eventEndDate": "2026-10-30",
+      "location": "",
+      "organizer": "實習與學生成就中心",
+      "audience": "學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090055",
+        "fetchedAt": "2026-10-08T05:48:44.982139+00:00"
+      },
+      "fitScore": 65,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "職涯／實習+20",
+        "直接連結法律學習目標+15",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "職涯／實習"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-18T06:01:08.427013+00:00",
+      "lastSeen": "2026-10-08T05:49:56.532833+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic"
+    },
+    {
+      "id": "auto-thu-2026090091",
+      "title": "2026 黃騰輝校友生涯演講-「我與小王子，和東海玫瑰園的旅程」",
+      "date": "2026-11-12",
+      "time": "",
+      "scope": "東海校內",
+      "type": "法律／學術",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026090091",
+      "keywords": "2026 黃騰輝校友生涯演講-「我與小王子，和東海玫瑰園的旅程」 東海大學 實習與學生成就中心 藝文活動 教職員，費用：0；學生，費用：0；校外人士，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 實習與學生成就中心；活動日 2026-11-12；截止 2026-11-12",
+      "government": false,
+      "deadline": "2026-11-12",
+      "eventEndDate": "2026-11-12",
+      "location": "良鑑廳",
+      "organizer": "實習與學生成就中心",
+      "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090091",
+        "fetchedAt": "2026-10-08T05:48:48.821987+00:00"
+      },
+      "fitScore": 67,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "職涯／實習+20",
+        "直接連結法律學習目標+15",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "職涯／實習"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-10-01T07:15:37.685597+00:00",
+      "lastSeen": "2026-10-08T05:49:56.532833+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic"
+    },
+    {
+      "id": "auto-thu-2026090041",
+      "title": "【企業實習人才招募說明會】2027台灣美光學期實習",
+      "date": "2026-10-15",
+      "time": "",
+      "scope": "東海校內",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026090041",
+      "keywords": "【企業實習人才招募說明會】2027台灣美光學期實習 東海大學 實習與學生成就中心 教育活動 教職員，費用：0；學生，費用：0；校外人士，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 實習與學生成就中心；活動日 2026-10-15；截止 2026-10-14",
+      "government": false,
+      "deadline": "2026-10-14",
+      "eventEndDate": "2026-10-15",
+      "location": "求真廳",
+      "organizer": "實習與學生成就中心",
+      "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090041",
+        "fetchedAt": "2026-10-08T05:48:49.863789+00:00"
+      },
+      "fitScore": 67,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "職涯／實習+20",
+        "直接連結法律學習目標+15",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "職涯／實習"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-14T06:24:52.182789+00:00",
+      "lastSeen": "2026-10-08T05:49:56.532833+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic"
+    },
+    {
+      "id": "auto-thu-2026090062",
+      "title": "【企業實習招募說明會】緯創資通股份有限公司(115-2學期實習)",
+      "date": "2026-10-20",
+      "time": "",
+      "scope": "東海校內",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026090062",
+      "keywords": "【企業實習招募說明會】緯創資通股份有限公司(115-2學期實習) 東海大學 實習與學生成就中心 教育活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 實習與學生成就中心；活動日 2026-10-20；截止 2026-10-19",
+      "government": false,
+      "deadline": "2026-10-19",
+      "eventEndDate": "2026-10-20",
+      "location": "",
+      "organizer": "實習與學生成就中心",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090062",
+        "fetchedAt": "2026-10-08T05:48:52.327996+00:00"
+      },
+      "fitScore": 65,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "職涯／實習+20",
+        "直接連結法律學習目標+15",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "職涯／實習"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-21T06:32:35.703147+00:00",
+      "lastSeen": "2026-10-08T05:49:56.532833+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic"
+    },
+    {
+      "id": "auto-tcjob-5634",
+      "title": "◎晴天花藝 × 花藝服務業職場體驗 ◎",
+      "date": "2026-10-22",
+      "time": "09:30",
+      "scope": "台中",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://1catchjob.taichung.gov.tw/detail.aspx?act=5634",
+      "keywords": "◎晴天花藝 × 花藝服務業職場體驗 ◎ 台中 臺中市 青年 職涯 職涯／實習",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "臺中市就業服務一鍵Catch",
+      "statusText": "臺中市就業服務處官方活動；活動日 2026-10-22；截止 2026-10-21",
+      "government": true,
+      "deadline": "2026-10-21",
+      "eventEndDate": "",
+      "location": "",
+      "organizer": "臺中市就業服務處",
+      "audience": "有限制",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "taichung_job",
+        "act": "5634",
+        "fetchedAt": "2026-10-08T05:48:56.558181+00:00"
+      },
+      "fitScore": 44,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第2圈：台中+4",
+        "青少年／營隊／教學+8",
+        "職涯／實習+20",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "青少年／營隊／教學",
+        "職涯／實習"
+      ],
+      "circleLevel": 2,
+      "circleLabel": "台中",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
+      "lastSeen": "2026-10-08T05:49:56.532833+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "taichung_job",
+      "sourceCategories": [
+        "career_internship",
+        "lecture"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 2,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": []
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "category": "career_internship"
+    },
+    {
+      "id": "auto-tcjob-5633",
+      "title": "◎ 走進麥當勞 × 餐飲服務業職場體驗 ◎",
+      "date": "2026-10-19",
+      "time": "09:30",
+      "scope": "台中",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://1catchjob.taichung.gov.tw/detail.aspx?act=5633",
+      "keywords": "◎ 走進麥當勞 × 餐飲服務業職場體驗 ◎ 台中 臺中市 青年 職涯 職涯／實習",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "臺中市就業服務一鍵Catch",
+      "statusText": "臺中市就業服務處官方活動；活動日 2026-10-19；截止 2026-10-16",
+      "government": true,
+      "deadline": "2026-10-16",
+      "eventEndDate": "",
+      "location": "麥當勞-麥當勞-太平中山餐廳（臺中市太平區中山路三段45號）",
+      "organizer": "臺中市就業服務處",
+      "audience": "有限制",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "taichung_job",
+        "act": "5633",
+        "fetchedAt": "2026-10-08T05:48:59.117103+00:00"
+      },
+      "fitScore": 46,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第2圈：台中+4",
+        "青少年／營隊／教學+8",
+        "職涯／實習+20",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "青少年／營隊／教學",
+        "職涯／實習"
+      ],
+      "circleLevel": 2,
+      "circleLabel": "台中",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
+      "lastSeen": "2026-10-08T05:49:56.532833+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "taichung_job",
+      "sourceCategories": [
+        "career_internship",
+        "lecture"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 2,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": []
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "category": "career_internship"
+    },
+    {
+      "id": "auto-tcjob-5632",
+      "title": "◎7-ELEVEN × 零售服務業職場體驗 ◎",
+      "date": "2026-10-12",
+      "time": "09:30",
+      "scope": "台中",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://1catchjob.taichung.gov.tw/detail.aspx?act=5632",
+      "keywords": "◎7-ELEVEN × 零售服務業職場體驗 ◎ 台中 臺中市 青年 職涯 職涯／實習",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "臺中市就業服務一鍵Catch",
+      "statusText": "臺中市就業服務處官方活動；活動日 2026-10-12；截止 2026-10-09",
+      "government": true,
+      "deadline": "2026-10-09",
+      "eventEndDate": "",
+      "location": "",
+      "organizer": "臺中市就業服務處",
+      "audience": "有限制",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "taichung_job",
+        "act": "5632",
+        "fetchedAt": "2026-10-08T05:48:59.884397+00:00"
+      },
+      "fitScore": 44,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第2圈：台中+4",
+        "青少年／營隊／教學+8",
+        "職涯／實習+20",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "青少年／營隊／教學",
+        "職涯／實習"
+      ],
+      "circleLevel": 2,
+      "circleLabel": "台中",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
+      "lastSeen": "2026-10-08T05:49:56.532833+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "taichung_job",
+      "sourceCategories": [
+        "career_internship",
+        "lecture"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 2,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": []
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "category": "career_internship"
+    },
+    {
+      "id": "auto-mofa-wh-portal",
+      "title": "青年度假打工｜外交部官方計畫入口",
+      "date": "",
+      "time": "",
+      "scope": "海外／國際",
+      "type": "語言／國際",
+      "kind": "program",
+      "url": "https://youthtaiwan.mofa.gov.tw/WorkingHoliday/",
+      "keywords": "青年度假打工 海外工作 國際交流 海外生活 外語 澳洲 日本 加拿大 紐西蘭 英國 德國 韓國",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "中華民國外交部｜臺灣青年FUN眼世界",
+      "statusText": "外交部常設青年度假打工官方入口；各國年齡、名額、簽證與保險條件依官方國別資訊",
+      "government": true,
+      "deadline": "",
+      "eventEndDate": "",
+      "location": "海外／依度假打工協定國",
+      "organizer": "中華民國外交部",
+      "audience": "青年；實際年齡與簽證資格依各協定國規定",
+      "openEnded": true,
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "mofa_working_holiday",
+        "fetchedAt": "2026-10-08T05:49:56.521028+00:00"
+      },
+      "fitScore": 94,
+      "fitTier": "高適配",
+      "fitReasons": [
+        "同心圓第4圈：海外／國際+0",
+        "語言／國際／海外+40",
+        "青少年／營隊／教學+34",
+        "直接連結海外／國際經驗目標+18",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "語言／國際／海外",
+        "青少年／營隊／教學"
+      ],
+      "circleLevel": 4,
+      "circleLabel": "海外／國際",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-09T12:50:00.937440+00:00",
+      "lastSeen": "2026-10-08T05:49:56.532833+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "mofa_working_holiday",
+      "sourceCategories": [
+        "international",
+        "career_internship",
+        "youth_program"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 4,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [],
+        "schoolNames": []
+      },
+      "country": "TW",
+      "category": "international"
+    },
+    {
       "id": "auto-thu-2026090017",
       "title": "【東海大學未來永續英雄行動者計畫】行動起點：問題探索工作坊暨說明會(申請教師專業成長活動、終身學習護照及博雅認證)",
       "date": "2026-10-27",
@@ -182,7 +1303,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-17T08:01:17.326390+00:00",
       "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 0,
+      "missCount": 1,
       "needsReview": false,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -258,321 +1379,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-02T07:05:01.119748+00:00",
       "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026090006",
-      "title": "2027【海外實習說明會】-賜昌集團",
-      "date": "2026-10-06",
-      "time": "",
-      "scope": "東海校內",
-      "type": "語言／國際",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=1&conference_code=2026090006",
-      "keywords": "2027【海外實習說明會】-賜昌集團 東海大學 實習與學生成就中心 教育活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 實習與學生成就中心；活動日 2026-10-06；截止 2026-10-05",
-      "government": false,
-      "deadline": "2026-10-05",
-      "eventEndDate": "2026-10-06",
-      "location": "",
-      "organizer": "實習與學生成就中心",
-      "audience": "教職員，費用：0；學生，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026090006",
-        "fetchedAt": "2026-10-02T07:03:23.597876+00:00"
-      },
-      "fitScore": 100,
-      "fitTier": "高適配",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "法律／轉學考+10",
-        "語言／國際／海外+40",
-        "職涯／實習+20",
-        "直接連結海外／國際經驗目標+18",
-        "直接連結法律學習目標+15",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "法律／轉學考",
-        "語言／國際／海外",
-        "職涯／實習"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-18T06:01:08.427013+00:00",
-      "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026090065",
-      "title": "【富邦產險】企業參訪暨實習說明會",
-      "date": "2026-10-29",
-      "time": "",
-      "scope": "東海校內",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=2&conference_code=2026090065",
-      "keywords": "【富邦產險】企業參訪暨實習說明會 東海大學 實習與學生成就中心 教育活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 實習與學生成就中心；活動日 2026-10-29；截止 2026-10-19",
-      "government": false,
-      "deadline": "2026-10-19",
-      "eventEndDate": "2026-10-29",
-      "location": "富邦產險台中分公司",
-      "organizer": "實習與學生成就中心",
-      "audience": "教職員，費用：0；學生，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026090065",
-        "fetchedAt": "2026-10-02T07:03:24.650691+00:00"
-      },
-      "fitScore": 67,
-      "fitTier": "中適配",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "法律／轉學考+10",
-        "職涯／實習+20",
-        "直接連結法律學習目標+15",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "法律／轉學考",
-        "職涯／實習"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-21T06:32:35.703147+00:00",
-      "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026090041",
-      "title": "【企業實習人才招募說明會】2027台灣美光學期實習",
-      "date": "2026-10-15",
-      "time": "",
-      "scope": "東海校內",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=2&conference_code=2026090041",
-      "keywords": "【企業實習人才招募說明會】2027台灣美光學期實習 東海大學 實習與學生成就中心 教育活動 教職員，費用：0；學生，費用：0；校外人士，費用：0 法律／學術 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 實習與學生成就中心；活動日 2026-10-15；截止 2026-10-14",
-      "government": false,
-      "deadline": "2026-10-14",
-      "eventEndDate": "2026-10-15",
-      "location": "求真廳",
-      "organizer": "實習與學生成就中心",
-      "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026090041",
-        "fetchedAt": "2026-10-02T07:03:28.000630+00:00"
-      },
-      "fitScore": 67,
-      "fitTier": "中適配",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "法律／轉學考+10",
-        "職涯／實習+20",
-        "直接連結法律學習目標+15",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "法律／轉學考",
-        "職涯／實習"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-14T06:24:52.182789+00:00",
-      "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026090091",
-      "title": "2026 傑出校友生涯典範演講-黃騰輝校友的跨界人生學",
-      "date": "2026-11-12",
-      "time": "",
-      "scope": "東海校內",
-      "type": "法律／學術",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=2&conference_code=2026090091",
-      "keywords": "2026 傑出校友生涯典範演講-黃騰輝校友的跨界人生學 東海大學 實習與學生成就中心 藝文活動 教職員，費用：0；學生，費用：0；校外人士，費用：0 法律／學術 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 實習與學生成就中心；活動日 2026-11-12；截止 2026-11-12",
-      "government": false,
-      "deadline": "2026-11-12",
-      "eventEndDate": "2026-11-12",
-      "location": "良鑑廳",
-      "organizer": "實習與學生成就中心",
-      "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026090091",
-        "fetchedAt": "2026-10-02T07:03:29.128161+00:00"
-      },
-      "fitScore": 67,
-      "fitTier": "中適配",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "法律／轉學考+10",
-        "職涯／實習+20",
-        "直接連結法律學習目標+15",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "法律／轉學考",
-        "職涯／實習"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-10-01T07:15:37.685597+00:00",
-      "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 0,
+      "missCount": 1,
       "needsReview": false,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -649,7 +1456,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-01T07:15:37.685597+00:00",
       "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 0,
+      "missCount": 1,
       "needsReview": false,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -725,7 +1532,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
       "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 0,
+      "missCount": 1,
       "needsReview": false,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -801,7 +1608,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-01T07:15:37.685597+00:00",
       "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 0,
+      "missCount": 1,
       "needsReview": false,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -877,7 +1684,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-30T06:49:51.580785+00:00",
       "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 0,
+      "missCount": 1,
       "needsReview": false,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -950,590 +1757,6 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-30T06:49:51.580785+00:00",
       "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026060032",
-      "title": "讓情緒被聽見❤️AI虛擬療癒師洋洋2.0",
-      "date": "2026-09-30",
-      "time": "",
-      "scope": "東海校內",
-      "type": "法律／學術",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026060032",
-      "keywords": "讓情緒被聽見❤️AI虛擬療癒師洋洋2.0 東海大學 健康暨諮商中心 其他活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 健康暨諮商中心；活動日 2026-09-30；截止 2026-12-23",
-      "government": false,
-      "deadline": "2026-12-23",
-      "eventEndDate": "",
-      "location": "",
-      "organizer": "健康暨諮商中心",
-      "audience": "教職員，費用：0；學生，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026060032",
-        "fetchedAt": "2026-10-02T07:03:42.770093+00:00"
-      },
-      "fitScore": 51,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "法律／轉學考+10",
-        "通用能力／AI工具+14",
-        "直接連結法律學習目標+15",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "法律／轉學考",
-        "通用能力／AI工具"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-16T06:07:49.530864+00:00",
-      "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026090062",
-      "title": "【企業實習招募說明會】緯創資通股份有限公司(115-2學期實習)",
-      "date": "2026-10-20",
-      "time": "",
-      "scope": "東海校內",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026090062",
-      "keywords": "【企業實習招募說明會】緯創資通股份有限公司(115-2學期實習) 東海大學 實習與學生成就中心 教育活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 實習與學生成就中心；活動日 2026-10-20；截止 2026-10-19",
-      "government": false,
-      "deadline": "2026-10-19",
-      "eventEndDate": "2026-10-20",
-      "location": "",
-      "organizer": "實習與學生成就中心",
-      "audience": "教職員，費用：0；學生，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026090062",
-        "fetchedAt": "2026-10-02T07:03:46.599507+00:00"
-      },
-      "fitScore": 65,
-      "fitTier": "中適配",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "法律／轉學考+10",
-        "職涯／實習+20",
-        "直接連結法律學習目標+15",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "法律／轉學考",
-        "職涯／實習"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-21T06:32:35.703147+00:00",
-      "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026090055",
-      "title": "115-1職涯諮詢、履歷自傳健診、面試技巧–個人諮詢 (10月場次開放預約)",
-      "date": "2026-10-05",
-      "time": "",
-      "scope": "東海校內",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026090055",
-      "keywords": "115-1職涯諮詢、履歷自傳健診、面試技巧–個人諮詢 (10月場次開放預約) 東海大學 實習與學生成就中心 教育活動 學生，費用：0 法律／學術 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 實習與學生成就中心；活動日 2026-10-05–2026-10-30；截止 2026-10-30",
-      "government": false,
-      "deadline": "2026-10-30",
-      "eventEndDate": "2026-10-30",
-      "location": "",
-      "organizer": "實習與學生成就中心",
-      "audience": "學生，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026090055",
-        "fetchedAt": "2026-10-02T07:03:48.418678+00:00"
-      },
-      "fitScore": 65,
-      "fitTier": "中適配",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "法律／轉學考+10",
-        "職涯／實習+20",
-        "直接連結法律學習目標+15",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "法律／轉學考",
-        "職涯／實習"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-18T06:01:08.427013+00:00",
-      "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-tcjob-5634",
-      "title": "◎晴天花藝 × 花藝服務業職場體驗 ◎",
-      "date": "2026-10-22",
-      "time": "09:30",
-      "scope": "台中",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://1catchjob.taichung.gov.tw/detail.aspx?act=5634",
-      "keywords": "◎晴天花藝 × 花藝服務業職場體驗 ◎ 台中 臺中市 青年 職涯 職涯／實習",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "臺中市就業服務一鍵Catch",
-      "statusText": "臺中市就業服務處官方活動；活動日 2026-10-22；截止 2026-10-21",
-      "government": true,
-      "deadline": "2026-10-21",
-      "eventEndDate": "",
-      "location": "",
-      "organizer": "臺中市就業服務處",
-      "audience": "有限制",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "taichung_job",
-        "act": "5634",
-        "fetchedAt": "2026-10-02T07:03:53.640034+00:00"
-      },
-      "fitScore": 44,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第2圈：台中+4",
-        "青少年／營隊／教學+8",
-        "職涯／實習+20",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "青少年／營隊／教學",
-        "職涯／實習"
-      ],
-      "circleLevel": 2,
-      "circleLabel": "台中",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
-      "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "taichung_job",
-      "sourceCategories": [
-        "career_internship",
-        "lecture"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 2,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": []
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "category": "career_internship"
-    },
-    {
-      "id": "auto-tcjob-5633",
-      "title": "◎ 走進麥當勞 × 餐飲服務業職場體驗 ◎",
-      "date": "2026-10-19",
-      "time": "09:30",
-      "scope": "台中",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://1catchjob.taichung.gov.tw/detail.aspx?act=5633",
-      "keywords": "◎ 走進麥當勞 × 餐飲服務業職場體驗 ◎ 台中 臺中市 青年 職涯 職涯／實習",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "臺中市就業服務一鍵Catch",
-      "statusText": "臺中市就業服務處官方活動；活動日 2026-10-19；截止 2026-10-16",
-      "government": true,
-      "deadline": "2026-10-16",
-      "eventEndDate": "",
-      "location": "麥當勞-麥當勞-太平中山餐廳（臺中市太平區中山路三段45號）",
-      "organizer": "臺中市就業服務處",
-      "audience": "有限制",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "taichung_job",
-        "act": "5633",
-        "fetchedAt": "2026-10-02T07:03:57.103651+00:00"
-      },
-      "fitScore": 46,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第2圈：台中+4",
-        "青少年／營隊／教學+8",
-        "職涯／實習+20",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "青少年／營隊／教學",
-        "職涯／實習"
-      ],
-      "circleLevel": 2,
-      "circleLabel": "台中",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
-      "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "taichung_job",
-      "sourceCategories": [
-        "career_internship",
-        "lecture"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 2,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": []
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "category": "career_internship"
-    },
-    {
-      "id": "auto-tcjob-5632",
-      "title": "◎7-ELEVEN × 零售服務業職場體驗 ◎",
-      "date": "2026-10-12",
-      "time": "09:30",
-      "scope": "台中",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://1catchjob.taichung.gov.tw/detail.aspx?act=5632",
-      "keywords": "◎7-ELEVEN × 零售服務業職場體驗 ◎ 台中 臺中市 青年 職涯 職涯／實習",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "臺中市就業服務一鍵Catch",
-      "statusText": "臺中市就業服務處官方活動；活動日 2026-10-12；截止 2026-10-09",
-      "government": true,
-      "deadline": "2026-10-09",
-      "eventEndDate": "",
-      "location": "",
-      "organizer": "臺中市就業服務處",
-      "audience": "有限制",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "taichung_job",
-        "act": "5632",
-        "fetchedAt": "2026-10-02T07:03:58.028156+00:00"
-      },
-      "fitScore": 44,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第2圈：台中+4",
-        "青少年／營隊／教學+8",
-        "職涯／實習+20",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "青少年／營隊／教學",
-        "職涯／實習"
-      ],
-      "circleLevel": 2,
-      "circleLabel": "台中",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
-      "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "taichung_job",
-      "sourceCategories": [
-        "career_internship",
-        "lecture"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 2,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": []
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "category": "career_internship"
-    },
-    {
-      "id": "auto-mofa-wh-portal",
-      "title": "青年度假打工｜外交部官方計畫入口",
-      "date": "",
-      "time": "",
-      "scope": "海外／國際",
-      "type": "語言／國際",
-      "kind": "program",
-      "url": "https://youthtaiwan.mofa.gov.tw/WorkingHoliday/",
-      "keywords": "青年度假打工 海外工作 國際交流 海外生活 外語 澳洲 日本 加拿大 紐西蘭 英國 德國 韓國",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "中華民國外交部｜臺灣青年FUN眼世界",
-      "statusText": "外交部常設青年度假打工官方入口；各國年齡、名額、簽證與保險條件依官方國別資訊",
-      "government": true,
-      "deadline": "",
-      "eventEndDate": "",
-      "location": "海外／依度假打工協定國",
-      "organizer": "中華民國外交部",
-      "audience": "青年；實際年齡與簽證資格依各協定國規定",
-      "openEnded": true,
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-10-02T07:05:01.105325+00:00"
-      },
-      "fitScore": 94,
-      "fitTier": "高適配",
-      "fitReasons": [
-        "同心圓第4圈：海外／國際+0",
-        "語言／國際／海外+40",
-        "青少年／營隊／教學+34",
-        "直接連結海外／國際經驗目標+18",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "語言／國際／海外",
-        "青少年／營隊／教學"
-      ],
-      "circleLevel": 4,
-      "circleLabel": "海外／國際",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "mofa_working_holiday",
-      "sourceCategories": [
-        "international",
-        "career_internship",
-        "youth_program"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 4,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [],
-        "schoolNames": []
-      },
-      "country": "TW",
-      "category": "international"
-    },
-    {
-      "id": "auto-thu-2026090067",
-      "title": "【企業人才招募暨產業趨勢分享會】裕隆集團-新鑫股份有限公司",
-      "date": "2026-10-13",
-      "time": "",
-      "scope": "東海校內",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026090067",
-      "keywords": "【企業人才招募暨產業趨勢分享會】裕隆集團-新鑫股份有限公司 東海大學 實習與學生成就中心 教育活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 實習與學生成就中心；活動日 2026-10-13；截止 2026-10-12",
-      "government": false,
-      "deadline": "2026-10-12",
-      "eventEndDate": "2026-10-13",
-      "location": "",
-      "organizer": "實習與學生成就中心",
-      "audience": "教職員，費用：0；學生，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026090067",
-        "fetchedAt": "2026-10-01T07:14:02.871972+00:00"
-      },
-      "fitScore": 50,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "法律／轉學考+10",
-        "職涯／實習+5",
-        "直接連結法律學習目標+15",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "法律／轉學考",
-        "職涯／實習"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
-      "lastSeen": "2026-10-01T07:15:37.685597+00:00",
       "missCount": 1,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -1608,81 +1831,6 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-24T06:19:41.019607+00:00",
       "lastSeen": "2026-10-01T07:15:37.685597+00:00",
-      "missCount": 1,
-      "needsReview": false,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026090087",
-      "title": "第十屆亞太大學智慧校園研討會暨成果展",
-      "date": "2026-10-05",
-      "time": "",
-      "scope": "東海校內",
-      "type": "法律／學術",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026090087",
-      "keywords": "第十屆亞太大學智慧校園研討會暨成果展 東海大學 圖書暨資訊處 教育活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 圖書暨資訊處；活動日 2026-10-05；截止 2026-10-05",
-      "government": false,
-      "deadline": "2026-10-05",
-      "eventEndDate": "2026-10-05",
-      "location": "人文大樓茂榜廳",
-      "organizer": "圖書暨資訊處",
-      "audience": "教職員，費用：0；學生，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026090087",
-        "fetchedAt": "2026-09-30T06:48:37.289376+00:00"
-      },
-      "fitScore": 39,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "法律／轉學考+10",
-        "直接連結法律學習目標+15",
-        "有明確截止日+4",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "法律／轉學考"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-29T07:01:11.559387+00:00",
-      "lastSeen": "2026-09-30T06:49:51.580785+00:00",
       "missCount": 2,
       "needsReview": true,
       "sourceId": "thu_official",
@@ -1760,7 +1908,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-29T07:01:11.559387+00:00",
       "lastSeen": "2026-09-30T06:49:51.580785+00:00",
-      "missCount": 2,
+      "missCount": 3,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1837,7 +1985,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-22T06:20:42.670284+00:00",
       "lastSeen": "2026-09-29T07:01:11.559387+00:00",
-      "missCount": 3,
+      "missCount": 4,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1915,7 +2063,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
       "lastSeen": "2026-09-29T07:01:11.559387+00:00",
-      "missCount": 3,
+      "missCount": 4,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1991,7 +2139,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-24T06:19:41.019607+00:00",
       "lastSeen": "2026-09-29T07:01:11.559387+00:00",
-      "missCount": 3,
+      "missCount": 4,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2066,159 +2214,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-19T05:59:16.875680+00:00",
       "lastSeen": "2026-09-29T07:01:11.559387+00:00",
-      "missCount": 3,
-      "needsReview": true,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026090073",
-      "title": "【學期實習招募說明會】台北富邦銀行2027實習計畫",
-      "date": "2026-10-06",
-      "time": "",
-      "scope": "東海校內",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026090073",
-      "keywords": "【學期實習招募說明會】台北富邦銀行2027實習計畫 東海大學 財務金融學系 學術活動 教職員，費用：0；學生，費用：0 學術／講座 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 財務金融學系；活動日 2026-10-06；截止 2026-10-02",
-      "government": false,
-      "deadline": "2026-10-02",
-      "eventEndDate": "2026-10-06",
-      "location": "",
-      "organizer": "財務金融學系",
-      "audience": "教職員，費用：0；學生，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026090073",
-        "fetchedAt": "2026-09-29T06:59:59.034489+00:00"
-      },
-      "fitScore": 40,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "職涯／實習+20",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "職涯／實習"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-24T06:19:41.019607+00:00",
-      "lastSeen": "2026-09-29T07:01:11.559387+00:00",
-      "missCount": 3,
-      "needsReview": true,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026090078",
-      "title": "皮革產業講座及手作體驗課",
-      "date": "2026-10-05",
-      "time": "",
-      "scope": "東海校內",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026090078",
-      "keywords": "皮革產業講座及手作體驗課 東海大學 創新創業中心 教育活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 創新創業中心；活動日 2026-10-05；截止 2026-10-05",
-      "government": false,
-      "deadline": "2026-10-05",
-      "eventEndDate": "2026-10-05",
-      "location": "第二校區產學中心-ICE208",
-      "organizer": "創新創業中心",
-      "audience": "教職員，費用：0；學生，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026090078",
-        "fetchedAt": "2026-09-29T07:00:02.803924+00:00"
-      },
-      "fitScore": 52,
-      "fitTier": "中適配",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "法律／轉學考+10",
-        "職涯／實習+5",
-        "直接連結法律學習目標+15",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "法律／轉學考",
-        "職涯／實習"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-23T06:04:32.174585+00:00",
-      "lastSeen": "2026-09-29T07:01:11.559387+00:00",
-      "missCount": 3,
+      "missCount": 4,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2293,82 +2289,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-23T06:04:32.174585+00:00",
       "lastSeen": "2026-09-29T07:01:11.559387+00:00",
-      "missCount": 3,
-      "needsReview": true,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026090072",
-      "title": "115學年度第一次輻射防護訓練",
-      "date": "2026-10-05",
-      "time": "",
-      "scope": "東海校內",
-      "type": "法律／學術",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026090072",
-      "keywords": "115學年度第一次輻射防護訓練 東海大學 事務組 學術活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 事務組；活動日 2026-10-05；截止 2026-10-05",
-      "government": false,
-      "deadline": "2026-10-05",
-      "eventEndDate": "2026-10-05",
-      "location": "科技大樓ST-114教室",
-      "organizer": "事務組",
-      "audience": "教職員，費用：0；學生，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026090072",
-        "fetchedAt": "2026-09-29T07:00:05.800695+00:00"
-      },
-      "fitScore": 39,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "法律／轉學考+10",
-        "直接連結法律學習目標+15",
-        "有明確截止日+4",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "法律／轉學考"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
-      "lastSeen": "2026-09-29T07:01:11.559387+00:00",
-      "missCount": 3,
+      "missCount": 4,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2446,85 +2367,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-22T06:20:42.670284+00:00",
       "lastSeen": "2026-09-27T08:38:20.904863+00:00",
-      "missCount": 4,
-      "needsReview": true,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026090063",
-      "title": "知識．敘事．講台──教學設計與講台實踐工作坊",
-      "date": "2026-10-08",
-      "time": "",
-      "scope": "東海校內",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026090063",
-      "keywords": "知識．敘事．講台──教學設計與講台實踐工作坊 東海大學 課外活動暨學生發展組 教育活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 課外活動暨學生發展組；活動日 2026-10-08；截止 2026-10-05",
-      "government": false,
-      "deadline": "2026-10-05",
-      "eventEndDate": "2026-10-08",
-      "location": "北側會議室",
-      "organizer": "課外活動暨學生發展組",
-      "audience": "教職員，費用：0；學生，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026090063",
-        "fetchedAt": "2026-09-23T06:03:18.796262+00:00"
-      },
-      "fitScore": 52,
-      "fitTier": "中適配",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "法律／轉學考+10",
-        "職涯／實習+5",
-        "直接連結法律學習目標+15",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "法律／轉學考",
-        "職涯／實習"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-21T06:32:35.703147+00:00",
-      "lastSeen": "2026-09-23T06:04:32.174585+00:00",
-      "missCount": 7,
+      "missCount": 5,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2599,84 +2442,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-21T06:32:35.703147+00:00",
       "lastSeen": "2026-09-23T06:04:32.174585+00:00",
-      "missCount": 7,
-      "needsReview": true,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026070017",
-      "title": "【學生增能工作坊X勵學基金】商務簡報與溝通訓練工作坊",
-      "date": "2026-10-05",
-      "time": "",
-      "scope": "東海校內",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026070017",
-      "keywords": "【學生增能工作坊X勵學基金】商務簡報與溝通訓練工作坊 東海大學 教學發展中心 學術活動 教職員，費用：0；學生，費用：0 學術／講座 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 教學發展中心；活動日 2026-10-05；截止 2026-10-02",
-      "government": false,
-      "deadline": "2026-10-02",
-      "eventEndDate": "2026-10-05",
-      "location": "",
-      "organizer": "教學發展中心",
-      "audience": "教職員，費用：0；學生，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026070017",
-        "fetchedAt": "2026-09-23T06:03:27.673355+00:00"
-      },
-      "fitScore": 46,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "職涯／實習+5",
-        "通用能力／AI工具+14",
-        "明確以大學生／學生為對象+7",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "職涯／實習",
-        "通用能力／AI工具"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-09-23T06:04:32.174585+00:00",
-      "missCount": 7,
+      "missCount": 8,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2754,83 +2520,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-14T06:24:52.182789+00:00",
       "lastSeen": "2026-09-17T08:01:17.326390+00:00",
-      "missCount": 13,
-      "needsReview": true,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026080026",
-      "title": "115年社團財務管理與經費核銷攻略",
-      "date": "2026-10-13",
-      "time": "",
-      "scope": "東海校內",
-      "type": "法律／學術",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026080026",
-      "keywords": "115年社團財務管理與經費核銷攻略 東海大學 課外活動暨學生發展組 教育活動 學生，費用：0；說明：僅限社團、系學會成員 法律／學術 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 課外活動暨學生發展組；活動日 2026-10-13；截止 2026-10-06",
-      "government": false,
-      "deadline": "2026-10-06",
-      "eventEndDate": "2026-10-13",
-      "location": "",
-      "organizer": "課外活動暨學生發展組",
-      "audience": "學生，費用：0；說明：僅限社團、系學會成員",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026080026",
-        "fetchedAt": "2026-09-17T08:00:19.488771+00:00"
-      },
-      "fitScore": 71,
-      "fitTier": "中適配",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "法律／轉學考+10",
-        "青少年／營隊／教學+34",
-        "直接連結法律學習目標+15",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "法律／轉學考",
-        "青少年／營隊／教學"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-14T06:24:52.182789+00:00",
-      "lastSeen": "2026-09-17T08:01:17.326390+00:00",
-      "missCount": 13,
+      "missCount": 14,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2904,82 +2594,6 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-14T06:24:52.182789+00:00",
       "lastSeen": "2026-09-16T06:07:49.530864+00:00",
-      "missCount": 14,
-      "needsReview": true,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026090016",
-      "title": "【115學年度第1學期人權法治教育宣導】《大學生法律生存指南 暨防制詐騙講座》10/7",
-      "date": "2026-10-07",
-      "time": "",
-      "scope": "東海校內",
-      "type": "法律／學術",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026090016",
-      "keywords": "【115學年度第1學期人權法治教育宣導】《大學生法律生存指南 暨防制詐騙講座》10/7 東海大學 生活輔導組 學術活動 教職員，費用：0；學生，費用：0；校外人士，費用：0 法律／學術 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 生活輔導組；活動日 2026-10-07；截止 2026-10-05",
-      "government": false,
-      "deadline": "2026-10-05",
-      "eventEndDate": "2026-10-07",
-      "location": "茂榜廳",
-      "organizer": "生活輔導組",
-      "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026090016",
-        "fetchedAt": "2026-09-15T06:12:48.031958+00:00"
-      },
-      "fitScore": 78,
-      "fitTier": "高適配",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "法律／轉學考+42",
-        "直接連結法律學習目標+15",
-        "明確以大學生／學生為對象+7",
-        "有明確截止日+4",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "法律／轉學考"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-09-15T06:14:04.334759+00:00",
       "missCount": 15,
       "needsReview": true,
       "sourceId": "thu_official",
@@ -3055,7 +2669,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-10T06:03:37.274328+00:00",
       "lastSeen": "2026-09-13T06:17:56.439273+00:00",
-      "missCount": 17,
+      "missCount": 18,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -3132,7 +2746,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
       "lastSeen": "2026-09-10T17:03:47.493023+00:00",
-      "missCount": 19,
+      "missCount": 20,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -3206,7 +2820,7 @@
       "hardFilterReason": "",
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
-      "missCount": 23,
+      "missCount": 24,
       "needsReview": true,
       "lastSeen": "2026-09-09T12:50:00.937440+00:00",
       "sourceId": "thu_official",
