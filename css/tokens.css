@@ -113,4 +113,35 @@ html[data-appearance="dark"]{
 /* GM-VISUAL-PHASE3-20261008-BEGIN: density overrides on canonical tokens */
 html[data-density="comfortable"]{--gm-layout-pad:20px;--gm-layout-gap:16px;--gm-layout-card:15px}
 html[data-density="compact"]{--gm-layout-pad:14px;--gm-layout-gap:10px;--gm-layout-card:12px}
+
+/* GM-SETTINGS-HUB-20261008: optional accent palettes; existing slate is default. */
+html[data-accent="sage"]{
+  --gm-primary:#3D6F62;--gm-primary-dark:#315D52;--gm-primary-deep:#294B43;
+  --gm-primary-soft:#E4EFE9;--gm-focus:rgba(61,111,98,.26);--gm-on-primary:#FFFFFF;
+}
+html[data-accent="plum"]{
+  --gm-primary:#6E567D;--gm-primary-dark:#5C456D;--gm-primary-deep:#503D5F;
+  --gm-primary-soft:#F0EAF4;--gm-focus:rgba(110,86,125,.26);--gm-on-primary:#FFFFFF;
+}
+html[data-accent="charcoal"]{
+  --gm-primary:#3B495A;--gm-primary-dark:#303D4C;--gm-primary-deep:#263442;
+  --gm-primary-soft:#E7EBEF;--gm-focus:rgba(59,73,90,.26);--gm-on-primary:#FFFFFF;
+}
+html.app-dark[data-accent="sage"],html[data-appearance="dark"][data-accent="sage"]{
+  --gm-primary:#99D0BA;--gm-primary-dark:#B2DEC9;--gm-primary-deep:#C6E9D8;
+  --gm-primary-soft:#253C36;--gm-focus:rgba(153,208,186,.32);--gm-on-primary:#142820;
+}
+html.app-dark[data-accent="plum"],html[data-appearance="dark"][data-accent="plum"]{
+  --gm-primary:#CEB5E2;--gm-primary-dark:#E0CCF0;--gm-primary-deep:#EADCF4;
+  --gm-primary-soft:#392C43;--gm-focus:rgba(206,181,226,.32);--gm-on-primary:#21172B;
+}
+html.app-dark[data-accent="charcoal"],html[data-appearance="dark"][data-accent="charcoal"]{
+  --gm-primary:#C4D0DF;--gm-primary-dark:#D5DFEC;--gm-primary-deep:#E0E7EF;
+  --gm-primary-soft:#2C3643;--gm-focus:rgba(196,208,223,.32);--gm-on-primary:#1D2731;
+}
+html[data-text-size="large"]{
+  --gm-font-size-body:17px;--gm-font-size-small:14px;
+  --gm-font-size-meta:13px;--gm-font-size-card-title:17px;
+  --gm-font-size-section:21px;--gm-font-size-page:29px;
+}
 /* GM-VISUAL-PHASE3-20261008-END */

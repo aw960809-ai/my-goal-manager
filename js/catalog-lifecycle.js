@@ -58,8 +58,10 @@
     catalogLifecycleEnsureStyles();
     const body=document.getElementById("settingsBody");if(!body)return;
     document.getElementById("gmCatalogLifecyclePanel")?.remove();
+    const mount=document.getElementById("settingsHealthMount");
     const health=document.getElementById("gmAutoFetchHealth");
-    if(health)health.insertAdjacentHTML("afterend",catalogLifecyclePanelHTML());
+    if(mount)mount.insertAdjacentHTML("beforeend",catalogLifecyclePanelHTML());
+    else if(health)health.insertAdjacentHTML("afterend",catalogLifecyclePanelHTML());
     else body.insertAdjacentHTML("beforeend",catalogLifecyclePanelHTML());
   }
 
