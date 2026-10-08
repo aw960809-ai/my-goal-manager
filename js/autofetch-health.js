@@ -66,14 +66,15 @@
     const total=explicitTotal!==null?n(explicitTotal,0):n(legacyHealthy,0);
     const healthy=explicitHealthy!==null?n(explicitHealthy,0):n(legacyHealthy,0);
     const failed=explicitFailed!==null?n(explicitFailed,0):Math.max(0,total-healthy);
+    const itemFailures=Math.max(0,n(first(meta.fetchFailedItems,summary.fetchFailedItems,meta.failed,summary.failed),0));
     const prunedRaw=first(meta.skippedPast,summary.skippedPast,meta.expiredPruned,summary.expiredPruned,quality.expiredPruned);
     const pruned=prunedRaw===null?null:n(prunedRaw,0);
     const retained=n(first(meta.retainedOnFailure,summary.retainedOnFailure,meta.preservedOnFailure),0);
     const count=rowsOf(payload).length;
     const age=ageHours(updated),stale=age!==null&&age>STALE_HOURS;
-    const warning=failed>0;
+    const warning=failed>0||itemFailures>0;
     const ok=total>0 ? healthy>0 : count>=0;
-    return {kind:"activity",updated,sources:total,healthy,failed,pruned,retained,count,age,stale,warning,ok};
+    return {kind:"activity",updated,sources:total,healthy,failed,itemFailures,pruned,retained,count,age,stale,warning,ok};
   }
   function scholarshipInfo(payload){
     const meta=metaOf(payload),summary=meta.summary||{};
@@ -107,7 +108,8 @@
     state.scholarships=s.status==="fulfilled"?scholarshipInfo(s.value):{ok:false,error:String(s.reason||"scholarships")};
     const both=state.activities.ok&&state.scholarships.ok;
     const stale=!!state.activities.stale||!!state.scholarships.stale;
-    state.overall=both?(stale?"warning":"healthy"):"error";
+    const partial=!!state.activities.warning||(state.scholarships.failed||0)>0;
+    state.overall=both?(stale||partial?"warning":"healthy"):"error";
     if(!both)state.error=[state.activities.error,state.scholarships.error].filter(Boolean).join("；");
     renderEverywhere();
     return snapshot();
@@ -127,6 +129,7 @@
         <span>資料筆數<b>${info.count}</b></span>
         <span>來源健康<b>${info.healthy}/${info.sources||info.healthy+info.failed||0}</b></span>
         <span>來源失敗<b>${info.failed}</b></span>
+        ${info.itemFailures>0?`<span>個別項目抓取失敗<b>${info.itemFailures}</b></span>`:""}
         ${extra(info)}
       </div>
       ${info.retained?`<div class="gm-health-note">來源失敗時已保留 ${info.retained} 筆上一輪可信資料。</div>`:""}
@@ -137,7 +140,7 @@
     const overall=state.overall==="healthy"
       ?{t:"系統正常",c:"ok"}
       :state.overall==="warning"
-        ?{t:"資料可能過舊",c:"warn"}
+        ?{t:(state.activities?.stale||state.scholarships?.stale)?"資料可能過舊":"部分項目需注意",c:"warn"}
         :state.overall==="error"
           ?{t:"需要檢查",c:"bad"}
           :{t:"尚未檢查",c:"muted"};
@@ -193,7 +196,8 @@
     if(state.overall==="unknown")return "";
     const cls=state.overall==="healthy"?"ok":state.overall==="warning"?"warn":"bad";
     const text=state.overall==="healthy"?"自動資料正常":state.overall==="warning"?"自動資料需注意":"自動資料異常";
-    return `<div id="gmAutoFetchCompact" class="gm-health-note"><span class="gm-health-pill ${cls}">${text}</span> 活動 ${a?.healthy??0}/${a?.sources??0} · 獎學金 ${s?.healthy??0}/${s?.sources??0}</div>`;
+    const itemNote=(a?.itemFailures||0)>0?` · 個別項目抓取失敗 ${a.itemFailures}`:"";
+    return `<div id="gmAutoFetchCompact" class="gm-health-note"><span class="gm-health-pill ${cls}">${text}</span> 活動來源 ${a?.healthy??0}/${a?.sources??0} · 獎學金來源 ${s?.healthy??0}/${s?.sources??0}${itemNote}</div>`;
   }
   function injectCompact(){
     ensureStyles();
