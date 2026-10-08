@@ -1,0 +1,101 @@
+name: Goal Manager Safe UI Auto Merge
+
+# The PR safety test runs WITHOUT write permissions. This separate workflow
+# receives merge privileges only after the required checks have succeeded.
+# We never check out or execute untrusted PR code in this privileged workflow.
+on:
+  workflow_run:
+    workflows: ["Goal Manager PR Safety Check"]
+    types: [completed]
+  pull_request_target:
+    types: [labeled]
+
+permissions:
+  actions: write
+  checks: read
+  contents: write
+  pull-requests: write
+
+jobs:
+  safe-ui-merge:
+    if: >-
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.event == 'pull_request' &&
+       github.event.workflow_run.conclusion == 'success') ||
+      (github.event_name == 'pull_request_target' &&
+       github.event.label.name == 'safe-auto-merge')
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    concurrency:
+      group: safe-ui-${{ github.event.workflow_run.head_sha || github.event.pull_request.head.sha || github.run_id }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout trusted merge policy from main only
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Verify eligibility and merge only approved UI PRs
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const {eligible,LABEL}=require(`${process.env.GITHUB_WORKSPACE}/scripts/automation/safe-ui-policy.cjs`);
+            const {owner,repo}=context.repo;
+            const run=context.eventName==='workflow_run'?context.payload.workflow_run:null;
+            let prNumber;
+            if(run){
+              const related=run.pull_requests||[];
+              if(related.length!==1){core.notice('No unique associated PR; manual review required.');return;}
+              prNumber=related[0].number;
+            }else{
+              prNumber=context.payload.pull_request?.number;
+              if(context.payload.label?.name!==LABEL){core.notice('Not an opt-in label.');return;}
+            }
+            if(!prNumber){core.notice('Cannot identify PR; no changes made.');return;}
+
+            const {data:pr}=await github.rest.pulls.get({owner,repo,pull_number:prNumber});
+            const files=await github.paginate(github.rest.pulls.listFiles,{
+              owner,repo,pull_number:prNumber,per_page:100
+            });
+            const decision=eligible({owner,repo,pr,files,run});
+            if(!decision.ok){core.notice(`Not eligible for automatic merge: ${decision.reason}`);return;}
+
+            // For a label applied AFTER CI finished, verify the exact current
+            // head still has a successful GitHub Actions PR safety job.
+            if(!run){
+              const {data:checks}=await github.rest.checks.listForRef({
+                owner,repo,ref:pr.head.sha,check_name:'verify',per_page:100
+              });
+              const verified=(checks.check_runs||[]).some(check=>
+                check.name==='verify' && check.status==='completed' &&
+                check.conclusion==='success' && check.head_sha===pr.head.sha &&
+                check.app?.slug==='github-actions' &&
+                check.pull_requests?.some(p=>p.number===prNumber)
+              );
+              if(!verified){core.notice('Verified PR safety check not yet present for head; waiting for CI.');return;}
+            }
+
+            // The PR must be rebased/retested after another change to main.
+            const {data:diff}=await github.rest.repos.compareCommitsWithBasehead({
+              owner,repo,basehead:`main...${pr.head.sha}`
+            });
+            if(diff.behind_by!==0){core.notice('Base branch has moved; PR requires an updated safety run.');return;}
+
+            const {data:latest}=await github.rest.pulls.get({owner,repo,pull_number:prNumber});
+            if(latest.head.sha!==pr.head.sha||latest.state!=='open'||latest.draft){
+              core.notice('PR changed before merge. Stopping.');return;
+            }
+            const {data:merged}=await github.rest.pulls.merge({
+              owner,repo,pull_number:prNumber,sha:pr.head.sha,merge_method:'merge'
+            });
+            if(!merged.merged)throw new Error(`Merge was not confirmed: ${merged.message||'unknown error'}`);
+            core.notice(`Auto-merged safe UI PR #${prNumber}: ${decision.reason}`);
+
+            // A merge performed with GITHUB_TOKEN will NOT trigger the usual
+            // push-event Actions workflow. Explicitly dispatch Pages instead.
+            await github.rest.actions.createWorkflowDispatch({
+              owner,repo,workflow_id:'pages.yml',ref:'main'
+            });
+            core.notice('Triggered Pages deployment after GITHUB_TOKEN merge.');
