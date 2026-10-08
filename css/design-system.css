@@ -1234,4 +1234,74 @@ select:focus-visible,textarea:focus-visible{outline:3px solid var(--gm-focus)!im
 @media(prefers-reduced-motion:reduce){
   .home-metric,.bottom-nav button,.goal-browse-card{transition:none!important}
 }
+/* GM-REVIEW-COMPACT-20261008: canonical review styles, not an injected patch. */
+#activity .activity-review-disclosure{
+  margin-top:14px;border:1px solid var(--gm-line);
+  border-radius:16px;background:var(--gm-surface-elevated);overflow:hidden;
+}
+#activity .activity-review-disclosure>summary{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:3px 14px;min-height:48px;cursor:pointer;list-style:none;
+  padding:12px 14px;color:var(--gm-text);font-size:15px;font-weight:650;
+}
+#activity .activity-review-disclosure>summary::-webkit-details-marker{display:none}
+#activity .activity-review-disclosure>summary::after{
+  content:'⌄';font-size:19px;line-height:1;color:var(--gm-text-secondary);
+}
+#activity .activity-review-disclosure[open]>summary::after{transform:rotate(180deg)}
+#activity .activity-review-disclosure>summary>span{flex:1 1 auto}
+#activity .activity-review-disclosure>summary>small{
+  order:3;flex-basis:100%;font-size:11px;line-height:1.45;
+  color:var(--gm-text-secondary);font-weight:500;
+}
+#activity .activity-review-list{display:grid;padding:0 13px 12px;gap:0}
+#activity .activity-review-context{margin:0;padding:3px 1px 11px;
+  color:var(--gm-text-secondary);font-size:11px;line-height:1.5}
+#activity .activity-review-compact-row{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;
+  gap:6px 9px;border-top:1px solid var(--gm-line);padding:12px 1px;
+}
+#activity .activity-review-compact-main{min-width:0}
+#activity .activity-review-compact-main b{
+  display:block;overflow-wrap:anywhere;line-height:1.45;
+  font-size:14px;font-weight:650;color:var(--gm-text);
+}
+#activity .activity-review-compact-main small{
+  display:block;margin-top:4px;font-size:11px;line-height:1.45;
+  color:var(--gm-text-secondary);overflow-wrap:anywhere;
+}
+#activity .activity-review-source{
+  display:inline-flex;justify-content:center;align-items:center;
+  flex:0 0 auto;min-height:40px;padding:5px 10px;
+  border:1px solid var(--gm-line);border-radius:10px;
+  background:var(--gm-surface);color:var(--gm-primary-deep);
+  font-size:12px;text-decoration:none;white-space:nowrap;
+}
+#activity .activity-review-source.unavailable{color:var(--gm-text-muted);border:0}
+#activity .activity-review-why{grid-column:1/-1;color:var(--gm-text-secondary);
+  font-size:11px;line-height:1.5}
+#activity .activity-review-why>summary{cursor:pointer;min-height:36px;display:inline-flex;align-items:center;padding:3px 0;
+  color:var(--gm-primary-deep);font-size:11px}
+#activity .activity-review-why p{margin:3px 0 0;padding:7px 9px;
+  border-radius:8px;background:var(--gm-surface-soft);overflow-wrap:anywhere}
+#activity .activity-review-footer{border-top:1px solid var(--gm-line);
+  display:flex;align-items:center;justify-content:space-between;
+  gap:8px;min-height:42px;padding:10px 1px 0}
+#activity .activity-review-footer small{font-size:11px;color:var(--gm-text-secondary)}
+#activity .activity-review-more{min-height:38px;padding:7px 11px;
+  border:1px solid var(--gm-line);border-radius:10px;
+  background:var(--gm-primary-soft);color:var(--gm-primary-deep);
+  font-size:12px;font-weight:650;cursor:pointer}
+#activity .activity-review-more:focus-visible,
+#activity .activity-review-source:focus-visible,
+#activity .activity-review-why>summary:focus-visible,
+#activity .activity-review-disclosure>summary:focus-visible{
+  outline:3px solid var(--gm-focus);outline-offset:2px;
+}
+@media(max-width:360px){
+  #activity .activity-review-compact-row{grid-template-columns:1fr}
+  #activity .activity-review-source{justify-self:start}
+  #activity .activity-review-why{grid-column:1}
+}
+
 /* GM-VISUAL-PHASE3-20261008-END */
