@@ -32,9 +32,20 @@ jobs:
         run: |
           rm -rf _site
           mkdir -p _site
-          cp index.html 404.html manifest.webmanifest manifest-original.webmanifest sw.js icon.svg icon-original-192.png icon-original-512.png apple-touch-original.png README.md _site/
-          cp -r css js config data _site/
+          cp index.html 404.html manifest.webmanifest manifest-original.webmanifest sw.js suite-icon-release.json icon.svg icon-64.png icon-192.png icon-512.png icon-maskable-512.png icon-original-192.png icon-original-512.png apple-touch-icon.png apple-touch-original.png README.md _site/
+          cp -r css js config data assets _site/
           cp -r apps _site/
+          # Verify assets referenced by index.html, the PWA manifest and the service worker.
+          test -s _site/suite-icon-release.json
+          test -s _site/assets/suite-icons/20261005a/icon-64.png
+          test -s _site/assets/suite-icons/20261005a/icon-192.png
+          test -s _site/assets/suite-icons/20261005a/icon-512.png
+          test -s _site/assets/suite-icons/20261005a/icon-maskable-512.png
+          test -s _site/assets/suite-icons/20261005a/apple-touch-icon.png
+          test -s _site/icon-192.png
+          test -s _site/icon-512.png
+          test -s _site/icon-maskable-512.png
+          test -s _site/apple-touch-icon.png
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4

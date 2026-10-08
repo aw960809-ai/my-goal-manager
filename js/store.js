@@ -12,7 +12,8 @@ function storeSet(k,v){
  }catch(e){
   memoryStore[k]=v;
   storeHealth={persistent:false,mode:'memory',lastError:String(e?.message||e||'localStorage unavailable'),lastWriteAt:new Date().toISOString()};
-  return memoryStore[k]===v;
+  // Memory-only fallback is not a successful durable write.
+  return false;
  }
 }
 function storeWriteStatus(){return {...storeHealth}}

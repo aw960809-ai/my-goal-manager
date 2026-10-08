@@ -15,24 +15,41 @@ function loadAppSettings(){
   try{const raw=localStorage.getItem(SETTINGS_KEY);const parsed=raw?JSON.parse(raw):{};return {...DEFAULT_SETTINGS,...(parsed&&typeof parsed==='object'?parsed:{})}}catch(e){return {...DEFAULT_SETTINGS}}
 }
 function saveAppSettings(){
-  try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(appSettings));return true}catch(e){return false}
+ try{
+  const raw=JSON.stringify(appSettings);
+  localStorage.setItem(SETTINGS_KEY,raw);
+  return localStorage.getItem(SETTINGS_KEY)===raw;
+ }catch(e){return false}
 }
-function applyAppSettings(){
+function applyAppSettings(persist=true){
   const root=document.documentElement;
   root.dataset.appearance=appSettings.appearance;
   root.dataset.density=appSettings.density;
   root.dataset.reducedMotion=appSettings.reducedMotion?'true':'false';
   root.dataset.timeFormat=appSettings.timeFormat;
   if(appSettings.appearance==='dark')root.classList.add('app-dark');else root.classList.remove('app-dark');
-  saveAppSettings();
+ return persist?saveAppSettings():true;
 }
-function resetAppSettings(){appSettings={...DEFAULT_SETTINGS};applyAppSettings();renderSettings();toast('已恢復預設設定')}
+function resetAppSettings(){
+ const old={...appSettings};appSettings={...DEFAULT_SETTINGS};
+ if(!applyAppSettings()){
+  appSettings=old;applyAppSettings(false);renderSettings();toast('無法儲存預設設定，已恢復原設定');return;
+ }
+ renderSettings();toast('已恢復預設設定');
+}
 function setAppSetting(key,value){
-  if(!(key in DEFAULT_SETTINGS))return;
-  if(key==='reducedMotion'||key==='activityReminder'||key==='scholarshipReminder')value=!!value;
-  if(key==='reminderDays')value=Math.max(1,Math.min(30,Number(value)||3));
-  appSettings[key]=value;applyAppSettings();renderSettings();toast('設定已保存');
+ if(!(key in DEFAULT_SETTINGS))return;
+ if(key==='reducedMotion'||key==='activityReminder'||key==='scholarshipReminder')value=!!value;
+ if(key==='reminderDays')value=Math.max(1,Math.min(30,Number(value)||3));
+ if(appSettings[key]===value)return;
+ const old={...appSettings};appSettings[key]=value;
+ if(!applyAppSettings()){
+  appSettings=old;applyAppSettings(false);renderSettings();toast('設定未能永久保存，已恢復原值');return;
+ }
+ renderSettings();toast('設定已保存');
 }
+// Restore persisted appearance at each startup without writing to storage.
+applyAppSettings(false);
 function openSettings(){
   const modal=document.getElementById('settingsModal');if(!modal)return false;
   renderSettings();
@@ -72,7 +89,7 @@ function renderSettings(){
   <div class="settings-section">
    <div class="settings-section-head"><div><h3>資料管理</h3><p>你的使用者資料以本機保存為主。匯入會先驗證格式與完整性。</p></div></div>
    <div class="settings-action-grid">
-    <button class="btn primary" onclick="exportDB();toast('備份檔已準備下載')">↥ 匯出全部資料</button>
+    <button class="btn primary" onclick="exportDBWithFeedback()">↥ 匯出全部資料</button>
     <button class="btn" onclick="importDB();closeSettings()">↧ 匯入資料</button>
     <button class="btn" onclick="createRestorePoint()">✦ 建立復原點</button>
     <button class="btn" onclick="restoreLatestBackup()">↶ 還原最近備份</button>
@@ -99,12 +116,17 @@ function renderSettings(){
 async function updateSettingsDataStatus(){
  const el=document.getElementById('settingsDataStatus');if(!el)return;
  const storeState=typeof storeWriteStatus==='function'?storeWriteStatus():null;let storage='不可用';try{storage=storeState?.persistent===false?'⚠ 暫存模式（關閉後可能遺失）':(localStorage?'✓ 永久儲存可用':'不可用')}catch(e){storage='⚠ 暫存模式'}
+ if(typeof persistenceRecoveryBlocked!=='undefined'&&persistenceRecoveryBlocked)storage='⚠ 唯讀救援模式：不得寫入或清除資料';
  const size=(()=>{try{return Math.round(new Blob([storeGet(KEY)||'']).size/1024)}catch(e){return 0}})();
  const backups=BACKUP_KEYS.filter(k=>!!storeGet(k)).length;
  const anchor=typeof historyAnchorSummary==='function'?historyAnchorSummary():null;
  const anchorText=anchor?`✓ ${anchor.logCount} 筆／${anchor.totalMinutes} 分鐘`:'⚠ 尚未建立';
  const errs=typeof validateDB==='function'?validateDB():[];
  el.innerHTML=`<div><b>資料結構</b><span>${errs.length?'⚠ '+errs.length+' 項問題':'✓ 正常'}</span></div><div><b>本機儲存</b><span>${storage}</span></div><div><b>目前資料大小</b><span>${size} KB</span></div><div><b>可用備份</b><span>${backups} 份</span></div><div><b>歷程安全基準</b><span>${anchorText}</span></div>`;
+}
+function exportDBWithFeedback(){
+ Promise.resolve().then(()=>exportDB()).then(()=>toast('備份檔已準備下載'))
+  .catch(e=>{console.error('Backup export failed',e);toast('備份產生失敗，請勿刪除原資料')});
 }
 function createRestorePoint(){
  try{if(save({backup:true})) {renderSettings();toast('已建立復原點；目前資料未改變')}}catch(e){toast('建立復原點失敗')}
@@ -121,19 +143,33 @@ function restoreLatestBackup(){
  }catch(e){toast('還原失敗；目前資料未變更')}
 }
 function resetUserData(){
+ if(typeof persistenceRecoveryBlocked!=='undefined'&&persistenceRecoveryBlocked){
+  toast('資料正在唯讀救援保護模式；禁止清除');return;
+ }
  if(!confirm('⚠️ 確定清除本機使用者資料？\n\n系統會先建立一次備份，再恢復為初始資料。'))return;
+ const previous=db;
+ const current=storeGet(KEY);
+ if(current){
+  const backedUp=storeSet(BACKUP_KEYS[0],current)&&storeWriteStatus().persistent!==false&&storeGet(BACKUP_KEYS[0])===current;
+  if(!backedUp){toast('無法確認復原備份完整，已取消清除');return}
+ }
  try{
-  const current=storeGet(KEY);if(current)storeSet(BACKUP_KEYS[0],current);
-  db=normalize(seed());ensureSchoolCalendar();ensureToeicPlan();save({backup:false,allowLogReplacement:true});
+  db=normalize(seed());ensureSchoolCalendar();ensureToeicPlan();
+  if(!save({backup:false,allowLogReplacement:true}))throw new Error('儲存失敗');
   selected=null;goalPath={long:null,mid:null,short:null,exec:null};renderAll();closeSettings();toast('已恢復初始資料；舊資料已保留備份');
- }catch(e){toast('重置失敗；目前資料可能未完整更新')}
+ }catch(e){db=previous;toast('重置失敗；原資料保持不變')}
 }
 async function requestNotificationPermission(){
  if(!('Notification' in window)){toast('此瀏覽器不支援通知');return}
  try{const result=await Notification.requestPermission();renderSettings();toast(result==='granted'?'通知權限已允許':result==='denied'?'通知權限已拒絕':'尚未允許通知')}catch(e){toast('無法取得通知權限')}
 }
 function rebuildLocalIndexes(){
- try{db=normalize(db);rebuildExecutionPlanActuals();ensureActivities();ensureSchoolCalendar();recalcAllStatuses();save({backup:true});renderAll();renderSettings();toast('資料索引已重建並重新驗證')}catch(e){toast('重建索引失敗；目前資料未變更')}
+ const previous=JSON.parse(JSON.stringify(db));
+ try{
+  db=normalize(db);rebuildExecutionPlanActuals();ensureActivities();ensureSchoolCalendar();recalcAllStatuses();
+  if(!save({backup:true}))throw new Error('儲存失敗');
+  renderAll();renderSettings();toast('資料索引已重建並重新驗證');
+ }catch(e){db=previous;toast('重建索引失敗；原資料保持不變')}
 }
 async function runDiagnostics(){
  const box=document.getElementById('diagnosticResult');if(!box)return;

@@ -71,6 +71,14 @@
       window.renderAll();
     }
 
+    if(typeof persistenceRecoveryBlocked!=='undefined'&&persistenceRecoveryBlocked){
+      const banner=document.createElement('div');
+      banner.setAttribute('role','alert');
+      banner.style.cssText='margin:12px 0;padding:15px;border:2px solid #b45309;border-radius:12px;background:#fff4d6;color:#682b04;font-weight:700;line-height:1.6';
+      banner.textContent='⚠ 原始資料無法安全解碼，系統已進入唯讀保護模式；畫面上的預設目標只是暫時顯示，未覆蓋原有儲存資料。請勿清除網站資料，應先進行備份救援。';
+      document.querySelector('.app')?.prepend(banner);
+    }
+
     registerPWA();
 
     if(typeof window.loadRemoteActivities==='function'){
