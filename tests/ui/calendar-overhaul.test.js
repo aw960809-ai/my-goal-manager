@@ -11,7 +11,7 @@ for(const f of ['calendarSetMode','calendarPickMonth','calendarFilterAll','calen
 assert(app.includes('CalendarDomain.eventsForDate')&&app.includes('periodForTask,'),'calendar must project goal deadlines');
 assert(css.includes('#calendar .calendar-days')&&css.includes('54px'),'mobile dots-only grid required');
 assert(sw.includes("'./css/calendar.css'"),'PWA shell must include calendar style');
-assert(version.includes("GOAL_MANAGER_VERSION='98.13.2'"),'calendar release version bump required');
+assert(version.includes("GOAL_MANAGER_VERSION='98.13.3'"),'calendar release version bump required');
 assert(!app.includes("el.scrollIntoView({behavior:'smooth',block:'nearest'})"),'calendar render must not auto-scroll');
 const day='2026-10-10';
 const school={type:'school',title:'<script>校曆</script>',date:day};

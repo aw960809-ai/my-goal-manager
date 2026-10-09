@@ -6,7 +6,7 @@ const path=require('path');
 const vm=require('vm');
 const root=path.resolve(__dirname,'../..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
-assert.ok(read('config/version.js').includes("GOAL_MANAGER_VERSION='98.13.2'"));
+assert.ok(read('config/version.js').includes("GOAL_MANAGER_VERSION='98.13.3'"));
 
 // A storage adapter may keep an emergency memory copy, but may not claim success.
 const srcStore=read('js/store.js');

@@ -1,0 +1,205 @@
+/* Goal Manager V98.13.3 — Mobile full-width surfaces.
+ * Presentation only: all data, timers, analytics, radar and storage stay intact.
+ * Primary sections meet the viewport edge; interactive text keeps safe insets.
+ */
+@media (max-width: 700px) {
+  .app {
+    --gm-mobile-inline: max(14px, env(safe-area-inset-left), env(safe-area-inset-right));
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 8px 0 calc(90px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .app > .view,
+  #today,
+  #calendar,
+  #stats {
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* Primary surfaces are true full-width sections, not floating cards. */
+  .app > .view > .panel,
+  #dash .home-grid-two > .panel,
+  #stats .stats-grid > .panel,
+  #today > .panel,
+  #today > details.panel,
+  #activity > .panel,
+  #scholarship > .panel,
+  #goals > #goalBrowsePanel,
+  #dash > .home-explore-panel,
+  #dash > .home-goals-panel {
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-bottom: 9px !important;
+    padding: 14px var(--gm-mobile-inline) !important;
+    border-radius: 0 !important;
+    border-left-width: 0 !important;
+    border-right-width: 0 !important;
+    border-top: 1px solid var(--gm-line, #d7dee4) !important;
+    border-bottom: 1px solid var(--gm-line, #d7dee4) !important;
+    box-shadow: none !important;
+    overflow-wrap: anywhere;
+  }
+
+  /* Existing colored indicator remains visible, flush with screen edge. */
+  #dash > .home-focus-panel,
+  #today > .execution-now-panel {
+    border-left: 4px solid var(--gm-primary, #596a85) !important;
+    padding-left: calc(var(--gm-mobile-inline) - 4px) !important;
+  }
+  #today > .execution-now-panel.is-running {
+    border-left-color: var(--gm-accent, #c5a059) !important;
+  }
+
+  /* Headers remain readable and never overlap the settings control. */
+  #dash > .home-hero,
+  #goals > .goal-page-head,
+  #today > .execution-page-head,
+  #stats > .stats-hero {
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: var(--gm-mobile-inline) !important;
+    padding-right: var(--gm-mobile-inline) !important;
+  }
+  #stats > .stats-hero {
+    padding-right: 62px !important;
+  }
+
+  /* KPIs use almost the whole width while retaining a tiny card gutter. */
+  #dash .home-metrics,
+  #dash .home-meta-row,
+  #stats .stats-kpi.cards {
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+    gap: 8px !important;
+  }
+  #dash .home-metrics .home-metric,
+  #stats .stats-kpi > .card {
+    min-width: 0 !important;
+    border-radius: 11px !important;
+    box-shadow: none !important;
+  }
+
+  /* Grids contain full-width sections instead of extra inset frames. */
+  #dash .home-grid-two,
+  #stats .stats-grid {
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: none !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 0 !important;
+    gap: 9px !important;
+  }
+  #dash .home-grid-two {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  #stats .stats-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  /* Lists get modest tap gutters, not three stacked container margins. */
+  #goals > #goalBrowsePanel,
+  #today > .compact-execution-panel {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  #activity > .panel,
+  #scholarship > .panel {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  #goals #goalBrowsePanel .gm-goal-toolbar,
+  #goals #goalBrowsePanel .gm-goal-search {
+    margin-left: 5px !important;
+    margin-right: 5px !important;
+  }
+  #activity .activity-group .activity-card,
+  #scholarship .scholarship-card {
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    border-radius: 11px !important;
+    box-shadow: none !important;
+  }
+
+  /* Each execution item's full title sits ABOVE the two actions. */
+  #today #todayList > .listitem {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: start !important;
+    row-gap: 10px !important;
+    padding: 12px !important;
+  }
+  #today #todayList .today-item-main,
+  #today #todayList .today-item-copy {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  #today #todayList .today-item-copy > b {
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
+  #today #todayList .today-path {
+    max-width: 100% !important;
+  }
+  #today #todayList .today-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+  }
+  #today #todayList .today-actions > .btn {
+    box-sizing: border-box;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+  #today #todayList .today-selected-label {
+    grid-column: 1 / -1;
+    margin: 0 !important;
+  }
+
+  /* Calendar already has a real 7-column full-width grid. Keep it intact. */
+  #calendar .calendar-shell {
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  /* Never clip the floating navigation or safe-area controls. */
+  .bottom-nav {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
