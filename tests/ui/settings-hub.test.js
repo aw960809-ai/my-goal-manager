@@ -1,4 +1,4 @@
-/* V98.13.3 settings hub regression: synthetic data only; no real storage. */
+/* V98.13.4 settings hub regression: synthetic data only; no real storage. */
 'use strict';
 const assert=require('assert');
 const fs=require('fs');
@@ -14,7 +14,7 @@ const status=read('js/autofetch-status.js');
 const version=read('config/version.js');
 const sw=read('sw.js');
 
-assert.match(version,/GOAL_MANAGER_VERSION='98\.13\.3'/);
+assert.match(version,/GOAL_MANAGER_VERSION='98\.13\.4'/);
 assert.match(version,/GOAL_MANAGER_SCHEMA_VERSION=6/);
 assert.ok(sw.includes("importScripts('./config/version.js')"));
 assert.ok(read('js/app.js').includes("const KEY='lawLangGoalSystemV92'"));
@@ -35,7 +35,7 @@ const context={
     addEventListener(){},
     getElementById(id){return id==='settingsBody'?settingsBody:id==='settingsModal'?modal:null}
   },
-  window:{matchMedia(){return scheme},AppConfig:{version:'V98.13.3'}},
+  window:{matchMedia(){return scheme},AppConfig:{version:'V98.13.4'}},
   localStorage:{
     getItem(k){return storage.has(k)?storage.get(k):null},
     setItem(k,v){changes.push(k);storage.set(k,String(v))}

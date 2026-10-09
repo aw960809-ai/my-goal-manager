@@ -1,7 +1,7 @@
 /* SUITE_ICON_RELEASE:20261005a; visual assets only; storage and application versions unchanged. */
 /* THU personal service worker */
 importScripts('./config/version.js');
-const PWA_VERSION=String(globalThis.GOAL_MANAGER_VERSION||'98.13.3');
+const PWA_VERSION=String(globalThis.GOAL_MANAGER_VERSION||'98.13.4');
 const PWA_SIGNATURE='thu-personal-'+PWA_VERSION+'-core';
 const CACHE_PREFIX='thu-goal-personal-v';
 const LEGACY_CACHE_PREFIX='law-goal-web-v';
