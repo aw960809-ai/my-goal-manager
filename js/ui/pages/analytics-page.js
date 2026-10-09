@@ -33,9 +33,9 @@
   function renderStats({
     document,
     leaves,
-    done,
     avg,
     week,
+    weekEngagedActionCount,
     directionRows,
     actualLogCount,
     esc,
@@ -44,7 +44,7 @@
     const safeLeaves=Array.isArray(leaves)?leaves:[];
     const safeDirections=Array.isArray(directionRows)?directionRows:[];
 
-    setText(document,'leafDone',`${done}/${safeLeaves.length}`);
+    setText(document,'weekEngagedActionCount',String(weekEngagedActionCount||0));
     setText(document,'avg',`${avg}%`);
     setText(document,'weekCreditedKpi',TimeFormat.minutes(week?.creditedGoalMinutes));
     setText(document,'logsN',actualLogCount||0);

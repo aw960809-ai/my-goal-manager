@@ -38,6 +38,28 @@
     });
   }
 
+  /** Count distinct valid Level 4 actions with real positive minutes this week. */
+  function weeklyEngagedActionCount({tasks,logs,date}){
+    const validIds=new Set(
+      analysisValidLeafTasks(tasks)
+        .filter(task=>task.id!==undefined&&task.id!==null)
+        .map(task=>String(task.id))
+    );
+    if(validIds.size===0)return 0;
+    const start=ExecutionDomain.weekStartKey(date);
+    const end=ExecutionDomain.weekEndKey(date);
+    const engaged=new Set();
+    list(logs).forEach(log=>{
+      const id=String(log?.taskId??'');
+      const minutes=Number(log?.minutes);
+      if(!validIds.has(id)||!Number.isFinite(minutes)||minutes<=0)return;
+      if(!StudyLogDomain.isGoalActualLog(log,tasks))return;
+      if(!StudyLogDomain.inDateRange(log,start,end))return;
+      engaged.add(id);
+    });
+    return engaged.size;
+  }
+
   function weeklyStudySummary({tasks,logs,date}){
     const ws=ExecutionDomain.weekStartKey(date);
     const we=ExecutionDomain.weekEndKey(date);
@@ -295,6 +317,7 @@
 
   return Object.freeze({
     analysisValidLeafTasks,
+    weeklyEngagedActionCount,
     weeklyStudySummary,
     weeklyDirectionSummary,
     executionAnalysis
