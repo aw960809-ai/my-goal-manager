@@ -1,0 +1,578 @@
+
+/* Goal Manager V98.13.2: production UI refinements; state and data preserved. */
+/* Settings: one navigation layer, native accordion is the sole navigation. */
+#settingsBody .settings-hub-nav{display:none!important}
+#settingsBody .settings-hub-intro{padding-bottom:8px!important}
+#settingsBody .settings-hub-save-status{margin-top:4px!important}
+
+/* Goal browse: one structural toolbar (path and count | add), then one search. */
+#goals .goal-view-switch,
+#goals #goalMapPanel{display:none!important}
+#goals .goal-page-head{padding-bottom:10px!important}
+
+#goals .gm-goal-toolbar{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:12px!important;
+  padding:2px 0 15px!important;
+  margin:0 0 12px!important;
+  border-bottom:1px solid var(--gm-line,#d7dee4)!important;
+}
+#goals .gm-goal-location{
+  display:grid;
+  align-content:center;
+  gap:5px;
+  min-width:0;
+}
+#goals .gm-goal-toolbar .goal-breadcrumb{
+  display:flex;align-items:center;gap:5px;
+  min-width:0;width:100%;overflow-x:auto;
+  white-space:nowrap;scrollbar-width:none;
+}
+#goals .gm-goal-toolbar .goal-breadcrumb::-webkit-scrollbar{display:none}
+#goals .gm-goal-toolbar .goal-breadcrumb button{
+  font-size:15px!important;line-height:1.35!important;
+  font-weight:700!important;
+  padding:2px 1px!important;
+  max-width:170px;
+  text-overflow:ellipsis;overflow:hidden;
+  flex:0 0 auto;
+}
+#goals .gm-goal-toolbar .goal-breadcrumb button:last-child{
+  color:var(--gm-text,#24313d)!important;
+}
+#goals .gm-goal-toolbar .goal-breadcrumb span{
+  flex:0 0 auto;color:var(--gm-text-muted,#7a8791)
+}
+#goals .gm-goal-count{
+  display:block;font-size:12px;line-height:1.4;
+  color:var(--gm-text-secondary,#64748b);
+}
+#goals .gm-goal-toolbar #goalBrowseAdd{
+  min-height:46px!important;width:auto!important;
+  min-width:max-content!important;
+  max-width:144px!important;
+  padding:0 14px!important;
+  white-space:nowrap!important;
+  overflow-wrap:normal!important;
+  word-break:keep-all!important;
+  border-radius:12px!important;
+  font-size:14px!important;
+  font-weight:700!important;
+}
+#goals .goal-browse-context[hidden]{display:none!important}
+#goals .goal-browse-context:not([hidden]){
+  display:flex;align-items:center;gap:12px;
+  margin:10px 0 12px;
+  padding:10px 12px;border-radius:12px;
+}
+#goals .goal-browse-context:not([hidden])>div{
+  min-width:0;
+}
+#goals .gm-goal-search{
+  margin:0 0 12px;
+  border:1px solid var(--gm-line,#d7dee4);
+  border-radius:13px;
+  background:var(--gm-surface-elevated,#fff);
+  overflow:hidden;
+}
+#goals .gm-goal-search>summary{
+  display:flex;align-items:center;gap:9px;
+  min-height:48px;padding:11px 13px;
+  list-style:none;cursor:pointer;
+  font-size:14px;font-weight:700;
+  color:var(--gm-text,#24313d);
+}
+#goals .gm-goal-search>summary::-webkit-details-marker{display:none}
+#goals .gm-goal-search>summary small{
+  margin-left:auto;font-size:11px;font-weight:500;
+  color:var(--gm-text-secondary,#64748b);
+}
+#goals .gm-goal-search>summary:after{
+  content:'⌄';font-size:18px;
+  color:var(--gm-text-secondary,#64748b);
+}
+#goals .gm-goal-search[open]>summary:after{transform:rotate(180deg)}
+#goals .gm-goal-search-content{
+  padding:0 12px 12px;
+  border-top:1px solid var(--gm-line,#d7dee4);
+}
+#goals .gm-goal-search-input{
+  display:block;width:100%;min-height:45px;
+  margin:12px 0 8px;padding:10px 12px;
+  border:1px solid var(--gm-line,#d7dee4);
+  border-radius:10px;
+  background:var(--gm-surface,#fff);
+  color:var(--gm-text,#24313d);
+  font-size:14px;
+}
+#goals .gm-goal-search-filters{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;
+}
+#goals .gm-goal-search-filters label{
+  display:grid;gap:3px;
+  font-size:11px;color:var(--gm-text-secondary,#64748b);
+}
+#goals .gm-goal-search-filters select{
+  width:100%;min-width:0;min-height:42px;
+  padding:7px 9px;border:1px solid var(--gm-line,#d7dee4);
+  border-radius:10px;background:var(--gm-surface,#fff);
+  color:var(--gm-text,#24313d);font-size:13px;
+}
+#goals .gm-goal-search-count{
+  margin:11px 0 5px;font-size:12px;
+  color:var(--gm-text-secondary,#64748b);
+}
+#goals .gm-goal-search-results{
+  display:grid;gap:7px;
+  max-height:440px;overflow:auto;
+}
+#goals .gm-goal-search-row{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;min-width:0;padding:10px 11px;
+  border:1px solid var(--gm-line,#d7dee4);
+  border-radius:10px;background:var(--gm-surface,#fff);
+}
+#goals .gm-goal-search-row>div{display:grid;min-width:0;gap:4px;flex:1}
+#goals .gm-goal-search-row b{
+  font-size:13px;line-height:1.4;overflow-wrap:anywhere;
+  color:var(--gm-text,#24313d);
+}
+#goals .gm-goal-search-row small{
+  font-size:11px;line-height:1.35;overflow-wrap:anywhere;
+  color:var(--gm-text-secondary,#64748b);
+}
+#goals .gm-goal-search-row button{
+  flex:0 0 auto;min-height:42px;padding:8px 11px;
+  border:1px solid var(--gm-line,#d7dee4);
+  border-radius:10px;
+  color:var(--gm-primary-deep,#354d60);
+  background:var(--gm-primary-soft,#e8edf3);
+  font-size:12px;font-weight:700;cursor:pointer;
+}
+#goals .gm-goal-search>summary:focus-visible,
+#goals .gm-goal-search-row button:focus-visible,
+#goals #goalBrowseAdd:focus-visible{
+  outline:3px solid var(--gm-focus,rgba(87,113,140,.3));outline-offset:2px;
+}
+@media(max-width:420px){
+  #goals .gm-goal-toolbar{gap:8px!important}
+  #goals .gm-goal-toolbar .goal-breadcrumb button{
+    font-size:14px!important;max-width:110px;
+  }
+  #goals .gm-goal-toolbar #goalBrowseAdd{
+    min-height:44px!important;max-width:132px!important;
+    padding:0 10px!important;font-size:13px!important;
+  }
+  #goals .gm-goal-search>summary small{display:none}
+  #goals .gm-goal-search-row{align-items:start}
+}
+
+/* Activities: compact at a glance, keep detailed fields available on demand. */
+#activity .activity-group .activity-card{
+  padding:12px 13px!important;
+  border-radius:14px!important;
+  box-shadow:none!important;
+}
+#activity .activity-card .activity-head{gap:9px!important}
+#activity .activity-card .activity-title-block h3{
+  font-size:15px!important;line-height:1.4!important;
+  margin:3px 0 5px!important;
+}
+#activity .activity-card .activity-eyebrow{font-size:11px!important}
+#activity .activity-card .activity-title-block>.muted{font-size:12px!important;line-height:1.4!important}
+#activity .activity-card .activity-score-block{min-width:62px!important;padding:7px!important;border-radius:11px!important}
+#activity .activity-card .activity-score-block .activity-score{font-size:24px!important}
+#activity .activity-card .activity-meta{margin:7px 0 0!important;gap:5px!important}
+#activity .activity-card .activity-meta .tier-chip{display:none!important}
+#activity .activity-card .activity-chip{font-size:11px!important;padding:4px 7px!important}
+#activity .gm-activity-deadline{
+  margin:9px 0 3px;font-size:12px;line-height:1.45;
+  color:var(--gm-text-secondary,#64748b);overflow-wrap:anywhere
+}
+#activity .gm-activity-deadline b{color:var(--gm-text,#242f3e);font-weight:650}
+#activity .activity-card .gm-activity-reason-details{
+  margin-top:9px!important;
+  border-top:1px solid var(--gm-line,#d7dee4)!important;
+  background:transparent!important;
+}
+#activity .activity-card .gm-activity-reason-details>summary{
+  display:flex;align-items:center;gap:8px;min-height:38px;
+  padding:7px 0!important;cursor:pointer;list-style:none;
+  font-size:12px!important;font-weight:650!important;
+  color:var(--gm-text-secondary,#586474)!important;
+  -webkit-tap-highlight-color:transparent!important;
+  touch-action:manipulation;
+  box-shadow:none!important;
+}
+#activity .activity-card .gm-activity-reason-details>summary::-webkit-details-marker{display:none}
+#activity .activity-card .gm-activity-reason-details>summary:after{
+  content:'⌄';font-size:15px;margin-left:auto;
+}
+#activity .activity-card .gm-activity-reason-details[open]>summary:after{transform:rotate(180deg)}
+#activity .activity-card .gm-activity-reason-details ul{
+  margin:1px 0 8px!important;padding-left:19px!important;
+  font-size:12px!important;line-height:1.55!important;
+}
+#activity .activity-card .gm-activity-reason-details li{margin:4px 0}
+#activity .activity-card .gm-activity-reason-details .activity-source{
+  margin:5px 0 9px!important;font-size:11px!important;overflow-wrap:anywhere;
+}
+#activity .activity-card .activity-actions{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px!important;margin-top:7px!important
+}
+#activity .activity-card .activity-actions>.btn{margin:0!important;width:100%!important;min-height:43px!important;display:flex!important;justify-content:center;align-items:center!important;text-align:center!important}
+#activity .activity-card .activity-actions>.btn:only-child{grid-column:1/-1}
+@media(max-width:400px){
+  #goals .gm-goal-search>summary small{display:none}
+  #goals .gm-goal-search-row{align-items:start}
+  #activity .activity-card .activity-actions{gap:6px!important}
+}
+
+
+/* Four filter cards are the only circle controls. The existing select
+   continues to own filtering and is hidden only when cards were installed. */
+#activity .filter-control.activity-scope-legacy{display:none!important}
+#activity .activity-radar-guide{
+  display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:6px!important;margin:8px 0 10px!important
+}
+#activity .activity-radar-guide .radar-ring{
+  min-width:0!important;min-height:51px!important;
+  padding:7px 4px!important;display:flex!important;
+  align-items:center!important;justify-content:center!important;
+  text-align:center!important
+}
+#activity .activity-radar-guide .radar-ring b{
+  font-size:11px!important;line-height:1.35!important
+}
+#activity .activity-radar-guide .radar-ring small{display:none!important}
+
+/* The original source card is available in a disclosure, not in the
+   recommendation reading flow. The source counts stay visible. */
+#activity .gm-radar-source-details{
+  margin:7px 0 12px;border:1px solid var(--gm-line,#d7dee4);
+  border-radius:12px;background:var(--gm-surface-elevated,#fff);
+}
+#activity .gm-radar-source-details>summary{
+  list-style:none;display:flex;align-items:center;
+  min-height:43px;padding:8px 12px;
+  font-size:12px;font-weight:650;line-height:1.35;
+  color:var(--gm-text-secondary,#64748b);cursor:pointer
+}
+#activity .gm-radar-source-details>summary::-webkit-details-marker{display:none}
+#activity .gm-radar-source-details>summary:after{
+  content:'⌄';font-size:16px;margin-left:auto
+}
+#activity .gm-radar-source-details[open]>summary:after{transform:rotate(180deg)}
+#activity .gm-radar-source-details[data-attention="true"]>summary{
+  color:var(--gm-primary-deep,#465b73)
+}
+#activity .gm-radar-source-details #activityAutoStatus{
+  margin:0!important;border:0!important;
+  border-top:1px solid var(--gm-line,#d7dee4)!important;
+  border-radius:0 0 12px 12px!important;
+}
+
+/* Event cards: title + meaningful date + two useful tags, expandable details,
+   one primary shortcut. No duplicated ring, status, or goal shortcut. */
+#activity .activity-card .activity-eyebrow{display:none!important}
+#activity .activity-card .activity-chip:last-child{display:none!important}
+#activity .activity-card .activity-head h3{margin:0 0 3px!important;line-height:1.3!important}
+#activity .activity-card .activity-meta{margin:5px 0 0!important;gap:4px!important}
+#activity .activity-card .activity-chip{padding:3px 7px!important}
+#activity .activity-card .gm-activity-deadline{margin:6px 0 1px!important}
+#activity .activity-card .activity-actions>.btn{
+  min-height:41px!important;padding:7px 11px!important;
+  font-size:13px!important
+}
+#activity .activity-card .activity-actions:empty{display:none!important}
+#activity #activityGoalContext button[onclick*="activityOpenGoal"]{display:none!important}
+@media(max-width:360px){
+  #activity .activity-radar-guide .radar-ring b{font-size:10px!important}
+}
+
+
+/* Advanced activity filters (unchanged). */
+#activity .gm-radar-advanced{
+  margin:8px 0 9px!important;
+  border:1px solid var(--gm-line,#d7dee4);
+  border-radius:12px;
+  background:var(--gm-surface-elevated,#fff);
+  overflow:hidden;
+}
+#activity .gm-radar-advanced>summary{
+  display:flex;align-items:center;gap:10px;
+  list-style:none;cursor:pointer;
+  min-height:45px;padding:10px 12px;
+  color:var(--gm-text,#26313d);
+}
+#activity .gm-radar-advanced>summary::-webkit-details-marker{display:none}
+#activity .gm-radar-advanced>summary b{
+  flex:0 0 auto;font-size:13px;font-weight:650;
+}
+#activity .gm-radar-advanced>summary small{
+  flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:11px;color:var(--gm-text-secondary,#667480);text-align:right;
+}
+#activity .gm-radar-advanced>summary:after{
+  content:'⌄';font-size:17px;margin-left:2px;color:var(--gm-text-secondary,#667480);
+}
+#activity .gm-radar-advanced[open]>summary:after{transform:rotate(180deg)}
+#activity .gm-radar-advanced[data-filtered="true"]>summary{
+  border-left:3px solid var(--gm-primary,#596a85);
+}
+#activity .gm-radar-advanced:not([open])>.activity-filter-row{
+  display:none!important;
+}
+#activity .gm-radar-advanced[open]>.activity-filter-row.radar-filters-ready{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px!important;
+  padding:9px!important;
+  margin:0!important;
+  border-top:1px solid var(--gm-line,#d7dee4);
+}
+#activity .gm-radar-advanced[open]>.activity-filter-row.radar-filters-ready>.filter-control:last-child{
+  grid-column:1/-1!important;
+}
+#activity .gm-radar-advanced .activity-scope-legacy{
+  display:none!important;
+}
+#activity .gm-radar-advanced:not([open])>.activity-filter-row.visual-filters{
+  visibility:hidden!important;
+}
+
+/* Staging layout consolidation: one activity detail level, focused mobile
+   study backfill, expandable scholarship qualifications. No calculation changes. */
+#scholarship .gm-scholarship-policy{
+  margin-top:12px;border:1px solid var(--gm-line,#d7dee4);
+  border-radius:12px;background:var(--gm-surface-elevated,#fff);
+}
+#scholarship .gm-scholarship-policy>summary{
+  display:flex;align-items:center;justify-content:space-between;
+  min-height:44px;padding:9px 13px;cursor:pointer;list-style:none;
+  color:var(--gm-text-secondary,#586474);font-size:13px;font-weight:700;
+  -webkit-tap-highlight-color:transparent;
+}
+#scholarship .gm-scholarship-policy>summary::-webkit-details-marker{display:none}
+#scholarship .gm-scholarship-policy>summary:after{content:'⌄';font-size:17px}
+#scholarship .gm-scholarship-policy[open]>summary:after{transform:rotate(180deg)}
+#scholarship .gm-scholarship-policy .notice{
+  margin:0!important;padding:11px 13px!important;border:0!important;
+  border-top:1px solid var(--gm-line,#d7dee4)!important;
+  border-radius:0 0 12px 12px!important;
+  background:transparent!important;
+  color:var(--gm-text-secondary,#586474)!important;
+  font-size:12px!important;line-height:1.6!important;
+}
+#scholarship .gm-scholarship-policy>summary:focus-visible,
+#activity .gm-activity-reason-details>summary:focus-visible{
+  outline:3px solid var(--gm-focus,rgba(80,105,139,.27));
+  outline-offset:2px;
+}
+@media(max-width:700px){
+  #today .other-study-disclosure .other-study-grid{
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:9px!important;
+  }
+  #today .other-study-disclosure .other-study-grid>label:first-child,
+  #today .other-study-disclosure .study-backfill-task-field{
+    grid-column:1/-1!important;min-width:0!important;
+  }
+  #today .other-study-disclosure .other-study-grid label{min-width:0}
+  #today .other-study-disclosure .other-study-grid select,
+  #today .other-study-disclosure .other-study-grid input{
+    width:100%!important;min-width:0!important;min-height:44px!important;
+  }
+  #today .other-study-disclosure .other-study-actions .btn{
+    width:100%!important;min-height:44px!important;
+  }
+  #stats .direction-meta{gap:5px 10px!important;line-height:1.45!important}
+  #stats .actual-log-compact-row{min-height:0!important;padding:10px 0!important}
+}
+
+/* Staging refinement: execution, analytics and scholarship reading hierarchy.
+   Only original controls and metric nodes are used; never rewrite user data. */
+#today .execution-now-head{
+  align-items:flex-start!important;gap:7px!important;
+}
+#today .execution-now-head>small{
+  text-align:right!important;font-size:11px!important;
+  line-height:1.4!important;color:var(--gm-text-muted,#6b7380)!important;
+}
+#today .free-study-quick-copy b{
+  font-size:15px!important;font-weight:700!important;
+  color:var(--gm-text,#27313d)!important;
+}
+#today .free-study-quick-note,
+#today .other-study-note{line-height:1.52!important}
+#today .other-study-disclosure>summary b{line-height:1.3!important}
+#today .other-study-disclosure>summary small{
+  line-height:1.45!important;max-width:31rem;
+}
+#stats .gm-stats-primary-metrics{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:8px!important;margin-top:12px!important;
+}
+#stats .gm-stats-primary-metrics>span{
+  min-width:0!important;min-height:64px;
+  padding:11px 10px!important;border:1px solid var(--gm-line,#d7dee4);
+  background:var(--gm-surface-soft,#f1f4f5)!important;
+  border-radius:12px;color:var(--gm-text-secondary,#66727d)!important;
+  font-size:12px!important;line-height:1.5!important;
+  overflow-wrap:anywhere;
+}
+#stats .gm-stats-primary-metrics>span b{
+  color:var(--gm-text,#27313d)!important;
+  font-size:clamp(15px,2.1vw,19px)!important;
+  font-weight:750!important;font-variant-numeric:tabular-nums;
+}
+#stats .gm-stats-extra{
+  margin-top:8px;border-top:1px solid var(--gm-line,#d7dee4);
+}
+#stats .gm-stats-extra>summary,
+#stats .gm-stats-deleted-summary{
+  list-style:none;cursor:pointer;
+  -webkit-tap-highlight-color:transparent!important;
+  touch-action:manipulation;
+}
+#stats .gm-stats-extra>summary{
+  min-height:40px;padding:10px 2px 7px;
+  display:flex;align-items:center;justify-content:space-between;
+  color:var(--gm-text-secondary,#66727d);font-size:12px;font-weight:650;
+}
+#stats .gm-stats-extra>summary::-webkit-details-marker,
+#stats .gm-stats-deleted-summary::-webkit-details-marker{display:none}
+#stats .gm-stats-extra>summary:after,
+#stats .gm-stats-deleted-summary:after{
+  content:'⌄';font-size:17px;margin-left:10px;
+}
+#stats .gm-stats-extra[open]>summary:after,
+#stats .gm-stats-deleted[open]>summary:after{
+  transform:rotate(180deg);
+}
+#stats .gm-stats-secondary-metrics{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;padding-top:4px!important;
+}
+#stats .gm-stats-secondary-metrics>span{
+  padding:9px!important;border-radius:10px;
+  background:var(--gm-surface-soft,#f1f4f5);
+  color:var(--gm-text-secondary,#66727d);
+  font-size:12px;min-width:0;overflow-wrap:anywhere;
+}
+#stats .gm-stats-secondary-metrics>span b{
+  color:var(--gm-text,#27313d);font-weight:700;
+  font-variant-numeric:tabular-nums;
+}
+#stats .gm-stats-deleted{
+  padding:0!important;border-color:var(--gm-line,#d7dee4)!important;
+  overflow:hidden!important;
+}
+#stats .gm-stats-deleted-summary{
+  min-height:52px!important;display:flex;align-items:center;
+  flex-wrap:wrap;gap:7px;padding:12px 14px!important;
+}
+#stats .gm-stats-deleted-summary>b{
+  color:var(--gm-text,#27313d);
+  font-size:15px;font-weight:700;
+}
+#stats .gm-stats-deleted-summary>small{
+  color:var(--gm-text-secondary,#66727d);
+  font-size:12px;margin-left:auto;
+}
+#stats .gm-stats-deleted[data-has-logs="true"] .gm-stats-deleted-summary>small{
+  color:var(--gm-primary-deep,#435c73)!important;font-weight:750;
+}
+#stats .gm-stats-deleted-help{
+  margin:0 14px 9px!important;font-size:12px!important;
+  color:var(--gm-text-secondary,#66727d)!important;line-height:1.5;
+}
+#stats .gm-stats-deleted #deletedLogs{
+  padding:0 14px 13px!important;
+}
+#stats .gm-stats-extra>summary:focus-visible,
+#stats .gm-stats-deleted-summary:focus-visible{
+  outline:3px solid var(--gm-focus,rgba(75,99,127,.26));
+  outline-offset:-3px;
+}
+#scholarship #scholarshipStats:has(.gm-scholarship-metrics){
+  padding:8px 10px!important;
+}
+#scholarship .gm-scholarship-metrics{
+  display:grid;gap:8px;
+}
+#scholarship .gm-scholarship-summary-main{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;
+}
+#scholarship .gm-scholarship-main-item{
+  display:flex;align-items:baseline;justify-content:space-between;
+  min-width:0;gap:8px;padding:8px 10px;border-radius:10px;
+  background:var(--gm-surface-soft,#f1f4f5);
+}
+#scholarship .gm-scholarship-main-item small{
+  color:var(--gm-text-secondary,#66727d);
+  font-size:12px!important;white-space:nowrap;
+}
+#scholarship .gm-scholarship-main-item strong{
+  color:var(--gm-text,#27313d);font-size:20px;
+  font-variant-numeric:tabular-nums;
+}
+#scholarship .gm-scholarship-summary-extra{
+  display:flex;align-items:center;flex-wrap:wrap;
+  gap:5px 10px;color:var(--gm-text-secondary,#66727d);
+}
+#scholarship .gm-scholarship-extra-item{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;white-space:nowrap;
+}
+#scholarship .gm-scholarship-extra-item small{
+  color:var(--gm-text-secondary,#66727d);
+  font-size:11px!important;
+}
+#scholarship .gm-scholarship-extra-item b{
+  color:var(--gm-text,#27313d);font-weight:700;
+  font-variant-numeric:tabular-nums;
+}
+@media(max-width:700px){
+  #today .execution-now-head{flex-wrap:wrap!important}
+  #today .execution-now-head>small{text-align:left!important}
+  #stats .gm-stats-primary-metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #stats .gm-stats-secondary-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #stats .gm-stats-primary-metrics>span{padding:10px 9px!important}
+  #scholarship .gm-scholarship-main-item{padding:8px 9px}
+}
+/* Android tap-feedback artifact test: backfill and radar only.
+   Avoid the global 999px inset shadow overlay; keep pressed/active feedback. */
+#today .other-study-disclosure button.tap-flash,
+#activity button.tap-flash,
+#activity .btn.tap-flash{
+  box-shadow:none!important;
+  filter:brightness(.97)!important;
+}
+#today .other-study-disclosure>summary,
+#today .other-study-disclosure button,
+#today .other-study-disclosure select,
+#today .other-study-disclosure input,
+#activity .activity-radar-guide button,
+#activity .activity-actions .btn,
+#activity .activity-search-panel button,
+#activity .gm-radar-advanced>summary,
+#activity .activity-reasons>summary,
+#activity .gm-activity-reason-details>summary,
+#activity .filter-control select{
+  -webkit-tap-highlight-color:transparent!important;
+}
+#today .other-study-disclosure>summary,
+#activity .activity-radar-guide button,
+#activity .gm-radar-advanced>summary{
+  touch-action:manipulation;
+  -webkit-user-select:none;
+  user-select:none;
+}
+/* Preserve accessible keyboard focus outlines from the canonical design. */
