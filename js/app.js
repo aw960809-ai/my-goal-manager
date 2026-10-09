@@ -909,18 +909,19 @@ function analysisValidLeafTasks(){return AnalyticsDomain.analysisValidLeafTasks(
 function stats(){
  const leaves=analysisValidLeafTasks();
  leaves.forEach(t=>calc(t));
- const done=leaves.filter(t=>calc(t)===100).length;
  const avg=leaves.length?Math.round((leaves.reduce((sum,t)=>sum+calc(t),0)/leaves.length)*10)/10:0;
- const week=AnalyticsDomain.weeklyStudySummary({tasks:db.tasks,logs:db.logs,date:todayKey()});
+ const date=todayKey();
+ const week=AnalyticsDomain.weeklyStudySummary({tasks:db.tasks,logs:db.logs,date});
+ const weekEngagedActionCount=AnalyticsDomain.weeklyEngagedActionCount({tasks:db.tasks,logs:db.logs,date});
  const rootsActive=roots().filter(t=>t.status!=='已封存');
- const directionRows=AnalyticsDomain.weeklyDirectionSummary({tasks:db.tasks,logs:db.logs,roots:rootsActive,date:todayKey()});
+ const directionRows=AnalyticsDomain.weeklyDirectionSummary({tasks:db.tasks,logs:db.logs,roots:rootsActive,date});
 
  AnalyticsPage.renderStats({
   document,
   leaves,
-  done,
   avg,
   week,
+  weekEngagedActionCount,
   directionRows,
   actualLogCount:StudyLogDomain.countableLogs(db.logs).length,
   esc,

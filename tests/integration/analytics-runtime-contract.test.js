@@ -8,7 +8,7 @@ function element(){
 }
 
 const ids=[
-  'leafDone','avg','weekCreditedKpi','logsN',
+  'weekEngagedActionCount','avg','weekCreditedKpi','logsN',
   'statsWeekRatio','statsWeekBar',
   'statsActual','statsCredited','statsOverrun',
   'statsOtherStudy','statsTotalStudy','statsTarget',
@@ -23,6 +23,7 @@ AnalyticsPage.renderStats({
   leaves:[],
   done:0,
   avg:0,
+  weekEngagedActionCount:0,
   week:{
     ratio:0,
     goalActualMinutes:0,
@@ -39,7 +40,7 @@ AnalyticsPage.renderStats({
   calc:()=>0
 });
 
-assert.strictEqual(elements.leafDone.textContent,'0/0');
+assert.strictEqual(elements.weekEngagedActionCount.textContent,'0');
 assert.strictEqual(elements.avg.textContent,'0%');
 assert.strictEqual(elements.statsWeekRatio.textContent,'0%');
 assert.strictEqual(elements.statsWeekBar.style.width,'0%');
@@ -51,6 +52,7 @@ AnalyticsPage.renderStats({
   leaves:[{id:'task-1',name:'行政法',level:4,status:'進行中'}],
   done:0,
   avg:25,
+  weekEngagedActionCount:1,
   week:{
     ratio:50,
     goalActualMinutes:80,
@@ -76,6 +78,7 @@ AnalyticsPage.renderStats({
   calc:()=>25
 });
 
+assert.strictEqual(elements.weekEngagedActionCount.textContent,'1');
 assert(elements.domains.innerHTML.includes('台大及政大轉學考'));
 assert(elements.domains.innerHTML.includes('實際 80 分'));
 assert(elements.domains.innerHTML.includes('有效 60 分'));
@@ -89,6 +92,8 @@ const app=fs.readFileSync(
 );
 
 assert(app.includes("if(id==='stats')stats();"));
+assert(app.includes('AnalyticsDomain.weeklyEngagedActionCount({tasks:db.tasks,logs:db.logs,date})'));
+assert(fs.readFileSync(path.join(__dirname,'../../index.html'),'utf8').includes('本週投入行動'));
 assert(app.includes("if(id==='today'){today();renderTimerState();}"));
 assert(!app.includes('saveExecutionPlan'));
 assert(!app.includes('findActivePlanForDate'));
