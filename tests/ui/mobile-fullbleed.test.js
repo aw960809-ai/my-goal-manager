@@ -12,7 +12,7 @@ const sw = read('sw.js');
 const version = read('config/version.js');
 const refinements = read('js/refinements.js');
 
-assert(version.includes("GOAL_MANAGER_VERSION='98.13.3'"));
+assert(version.includes("GOAL_MANAGER_VERSION='98.13.4'"));
 assert(version.includes('GOAL_MANAGER_SCHEMA_VERSION=6'));
 assert(html.includes('id="weekEngagedActionCount"'));
 assert(html.includes('本週投入行動'));

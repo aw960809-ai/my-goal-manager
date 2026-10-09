@@ -12,7 +12,7 @@ const css=read('css/refinements.css');
 const sw=read('sw.js');
 const version=read('config/version.js');
 
-assert(version.includes("GOAL_MANAGER_VERSION='98.13.3'"));
+assert(version.includes("GOAL_MANAGER_VERSION='98.13.4'"));
 assert(version.includes('GOAL_MANAGER_SCHEMA_VERSION=6'));
 assert(html.includes('id="weekEngagedActionCount"'));
 assert(html.includes('本週投入行動'),'The existing V98.13.1 KPI must remain');
@@ -58,4 +58,4 @@ assert(!/@import|url\(/.test(css),'Remote CSS asset injection is disallowed');
 vm.runInNewContext(js,{window:{},document:{getElementById:()=>null}},
                    {filename:'js/refinements.js'});
 assert(read('js/app.js').includes("const KEY='lawLangGoalSystemV92'"));
-console.log('OK: V98.13.3 refinements loaded after bootstrap; original KPI, store and UI boundaries preserved');
+console.log('OK: V98.13.4 refinements loaded after bootstrap; original KPI, store and UI boundaries preserved');

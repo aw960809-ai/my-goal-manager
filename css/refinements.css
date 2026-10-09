@@ -576,3 +576,58 @@
   user-select:none;
 }
 /* Preserve accessible keyboard focus outlines from the canonical design. */
+
+/* GM-V98.13.4: prevent Android native blue touch highlight on accordions.
+ * Scope only to existing activity source and settings disclosure controls.
+ * Do not change the open state, data-source health, or app theme values.
+ */
+:is(
+  #activity .gm-radar-source-details > summary,
+  #activity .gm-radar-advanced > summary,
+  #activity .gm-activity-reason-details > summary,
+  #settingsBody .settings-hub-panel > summary.settings-hub-summary,
+  #settingsBody .settings-hub-advanced > summary
+) {
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+  -webkit-appearance: none;
+  appearance: none;
+  box-shadow: none !important;
+}
+
+/* Touch focus does not need a browser-default blue rectangle. */
+:is(
+  #activity .gm-radar-source-details > summary,
+  #activity .gm-radar-advanced > summary,
+  #activity .gm-activity-reason-details > summary,
+  #settingsBody .settings-hub-panel > summary.settings-hub-summary,
+  #settingsBody .settings-hub-advanced > summary
+):focus:not(:focus-visible) {
+  outline: none !important;
+}
+
+/* Keep a visible theme-aware focus indication for keyboard users. */
+:is(
+  #activity .gm-radar-source-details > summary,
+  #activity .gm-radar-advanced > summary,
+  #activity .gm-activity-reason-details > summary,
+  #settingsBody .settings-hub-panel > summary.settings-hub-summary,
+  #settingsBody .settings-hub-advanced > summary
+):focus-visible {
+  outline: 3px solid var(--gm-focus, rgba(89,106,133,.3)) !important;
+  outline-offset: -3px !important;
+}
+
+/* A small brightness response replaces any native touch color overlay. */
+:is(
+  #activity .gm-radar-source-details > summary,
+  #activity .gm-radar-advanced > summary,
+  #activity .gm-activity-reason-details > summary,
+  #settingsBody .settings-hub-panel > summary.settings-hub-summary,
+  #settingsBody .settings-hub-advanced > summary
+):active {
+  filter: brightness(.98);
+}
