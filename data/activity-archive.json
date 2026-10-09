@@ -2,18 +2,178 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-10-08T07:48:14.631797+00:00",
-    "count": 26,
-    "retiredThisRun": 0,
+    "updatedAt": "2026-10-09T07:29:12.219725+00:00",
+    "count": 28,
+    "retiredThisRun": 2,
     "revivedThisRun": 0,
-    "retiredTotal": 26,
+    "retiredTotal": 28,
     "revivedTotal": 0,
     "retainedOnFailure": 0,
-    "carriedMissing": 21,
-    "needsReview": 21,
+    "carriedMissing": 19,
+    "needsReview": 19,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
+    {
+      "id": "auto-thu-2026090088",
+      "title": "轉知活動「AI × ESG 職涯浪潮下打造你的求職競爭力」",
+      "date": "2026-09-29",
+      "time": "13:00",
+      "scope": "東海校內",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026090088",
+      "keywords": "轉知活動「AI × ESG 職涯浪潮下打造你的求職競爭力」 東海大學 公共事務暨校友服務處 學術活動 教職員，費用：0；學生，費用：0；校外人士，費用：0 學術／講座 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 公共事務暨校友服務處；活動日 2026-09-29；截止 2026-10-08",
+      "government": false,
+      "deadline": "2026-10-08",
+      "eventEndDate": "",
+      "location": "、人數或其他不可預期因素需調整安排，將另行通知。",
+      "organizer": "公共事務暨校友服務處",
+      "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090088",
+        "fetchedAt": "2026-09-30T06:48:41.073752+00:00"
+      },
+      "fitScore": 56,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "職涯／實習+20",
+        "通用能力／AI工具+14",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "職涯／實習",
+        "通用能力／AI工具"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-29T07:01:11.559387+00:00",
+      "lastSeen": "2026-09-30T06:49:51.580785+00:00",
+      "missCount": 4,
+      "needsReview": true,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-09T07:29:12.219183+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-09-30T06:49:51.580785+00:00"
+    },
+    {
+      "id": "auto-thu-2026090093",
+      "title": "【行政講堂】10/8(四)，國際 ESG 理論與台灣產業實務， 詹中原(金兆鎔科技股份有限公司 副董事長暨ESG永續長)",
+      "date": "2026-10-08",
+      "time": "",
+      "scope": "東海校內",
+      "type": "語言／國際",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026090093",
+      "keywords": "【行政講堂】10/8(四)，國際 ESG 理論與台灣產業實務， 詹中原(金兆鎔科技股份有限公司 副董事長暨ESG永續長) 東海大學 行政管理暨政策學系 學術活動 教職員，費用：0；學生，費用：0 學術／講座 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 行政管理暨政策學系；活動日 2026-10-08；截止 2026-10-08",
+      "government": false,
+      "deadline": "2026-10-08",
+      "eventEndDate": "2026-10-08",
+      "location": "",
+      "organizer": "行政管理暨政策學系",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090093",
+        "fetchedAt": "2026-10-02T07:03:41.695181+00:00"
+      },
+      "fitScore": 52,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "語言／國際／海外+40",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "語言／國際／海外"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-30T06:49:51.580785+00:00",
+      "lastSeen": "2026-10-02T07:05:01.119748+00:00",
+      "missCount": 2,
+      "needsReview": true,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-09T07:29:12.219183+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-10-02T07:05:01.119748+00:00"
+    },
     {
       "id": "auto-thu-2026090016",
       "title": "【115學年度第1學期人權法治教育宣導】《大學生法律生存指南 暨防制詐騙講座》10/7",
