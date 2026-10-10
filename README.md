@@ -53,7 +53,7 @@ V96.5 是「七模組 UI 一致性＋運行穩定性」修正版。優先原則�
 - 系統完成事件不再被視為實際讀書紀錄。
 - 計時器狀態可跨 PWA／Android 背景終止恢復。
 - localStorage 永久寫入失敗時不再誤報保存成功。
-- AutoFetch／TOEIC 只更新資料；自動 push 後以 `workflow_dispatch` 明確呼叫 `pages.yml`，GitHub Pages 僅由 `pages.yml` 部署。
+- AutoFetch 只更新相關資料；自動 push 後以 `workflow_dispatch` 明確呼叫 `pages.yml`，GitHub Pages 僅由 `pages.yml` 部署。
 - 自動寫入 main 的工作共用 concurrency，push 前先 rebase。
 
 

@@ -55,13 +55,17 @@ assert 'storeWriteStatus' in store and 'persistent:false' in store, 'persistent 
 sw=(root/'sw.js').read_text(encoding='utf-8')
 assert "importScripts('./config/version.js')" in sw and 'GOAL_MANAGER_VERSION' in sw, 'service worker must consume shared version source'
 autofetch=(root/'.github'/'workflows'/'autofetch.yml').read_text(encoding='utf-8')
-toeic=(root/'.github'/'workflows'/'toeic-news.yml').read_text(encoding='utf-8')
-assert 'actions/configure-pages' not in autofetch and 'actions/deploy-pages' not in autofetch and 'upload-pages-artifact' not in autofetch, 'AutoFetch must not deploy Pages'
-assert 'group: goal-manager-main-writers' in autofetch and 'group: goal-manager-main-writers' in toeic, 'main-writer workflows must share concurrency group'
-assert 'git pull --rebase origin' in autofetch and 'git pull --rebase origin' in toeic, 'main-writer workflows must rebase before push'
-assert 'actions: write' in autofetch and 'actions: write' in toeic, 'main-writer workflows need actions: write for explicit Pages dispatch'
-assert 'gh workflow run pages.yml' in autofetch and 'gh workflow run pages.yml' in toeic, 'automated main writers must explicitly dispatch Pages after GITHUB_TOKEN push'
-assert '[skip ci]' not in autofetch and '[skip ci]' not in toeic, 'automated deploy commits must not carry skip-ci markers'
+assert all(x not in autofetch for x in ['actions/configure-pages','actions/deploy-pages','upload-pages-artifact']), 'AutoFetch must not deploy Pages'
+assert 'group: goal-manager-main-writers' in autofetch, 'writer concurrency missing'
+assert 'git pull --rebase origin' in autofetch, 'writer rebase missing'
+assert 'actions: write' in autofetch, 'workflow dispatch permission missing'
+assert 'gh workflow run pages.yml' in autofetch, 'Pages dispatch missing'
+assert '[skip ci]' not in autofetch, 'unexpected skip-ci'
+assert not (root/'apps'/'toeic').exists(), 'retired TOEIC app restored'
+assert not (root/'js'/'toeic-goal-sync.js').exists(), 'retired sync restored'
+assert not (root/'tools'/'toeic_news_refresh.py').exists(), 'retired news task restored'
+assert not (root/'.github'/'workflows'/'toeic-news.yml').exists(), 'retired cron restored'
+assert './js/toeic-goal-sync.js' not in html and './js/toeic-goal-sync.js' not in sw, 'TOEIC sync still loaded'
 assert './css/tokens.css' in html and './css/design-system.css' in html, 'design system CSS must load explicitly'
 assert all(x not in html for x in ['theme-v9793.css','theme-v9794.css','theme-v9795.css']), 'retired theme CSS must not load from HTML'
 cfg=(root/'config'/'system-config.js').read_text(encoding='utf-8')

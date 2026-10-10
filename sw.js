@@ -26,7 +26,7 @@ const APP_SHELL=[/* suite-icons:assets:start */
   './js/autofetch-health.js',
   './js/catalog-lifecycle.js',
   './js/autofetch-status.js',
-  './js/toeic-goal-sync.js','./js/navigation.js','./js/pwa.js','./js/ui-feedback.js','./js/bootstrap.js','./js/refinements.js'
+  './js/navigation.js','./js/pwa.js','./js/ui-feedback.js','./js/bootstrap.js','./js/refinements.js'
 ];
 const MUTABLE_DATA=['./data/events.json','./data/activities.json','./data/scholarships.json',
   './data/activity-archive.json',
