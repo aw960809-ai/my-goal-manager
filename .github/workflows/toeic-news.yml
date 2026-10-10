@@ -1,7 +1,5 @@
 name: TOEIC GitHub News Refresh
 on:
-  schedule:
-    - cron: "20 21 * * *"
   workflow_dispatch:
 permissions:
   contents: write
