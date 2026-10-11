@@ -49,6 +49,19 @@
   display:block;font-size:12px;line-height:1.4;
   color:var(--gm-text-secondary,#64748b);
 }
+#goals .gm-goal-location-meta{
+  display:flex;align-items:center;flex-wrap:wrap;
+  gap:8px;min-width:0;
+}
+#goals .gm-goal-toolbar #goalBrowseUp{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:34px;margin:0;padding:6px 10px;flex:0 0 auto;
+  border:1px solid var(--gm-line,#d7dee4);border-radius:9px;
+  background:var(--gm-surface-soft,#f1f5f9);
+  color:var(--gm-text,#24313d);
+  font-size:12px;font-weight:700;white-space:nowrap;
+}
+#goals .gm-goal-toolbar #goalBrowseUp[hidden]{display:none!important}
 #goals .gm-goal-toolbar #goalBrowseAdd{
   min-height:46px!important;width:auto!important;
   min-width:max-content!important;
@@ -578,10 +591,11 @@
 /* Preserve accessible keyboard focus outlines from the canonical design. */
 
 /* GM-V98.13.4: prevent Android native blue touch highlight on accordions.
- * Scope only to existing activity source and settings disclosure controls.
+ * Scope to existing activity, settings and goal-search disclosure controls.
  * Do not change the open state, data-source health, or app theme values.
  */
 :is(
+  #goals .gm-goal-search > summary,
   #activity .gm-radar-source-details > summary,
   #activity .gm-radar-advanced > summary,
   #activity .gm-activity-reason-details > summary,
@@ -600,6 +614,7 @@
 
 /* Touch focus does not need a browser-default blue rectangle. */
 :is(
+  #goals .gm-goal-search > summary,
   #activity .gm-radar-source-details > summary,
   #activity .gm-radar-advanced > summary,
   #activity .gm-activity-reason-details > summary,
@@ -611,6 +626,7 @@
 
 /* Keep a visible theme-aware focus indication for keyboard users. */
 :is(
+  #goals .gm-goal-search > summary,
   #activity .gm-radar-source-details > summary,
   #activity .gm-radar-advanced > summary,
   #activity .gm-activity-reason-details > summary,
@@ -623,6 +639,7 @@
 
 /* A small brightness response replaces any native touch color overlay. */
 :is(
+  #goals .gm-goal-search > summary,
   #activity .gm-radar-source-details > summary,
   #activity .gm-radar-advanced > summary,
   #activity .gm-activity-reason-details > summary,
