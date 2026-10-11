@@ -105,17 +105,21 @@
     const toolbar=browse?.querySelector('.goal-browse-toolbar');
     const breadcrumbs=byId('goalBreadcrumb');
     const add=byId('goalBrowseAdd');
+    const up=byId('goalBrowseUp');
     const context=byId('goalBrowseContext');
-    if(!browse||!toolbar||!breadcrumbs||!add||!context)return;
+    if(!browse||!toolbar||!breadcrumbs||!add||!up||!context)return;
 
-    // Reuse the canonical breadcrumbs and add action; no duplicated root card,
-    // separate back button or second search button. Existing handlers remain.
+    // Reuse the canonical back button, breadcrumbs and add action.
+    // Do not duplicate handlers or modify goal navigation/storage.
     const location=document.createElement('div');
     location.className='gm-goal-location';
     const count=document.createElement('small');
     count.id='gmGoalLocationCount';
     count.className='gm-goal-count';
-    location.append(breadcrumbs,count);
+    const locationMeta=document.createElement('div');
+    locationMeta.className='gm-goal-location-meta';
+    locationMeta.append(up,count);
+    location.append(breadcrumbs,locationMeta);
     toolbar.replaceChildren(location,add);
     toolbar.classList.add('gm-goal-toolbar');
 
@@ -130,6 +134,7 @@
       count.textContent=isRoot
         ?total+' 個主要目標'
         :total+' 個'+(current.level===3?'具體行動':'下層目標');
+      up.hidden=isRoot;
       context.hidden=isRoot;
       if(byId('gmGoalSearchDisclosure')?.open)renderGoalSearchResults();
       return result;
@@ -145,7 +150,7 @@
     };
 
     // Old map links still resolve to the unified search, but only one
-    // visible search entry remains. The breadcrumb owns return navigation.
+    // visible search entry remains. Back button and breadcrumbs share navigation.
     window.setGoalViewMode=function(mode){
       if(mode==='map')openUnifiedGoalSearch();
       else if(byId('gmGoalSearchDisclosure'))byId('gmGoalSearchDisclosure').open=false;
