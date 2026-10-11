@@ -2,18 +2,100 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-10-10T07:15:30.158480+00:00",
-    "count": 31,
-    "retiredThisRun": 3,
+    "updatedAt": "2026-10-11T07:17:50.228073+00:00",
+    "count": 32,
+    "retiredThisRun": 1,
     "revivedThisRun": 0,
-    "retiredTotal": 31,
+    "retiredTotal": 32,
     "revivedTotal": 0,
     "retainedOnFailure": 0,
-    "carriedMissing": 18,
+    "carriedMissing": 17,
     "needsReview": 17,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
+    {
+      "id": "auto-thu-2026090025",
+      "title": "2027年日文系海外實習說明會",
+      "date": "2026-10-22",
+      "time": "",
+      "scope": "東海校內",
+      "type": "語言／國際",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026090025",
+      "keywords": "2027年日文系海外實習說明會 東海大學 日本語言文化學系 學術活動 學生，費用：0 學術／講座 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 日本語言文化學系；活動日 2026-10-22；截止 2026-10-19",
+      "government": false,
+      "deadline": "2026-10-19",
+      "eventEndDate": "2026-10-22",
+      "location": "",
+      "organizer": "日本語言文化學系",
+      "audience": "學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090025",
+        "fetchedAt": "2026-09-10T17:02:35.707621+00:00"
+      },
+      "fitScore": 98,
+      "fitTier": "高適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "語言／國際／海外+40",
+        "職涯／實習+20",
+        "直接連結海外／國際經驗目標+18",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "語言／國際／海外",
+        "職涯／實習"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-09T12:50:00.937440+00:00",
+      "lastSeen": "2026-09-10T17:03:47.493023+00:00",
+      "missCount": 24,
+      "needsReview": true,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-11T07:17:50.227435+00:00",
+      "retireCode": "stale_source",
+      "retireReason": "來源連續未出現且超過 30 日",
+      "lastActiveAt": "2026-09-10T17:03:47.493023+00:00"
+    },
     {
       "id": "auto-thu-2026080013",
       "title": "115學年上學期Agentic AI應用課程",
