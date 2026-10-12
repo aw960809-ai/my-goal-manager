@@ -7,6 +7,7 @@
   const policy=window.GoalToeicSyncPolicy;
   if(!policy)return;
   let busy=false,lastSummary=null;
+  let externalMainChanged=false;
   function safeJSON(key){
     const raw=localStorage.getItem(key);
     if(!raw)return null;
@@ -26,7 +27,7 @@
       el=document.createElement('div');el.id='gmToeicBridgeEntry';
       el.style.cssText='display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:9px;padding:10px 12px;margin:6px 0 12px;border:1px solid var(--gm-line,#dae1e7);border-radius:12px;background:var(--gm-surface-elevated,#fff)';
       const msg=document.createElement('span');msg.id='gmToeicBridgeStatus';msg.style.cssText='font-size:12px;color:var(--gm-text-secondary,#667480)';
-      const a=document.createElement('a');a.href='./apps/toeic-trainer/';a.textContent='開始 TOEIC 訓練 →';a.style.cssText='font-size:13px;font-weight:700;color:var(--gm-primary-deep,#526d98)';
+      const a=document.createElement('a');a.href='/toeic-trainer/';a.textContent='開始 TOEIC 訓練 →';a.style.cssText='font-size:13px;font-weight:700;color:var(--gm-primary-deep,#526d98)';
       el.append(msg,a);
       panel.insertBefore(el,panel.querySelector('#gmGoalSearchDisclosure')||panel.firstChild);
     }
@@ -40,6 +41,9 @@
     // Avoid saving a stale in-memory tab over logs added in another tab.
     const raw=typeof storeGet==='function'?storeGet('lawLangGoalSystemV92'):null;
     if(!raw)throw new Error('主資料不存在，停止連動');
+    if(externalMainChanged||typeof gmToeicLastCommittedRaw!=='string'||raw!==gmToeicLastCommittedRaw){
+      throw new Error('另一分頁修改過目標資料（含目標、行事曆或執行安排）；自動連動已停止，請重新載入');
+    }
     const parsed=typeof parseEnvelope==='function'?parseEnvelope(raw):null;
     if(!parsed||!parsed.data||!Array.isArray(parsed.data.logs))throw new Error('無法核對當前歷史資料');
     const disk=new Map(parsed.data.logs.map(l=>[String(l.id),l]));
@@ -95,6 +99,11 @@
     updateUI();
     sync('goal-manager-open');
     window.addEventListener('storage',event=>{
+      if(event.key==='lawLangGoalSystemV92'&&event.newValue!==gmToeicLastCommittedRaw){
+        externalMainChanged=true;
+        recordSummary({blocked:'目標系統另有分頁更新資料；請重新載入再連動',added:0,addedCount:0,held:0,already:0});
+        return;
+      }
       if(event.key===policy.TRAINER_KEY||event.key===policy.CONSENT_KEY)sync('other-tab-write');
     });
     window.addEventListener('focus',()=>sync('focus'));

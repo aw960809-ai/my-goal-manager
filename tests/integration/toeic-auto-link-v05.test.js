@@ -95,8 +95,9 @@ function simulatedRuntime(saveOkay){
  const window={GoalToeicSyncPolicy:P,addEventListener(){},location:{href:'https://example.com/my-goal-manager/'}};
  const document={readyState:'complete',getElementById(){return null},addEventListener(){}};
  const ctx={window,document,db,localStorage:store,console,persistenceRecoveryBlocked:false,
+   gmToeicLastCommittedRaw:map.get('lawLangGoalSystemV92'),
    storeGet:k=>store.getItem(k),parseEnvelope:raw=>JSON.parse(raw),
-   save:()=>{saved++;if(saveOkay)map.set('lawLangGoalSystemV92',wrapDb());return saveOkay},renderAll(){}};
+   save:()=>{saved++;if(saveOkay){map.set('lawLangGoalSystemV92',wrapDb());ctx.gmToeicLastCommittedRaw=map.get('lawLangGoalSystemV92')}return saveOkay},renderAll(){}};
  vm.runInNewContext(fs.readFileSync(path.join(root,'js/toeic-sync-runtime.js'),'utf8'),ctx,{filename:'toeic-sync-runtime.js'});
  return {ctx,map,saved:()=>saved,oldLog};
 }

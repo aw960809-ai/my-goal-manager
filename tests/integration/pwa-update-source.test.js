@@ -14,7 +14,7 @@ const match=versionSource.match(
 );
 
 assert(match,'version.js must expose GOAL_MANAGER_VERSION');
-assert.strictEqual(match[1],'98.13.6');
+assert.strictEqual(match[1],'98.13.7');
 
 assert(
   sw.includes("importScripts('./config/version.js')"),

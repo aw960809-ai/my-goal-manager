@@ -12,7 +12,7 @@ const css=read('css/refinements.css');
 const sw=read('sw.js');
 const version=read('config/version.js');
 
-assert(version.includes("GOAL_MANAGER_VERSION='98.13.6'"));
+assert(version.includes("GOAL_MANAGER_VERSION='98.13.7'"));
 assert(version.includes('GOAL_MANAGER_SCHEMA_VERSION=6'));
 assert(html.includes('id="weekEngagedActionCount"'));
 assert(html.includes('本週投入行動'),'The existing V98.13.1 KPI must remain');

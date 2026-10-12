@@ -9,7 +9,7 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
   const TRAINER_KEY='toeic-trainer-v01:learning-state';
-  const CONSENT_KEY='toeic-trainer:v05-link-settings';
+  const CONSENT_KEY='toeic-trainer:v051-link-settings';
   const STATUS_KEY='goal-manager:toeic-sync-status-v1';
   const TRAINER_APP='toeic-trainer-standalone';
   const ID_RX=/^tt-[a-z0-9-]{8,70}$/i;

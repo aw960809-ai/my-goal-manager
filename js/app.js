@@ -1,6 +1,9 @@
 const APP_VERSION=String(window.AppConfig?.version||('V'+String(globalThis.GOAL_MANAGER_VERSION||'98.9.4')));
 const SCHEMA_VERSION=Number(globalThis.GOAL_MANAGER_SCHEMA_VERSION||6);
 const KEY='lawLangGoalSystemV92';
+// Compare the entire last committed envelope before *any* Goal Manager save.
+// This is advisory optimistic multi-tab protection, not a cross-process atomic transaction.
+let gmToeicLastCommittedRaw=null;
 const BACKUP_KEYS=['lawLangGoalSystemV92_backup1','lawLangGoalSystemV92_backup2','lawLangGoalSystemV92_backup3'];
 const ACTIVE_TIMER_KEY='lawLangGoalActiveTimerV1';
 const HISTORY_ANCHOR_KEY='lawLangGoalSystemV92_historyAnchorV1';
@@ -185,6 +188,8 @@ async function idbMirrorSave(){
 }
 const THU_1151_LAW_PLAN_MARKER='thuPersonalMigration:1151-law-preview:v2';
 db=loadDB();
+// Baseline after load/migration/recovery, before bootstrap changes and normal saves.
+gmToeicLastCommittedRaw=storeGet(KEY);
 ensureHistoryAnchor();
 removeLegacyStandaloneToeicGoals();
 ensureSchoolCalendar();
@@ -535,7 +540,19 @@ function ensureToeicPlan(){
  return {...result,applied:!!(result.applied||aliases.length),progressAliasesAdded:aliases.length};
 }
 
-function save(options={}){try{const ok=persistEnvelope(db,{backup:options.backup!==false,allowLogReplacement:options.allowLogReplacement===true});if(ok)idbMirrorSave();return ok}catch(e){console.error(e);toast(String(e?.message||'資料保存失敗，原資料未被覆蓋'));return false}}
+function save(options={}){
+ // Fail closed if another browser tab wrote ANY persistent field since our last save.
+ // The original save / history guard remains the canonical and only writer.
+ try{
+  const current=storeGet(KEY);
+  if(gmToeicLastCommittedRaw!==current){
+   throw new Error('偵測到另一分頁已更新目標資料（含目標／行事曆／讀書安排）；為避免覆蓋，已停止保存。請重新開啟最新目標系統。');
+  }
+  const ok=persistEnvelope(db,{backup:options.backup!==false,allowLogReplacement:options.allowLogReplacement===true});
+  if(ok){gmToeicLastCommittedRaw=storeGet(KEY);idbMirrorSave();}
+  return ok;
+ }catch(e){console.error(e);toast(String(e?.message||'資料保存失敗，原資料未被覆蓋'));return false}
+}
 function esc(x){return String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 function todayKey(){const d=new Date(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${d.getFullYear()}-${m}-${day}`}

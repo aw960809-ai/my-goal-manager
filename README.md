@@ -100,5 +100,5 @@ V96.5 是「七模組 UI 一致性＋運行穩定性」修正版。優先原則�
 - 歷史排序依真實時間戳而非原始 ISO 字串，避免混合 Z／+08:00 順序錯亂。
 - 舊式無時區紀錄視為臺灣當地時間；未改動任何原始紀錄、分鐘、schema 或個人資料。
 
-## V98.13.6｜新 TOEIC Trainer V0.5 同網域自動連動（需啟用）
+## V98.13.7｜新 TOEIC Trainer V0.5 同網域自動連動（需啟用）
 訓練工具位於 `apps/toeic-trainer/`。用戶於訓練端設定明確啟用後，Goal Manager 才在下次開啟時驗證並計入新的 Level 4 學習 Session。不恢復退役 News × TOEIC，同日人工補登／重疊／不合法事件均保守暫停。舊本機紀錄須由 Trainer 自行匯出／還原一次，舊 Session 不自動回補。參閱 `docs/TOEIC_V05_AUTOLINK.md` 與 `docs/TOEIC_QUALITY_AUDIT_V05.md`。
