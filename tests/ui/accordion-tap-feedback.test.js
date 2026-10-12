@@ -14,7 +14,7 @@ const refinements=read('js/refinements.js');
 const app=read('js/app.js');
 const analytics=read('js/domain/analytics.js');
 
-assert(version.includes("GOAL_MANAGER_VERSION='98.13.6'"));
+assert(version.includes("GOAL_MANAGER_VERSION='98.13.7'"));
 assert(version.includes('GOAL_MANAGER_SCHEMA_VERSION=6'));
 assert(sw.includes("importScripts('./config/version.js')"));
 assert(sw.includes("'./css/refinements.css'"));
