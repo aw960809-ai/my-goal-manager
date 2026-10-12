@@ -1,0 +1,24 @@
+
+'use strict';
+const assert=require('node:assert/strict');
+const P=require('../../js/domain/toeic-plan.js');
+const S=require('../../js/domain/toeic-sync-policy.js');
+const tasks=[{id:'g1',name:'台大及政大轉學考',level:1,parent:null,status:'進行中',progress:8}];
+const first=P.apply(tasks);
+assert.equal(first.added,14);
+assert.equal(first.bootstrapEligible,true);
+assert.equal(P.apply(tasks).applied,false);
+assert.deepEqual(tasks.filter(x=>x.level===1).map(x=>x.id),['g1',P.DIRECTION_ID]);
+assert.equal(tasks.find(x=>x.id==='g1').progress,8);
+assert.equal(tasks.some(x=>x.id==='g3'||x.id==='g2'),false);
+assert.equal(tasks.find(x=>x.id===P.ROOT_ID).parent,P.DIRECTION_ID);
+assert.equal(tasks.filter(x=>x.level===4).length,9);
+const event={appId:S.TRAINER_APP,schema:1,id:'tt-test-123456789abc',date:'2026-10-12',createdAt:'2026-10-12T02:20:00.000Z',mode:'grammar',unit:'practice',part:5,seconds:145,questionsAnswered:2,correct:1,questionIds:['v04-p5-001','v04-p5-002'],suggestedGoalTaskId:'g3-2026-10-practice',goalImportStatus:'not-imported'};
+const consent={version:1,enabled:true,enabledAt:'2026-10-12T00:00:00.000Z'};
+const b={appId:S.TRAINER_APP,schema:1,sessions:[event]};
+const context={tasks,logs:[],now:new Date('2026-10-12T03:00:00Z')};
+const result=S.reconcile(b,consent,context);
+assert.equal(result.eligible.length,1);
+assert.equal(result.eligible[0].log.minutes,2);
+assert.equal(S.reconcile(b,consent,{...context,logs:result.eligible.map(x=>x.log)}).already.length,1);
+console.log('OK: TOEIC direction and safe sync');

@@ -6,8 +6,8 @@ const P=require('../../js/domain/toeic-sync-policy.js');
 const NOW=new Date('2026-10-12T08:00:00Z');
 const CONSENT={version:1,enabled:true,enabledAt:'2026-10-12T00:00:00Z'};
 function goals(){return [
- {id:'g3',name:'語言能力準備',level:1,parent:null,status:'進行中'},
- {id:'g3-2026-integrated',name:'TOEIC｜10–12 月整合準備',level:2,parent:'g3',status:'進行中'},
+ {id:'toeic-direction-2026',name:'TOEIC 多益英文能力準備',level:1,parent:null,status:'進行中'},
+ {id:'g3-2026-integrated',name:'TOEIC｜10–12 月整合準備',level:2,parent:'toeic-direction-2026',status:'進行中'},
  {id:'g3-2026-10',name:'10月低負擔整合學習',level:3,parent:'g3-2026-integrated',status:'進行中',start:'2026-10-01',due:'2026-11-01'},
  {id:'g3-2026-10-article',name:'文章整合',level:4,parent:'g3-2026-10',status:'進行中',weeklyMinutes:40},
  {id:'g3-2026-10-practice',name:'題目＋檢討',level:4,parent:'g3-2026-10',status:'進行中',weeklyMinutes:30}

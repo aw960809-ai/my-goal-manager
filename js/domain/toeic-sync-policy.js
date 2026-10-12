@@ -77,7 +77,7 @@
     if(!task||Number(task.level)!==4||task.status==='已封存'||!(Number(task.weeklyMinutes)>0))return {hold:'Level 4 目標不存在、已封存或無有效每週分鐘'};
     const parent=byId.get(String(task.parent||'')),phase=byId.get(String(parent?.parent||'')),direction=byId.get(String(phase?.parent||''));
     if(!parent||Number(parent.level)!==3||parent.status==='已封存'||!validDate(parent.start)||!validDate(parent.due)||parent.start>parent.due||s.date<parent.start||s.date>parent.due)return {hold:'不在 Level 3 子任務有效期間'};
-    if(!phase||Number(phase.level)!==2||phase.id!=='g3-2026-integrated'||phase.status==='已封存'||!direction||Number(direction.level)!==1||direction.id!=='g3'||direction.status==='已封存')return {hold:'不符合既有 TOEIC 四級目標結構'};
+    if(!phase||Number(phase.level)!==2||phase.id!=='g3-2026-integrated'||phase.status==='已封存'||!direction||Number(direction.level)!==1||direction.id!=='toeic-direction-2026'||direction.status==='已封存')return {hold:'不符合既有 TOEIC 四級目標結構'};
     // Recreate the built-in TOEIC plan routing, including a mock fallback to
     // practice before December. Never trust arbitrary unvalidated task IDs.
     const prefixes=[['2026-10-01','2026-11-01','g3-2026-10',['article','review','practice']],['2026-11-02','2026-11-29','g3-2026-11',['article','review','practice']],['2026-11-30','2026-12-19','g3-2026-12',['review','practice','mock']]];
