@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#273a50">
+<meta name="description" content="獨立、非官方 TOEIC 閱讀、單字與文法訓練程式；文章精讀、間隔複習、錯題追蹤。">
+<title>TOEIC Trainer | 多益英文能力訓練</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./css/style.css?v=v0.5.0-auto-link-20261012">
+<link rel="stylesheet" href="./css/layout-v043.css?v=v0.5.0-auto-link-20261012">
+<link rel="stylesheet" href="./css/preferences-v0433.css?v=v0.5.0-auto-link-20261012">
+<script src="./data/content.js?v=v0.5.0-auto-link-20261012" defer></script>
+<script src="./data/advanced.js?v=v0.5.0-auto-link-20261012" defer></script>
+<script src="./data/v04_bank.js?v=v0.5.0-auto-link-20261012" defer></script>
+<script src="./data/v041_progression.js?v=v0.5.0-auto-link-20261012" defer></script>
+<script src="./data/v042_official.js?v=v0.5.0-auto-link-20261012" defer></script>
+<script src="./js/core.js?v=v0.5.0-auto-link-20261012" defer></script>
+<script src="./js/bridge.js?v=v0.5.0-auto-link-20261012" defer></script>
+<script src="./js/bank-audit.js?v=v0.5.0-auto-link-20261012" defer></script>
+<script src="./js/length-policy.js?v=v0.5.0-auto-link-20261012" defer></script>
+<script src="./js/exam.js?v=v0.5.0-auto-link-20261012" defer></script>
+<script src="./js/quality-review.js?v=v0.5.0-auto-link-20261012" defer></script>
+<script src="./js/quality-v043.js?v=v0.5.0-auto-link-20261012" defer></script>
+<script src="./js/preferences.js?v=v0.5.0-auto-link-20261012" defer></script>
+<script src="./js/app.js?v=v0.5.0-auto-link-20261012" defer></script>
+<script src="./js/auto-sync.js?v=v0.5.0-auto-link-20261012" defer></script>
+</head>
+<body>
+<a class="skip-link" href="#main">跳至主要內容</a>
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="identity"><span class="brand-icon" aria-hidden="true">T<span>·</span></span><div><small>INDEPENDENT LEARNING LAB</small><strong>TOEIC Trainer</strong></div></div>
+    <div class="app-status" id="storageStatus" role="status">本機儲存</div>
+  </div>
+</header>
+<div class="site-shell">
+  <nav class="main-nav" aria-label="訓練功能選單">
+    <button class="nav-btn active" data-tab="home" aria-current="page">總覽</button>
+    <button class="nav-btn" data-tab="reading">閱讀</button>
+    <button class="nav-btn" data-tab="vocab">單字</button>
+    <button class="nav-btn" data-tab="grammar">文法</button>
+    <button class="nav-btn" data-tab="analysis">分析</button>
+    <button class="nav-btn" data-tab="settings">設定</button>
+  </nav>
+  <main id="main">
+    <div class="panel draft-resume-banner" id="draftBanner" hidden role="status"><div><b>尚有未交卷的試卷</b><p id="draftLabel">可恢復先前進度</p></div><div class="button-row"><button class="btn btn-primary" id="resumeDraft" type="button">繼續作答</button><button class="btn btn-light" id="discardDraft" type="button">放棄草稿</button></div></div>
+    <section id="tab-home" class="tab-page">
+      <div class="intro-banner home-compact-hero">
+        <div class="eyebrow">TODAY'S TOEIC PRACTICE</div>
+        <h1>今天練哪一項？</h1>
+        <p>閱讀、單字、文法，整份交卷後才公布答案與解析。</p>
+        <div class="hero-actions" aria-label="快速開始訓練"><button class="btn btn-primary" id="homeStartPractice" type="button">閱讀</button><button class="btn btn-light" id="homeStartVocab" type="button">單字</button><button class="btn btn-light" id="homeStartGrammar" type="button">文法</button></div>
+      </div>
+      <div class="metrics" id="homeMetrics" aria-label="學習統計"></div>
+
+      <div class="two-col">
+        <details class="panel training-directory"><summary><span>其他訓練入口</span><small>含錯題重練與詳細分類</small></summary><div class="quick-grid">
+          <button class="quick" data-quick="reading"><span>01 / READING</span><strong>文章精讀</strong><small>從基礎短篇到高階長篇，Part 6–7</small></button>
+          <button class="quick" data-quick="vocab"><span>02 / VOCABULARY</span><strong>單字記憶</strong><small>800 張不同字卡、間隔複習、閱讀收藏</small></button>
+          <button class="quick" data-quick="grammar"><span>03 / GRAMMAR</span><strong>文法架構</strong><small>20 個文法單元、Part 5–6 練習</small></button>
+          <button class="quick" data-quick="mistakes"><span>04 / REVIEW</span><strong>弱點重練</strong><small>錯題、易錯文法、複習循環</small></button>
+        </div></details>
+
+      </div>
+
+    </section>
+    <section id="tab-vocab" class="tab-page" hidden>
+      <div class="section-head"><div><div class="eyebrow">VOCABULARY · SUBMIT-TO-REVIEW</div><h1 id="vocabPageTitle">單字記憶測驗</h1><p id="vocabPageDescription">整組字彙四選一。交卷前不顯示詞義、答對率或解析；交卷後安排下一次間隔複習。</p></div></div>
+      <div class="vocab-view-switch" id="vocabViewTabs" role="group" aria-label="單字頁功能">
+        <button type="button" class="active" data-vocab-view="test" aria-pressed="true">記憶測驗</button>
+        <button type="button" data-vocab-view="library" aria-pressed="false">單字庫／收藏</button>
+      </div>
+      <div id="vocabIntro" class="panel vocab-compact-setup">
+        <div class="vocab-launch"><label class="field" for="vocabCount"><span>本次字卡數</span><select id="vocabCount" aria-label="本次練習單字數"><option value="5">5 張</option><option value="10" selected>10 張</option><option value="20">20 張</option></select></label><button class="btn btn-primary" id="startVocab" type="button">開始單字測驗</button></div>
+        <p class="muted vocab-help">優先練習尚未學習與到期單字，全部交卷後才批改。可在上方切換至「單字庫／收藏」查詢、整理字卡。</p>
+        <div class="vocab-pool-summary" id="vocabPoolLabel" aria-live="polite"></div>
+
+      </div>
+      <div id="vocabLibraryPanel" class="panel vocab-library-panel" hidden>
+        <div class="vocab-library-header"><div><div class="eyebrow">WORD BANK</div><h2>搜尋與收藏</h2></div><small id="wordDictionaryCount" role="status">800 張可查詢</small></div>
+        <p class="vocab-library-lead">快速搜尋、分類與收藏單字。每頁最多 8 筆；測驗時不開放查詢答案。</p>
+        <div class="word-dictionary" id="wordDictionary">
+          <div class="word-dictionary-body"><div class="tt-vocab-controls">
+            <div class="tt-tabs tt-vocab-tabs" id="vocabQuickFilters" role="group" aria-label="單字快速篩選">
+              <button type="button" class="active" aria-pressed="true" data-vocab-filter="all">全部</button>
+              <button type="button" aria-pressed="false" data-vocab-filter="due">待複習</button>
+              <button type="button" aria-pressed="false" data-vocab-filter="saved">收藏</button>
+            </div>
+            <label class="tt-search-label" for="vocabSearch"><span class="sr-only">搜尋單字</span><input id="vocabSearch" type="search" placeholder="搜尋英文、中文或搭配詞…" autocomplete="off"></label>
+            <details class="tt-subfilters" id="vocabCategoryDetails"><summary>依商務情境篩選（選用）</summary><div class="tt-tabs tt-vocab-categories" id="vocabCategoryTabs" role="group" aria-label="商務情境分類">
+              <button type="button" data-vocab-filter="office" aria-pressed="false">辦公</button>
+              <button type="button" data-vocab-filter="business" aria-pressed="false">商務</button>
+              <button type="button" data-vocab-filter="finance" aria-pressed="false">財務</button>
+              <button type="button" data-vocab-filter="hiring" aria-pressed="false">招聘</button>
+              <button type="button" data-vocab-filter="travel" aria-pressed="false">旅行</button>
+              <button type="button" data-vocab-filter="budget" aria-pressed="false">預算</button>
+            </div></details>
+            <select id="vocabFilter" hidden aria-label="單字來源"><option value="all">全部類別</option><option value="due">待學與到期</option><option value="saved">閱讀收藏</option><option value="office">辦公</option><option value="business">商務</option><option value="finance">財務</option><option value="hiring">招聘</option><option value="travel">旅行</option><option value="budget">預算</option></select>
+          </div>
+            <div id="vocabLookupList" class="word-lookup"></div>
+          </div>
+        </div>
+      </div>
+      <div id="vocabSession" hidden></div>
+
+    </section>
+    <section id="tab-practice" class="tab-page" hidden>
+      <div class="section-head"><div><div class="eyebrow" id="practiceEyebrow">READING · UNDERSTAND THE CONTEXT</div><h1 id="practicePageTitle">閱讀理解</h1><p id="practicePageDescription">完整閱讀並交卷後，才可看見答案、逐句翻譯及句型解析。</p></div></div>
+      <div id="readingCoach" class="panel">
+        <div class="section-title"><div><small>READING TEST → POST-EXAM STUDY</small><h2>文章理解測驗</h2></div></div>
+        <details class="reading-level-guide"><summary>難度說明（基礎／中階／高階）</summary><div class="progression-stages" aria-label="漸進閱讀訓練路徑">
+          <div><b>01 · 基礎</b><small>約 60–110 詞 · 短篇定位</small></div>
+          <div><b>02 · 中階</b><small>約 170–250 詞 · 複句整合</small></div>
+          <div><b>03 · 高階</b><small>約 320–475 詞 · 跨段推論</small></div>
+        </div></details>
+        <div class="tt-reading-browser" id="readingBrowser">
+          <div class="tt-filter-heading"><b>依難度選篇</b><span>點選文章直接開始作答</span></div>
+          <div class="tt-tabs tt-reading-tabs" id="readingLevelTabs" role="group" aria-label="閱讀難度篩選">
+            <button type="button" data-reading-level="all" aria-pressed="false">全部</button>
+            <button type="button" data-reading-level="foundation" aria-pressed="true" class="active">基礎</button>
+            <button type="button" data-reading-level="intermediate" aria-pressed="false">中階</button>
+            <button type="button" data-reading-level="advanced" aria-pressed="false">高階</button>
+            <button type="button" data-reading-level="legacy" aria-pressed="false">既有</button>
+          </div>
+          <label class="tt-search-label" for="readingSearch"><span class="sr-only">搜尋閱讀文章</span><input id="readingSearch" type="search" placeholder="搜尋文章名稱或主題…" autocomplete="off"></label>
+          <div class="tt-browser-count" id="readingBrowserCount" role="status" aria-live="polite"></div>
+          <div class="tt-compact-list" id="readingArticleList"></div>
+          <button class="tt-more" id="readingLoadMore" type="button" hidden>顯示更多文章 ↓</button>
+        </div>
+        <div class="reading-pick tt-legacy-pick">
+          <label class="field"><span>閱讀難度</span><select id="readingLevelSelect"><option value="foundation" selected>基礎 · 短篇</option><option value="intermediate">中階 · 複句</option><option value="advanced">高階 · 長篇</option><option value="legacy">V0.4 既有 34 篇</option><option value="all">全部 43 篇</option></select></label>
+          <label class="field"><span>選擇文章</span><select id="readingLessonSelect"></select></label>
+          <button class="btn btn-primary" id="openReadingLesson" type="button">開始文章測驗</button>
+        </div>
+        <p class="reading-level-hint" id="readingLevelHint" aria-live="polite"></p>
+        <p class="fineprint">閱讀原文後回答整份理解題；交卷前不顯示翻譯與解析。完成交卷後才建立 Session 並開放逐句精讀。</p>
+        <div id="readingLessonPanel" hidden></div>
+      </div>
+      <div id="grammarCoach" class="panel" hidden>
+        <div class="section-title"><div><small>GRAMMAR TEST</small><h2>文法正式測驗</h2></div></div>
+        <div class="tt-grammar-browser" id="grammarBrowser">
+          <label class="tt-search-label" for="grammarSearch"><span class="sr-only">搜尋文法主題</span><input type="search" id="grammarSearch" placeholder="搜尋文法主題…" autocomplete="off"></label>
+          <div class="tt-tabs tt-grammar-tabs" id="grammarCategoryTabs" role="group" aria-label="文法主題分類">
+            <button type="button" class="active" aria-pressed="true" data-grammar-category="recommended">推薦</button>
+            <button type="button" aria-pressed="false" data-grammar-category="verbs">動詞</button>
+            <button type="button" aria-pressed="false" data-grammar-category="words">詞性</button>
+            <button type="button" aria-pressed="false" data-grammar-category="clauses">子句</button>
+            <button type="button" aria-pressed="false" data-grammar-category="advanced">進階</button>
+            <button type="button" aria-pressed="false" data-grammar-category="all">全部</button>
+          </div>
+          <div class="tt-browser-count" id="grammarBrowserCount" role="status" aria-live="polite"></div>
+          <div class="tt-compact-list" id="grammarTopicList"></div>
+          <button class="tt-more" id="grammarLoadMore" type="button" hidden>顯示更多主題 ↓</button>
+        </div>
+        <div class="reading-pick tt-legacy-pick"><label class="field"><span>文法主題</span><select id="grammarTopicSelect"></select></label><button class="btn btn-primary" id="startTopicPractice" type="button">練這個主題</button></div>
+        <div id="grammarLessonPanel"></div>
+        <div id="weakGrammarPanel" class="weak-note"></div>
+      </div>
+
+      <details class="panel collapsible-session-setup" id="practiceSetup"><summary><span id="practiceQuestionTitle">日常閱讀題組</span><small>Part 5–7 · 題型、難度、題數可設定</small></summary><div class="setup-content">
+        <select id="practiceMode" hidden aria-label="訓練模式"><option value="reading">閱讀</option><option value="grammar">文法</option><option value="mixed">混合</option><option value="mistakes">錯題</option></select>
+        <div class="practice-form">
+          <label class="field"><span>指定題型</span><select id="practicePart"><option value="all">所有適用題型</option><option value="5">Part 5</option><option value="6">Part 6</option><option value="7">Part 7</option></select></label>
+          <label class="field"><span>難度與篇幅</span><select id="practiceTier"><option value="all" selected>全部題目（保留舊題）</option><option value="foundation">基礎 · 短題</option><option value="intermediate">中階 · 複句</option><option value="advanced">高階 · 長篇</option><option value="legacy">舊題專區</option></select></label>
+          <label class="field"><span>題目數</span><select id="practiceCount"><option value="5">5 題</option><option value="10" selected>10 題</option><option value="20">20 題</option></select></label>
+        </div>
+        <div class="setup-bottom"><span id="practicePoolHint" class="muted"></span><button id="startPractice" class="btn btn-primary">開始訓練</button></div>
+        <p class="fineprint">整份交卷後才批改；正確率不是 ETS 官方分數。</p></div>
+      </details>
+      <details class="panel official-mock-panel collapsible-session-setup" id="officialMockPanel"><summary><span>完整閱讀模考</span><small>100 題／75 分鐘</small></summary><div class="setup-content"><p>依官方閱讀配置組卷：Part 5：30 題、Part 6：16 題、Part 7：54 題；75 分鐘計時，時間到自動交卷。包含原創新題與保留原題號的既有篇章，非 ETS 官方試卷。</p><div class="setup-bottom"><span class="muted">10 篇單篇（29 題）及 5 組雙／三篇（25 題）。整份交卷後批改。</span><button class="btn btn-primary" id="startOfficialMock" type="button">開始 100 題模考</button></div></div></details>
+      <div id="practiceSession" hidden></div>
+      <div id="practiceFinished" hidden></div>
+    </section>
+    <div id="analysisSwitcher" class="analysis-switcher" role="group" aria-label="學習分析類別" hidden>
+      <button type="button" data-analysis-tab="mistakes" aria-pressed="true" class="active">錯題與弱點</button>
+      <button type="button" data-analysis-tab="history" aria-pressed="false">學習紀錄</button>
+    </div>
+    <section id="tab-mistakes" class="tab-page" hidden>
+      <div class="section-head"><div><div class="eyebrow">ERROR REVIEW · ADAPTIVE PRACTICE</div><h1>錯題與弱點</h1><p>追蹤閱讀理解與文法易錯類型，持續重練。</p></div></div>
+      <div id="mistakesMetrics" class="metrics"></div><div id="weaknessOverview" class="panel" hidden></div>
+      <div class="panel"><div class="section-title"><div><small>PERSONAL ERROR POOL</small><h2>需要再練的題目</h2></div><button class="btn btn-light" id="startMistakes">開始錯題測驗 →</button></div><div id="mistakesList"></div></div>
+    </section>
+    <section id="tab-history" class="tab-page" hidden>
+      <div class="section-head"><div><div class="eyebrow">SESSIONS · PRIVATE LOCAL DATA</div><h1>學習紀錄</h1><p>每次完成練習產生獨立 Session；不自動寫入另一個系統。</p></div></div>
+      <div class="panel" id="historyPanel"><div class="section-title"><div><small>ACTUAL LEARNING</small><h2>近期完成紀錄</h2></div></div><div id="sessionList"></div></div>
+
+
+
+    </section>
+    <section id="tab-settings" class="tab-page" hidden>
+      <header class="section-head settings-heading"><div class="eyebrow">PERSONAL SETTINGS</div><h1>設定</h1>
+        <p>訓練與學習分析在主頁；外觀、資料備份、Goal Manager 核對與系統資訊集中在這裡；單字查詢請至「單字」頁。</p>
+      </header>
+      <div class="panel settings-section" id="settingsAppearancePanel">
+        <div class="section-title"><div><small>APPEARANCE</small><h2>外觀與顏色</h2></div></div>
+        <div class="settings-setting-label">顯示模式</div>
+        <div class="settings-choice-row" id="settingsAppearanceButtons" role="group" aria-label="顯示模式">
+          <button type="button" data-appearance-value="system">跟隨系統</button>
+          <button type="button" data-appearance-value="light">淺色</button>
+          <button type="button" data-appearance-value="dark">深色</button>
+        </div>
+        <div class="settings-setting-label">主題色</div>
+        <div class="settings-palette-grid" id="settingsAccentButtons" role="group" aria-label="介面主題色">
+          <button type="button" data-accent-value="slate"><i class="swatch slate" aria-hidden="true"></i>霧藍灰</button>
+          <button type="button" data-accent-value="indigo"><i class="swatch indigo" aria-hidden="true"></i>靛紫</button>
+          <button type="button" data-accent-value="graphite"><i class="swatch graphite" aria-hidden="true"></i>石墨</button>
+          <button type="button" data-accent-value="teal"><i class="swatch teal" aria-hidden="true"></i>青綠</button>
+        </div>
+        <div class="settings-setting-label">文字大小</div>
+        <div class="settings-choice-row" id="settingsTextSizeButtons" role="group" aria-label="文字大小">
+          <button type="button" data-text-size-value="normal">標準</button>
+          <button type="button" data-text-size-value="large">大字</button>
+        </div>
+        <p class="fineprint">只儲存外觀偏好；不更動測驗紀錄、題庫或 Goal Manager。</p>
+      </div>
+      <div class="settings-section-group">
+        <details class="panel settings-fold" id="settingsDataPanel"><summary><span>資料與備份</span><small>匯出、還原、事件核對</small></summary><div class="settings-fold-body"><div class="section-title"><div><small>DATA OWNERSHIP</small><h2>備份與資料交換</h2></div></div>
+        <p class="muted">匯出的是這套新程式的紀錄，絕不包含 Goal Manager 原始資料。可在這裡還原訓練端自己的備份；不支援匯入其他來源資料。</p>
+        <div class="button-row"><button id="exportBackup" class="btn btn-primary">下載完整訓練備份</button><button id="exportEvents" class="btn btn-light">開啟事件核對</button><button id="importBackupBtn" class="btn btn-light">匯入此程式備份</button></div>
+        <input id="importBackupInput" type="file" accept="application/json,.json" hidden>
+        <p class="fineprint">新版同網站版本具備經驗證的自動匯入器（需先啟用），請勿把本檔直接匯入 Goal Manager 的「完整備份還原」功能。</p>
+      </div></details>
+      </div>
+      <div class="settings-section-group" id="toeicAutoLinkPanel">
+        <details class="panel settings-fold" id="autoSyncDetails"><summary><span>Goal Manager 自動連動</span><small>同網站 · 開啟時安全入帳</small></summary>
+          <div class="settings-fold-body"><h2>新學習紀錄自動連動</h2>
+            <p class="muted">第一次請從原本 localhost 的 Trainer 下載完整訓練備份，再到 Goal Manager 同網域的 Trainer 還原一次。兩個網址的儲存空間不同；舊 Session 保留，但不會自動回填進度。</p>
+            <p id="autoSyncStatus" class="fineprint" role="status">正在檢查連動狀態</p>
+            <div class="button-row"><button id="autoSyncToggle" type="button" class="btn btn-primary">啟用新練習自動連動</button><a id="autoSyncOpenGoal" class="btn btn-light" href="../../">開啟 Goal Manager ↗</a></div>
+            <p class="fineprint">只有本頁確認「啟用」後的新正式交卷，且超過 60 秒、符合既有 Level 4 計畫的事件，才由目標系統入帳。同日人工補登或時間重疊的事件不會自動入帳。正確率只留在訓練端。</p>
+          </div></details>
+      </div>
+      <div class="settings-section-group" id="settingsGoalTools">
+        <details class="panel integration-disclosure" id="bridgeDisclosure"><summary><span><b>學習成果安全連結</b><small>備援核對 · 訓練端不直接寫目標</small></span><span class="disclosure-chevron" aria-hidden="true">⌄</span></summary>
+      <div id="bridgePanel" class="disclosure-content">
+        <div class="section-title"><div><small>V0.3 · READ-ONLY LINK PREVIEW</small><h2>學習成果安全連結預覽</h2></div></div>
+        <p class="muted">第一階段只核對、不匯入。若提供 Goal Manager 匯出的完整 JSON 備份，系統會在本機記憶體檢查目標期間、相同事件及同日可能重複補登；不會讀取、覆蓋或還原另一套系統的資料。</p>
+        <div class="button-row bridge-toolbar"><button id="loadGoalSnapshot" class="btn btn-primary" type="button">選擇目標系統備份（只讀）</button><button id="clearGoalSnapshot" class="btn btn-light" type="button">清除核對參考</button></div>
+        <input id="goalSnapshotInput" type="file" accept=".json,application/json" hidden>
+        <div class="bridge-hint" id="bridgeSnapshotStatus" role="status">尚未讀取目標系統備份。</div>
+        <div class="metrics bridge-metrics" id="bridgeMetrics"></div>
+        <div class="bridge-header"><h3>逐筆核對</h3><span class="muted">只勾選要匯出供人工檢查的紀錄</span></div>
+        <div id="bridgeRows" class="bridge-rows"></div>
+        <div class="bridge-actions"><div class="button-row"><button class="btn btn-light" id="selectBridgeCandidates" type="button">選取可核對項目</button><button class="btn btn-light" id="clearBridgeCandidates" type="button">清空選取</button></div>
+          <p class="fineprint" id="bridgeSelectionCount">尚未選取</p><button class="btn btn-primary" id="exportBridgeCandidates" type="button" disabled>下載選取的待核對事件 JSON</button></div>
+        <p class="bridge-alert">下載事件檔 ≠ 已匯入目標系統。不得用 Goal Manager 的「完整備份還原」功能匯入此檔；不得在已手動補登同一段時間後再次計入。若已啟用同網站自動連動，請以 Goal Manager 的實際接收紀錄為準；本區僅做唯讀參考。</p>
+      </div>
+      </details>
+        <details class="panel settings-fold" id="settingsGoalGuide"><summary><span>目標系統使用說明</span><small>保留手動核對備援</small></summary><div class="settings-fold-body"><div class="section-title"><div><small>GOAL MANAGER</small><h2>如何記入現有目標</h2></div></div>
+        <p>先在上方完成逐筆事件核對，確認是否與既有目標紀錄重複。啟用新版同網站連動後，新完成的有效學習會在開啟 Goal Manager 時自動核對與計入。手動匯出／核對保留為備援，不能對同一段時間重複補登。</p>
+        <a class="text-link" href="https://aw960809-ai.github.io/my-goal-manager/" target="_blank" rel="noopener noreferrer">開啟既有目標系統 ↗</a>
+      </div></details>
+        <details class="panel architecture-disclosure"><summary><span><small>LEARNING RECORD</small><b>學習紀錄與目標系統</b></span><span class="disclosure-chevron" aria-hidden="true">⌄</span></summary>
+          <div class="architecture"><div><b>訓練端</b><p>獨立保存答題、單字記憶與有效專注分鐘。</p></div><div class="architecture-arrow">↓ 同網站可選自動連動／手動核對備援</div><div><b>目標系統</b><p>新 Session 在同網站啟用後，由 Goal Manager 驗證並計入 Level 4 目標；Trainer 不直接修改目標資料。</p></div></div>
+        </details>
+      </div>
+      <div class="settings-section-group" id="settingsInformation">
+        <div class="panel settings-section"><div class="section-title"><div><small>ABOUT & QUALITY</small><h2>題庫與系統資訊</h2></div></div>
+          <p class="muted">TOEIC Trainer V0.5.0 · 原創 Part 5–7 題庫，非 ETS 官方產品。</p>
+          <div class="settings-health" id="settingsStorageHealth" role="status">本機學習紀錄與外觀設定分開保存</div>
+          <details class="quality-disclosure" id="qualityDisclosure"><summary>題庫數量與品質檢查 <span id="qualityStatus" class="quality-status">正在確認</span></summary><div class="quality-detail"><p class="fineprint" id="bankQuality">題庫清單：800 張不重複字卡／640 道不重複書面題（Part 5：368；Part 6：44；Part 7：228）／43 篇原創精讀／20 個文法主題。同一題在複習再次出現不作新題計數；自動查重不等於逐題人工語意審查。</p><p class="fineprint">此處是自動化格式、唯一性與候審清單；不代表所有英文答案已通過專業語意校對。系統不會為了增加題數而複製或重新編號舊題。</p></div></details>
+          <details class="panel mini-note"><summary>單字複習與間隔記憶規則</summary><p>整份交卷後才依答題結果更新複習排程。答錯者約十分鐘後重練，答對者逐步拉長間隔。舊版單字 SRS 與紀錄保留，不計為新題目。</p></details>
+          <details class="settings-about"><summary>題型來源與使用說明</summary>
+            <p class="fineprint">題型配置參考 ETS 官方公開規格，題文、選項均為獨立原創；正確率不是官方 TOEIC 分數。整份交卷後才批改，沒有聽力測驗。640 題已完成程式化結構檢查；新增分布風險檢查後 224 題列為優先語意覆核，並非已證實錯題。</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer><span>TOEIC Trainer v0.5.0 · 新學習自動連動可選啟用</span><span>資料只儲存在此瀏覽器（可自行匯出）</span></footer>
+</div>
+<dialog class="saved-review-dialog" id="savedReviewDialog"><div class="dialog-head"><button type="button" class="btn btn-light" id="closeSavedReview">關閉</button></div><div id="savedReviewBody"></div></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

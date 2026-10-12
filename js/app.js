@@ -1060,6 +1060,11 @@ function addGoalStudyLog(){
   document.getElementById('goalStudyBackfillDate')?.focus();
   return;
  }
+ // V0.5 safeguard: same-day automatically credited TOEIC intervals cannot be manually backfilled again.
+ if(db.logs.some(log=>log.source==='toeic-trainer-v05'&&String(log.taskId)===String(taskId)&&logDate(log.time)===date&&log.actual!==false&&log.status!=='已刪除')){
+  toast('當日此目標已有 TOEIC 自動連動紀錄；為防止重複計入，請改用獨立計時並核對不同的學習時段。');
+  return;
+ }
  const when=date===todayKey()?new Date():new Date(date+'T12:00:00');
  if(Number.isNaN(when.getTime())){toast('日期格式無效');return}
  const row={

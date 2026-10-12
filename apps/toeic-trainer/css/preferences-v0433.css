@@ -1,0 +1,139 @@
+/* TOEIC Trainer V0.4.3.3 — settings and calm non-green palette; no data or test engine. */
+html[data-accent="slate"]{--tt-light-accent:#526d98;--tt-light-soft:#e8eef8;--tt-dark-accent:#a6b9e3;--tt-dark-soft:#30415c;--tt-hero-right:#445a78}
+html[data-accent="indigo"]{--tt-light-accent:#6b5da1;--tt-light-soft:#f0edfa;--tt-dark-accent:#c0a9ef;--tt-dark-soft:#443c5c;--tt-hero-right:#50486f}
+html[data-accent="graphite"]{--tt-light-accent:#4b6373;--tt-light-soft:#eaf0f2;--tt-dark-accent:#b5c8d6;--tt-dark-soft:#3b4752;--tt-hero-right:#46525e}
+html[data-accent="teal"]{--tt-light-accent:#277780;--tt-light-soft:#e8f3f4;--tt-dark-accent:#95cad0;--tt-dark-soft:#294c53;--tt-hero-right:#315f69}
+html[data-appearance="system"],html[data-appearance="light"]{
+  color-scheme:light;
+  --canvas:#f3f5f8;--paper:#fff;--paper-2:#f8f9fc;
+  --navy:#273951;--navy-2:#3e5774;--ink:#253448;--mute:#68798a;
+  --line:#dbe3ec;--sage:var(--tt-light-accent);--sage-soft:var(--tt-light-soft);
+  --focus:#b77d39;--bad:#a64248;--bad-soft:#faebed;
+  --tt-primary-on:#fff;--tt-label:#3d5780;
+}
+html[data-appearance="dark"]{
+  color-scheme:dark;
+  --canvas:#151c27;--paper:#202b3b;--paper-2:#253247;
+  --navy:#e1e9f6;--navy-2:#c6d5e8;--ink:#ebf0f7;--mute:#b8c5d6;
+  --line:#39485d;--sage:var(--tt-dark-accent);--sage-soft:var(--tt-dark-soft);
+  --focus:#dfb473;--bad:#f0abb3;--bad-soft:#513742;
+  --tt-primary-on:#16243c;--tt-label:#e0eafa;
+}
+@media (prefers-color-scheme:dark){
+  html[data-appearance="system"]{
+    color-scheme:dark;
+    --canvas:#151c27;--paper:#202b3b;--paper-2:#253247;
+    --navy:#e1e9f6;--navy-2:#c6d5e8;--ink:#ebf0f7;--mute:#b8c5d6;
+    --line:#39485d;--sage:var(--tt-dark-accent);--sage-soft:var(--tt-dark-soft);
+    --focus:#dfb473;--bad:#f0abb3;--bad-soft:#513742;
+    --tt-primary-on:#16243c;--tt-label:#e0eafa;
+  }
+}
+/* Retune common elements without rewriting the approved navigation/exam components. */
+.btn-primary{background:var(--sage)!important;border-color:var(--sage)!important;color:var(--tt-primary-on)!important}
+.intro-banner,#tab-home .home-compact-hero{background:linear-gradient(118deg,#263750 0%,#2d3c59 60%,var(--tt-hero-right) 100%)!important;color:#f8fbff!important}
+.intro-banner .eyebrow,.intro-banner small{color:#c9d6e8!important}
+.intro-banner .btn-primary{background:#e4eafa!important;border-color:#e4eafa!important;color:#1d304c!important}
+.intro-banner .btn-light{border-color:#8da2ba!important;color:#fff!important;background:transparent!important}
+.pill:not(.warn){color:var(--tt-label)!important}
+.answer.picked,.exam-index-grid button.answered,.review-toolbar button.active,.tt-tabs button.active,.tt-tabs button[aria-pressed="true"]{background:var(--sage-soft)!important;border-color:var(--sage)!important;color:var(--ink)!important}
+.tt-tabs button.active,.tt-tabs button[aria-pressed="true"]{box-shadow:inset 0 0 0 1px var(--sage)!important}
+.answer.correct{border-color:#649e89!important;background:#eaf4ee!important;color:#233d34!important}
+.answer.wrong{border-color:#c9858a!important;background:#f9ebee!important;color:#4f2732!important}
+.feedback{border-color:var(--line)!important;background:var(--sage-soft)!important}
+.feedback.bad{background:var(--bad-soft)!important}
+html[data-appearance="dark"] .masthead,html[data-appearance="system"] .masthead{background:#25354e;color:#f8fbff}
+html[data-appearance="light"] .masthead{background:#25354e;color:#f8fbff}
+html[data-appearance="dark"] .answer.correct{background:#2d473e!important;color:#e1f7ed!important}
+html[data-appearance="dark"] .answer.wrong{background:#583741!important;color:#f9e5e8!important}
+html[data-appearance="dark"] .answer:not(.correct):not(.wrong),html[data-appearance="dark"] .grade-grid button{background:var(--paper);color:var(--ink)}
+html[data-appearance="light"] .answer:not(.correct):not(.wrong){background:var(--paper);color:var(--ink)}
+html[data-appearance="light"] .vocab-reveal{background:var(--sage-soft)}
+html[data-appearance="dark"] .vocab-reveal{background:var(--sage-soft)}
+html[data-appearance="light"] .metric b,html[data-appearance="light"] .result-summary b,html[data-appearance="light"] .timer{color:var(--ink)}
+html[data-appearance="dark"] .metric b,html[data-appearance="dark"] .result-summary b,html[data-appearance="dark"] .timer{color:var(--ink)}
+html[data-appearance="light"] .answer .letter{background:#edf0f6;color:var(--ink)}
+html[data-appearance="dark"] .answer .letter{background:#394b62;color:#f0f4fa}
+@media(prefers-color-scheme:dark){
+  html[data-appearance="system"] .answer.correct{background:#2d473e!important;color:#e1f7ed!important}
+  html[data-appearance="system"] .answer.wrong{background:#583741!important;color:#f9e5e8!important}
+  html[data-appearance="system"] .answer:not(.correct):not(.wrong){background:var(--paper);color:var(--ink)}
+  html[data-appearance="system"] .answer .letter{background:#394b62;color:#f0f4fa}
+}
+/* Analysis groups errors and sessions while retaining original individual views and event handlers. */
+.analysis-switcher{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 3px}
+.analysis-switcher[hidden]{display:none!important}
+.analysis-switcher button{min-height:46px;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--ink);font-size:14px;font-weight:750;padding:9px 12px}
+.analysis-switcher button.active{background:var(--sage-soft);border-color:var(--sage);box-shadow:inset 0 -2px 0 var(--sage)}
+/* Settings: each low-frequency function lives in one clear destination, not main practice panels. */
+#tab-settings .section-head{margin:8px 0 15px}
+#tab-settings .panel{margin-bottom:12px}
+#tab-settings .settings-section .section-title{margin-bottom:13px}
+#tab-settings .settings-setting-label{font-size:13px;font-weight:750;color:var(--ink);margin:14px 0 8px}
+#tab-settings .settings-choice-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#tab-settings .settings-choice-row button,#tab-settings .settings-palette-grid button{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  min-height:45px;padding:9px 7px;text-align:center;border:1px solid var(--line);
+  background:var(--paper-2);border-radius:11px;color:var(--ink);font:inherit;font-size:13px;font-weight:700;
+}
+#tab-settings .settings-choice-row button.active,#tab-settings .settings-palette-grid button.active{
+  border-color:var(--sage);background:var(--sage-soft);box-shadow:inset 0 0 0 1px var(--sage)
+}
+#tab-settings #settingsTextSizeButtons{grid-template-columns:repeat(2,minmax(0,1fr))}
+#tab-settings .settings-palette-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#tab-settings .swatch{display:inline-block;width:16px;height:16px;border-radius:50%;flex:0 0 auto;border:1px solid #64758955}
+#tab-settings .swatch.slate{background:#526d98}#tab-settings .swatch.indigo{background:#6b5da1}
+#tab-settings .swatch.graphite{background:#4b6373}#tab-settings .swatch.teal{background:#277780}
+#tab-settings .settings-health{border:1px solid var(--line);background:var(--paper-2);border-radius:11px;padding:11px 13px;color:var(--mute);font-size:12px;line-height:1.6}
+#tab-settings #settingsDataPanel .button-row{display:flex;flex-wrap:wrap}
+#tab-settings #settingsDataPanel .button-row .btn{flex:1 1 180px;min-width:0}
+#tab-settings #bridgeDisclosure{margin-bottom:12px}
+#tab-settings .settings-about{border:1px solid var(--line);border-radius:11px;padding:0 12px;margin-top:12px;background:var(--paper-2)}
+#tab-settings .settings-about>summary{min-height:43px;font-size:13px;font-weight:700;cursor:pointer;padding:10px 0}
+#tab-settings .quality-disclosure{margin:12px 0}
+#tab-settings #settingsInformation .mini-note{padding:12px 13px;margin-bottom:8px}
+/* Larger text is optional and does not alter persisted learning records. */
+html[data-text-size="large"] body{font-size:17px}
+html[data-text-size="large"] .answer,html[data-text-size="large"] .passage,html[data-text-size="large"] .reading-document{font-size:18px!important}
+html[data-text-size="large"] .tt-list-row,html[data-text-size="large"] .nav-btn{font-size:15px!important}
+@media(max-width:700px){
+  #tab-settings .settings-section{padding:14px 12px}
+  #tab-settings .settings-choice-row{gap:6px}
+  #tab-settings .settings-choice-row button,#tab-settings .settings-palette-grid button{font-size:12px;padding:8px 4px}
+  #tab-settings .button-row .btn{min-height:43px}
+}
+/* Compact settings disclosures: keep infrequent backup/Goal Manager operations available on demand. */
+#tab-settings .settings-fold{padding:0!important;overflow:hidden}
+#tab-settings .settings-fold>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:9px;min-height:51px;padding:13px 14px;font-size:14px;font-weight:750;cursor:pointer}
+#tab-settings .settings-fold>summary::-webkit-details-marker{display:none}
+#tab-settings .settings-fold>summary small{font-size:11px;font-weight:500;color:var(--mute);text-align:right}
+#tab-settings .settings-fold>summary:after{content:'⌄';font-size:16px;color:var(--mute)}
+#tab-settings .settings-fold[open]>summary:after{transform:rotate(180deg)}
+#tab-settings .settings-fold .settings-fold-body{padding:10px 14px 15px;border-top:1px solid var(--line)}
+#tab-settings .settings-fold .settings-fold-body .section-title{margin-bottom:8px}
+
+/* V0.4.3.4 — Vocabulary has two direct destinations; Settings has no dictionary. */
+#tab-vocab .vocab-view-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 13px}
+#tab-vocab .vocab-view-switch button{min-height:47px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:12px;font:inherit;font-size:14px;font-weight:700;padding:8px 10px;cursor:pointer}
+#tab-vocab .vocab-view-switch button.active{background:var(--sage-soft);border-color:var(--sage);box-shadow:inset 0 -2px 0 var(--sage)}
+#tab-vocab .vocab-view-switch button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+#tab-vocab #vocabLibraryPanel[hidden],#tab-vocab #vocabViewTabs[hidden]{display:none!important}
+#tab-vocab .vocab-library-panel{padding:17px;max-width:none}
+#tab-vocab .vocab-library-header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:5px}
+#tab-vocab .vocab-library-header h2{font-size:20px;margin:3px 0 0}
+#tab-vocab #wordDictionaryCount{font-size:12px;color:var(--mute);white-space:nowrap}
+#tab-vocab .vocab-library-lead{font-size:13px;color:var(--mute);margin:9px 0 13px;line-height:1.65}
+#tab-vocab .word-dictionary{border-top:0;padding-top:0;margin:0;max-width:none}
+#tab-vocab .word-dictionary-body{min-width:0}
+#tab-vocab .tt-vocab-controls{margin:6px 0 12px}
+#tab-vocab .word-row small span{display:inline}
+@media(max-width:700px){
+  #tab-vocab .vocab-library-panel{padding:14px 12px}
+  #tab-vocab .vocab-view-switch{gap:7px}
+  #tab-vocab .vocab-view-switch button{min-height:46px;font-size:13px}
+}
+
+/* V0.4.3.5: Visible exit control on submitted vocabulary results. */
+#tab-vocab .post-exam-return{display:flex;justify-content:flex-start;margin:0 0 14px}
+#tab-vocab .post-exam-return .btn{min-height:44px;padding:9px 14px;max-width:100%;white-space:normal}
+#tab-vocab #vocabSession .button-row .btn{min-width:0}

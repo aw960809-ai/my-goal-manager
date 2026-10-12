@@ -1,0 +1,20 @@
+{
+  "version": "0.4.0",
+  "newCards": 728,
+  "newQuestions": 465,
+  "newPart5": 301,
+  "newPart6": 24,
+  "newPart7": 140,
+  "newReading": 28,
+  "newGrammarLessons": 11,
+  "totals": {
+    "cards": 800,
+    "questions": 524,
+    "part5": 338,
+    "part6": 28,
+    "part7": 158,
+    "reading": 34,
+    "grammarLessons": 20
+  },
+  "reviewScope": "structural/dedup/answer indexes, NOT independently verified linguistic/semantic correctness"
+}

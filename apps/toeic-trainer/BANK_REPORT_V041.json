@@ -1,0 +1,47 @@
+{
+  "version": "0.4.1",
+  "baseline": {
+    "cards": 800,
+    "writtenQuestions": 524,
+    "readingLessons": 34,
+    "grammarTopics": 20
+  },
+  "new": {
+    "cards": 0,
+    "part5": 18,
+    "part6": 0,
+    "part7": 45,
+    "writtenQuestions": 63,
+    "readingLessons": 9,
+    "grammarTopics": 0
+  },
+  "totals": {
+    "cards": 800,
+    "part5": 356,
+    "part6": 28,
+    "part7": 203,
+    "writtenQuestions": 587,
+    "readingLessons": 43,
+    "grammarTopics": 20
+  },
+  "newReadingBands": {
+    "foundation": [
+      61,
+      63,
+      64
+    ],
+    "intermediate": [
+      220,
+      229,
+      236
+    ],
+    "advanced": [
+      394,
+      431,
+      443
+    ]
+  },
+  "reviewScope": "structural QA, original authored material, simulated browser interaction; NOT independent full semantic certification",
+  "goalManagerWriteEnabled": false,
+  "storageSchema": 1
+}

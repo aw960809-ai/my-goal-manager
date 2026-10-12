@@ -1,0 +1,9 @@
+{
+  "name": "toeic-trainer-standalone",
+  "private": true,
+  "version": "0.5.0",
+  "description": "V0.5.0 opt-in same-origin auto-link; old study history preserved and trainer never writes GM data.",
+  "scripts": {
+    "test": "node tests/core.test.js && node tests/bridge.test.js && node tests/bank-v04.test.js && node tests/progression-v041.test.js && node tests/official-v042.test.js && node tests/layout-quality-v043.test.js && node tests/ui-v0431.test.js && node tests/ui-v0432.test.js && node tests/ui-v0433.test.js && node tests/ui-v0434.test.js && node tests/ui-v0435.test.js && node tests/ui-v0436.test.js && node tests/auto-sync-v05.test.js"
+  }
+}

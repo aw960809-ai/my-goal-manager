@@ -1,0 +1,93 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const vm=require('node:vm');
+const root=path.resolve(__dirname,'..');
+const Core=require('../js/core.js');
+const cx={};vm.runInNewContext(fs.readFileSync(path.join(root,'data/content.js'),'utf8'),cx);
+vm.runInNewContext(fs.readFileSync(path.join(root,'data/advanced.js'),'utf8'),cx);
+const v01=cx.ToeicTrainerContent,v02=cx.ToeicTrainerAdvanced;
+const cards=[...v01.cards,...v02.cards];
+const questions=[...v01.questions.filter(q=>q.part>=5),...v02.questions];
+assert.equal(Core.VERSION,'0.5.0');
+assert.equal(Core.SCHEMA,1,'Do not migrate the existing browser storage schema');
+assert.equal(Core.KEY,'toeic-trainer-v01:learning-state');
+assert.equal(cards.length,72);
+assert.equal(v01.cards.length,48);
+assert.equal(v01.questions.length,40,'Legacy questions retained for historical IDs');
+assert.equal(v02.questions.length,39);
+assert.equal(questions.length,59);
+const counts={};questions.forEach(q=>counts[q.part]=(counts[q.part]||0)+1);
+assert.deepEqual(counts,{5:37,6:4,7:18});
+assert.deepEqual(Core.validateBank(cards,questions),[]);
+assert(questions.every(q=>typeof q.reasonEn==='string'&&q.reasonEn.length>25));
+assert.equal(v02.grammarLessons.length,9);
+assert.equal(v02.readingLessons.length,6);
+for(const lesson of v02.readingLessons){
+ assert.equal(lesson.sentences.length,4);
+ assert.equal(lesson.questions.length,2);
+ for(const sent of lesson.sentences)assert(sent.en.length>28&&sent.zh.length>6&&sent.note.length>8);
+ for(const id of lesson.vocab)assert(cards.some(c=>c.id===id),`Unknown reading-linked word ${id}`);
+}
+for(const topic of v02.grammarLessons){
+ assert(topic.ruleEn.length>40&&topic.ruleZh.length>10&&topic.formula);
+ assert(v02.questions.filter(q=>q.grammarTopic===topic.id).length>=3);
+}
+const onlyWritten=Core.chooseQuestions(v01.questions,{mode:'mixed',count:100});
+assert(onlyWritten.every(q=>q.part>=5));
+assert.equal(Core.chooseQuestions(v01.questions,{mode:'listening',count:100}).length,0);
+assert(Core.chooseQuestions(questions,{mode:'reading',count:100}).every(q=>[6,7].includes(q.part)));
+assert(Core.chooseQuestions(questions,{mode:'grammar',count:100}).every(q=>[5,6].includes(q.part)));
+assert.equal(Core.chooseQuestions(questions,{mode:'grammar',topic:'relative',count:100}).length,3);
+assert.equal(Core.chooseQuestions(questions,{mode:'reading',readingId:'r-email',count:100}).length,2);
+assert.equal(Core.chooseQuestions(questions,{mode:'mistakes',stats:{},count:100}).length,0);
+const base=new Date('2026-10-11T04:00:00Z');
+const next=Core.nextReview(null,'good',base);
+assert.equal(next.intervalDays,2);
+assert.equal(Core.reviewIsDue(next,base),false);
+let wrong=Core.recordAnswer(null,false,base);assert.equal(Core.inMistakePool(wrong,base),true);
+wrong=Core.recordAnswer(wrong,true,base);wrong=Core.recordAnswer(wrong,true,base);
+assert.equal(Core.inMistakePool(wrong,base),false);
+const weak=Core.weakTopics(questions,{'g-re-01':{correct:0,wrong:3},'g-tn-01':{correct:2,wrong:1}});
+assert.equal(weak[0].topic,'relative');assert.equal(weak[0].errorRate,100);
+assert.equal(Core.dateKey('2026-10-10T17:00:00Z'),'2026-10-11');
+assert.equal(Core.taskFor('2026-10-11','article').taskId,'g3-2026-10-article');
+assert.equal(Core.taskFor('2026-12-10','article').taskId,'g3-2026-12-practice');
+const ev=Core.createSession({id:'tt-test-event-20261011',date:'2026-10-11',mode:'guided-reading',unit:'article',part:7,seconds:156,answered:2,correct:1,questionIds:['r-email-q1','r-email-q2']});
+assert.equal(ev.accuracy,50);assert.equal(ev.minutes,2.6);assert.equal(ev.goalImportStatus,'not-imported');
+assert.equal(ev.goalSyncEligible,true);assert.equal(ev.suggestedGoalTaskId,'g3-2026-10-article');
+assert.equal(Core.createSession({id:'tt-test-event-20261012',date:'2026-10-11',mode:'grammar',unit:'practice',part:5,seconds:20,answered:1,correct:1,questionIds:['g-re-01']}).goalSyncEligible,false);
+// Realistic V0.1 state with user-owned historical listening result, review interval and mistakes.
+const legacy={appId:Core.APP_ID,schema:1,version:'0.1.0',createdAt:'2026-10-11T12:40:00.000Z',
+ review:{v001:{repetitions:2,intervalDays:3,dueAt:'2026-10-15T00:00:00Z'}},
+ questionStats:{'p2-01':{correct:1,wrong:1},'p5-01':{correct:8,wrong:2}},
+ sessions:[{...ev,mode:'listening',questionIds:['p2-01']}]};
+const nextState=Core.normalized(legacy);
+assert.deepEqual(nextState.review,legacy.review);
+assert.deepEqual(nextState.questionStats,legacy.questionStats);
+assert.deepEqual(nextState.sessions,legacy.sessions);
+assert.deepEqual(nextState.savedWordIds,[]);assert.deepEqual(nextState.readingProgress,{});
+nextState.savedWordIds=['v013','v070'];nextState.readingProgress['r-email']={attempts:2,best:100,lastAt:base.toISOString()};
+const restored=Core.normalized(nextState);
+assert.deepEqual(restored.savedWordIds,['v013','v070']);
+assert.equal(restored.readingProgress['r-email'].attempts,2);
+assert.equal(restored.sessions.length,1,'Past V0.1 session survives v0.2 backup import');
+assert.throws(()=>Core.normalized({appId:'goal-manager',schema:1}),/來源不符/);
+const ui=fs.readFileSync(path.join(root,'js/app.js'),'utf8');
+const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
+const joined=[ui,html,sw,fs.readFileSync(path.join(root,'js/core.js'),'utf8')].join('\n');
+for(const rule of ['lawLangGoalSystemV92','localStorage.clear(', 'indexedDB.deleteDatabase(', '/api/goal-events'])assert(!joined.includes(rule));
+assert(sw.includes("const OWN_PREFIX='toeic-trainer-v'"));
+assert(sw.includes("const VERSION='toeic-trainer-v0.5.0'"));
+assert(sw.includes("'./data/advanced.js'"));
+assert(html.includes('src="./data/advanced.js?v=v0.5.0-auto-link-20261012"'));
+assert(html.includes('src="./js/bridge.js?v=v0.5.0-auto-link-20261012"'));
+for(const nav of ['home','reading','vocab','grammar','analysis','settings'])assert(html.includes(`data-tab="${nav}"`));
+for(const old of ['mistakes','history'])assert(html.includes(`data-analysis-tab="${old}"`),'preserve individual analysis destinations');
+assert(!html.includes('data-tab="practice"')&&!html.includes('data-quick="listening"'));
+assert(!html.includes('value="2"')&&!html.includes('value="3"')&&!html.includes('value="4"'));
+assert(ui.includes('localStorage.setItem(Core.KEY,json)'));
+assert(fs.readFileSync(path.join(root,'js/bridge.js'),'utf8').includes('goalManagerImportReady:false'));
+console.log('PASS: V0.4 historical baseline: 72 words, 59 reading/grammar questions, 6 close readings, 9 grammar units, safe v0.1 restoration, listening excluded, isolated store.');
