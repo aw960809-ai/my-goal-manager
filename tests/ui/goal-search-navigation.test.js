@@ -40,7 +40,7 @@ assert(hotfix.includes('var(--gm-focus'));
 assert(!hotfix.includes('999px'));
 assert(!hotfix.includes('localStorage'));
 assert(!hotfix.includes('db.logs'));
-assert(version.includes("GOAL_MANAGER_VERSION='98.13.7'"));
+assert(version.includes("GOAL_MANAGER_VERSION='98.13.8'"));
 assert(version.includes('GOAL_MANAGER_SCHEMA_VERSION=6'));
 assert(sw.includes("'./css/refinements.css'"));
 assert(sw.includes("'./js/refinements.js'"));

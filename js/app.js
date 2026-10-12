@@ -7,6 +7,7 @@ let gmToeicLastCommittedRaw=null;
 const BACKUP_KEYS=['lawLangGoalSystemV92_backup1','lawLangGoalSystemV92_backup2','lawLangGoalSystemV92_backup3'];
 const ACTIVE_TIMER_KEY='lawLangGoalActiveTimerV1';
 const HISTORY_ANCHOR_KEY='lawLangGoalSystemV92_historyAnchorV1';
+const TOEIC_DIRECTION_BOOTSTRAP_MARKER='goalManager:toeic-independent-direction:v1';
 const L={1:'方向／重要目標',2:'階段目標',3:'子任務',4:'具體行動'};
 let recoveryNotice='';
 let persistenceRecoveryBlocked=false;
@@ -198,6 +199,9 @@ const toeicIntegratedPlanMigration=ensureToeicPlan();
 const initialPersonalSaveOk=save({backup:!!((thu1151LawPlanMigration&&thu1151LawPlanMigration.applied)||(toeicIntegratedPlanMigration&&toeicIntegratedPlanMigration.applied))});
 if(initialPersonalSaveOk&&thu1151LawPlanMigration&&thu1151LawPlanMigration.applied){
  try{storeSet(THU_1151_LAW_PLAN_MARKER,'1')}catch(_){}
+}
+if(initialPersonalSaveOk&&toeicIntegratedPlanMigration?.bootstrapEligible===true){
+ if(!storeSet(TOEIC_DIRECTION_BOOTSTRAP_MARKER,'1'))console.warn('TOEIC marker save failed');
 }
 cleanupLegacyStorage();
 setTimeout(()=>idbMirrorSave(),500);
@@ -527,7 +531,8 @@ function ensureThu1151LawPreviewPlan(){
 
 function ensureToeicPlan(){
  if(!window.ToeicPlanDomain)return {applied:false,reason:'toeic-plan-domain-unavailable'};
- const result=ToeicPlanDomain.apply(db.tasks);
+ const done=storeGet(TOEIC_DIRECTION_BOOTSTRAP_MARKER)==='1';
+ const result=done?{applied:false,bootstrapEligible:false}:ToeicPlanDomain.apply(db.tasks);
  const aliases=ToeicPlanDomain.progressAliases(db.tasks,db.logs);
  if(aliases.length)db.logs.push(...aliases);
  try{storeSet('o'+ToeicPlanDomain.ROOT_ID,'1')}catch(_){}

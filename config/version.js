@@ -1,3 +1,3 @@
 /* Single runtime version source: shared by page and Service Worker. */
-globalThis.GOAL_MANAGER_VERSION='98.13.7';
+globalThis.GOAL_MANAGER_VERSION='98.13.8';
 globalThis.GOAL_MANAGER_SCHEMA_VERSION=6;

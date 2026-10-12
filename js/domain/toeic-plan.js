@@ -6,6 +6,8 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
 
+  const DIRECTION_ID='toeic-direction-2026';
+  const DIRECTION_NAME='TOEIC 多益英文能力準備';
   const ROOT_ID='g3-2026-integrated';
   const UNITS=Object.freeze({
     ARTICLE:'article',
@@ -67,7 +69,7 @@
       id:ROOT_ID,
       name:'TOEIC｜10–12 月整合準備',
       level:2,
-      parent:'g3',
+      parent:DIRECTION_ID,
       weeklyMinutes:0,
       start:'',
       due:''
@@ -101,16 +103,26 @@
 
   function apply(tasks){
     const rows=list(tasks);
-    if(!getTask(rows,'g3')){
-      return {applied:false,reason:'language-root-missing',added:0,repaired:0,archived:0};
-    }
-
     let changed=false,added=0,repaired=0,archived=0;
     const set=(task,key,value)=>{
       if(task[key]!==value){task[key]=value;changed=true;return true}
       return false;
     };
 
+
+    let direction=getTask(rows,DIRECTION_ID);
+    if(!direction){
+      const sameName=rows.some(t=>Number(t?.level)===1&&String(t.name||'').trim()===DIRECTION_NAME);
+      if(sameName)return {applied:false,reason:'matching-name-conflict',bootstrapEligible:false};
+      direction={id:DIRECTION_ID,name:DIRECTION_NAME,level:1,parent:null,status:'未開始',progress:0,weeklyMinutes:0,start:'',due:''};
+      rows.push(direction);changed=true;added++;
+    }else if(Number(direction.level)!==1||direction.parent||direction.status==='已封存'){
+      return {applied:false,reason:'invalid-or-archived',bootstrapEligible:false};
+    }
+    const old=getTask(rows,ROOT_ID);
+    if(old&&Number(old.level)===2&&old.parent==='g3'){
+      old.parent=DIRECTION_ID;changed=true;repaired++;
+    }
     taskSpecs().forEach(spec=>{
       let task=getTask(rows,spec.id);
       if(!task){
@@ -142,7 +154,7 @@
     return {
       applied:changed,
       reason:changed?'integrated-plan-applied':'already-current',
-      added,repaired,archived,
+      added,repaired,archived,bootstrapEligible:true,
       weeklyTargets:PHASES.map(phase=>({
         phaseId:phase.id,
         minutes:phase.units.reduce((sum,unit)=>sum+unit.weeklyMinutes,0)
@@ -262,7 +274,7 @@
   }
 
   return Object.freeze({
-    ROOT_ID,UNITS,PHASES,LEGACY_IDS,taskSpecs,apply,phaseForDate,localDateKey,
+    DIRECTION_ID,DIRECTION_NAME,ROOT_ID,UNITS,PHASES,LEGACY_IDS,taskSpecs,apply,phaseForDate,localDateKey,
     inferUnit,targetTaskId,isManagedTask,plannedMinutes,aggregateProgress,progressAliases
   });
 });
