@@ -1,0 +1,65 @@
+{
+  "version": "0.4.2",
+  "origin": "independently authored TOEIC-format-inspired material; not ETS official questions",
+  "storage": {
+    "key": "toeic-trainer-v01:learning-state",
+    "schema": 1,
+    "goalManagerWriteEnabled": false
+  },
+  "cards": 800,
+  "readingLessons": 43,
+  "grammarTopics": 20,
+  "questionBank": {
+    "legacy": 587,
+    "new": 53,
+    "all": 640,
+    "part5": 368,
+    "part6": 44,
+    "part7": 228,
+    "newPart6Groups": 4,
+    "newMultiGroups": 5,
+    "legacySinglePassagesOutsideExamRange": 37
+  },
+  "newAuthored": {
+    "part5": 12,
+    "part6": 16,
+    "part6Bundles": 4,
+    "part7DoubleOrTriple": 25,
+    "part7Bundles": 5
+  },
+  "officialFormatPractice": {
+    "questionCount": 100,
+    "timeMinutes": 75,
+    "structure": {
+      "part5": 30,
+      "part6": 16,
+      "part7Single": 29,
+      "part7Multiple": 25
+    },
+    "valid": true
+  },
+  "programmaticReview": {
+    "passed": true,
+    "failures": [],
+    "warnings": [
+      "既有 37 篇單篇閱讀含超過四題：保留歷史，不直接改寫；官方模考僅選 2–4 題／篇。",
+      "所有 587 道舊題保留原文及 ID，完整語意／錯誤選項專業覆核仍待進行。",
+      "新增題已通過格式及來源一致性檢查，但此檢查無法證明沒有第二個語意成立的答案。"
+    ],
+    "checks": [
+      "IDs, normalized stems and unique answer options",
+      "Part 6 four blanks per single document",
+      "Part 7 two/triple documents five different skills and cited evidence",
+      "original old IDs unchanged",
+      "100 unique IDs per mock paper",
+      "five automated regression test suites",
+      "browser submit-only practice and historical data retention"
+    ]
+  },
+  "limitations": [
+    "Automated structural checks are not a complete professional semantic proof of unique correct options.",
+    "587 legacy question stems/answers remain unedited; expert semantic review is pending.",
+    "Original authoring of 53 new items does not confer ETS approval or official score conversion.",
+    "Read-only Goal Manager preview only; no automated data sharing."
+  ]
+}

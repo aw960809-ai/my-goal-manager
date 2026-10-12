@@ -1,0 +1,97 @@
+'use strict';
+const assert=require('node:assert/strict');
+const vm=require('node:vm');
+const fs=require('node:fs');
+const path=require('node:path');
+const ROOT=path.join(__dirname,'..');
+const read=p=>fs.readFileSync(path.join(ROOT,p),'utf8');
+const ctx={};
+for(const p of ['data/content.js','data/advanced.js','data/v04_bank.js','data/v041_progression.js','data/v042_official.js'])vm.runInNewContext(read(p),ctx,{filename:p});
+const Core=require('../js/core.js'),Bank=require('../js/bank-audit.js'),Exam=require('../js/exam.js'),Quality=require('../js/quality-review.js');
+const previous=[...ctx.ToeicTrainerContent.questions.filter(q=>q.part>=5),...ctx.ToeicTrainerAdvanced.questions,...ctx.ToeicTrainerV04.questions,...ctx.ToeicTrainerV041.questions];
+const added=ctx.ToeicTrainerV042.questions,all=[...previous,...added];
+const words=[...ctx.ToeicTrainerContent.cards,...ctx.ToeicTrainerAdvanced.cards,...ctx.ToeicTrainerV04.cards];
+const lessons=[...ctx.ToeicTrainerAdvanced.readingLessons,...ctx.ToeicTrainerV04.readingLessons,...ctx.ToeicTrainerV041.readingLessons];
+const grammar=[...ctx.ToeicTrainerAdvanced.grammarLessons,...ctx.ToeicTrainerV04.grammarLessons];
+assert.equal(previous.length,587);assert.equal(added.length,53);assert.equal(words.length,800);
+assert.deepEqual(added.filter(q=>q.part===5).length,12);assert.deepEqual(added.filter(q=>q.part===6).length,16);assert.deepEqual(added.filter(q=>q.part===7).length,25);
+assert.equal(Core.SCHEMA,1);assert.equal(Core.VERSION,'0.5.0');
+assert.equal(Core.KEY,'toeic-trainer-v01:learning-state');
+assert.equal(Core.BACKUP_KEY,'toeic-trainer-v01:learning-state-backup');
+assert.equal(Core.validateBank(words,all).length,0);
+const bank=Bank.audit({cards:words,questions:all,readingLessons:lessons,grammarLessons:grammar,
+ expected:{cards:800,questions:640,reading:43,grammar:20,part5:368,part6:44,part7:228}});
+assert(bank.ok,bank.errors.join('\n'));
+const qa=Quality.check({legacy:previous,fresh:added,reading:lessons});
+assert(qa.ok,qa.errors.join('\n'));
+assert.equal(qa.counts.newMultiGroups,5);
+assert(qa.counts.legacySinglePassagesOutsideExamRange>0);
+const def=ctx.ToeicTrainerV042.mock;
+const spec=Exam.validateMock(all,def);assert(spec.ok,spec.issues.join('\n'));
+const paper=Exam.assembleMock(all,def);
+assert.equal(paper.length,100);
+assert.deepEqual([paper.filter(q=>q.part===5).length,paper.filter(q=>q.part===6).length,paper.filter(q=>q.part===7).length],[30,16,54]);
+const byId=new Map(all.map(q=>[q.id,q]));
+assert.equal(new Set(paper.map(q=>q.id)).size,100);
+const sourceGroup=new Map();
+for(const q of paper.filter(q=>q.part===7)){const k=q.docGroup||q.readingId;sourceGroup.set(k,(sourceGroup.get(k)||0)+1)}
+assert.equal(sourceGroup.size,15,'ten single documents plus five double/triple sets');
+for(const q of added){assert(!previous.some(x=>x.id===q.id));assert(q.id.startsWith('v42-'))}
+for(const part of [5,6,7])assert(paper.some(q=>q.part===part));
+const draft=Exam.start(paper,{context:'reading',mode:'official-reading-mock',timed:true,durationSeconds:4500,now:10000000});
+assert.equal(draft.itemIds.length,100);assert.equal(Exam.completed(draft),0);
+assert.equal(JSON.stringify(draft).includes('reasonEn'),false,'do not serialize solution feedback in written draft');
+const picked=Exam.answer(draft,paper[0].id,2);assert.equal(draft.responses[paper[0].id],undefined,'pure non-mutating answer draft');
+assert.equal(Exam.completed(picked),1);
+assert.throws(()=>Exam.score(picked,paper),/99 題未作答/);
+assert.equal(Exam.score(picked,paper,{timedOut:true}).unanswered,99);
+const changed=Exam.answer(picked,paper[0].id,paper[0].answer);
+assert.equal(Exam.score(changed,paper,{timedOut:true}).correct,1);
+let ready=changed;
+for(let i=1;i<100;i++)ready=Exam.answer(ready,paper[i].id,paper[i].answer);
+let scored=Exam.score(ready,paper);assert.equal(scored.answered,100);assert.equal(scored.correct,100);assert.equal(scored.unanswered,0);
+assert.equal(scored.accuracy,100);
+// Daily practice preserves four-question Part 6 bundles and five-question multi-document bundles.
+const p6Pool=added.filter(q=>q.docGroup==='p6-archive');
+assert.equal(Exam.pickPractice(p6Pool,{count:5,random:()=>.5}).length,4);
+assert.equal(new Set(Exam.pickPractice(p6Pool,{count:5}).map(q=>q.docGroup)).size,1);
+const multiPool=added.filter(q=>q.docGroup==='p7-hotel');
+assert.equal(Exam.pickPractice(multiPool,{count:5}).length,5);
+assert.equal(Exam.pickPractice(multiPool,{count:4}).length,0,'never slice a five-question shared-document group');
+const combined=Exam.pickPractice([...p6Pool,...multiPool],{count:9,random:()=>.5});
+assert.equal(combined.length,9);
+assert.equal(new Set(combined.map(q=>q.id)).size,9);
+assert.deepEqual(new Set(combined.map(q=>q.docGroup)),new Set(['p6-archive','p7-hotel']));
+
+const clone=JSON.parse(JSON.stringify(ready));const restored=Exam.validDraft(clone,all,10000100);
+assert.equal(restored.items.length,100);
+assert.equal(Exam.elapsed(ready,10001000),1);
+assert.throws(()=>Exam.validDraft({...clone,itemIds:[...clone.itemIds,'duplicate']},all,10000100));
+assert.throws(()=>Exam.validDraft({...clone,responses:{missing:2}},all,10000100));
+assert.throws(()=>Exam.validDraft({...clone,createdAt:1},all,10000000+31*86400000));
+const vqs=Exam.vocabQuestions(words.slice(0,10),{random:()=>0.9});
+assert.equal(vqs.length,10);
+assert(vqs.every(q=>q.options.length===4&&q.options[q.answer]===words.find(c=>c.id===q.id).zh&&new Set(q.options).size===4));
+const vd=Exam.start(vqs,{context:'vocab',mode:'vocabulary',type:'vocab'});
+const scoreVocab=Exam.score(vqs.reduce((d,q)=>Exam.answer(d,q.id,q.answer),vd),vqs);
+assert.equal(scoreVocab.correct,10);
+const saved=Core.normalized({appId:Core.APP_ID,schema:1,version:'0.4.1',createdAt:'2026-10-10T08:00:00Z',
+  review:{v001:{repetitions:2,intervalDays:4}},questionStats:{'v4-p5-003':{correct:3,wrong:1}},
+  sessions:[{appId:Core.APP_ID,id:'tt-old-record-123',mode:'grammar',date:'2026-10-10',seconds:103}],
+  savedWordIds:['v001','v800'],readingProgress:{'v41-r-parcel':{attempts:1,best:80,lastAt:'2026-10-10T00:00:00Z'}}});
+assert.equal(saved.sessions.length,1);assert.deepEqual(Object.keys(saved.review),['v001']);
+assert.equal(saved.questionStats['v4-p5-003'].wrong,1);assert.deepEqual(saved.savedWordIds,['v001','v800']);
+const damaged=added.map(x=>({...x}));damaged[1]={...damaged[1],id:previous[0].id};
+assert(!Quality.check({legacy:previous,fresh:damaged,reading:lessons}).ok,'duplicate old/new ID rejected');
+const wrong=added.map(x=>({...x}));wrong[12]={...wrong[12],options:['A','A','C','D']};
+assert(!Quality.check({legacy:previous,fresh:wrong,reading:lessons}).ok,'duplicate option rejected');
+const severed=added.map(x=>({...x}));severed[28]={...severed[28],evidence:'invented absent evidence'};
+assert(!Quality.check({legacy:previous,fresh:severed,reading:lessons}).ok,'missing source evidence rejected');
+const wrongMock={...def,part7multiple:[...def.part7multiple.slice(0,24),def.part7multiple[0]]};
+assert(!Exam.validateMock(all,wrongMock).ok,'duplicate in 100-item mock rejected');
+const html=read('index.html'),app=read('js/app.js'),sw=read('sw.js');
+for(const name of ['v0.5.0-auto-link-20261012','id="startOfficialMock"','id="draftBanner"','id="savedReviewDialog"','data/v042_official.js','js/exam.js','js/quality-review.js'])assert(html.includes(name),name);
+assert(sw.includes('toeic-trainer-v0.5.0'));assert(sw.includes("'./data/v042_official.js'"));
+for(const expected of ['function finishQuiz(timedOut=false)','function finishReadingLesson()','function startOfficialMock()','Exam.score(','Exam.answer(','reviewSection(','finishReadingLesson()','finishQuiz(false)'])assert(app.includes(expected),expected);
+for(const sensitive of ['localStorage.clear(','indexedDB.deleteDatabase(','lawLangGoalSystemV92','window.ToeicTrainerNews'])for(const src of ['js/app.js','js/exam.js','js/quality-review.js','data/v042_official.js'])assert(!read(src).includes(sensitive),src+' touches unsafe boundary');
+console.log('PASS: V0.4.2 official 100/75 blueprint, 53 independently authored items, full-submit deferred scoring, session stability and strict source audit.');

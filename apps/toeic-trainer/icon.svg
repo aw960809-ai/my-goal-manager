@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192" role="img" aria-label="TOEIC Trainer">
+<rect width="192" height="192" rx="42" fill="#273a50"/>
+<rect x="22" y="22" width="148" height="148" rx="32" fill="#e5f2ed"/>
+<path d="M48 58h96v18h-38v72H86V76H48z" fill="#273a50"/>
+<circle cx="142" cy="139" r="11" fill="#247461"/>
+</svg>

@@ -1,0 +1,1310 @@
+{
+  "version": "0.4.3",
+  "source": "machine-checks-only",
+  "counts": {
+    "questions": 640,
+    "cards": 800,
+    "reading": 43,
+    "grammar": 20,
+    "part5": 368,
+    "part6": 44,
+    "part7": 228,
+    "uniqueQuestionIds": 640,
+    "mechanicallyBlocked": 0,
+    "flaggedForReview": 188,
+    "notSemanticallyCertified": 640
+  },
+  "ok": true,
+  "blockedIds": [],
+  "errors": [],
+  "reviewFlags": [
+    {
+      "id": "p7-01",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "p7-02",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "p7-03",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "p7-04",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "p7-05",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "p7-06",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "r-email-q1",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "r-email-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "r-email-q2",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "r-email-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "r-logistics-q1",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "r-logistics-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "r-logistics-q2",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "r-logistics-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "r-facilities-q1",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "r-facilities-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "r-facilities-q2",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "r-facilities-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "r-finance-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "r-finance-q2",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "r-finance-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "r-recruit-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "r-recruit-q2",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "r-recruit-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "r-hotel-q1",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "r-hotel-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "r-hotel-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-p6-equipment-2",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v4-r-facility-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-facility-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-facility-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-facility-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-facility-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-facility-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-facility-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-clinic-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-clinic-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-clinic-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-clinic-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-clinic-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-clinic-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-clinic-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-museum-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-museum-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-museum-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-museum-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-museum-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-museum-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-museum-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-software-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-software-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-software-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-software-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-software-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-software-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-software-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-courier-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-courier-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-courier-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-courier-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-courier-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-courier-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-courier-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-training-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-training-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-training-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-training-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-training-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-training-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-training-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-restaurant-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-restaurant-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-restaurant-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-restaurant-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-restaurant-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-restaurant-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-restaurant-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-library-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-library-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-library-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-library-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-library-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-library-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-library-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-insurance-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-insurance-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-insurance-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-insurance-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-insurance-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-insurance-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-insurance-q5",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v4-r-insurance-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-parking-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-parking-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-parking-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-parking-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-parking-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-parking-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-parking-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-warehouse-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-warehouse-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-warehouse-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-warehouse-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-warehouse-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-warehouse-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-warehouse-q5",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v4-r-warehouse-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-bank-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-bank-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-bank-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-bank-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-bank-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-bank-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-bank-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-conference-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-conference-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-conference-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-conference-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-conference-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-conference-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-conference-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-housing-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-housing-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-housing-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-housing-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-housing-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-housing-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-housing-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-retail-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-retail-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-retail-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-retail-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-retail-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-retail-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-retail-q5",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v4-r-retail-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-factory-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-factory-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-factory-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-factory-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-factory-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-factory-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-factory-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-hotel-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-hotel-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-hotel-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-hotel-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-hotel-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-hotel-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-hotel-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-charity-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-charity-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-charity-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-charity-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-charity-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-charity-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-charity-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-supplier-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-supplier-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-supplier-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-supplier-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-supplier-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-supplier-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-supplier-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-transit-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-transit-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-transit-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-transit-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-transit-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-transit-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-transit-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-publisher-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-publisher-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-publisher-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-publisher-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-publisher-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-publisher-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-publisher-q5",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v4-r-publisher-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-hospital-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-hospital-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-hospital-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-hospital-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-hospital-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-hospital-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-hospital-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-energy-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-energy-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-energy-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-energy-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-energy-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-energy-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-energy-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-film-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-film-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-film-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-film-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-film-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-film-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-film-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-garden-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-garden-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-garden-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-garden-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-garden-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-garden-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-garden-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-legal-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-legal-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-legal-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-legal-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-legal-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-legal-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-legal-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-agriculture-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-agriculture-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-agriculture-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-agriculture-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-agriculture-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-agriculture-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-agriculture-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-education-q1",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-education-q2",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-education-q2",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-education-q3",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-education-q3",
+      "code": "implausible-distractor",
+      "detail": "疑似過於明顯的干擾選項，建議優先人工覆核"
+    },
+    {
+      "id": "v4-r-education-q4",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v4-r-education-q5",
+      "code": "missing-cited-evidence",
+      "detail": "閱讀題缺少機器可驗證的原文依據欄位（不代表答案錯誤）"
+    },
+    {
+      "id": "v41-r-parcel-q1",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v41-r-parcel-q2",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v41-r-parcel-q3",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v41-r-parcel-q5",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v41-r-orientation-q1",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v41-r-orientation-q2",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v41-r-orientation-q3",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v41-r-orientation-q4",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v41-r-bookings-q1",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v41-r-bookings-q4",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v41-r-bookings-q5",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v41-r-regional-tour-q2",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v41-r-regional-tour-q4",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v41-r-subscription-q4",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v41-r-catering-q1",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v41-r-catering-q4",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v41-p5-001",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v42-p7-hotel-q1",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v42-p7-hotel-q2",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v42-p7-supplier-q1",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v42-p7-cycle-q2",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v42-p7-cycle-q4",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v42-p7-cycle-q5",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v42-p7-warranty-q1",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v42-p7-warranty-q3",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v42-p7-warranty-q5",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v42-p7-training-q1",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v42-p7-training-q2",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    },
+    {
+      "id": "v42-p7-training-q5",
+      "code": "brief-rationale",
+      "detail": "解析較短，需人工確認是否足以說明正確與錯誤選項"
+    }
+  ],
+  "nearDuplicateCandidates": [],
+  "exactDuplicatePairs": [],
+  "policy": "不得重編舊題 ID；機械檢查不等於英文語意、唯一解及干擾選項專業校對。疑似問題先列候審，不自行修改歷史題文或分數。"
+}

@@ -1,0 +1,28 @@
+{
+  "version": "0.4.3",
+  "auditMode": "automated-structural",
+  "qa": {
+    "questions": 640,
+    "cards": 800,
+    "reading": 43,
+    "grammar": 20,
+    "part5": 368,
+    "part6": 44,
+    "part7": 228,
+    "uniqueQuestionIds": 640,
+    "mechanicallyBlocked": 0,
+    "flaggedForReview": 188,
+    "notSemanticallyCertified": 640
+  },
+  "prioritized": {
+    "missingCitedEvidence": 158,
+    "implausibleDistractor": 56,
+    "briefExplanation": 43
+  },
+  "limitations": [
+    "Flags overlap and are not proof of an incorrect answer.",
+    "None of 640 is marked expert-semantic certified.",
+    "No original 640 item IDs or training storage keys rewritten.",
+    "Goal Manager write integration disabled."
+  ]
+}

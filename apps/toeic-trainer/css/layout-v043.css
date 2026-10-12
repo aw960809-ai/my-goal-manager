@@ -1,0 +1,389 @@
+/* TOEIC Trainer V0.4.3 — reading-first, mobile-first layout layer.
+ * Presentation only. Existing study state, timer, exam/submit behavior and history stay owned by the original modules.
+ */
+:root{
+  --tt-space:clamp(12px,2.5vw,20px);
+  --tt-max-reading:76ch;
+  --tt-shadow:0 5px 18px rgba(25,45,62,.045);
+}
+.skip-link{position:absolute;top:-90px;left:12px;z-index:100;padding:10px 16px;background:var(--paper);color:var(--ink);border-radius:12px}
+.skip-link:focus{top:12px}
+html{scroll-padding-top:74px;-webkit-text-size-adjust:100%}
+body{line-height:1.55;letter-spacing:.008em}
+button,summary{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+summary:focus:not(:focus-visible){outline:none}
+summary:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.masthead-inner{padding:13px var(--tt-space);max-width:1140px}
+.identity{gap:10px}
+.identity strong{font-size:19px}
+.identity small{font-size:9px;letter-spacing:.12em}
+.brand-icon{width:36px;height:36px;border-radius:11px}
+.site-shell{max-width:1120px;margin:0 auto;padding:0 var(--tt-space)}
+.main-nav{
+  position:sticky;top:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:5px;overflow:visible;padding:10px 0;margin-bottom:2px;
+  background:var(--canvas);border-bottom:1px solid var(--line);z-index:7;
+}
+.nav-btn{min-width:0;min-height:43px;padding:9px 4px;font-size:13px;line-height:1.35;border-radius:12px;transition:background-color .15s ease}
+.nav-btn.active{background:var(--paper);border-color:var(--line);box-shadow:none;position:relative;color:var(--ink)}
+.nav-btn.active:after{content:"";position:absolute;bottom:3px;left:25%;width:50%;height:2px;border-radius:2px;background:var(--sage)}
+.tab-page{padding:12px 0 30px;min-width:0}
+.section-head{margin:12px 0 14px}
+.section-head h1{font-size:clamp(25px,4vw,32px)}
+.section-head p{line-height:1.65}
+h1,h2,h3{letter-spacing:-.025em}
+p{line-height:1.7}
+.panel{padding:18px;margin-bottom:12px;box-shadow:var(--tt-shadow);border-radius:16px}
+.section-title{margin-bottom:12px;flex-wrap:wrap;align-items:flex-start}
+.section-title h2{font-size:18px;line-height:1.35}
+.fineprint{line-height:1.7;font-size:12px}
+.intro-banner{display:grid;gap:8px;padding:24px 25px;border-radius:18px;margin-bottom:13px}
+.intro-banner .eyebrow{letter-spacing:.14em}
+.intro-banner h1{font-size:clamp(29px,5vw,40px);margin:0;line-height:1.27}
+.intro-banner p{font-size:14px;line-height:1.6;margin:0;max-width:58ch}
+.intro-banner .hero-actions{margin-top:8px}
+.hero-actions>.btn{min-height:46px}
+.metrics{gap:9px;margin-bottom:12px}
+.metric{border-radius:13px;padding:13px 15px;min-height:84px;box-shadow:none}
+.metric b{font-size:clamp(21px,4vw,26px);line-height:1.25;margin:0 0 7px}
+.metric span{font-size:12px;line-height:1.4}
+.two-col{grid-template-columns:minmax(0,1.75fr) minmax(230px,.85fr)}
+.quick-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.quick{min-height:91px;padding:14px;border-radius:13px;gap:5px}
+.quick strong{font-size:16px;line-height:1.35}
+.quick>span{font-size:10px}
+.quick small{font-size:12px;line-height:1.45}
+.quick:active{transform:scale(.99)}
+.quality-disclosure{margin:4px 0 15px;border-radius:12px;border:1px solid var(--line);background:var(--paper-2)}
+.quality-disclosure>summary{cursor:pointer;padding:12px 14px;display:flex;gap:10px;justify-content:space-between;align-items:center;font-size:13px;font-weight:750;color:var(--ink)}
+.quality-status{font-size:11px;color:var(--mute);font-weight:650;text-align:right}
+.quality-detail{padding:0 14px 13px;border-top:1px solid var(--line)}
+.quality-detail p{margin-top:12px}
+.architecture-disclosure>summary,.integration-disclosure>summary,.mini-note>summary{
+  cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  color:var(--ink);font-size:14px;font-weight:750;min-height:42px
+}
+.architecture-disclosure>summary::-webkit-details-marker,.integration-disclosure>summary::-webkit-details-marker,.mini-note>summary::-webkit-details-marker{display:none}
+.architecture-disclosure>summary small,.integration-disclosure>summary small{display:block;color:var(--sage);font-size:10px;margin-bottom:3px;letter-spacing:.07em}
+.architecture-disclosure>summary b,.integration-disclosure>summary b{font-size:16px}
+.disclosure-chevron{color:var(--mute);font-size:18px}
+.architecture-disclosure[open] .disclosure-chevron,.integration-disclosure[open] .disclosure-chevron{transform:rotate(180deg)}
+.architecture-disclosure .architecture,.integration-disclosure .disclosure-content{margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+.integration-disclosure .disclosure-content{min-width:0}
+.button-row{gap:9px}
+.btn{min-height:46px;border-radius:11px;font-size:14px;padding:10px 15px}
+.btn-primary{font-weight:800}
+select,input[type="text"],input[type="search"],input[type="number"]{font-size:16px;min-height:46px;border-radius:10px;max-width:100%;background:var(--paper);color:var(--ink)}
+.reading-pick{grid-template-columns:minmax(140px,.8fr) minmax(0,1.5fr) auto;gap:10px}
+.reading-level-hint{font-size:12px;line-height:1.6}
+.progression-stages>div{border-radius:11px}
+#readingCoach,#grammarCoach,#practiceSetup,#officialMockPanel{scroll-margin-top:78px}
+.official-mock-panel{border-left:1px solid var(--line)}
+.official-mock-panel .section-title h2{font-size:17px}
+#officialMockPanel .setup-bottom{margin-top:10px;padding-top:10px}
+/* Long English documents: readable line lengths and paragraph breaks. */
+.passage,.transcript{max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal;
+  line-height:1.88;font-size:16px;padding:17px 18px;border-radius:13px;margin-bottom:16px;
+  font-family:ui-sans-serif,system-ui,-apple-system,'Noto Sans',sans-serif}
+.reading-study{border-radius:14px;padding:20px;margin-top:12px}
+.reading-study h3{font-size:19px;line-height:1.5}
+.sentence-list{display:grid;gap:10px}
+.sentence-card{border-radius:12px}
+.sentence-en{font-size:16px;line-height:1.9;letter-spacing:.002em}
+.sentence-notes{line-height:1.8;font-size:14px}
+.reading-quiz{padding:19px 0 8px}
+.reading-quiz .q-stem{font-size:17px;line-height:1.65}
+.q-stem{font-size:clamp(17px,3vw,20px);line-height:1.65;margin-bottom:16px;overflow-wrap:anywhere}
+.question-label{font-size:12px;line-height:1.4;margin-bottom:8px}
+.answers{gap:10px;margin:15px 0 18px}
+.answer{font-size:15px;line-height:1.6;gap:12px;min-height:58px;border-radius:12px;padding:14px 15px;transition:background-color .12s ease,border-color .12s ease}
+.answer .letter{width:31px;height:31px;border-radius:9px;font-size:13px}
+.answer.picked{border-width:2px;padding:13px 14px}
+.answer:active:not(:disabled){filter:brightness(.97)}
+.exam-panel{padding:18px 20px;scroll-margin-top:80px}
+.session-head{margin-bottom:8px}
+.session-head span{font-size:13px;font-weight:700}
+.timer{font-size:17px}
+.progress{height:6px;margin:10px 0 14px}
+.exam-banner{font-size:12px;line-height:1.5;padding:10px 12px;margin-bottom:17px}
+.exam-nav{grid-template-columns:minmax(0,1fr) minmax(130px,180px) minmax(0,1fr);margin:15px 0 6px}
+.exam-jump{min-width:0}
+.exam-jump input{width:100%;min-width:50px}
+.exam-index{border:1px solid var(--line);border-radius:12px;padding:0;margin:13px 0}
+.exam-index>summary{cursor:pointer;min-height:45px;padding:11px 13px;font-size:13px;color:var(--ink);font-weight:750}
+.exam-index-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:7px;padding:13px;border-top:1px solid var(--line)}
+.exam-index-grid button{height:42px;border-radius:9px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:13px;font-weight:700}
+.exam-index-grid button.answered{background:var(--sage-soft);border-color:var(--sage)}
+.exam-index-grid button.current{outline:2px solid var(--focus);outline-offset:1px}
+.quiz-bottom{gap:10px}
+.quiz-bottom .btn{min-width:0}
+/* While taking an exam, do not require scrolling past setup, grammar rules or mock introductions. */
+.tt-quiz-active #readingCoach,.tt-quiz-active #grammarCoach,
+.tt-quiz-active #practiceSetup,.tt-quiz-active #officialMockPanel{display:none!important}
+.tt-quiz-complete #readingCoach,.tt-quiz-complete #grammarCoach,
+.tt-quiz-complete #practiceSetup,.tt-quiz-complete #officialMockPanel{display:none!important}
+.tt-reading-active #readingCoach>.section-title,.tt-reading-active #readingCoach>.progression-stages,
+.tt-reading-active #readingCoach>.reading-pick,.tt-reading-active #readingCoach>.reading-level-hint,
+.tt-reading-active #readingCoach>.fineprint,.tt-reading-active #practiceSetup,
+.tt-reading-active #officialMockPanel{display:none!important}
+.tt-reading-complete #readingCoach>.section-title,.tt-reading-complete #readingCoach>.progression-stages,
+.tt-reading-complete #readingCoach>.reading-pick,.tt-reading-complete #readingCoach>.reading-level-hint,
+.tt-reading-complete #readingCoach>.fineprint,.tt-reading-complete #practiceSetup,
+.tt-reading-complete #officialMockPanel{display:none!important}
+.tt-reading-active #readingCoach,.tt-reading-complete #readingCoach{padding:10px;background:transparent;border-color:transparent;box-shadow:none}
+.post-review{margin-top:20px}
+.review-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0 13px}
+.review-toolbar button{min-height:40px;padding:7px 12px;font-size:12px}
+.review-toolbar button.active{background:var(--sage-soft);border-color:var(--sage)}
+.post-review[data-review-view="wrong"] .review-detail:not(.needs-review){display:none}
+.review-detail>summary{min-height:48px;font-size:14px;padding:12px 14px;line-height:1.5}
+.review-content{padding:16px}
+.review-content p{line-height:1.8;font-size:14px}
+.review-content .q-stem{font-size:16px;line-height:1.7}
+.result-summary>div{min-width:0;padding:12px}
+.result-summary b{font-size:24px}
+.list-row{gap:9px;min-width:0}
+.list-row>div{min-width:0;overflow-wrap:anywhere}
+.list-row .btn{min-width:84px}
+.word-row small span{overflow-wrap:anywhere}
+.bridge-row{overflow-wrap:anywhere}
+.bridge-row-body{min-width:0}
+footer{padding:22px 0;line-height:1.5}
+@media(max-width:850px){
+  .two-col{grid-template-columns:minmax(0,1fr)}
+  .architecture-disclosure{margin-bottom:0}
+}
+@media(max-width:700px){
+  :root{--tt-space:10px}
+  .site-shell{width:100%;max-width:none;padding:0}
+  .masthead-inner{padding:12px 14px}
+  .main-nav{gap:3px;padding:7px 8px 10px;margin:0}
+  .nav-btn{min-height:44px;padding:9px 1px;font-size:12px;letter-spacing:0}
+  .tab-page{padding:12px 0 calc(82px + env(safe-area-inset-bottom))}
+  .tab-page>.section-head{padding:0 15px}
+  .tab-page>.panel,.tab-page>.intro-banner,.tab-page>.metrics,
+  .tab-page>.two-col,.tab-page>.quality-disclosure,.tab-page>.fineprint,
+  .tab-page>#readingCoach,.tab-page>#grammarCoach,
+  .tab-page>#practiceSetup,.tab-page>#officialMockPanel,
+  .tab-page>#practiceSession,.tab-page>#practiceFinished{margin-left:0;margin-right:0}
+  .panel{border-left:0;border-right:0;border-radius:0;margin-bottom:8px;padding:16px 15px;box-shadow:none}
+  .intro-banner{margin:4px 8px 10px!important;padding:22px 20px;border-radius:16px}
+  .intro-banner h1{font-size:30px}
+  .intro-banner p{font-size:13px}
+  .intro-banner .hero-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.75fr)}
+  .intro-banner .btn{padding:9px 7px;font-size:13px}
+  .metrics{padding:0 8px;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .metric{min-height:83px;padding:12px 13px}
+  .metric b{font-size:24px}
+  .two-col{gap:0}
+  .two-col>.panel{margin:0 0 8px}
+  .quick-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .quick{padding:13px 11px;min-height:96px}
+  .quick strong{font-size:15px}
+  .quick small{font-size:11px}
+  .quality-disclosure{border-left:0;border-right:0;border-radius:0}
+  .section-head{margin:12px 0 15px}
+  .section-head h1{font-size:27px}
+  .practice-form{grid-template-columns:1fr 1fr;gap:10px}
+  .reading-pick{grid-template-columns:1fr;gap:9px}
+  .reading-pick .btn{width:100%}
+  .progression-stages{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .progression-stages>div{padding:9px 8px}
+  .progression-stages small{display:block!important;margin-left:0!important;font-size:10px}
+  .reading-study{margin:0;border:0;padding:9px 4px;border-radius:0;background:transparent}
+  .sentence-card{padding:12px 13px}
+  .reading-quiz{padding:19px 0 10px}
+  .q-stem{font-size:18px}
+  .passage,.transcript{font-size:16px;line-height:1.85;padding:15px 14px}
+  .answer{font-size:15px;min-height:56px;padding:13px 12px}
+  .answer.picked{padding:12px 11px}
+  .exam-panel{padding:15px 14px;scroll-margin-top:65px}
+  .exam-nav{grid-template-columns:minmax(0,1fr) minmax(117px,1.1fr) minmax(0,1fr);gap:6px}
+  .exam-nav .btn{font-size:12px!important;padding:7px 6px;min-height:44px}
+  .exam-jump .btn{font-size:11px!important}
+  .quiz-bottom{position:sticky;bottom:0;z-index:6;display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.3fr);
+    margin:16px -14px -15px;padding:12px 14px calc(12px + env(safe-area-inset-bottom));
+    background:var(--paper);border-top:1px solid var(--line);box-shadow:0 -8px 18px rgba(25,45,62,.045)}
+  .reading-study>.quiz-bottom{margin-left:-4px;margin-right:-4px}
+  .quiz-bottom .btn{font-size:13px;line-height:1.4;white-space:normal;padding:9px 7px}
+  .result-summary>div{padding:12px 8px}
+  .result-summary b{font-size:23px}
+  .list-row{align-items:flex-start;flex-wrap:wrap}
+  .list-row .btn{min-width:0}
+  .bridge-toolbar{display:grid;grid-template-columns:1fr 1fr}
+  .bridge-toolbar button{min-width:0;font-size:12px;padding:9px 6px}
+  .saved-review-dialog{width:calc(100% - 16px);max-width:none;max-height:90dvh;padding:12px}
+}
+@media(max-width:365px){
+  .masthead-inner{padding:11px 10px}.identity small{display:none}
+  .nav-btn{font-size:11px}.app-status{display:none}
+  .quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .progression-stages>div{padding:9px 5px}.progression-stages small{font-size:9px}
+  .exam-nav{grid-template-columns:1fr 1fr}
+  .exam-nav .exam-jump{grid-column:1/-1;grid-row:2}
+  .exam-nav button#prevQuestion{grid-row:1;grid-column:1}
+  .exam-nav button#nextQuestion{grid-row:1;grid-column:2}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;scroll-behavior:auto!important}}
+/* V0.4.3 review pass: no overlay on long-form reading, and no cramped stacked CTAs. */
+.tt-quiz-active #tab-practice>.section-head,
+.tt-quiz-complete #tab-practice>.section-head,
+.tt-reading-active #tab-practice>.section-head,
+.tt-reading-complete #tab-practice>.section-head{display:none!important}
+@media(max-width:700px){
+  .setup-bottom{flex-direction:column;align-items:stretch;gap:10px}
+  .setup-bottom .btn{width:100%;min-height:46px}
+  .setup-bottom .muted{width:100%}
+  .reading-study>.quiz-bottom{position:static;z-index:auto;box-shadow:none;
+    margin:18px -4px 0;padding:14px 4px 4px;background:transparent}
+  .reading-study>.quiz-bottom .btn{min-height:46px}
+}
+
+/* V0.4.3.1 — focused mobile workflow; scope to existing page elements.
+ * The reading text and word list are presentation-only. No scoring/storage mutation here.
+ */
+#tab-home .home-compact-hero{padding:19px 21px;margin:5px 0 10px;gap:6px;background:linear-gradient(115deg,#293e56,#26384e 70%,#355e65)}
+#tab-home .home-compact-hero h1{font-size:clamp(23px,4.1vw,29px);line-height:1.3;margin:1px 0}
+#tab-home .home-compact-hero p{font-size:13px;line-height:1.5;max-width:65ch}
+#tab-home .home-compact-hero .hero-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:9px}
+#tab-home .hero-actions .btn{width:100%;font-size:14px;min-width:0;padding:10px 7px;min-height:44px}
+#tab-home .metrics{margin-bottom:10px}
+#tab-home .metric{min-height:66px;padding:9px 12px;display:flex;flex-direction:column;justify-content:center;gap:1px}
+#tab-home .metric b{font-size:22px;margin:0;line-height:1.15}
+#tab-home .metric span{font-size:11px}
+.training-directory>summary,.word-dictionary>summary,.reading-level-guide>summary,.collapsible-session-setup>summary{
+ cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:12px;
+ min-height:44px;font-size:14px;font-weight:750;color:var(--ink)}
+.training-directory>summary::-webkit-details-marker,.word-dictionary>summary::-webkit-details-marker,
+.reading-level-guide>summary::-webkit-details-marker,.collapsible-session-setup>summary::-webkit-details-marker{display:none}
+.training-directory>summary small,.word-dictionary>summary small,.collapsible-session-setup>summary small{
+ color:var(--mute);font-size:11px;font-weight:500;text-align:right}
+.training-directory .quick-grid{margin-top:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.draft-resume-banner{padding:12px 16px!important;gap:12px;align-items:center}
+.draft-resume-banner b{font-size:14px}
+.draft-resume-banner p{font-size:12px;line-height:1.5;margin:1px 0 0}
+.draft-resume-banner .button-row{flex-wrap:nowrap}
+.draft-resume-banner .btn{padding:8px 11px;min-height:39px;white-space:nowrap}
+.reading-level-guide{margin:0 0 12px;border:1px solid var(--line);padding:0 12px;border-radius:10px;background:var(--paper-2)}
+.reading-level-guide>summary{min-height:40px;font-size:12px;color:var(--mute)}
+.reading-level-guide .progression-stages{margin:0 0 12px}
+.tt-reading-active #readingCoach>.reading-level-guide,.tt-reading-complete #readingCoach>.reading-level-guide{display:none!important}
+.collapsible-session-setup>summary{font-size:15px}
+.collapsible-session-setup[open]>summary{border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:15px}
+.collapsible-session-setup .setup-content{min-width:0}
+.official-mock-panel>summary{color:var(--ink)}
+.vocab-compact-setup{padding:17px}
+.vocab-launch{display:grid;grid-template-columns:minmax(125px,.7fr) minmax(0,1.3fr);gap:12px;align-items:end}
+.vocab-launch .btn{min-width:0}
+.vocab-help{margin:7px 0 0;font-size:12px}
+.vocab-pool-summary{font-size:12px;color:var(--mute);margin:6px 0 12px}
+.word-dictionary{border-top:1px solid var(--line);padding-top:4px}
+.word-dictionary[open]>summary{margin-bottom:10px}
+.word-dictionary-body{min-width:0}
+.word-dictionary .vocab-controls{margin:4px 0 10px}
+.word-dictionary .word-row{min-height:64px;padding:9px 0;align-items:center;gap:10px}
+.word-dictionary .word-row b{font-size:15px;line-height:1.4}
+.word-dictionary .word-row small{font-size:12px;line-height:1.45}
+.word-dictionary .word-row .btn{font-size:12px;min-height:38px;padding:7px 9px;border-radius:9px}
+.word-pages{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:15px 0 0}
+.word-pages .btn{font-size:12px;min-height:38px;padding:7px 11px}
+.word-pages span{text-align:center;color:var(--mute);font-size:11px}
+/* Keep the passage continuous. Paragraph boundaries are visual grouping only. */
+.reading-document{margin:12px 0 20px;padding:20px 22px;border:1px solid var(--line);border-radius:13px;
+ background:var(--paper-2);max-width:100%;overflow-wrap:anywhere}
+.reading-paragraph{font-size:clamp(16px,2.3vw,18px);line-height:1.9;margin:0 0 1.12em;
+ font-weight:400;letter-spacing:.005em;max-width:74ch;white-space:normal}
+.reading-paragraph:last-child{margin-bottom:0}
+.reading-question-head{padding-bottom:10px;border-bottom:1px solid var(--line)}
+.reading-quiz{padding:16px 2px 18px;border-bottom:1px solid var(--line)}
+.reading-quiz .q-stem{font-size:17px;font-weight:750}
+.reading-study .sentence-list{display:block;border-top:1px solid var(--line)}
+.reading-study .sentence-card{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:0;background:transparent}
+.reading-study .sentence-card>summary{font-size:15px;line-height:1.8;padding:12px 4px;min-height:44px}
+.reading-study .sentence-card .sentence-notes{margin:0 4px 12px;padding:10px 12px;border-radius:10px;background:var(--paper-2)}
+.toast{max-width:min(90vw,390px)}
+@media(max-width:700px){
+ #tab-home .home-compact-hero{margin:1px 8px 10px!important;padding:17px 15px;border-radius:14px}
+ #tab-home .home-compact-hero h1{font-size:24px}
+ #tab-home .home-compact-hero p{font-size:12px}
+ #tab-home .metric{min-height:67px;padding:9px 11px}
+ #tab-home .metric b{font-size:21px}
+ .training-directory{padding:13px 15px}
+ .draft-resume-banner{margin:0 6px 8px!important;border-radius:12px!important;border:1px solid var(--line)!important;
+   flex-direction:row;align-items:center;padding:10px 12px!important}
+ .draft-resume-banner .button-row{flex:0 0 auto;display:grid;grid-template-columns:1fr;gap:5px}
+ .draft-resume-banner .btn{font-size:11px;padding:6px 8px;min-height:34px}
+ #readingCoach>.section-title{margin-bottom:8px}
+ #readingCoach .reading-level-guide{margin-bottom:11px}
+ #tab-practice>.section-head{margin-bottom:9px}
+ .vocab-compact-setup{padding:14px 14px!important}
+ .vocab-launch{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:8px}
+ .vocab-launch .btn{font-size:13px;min-height:46px;padding:8px 7px}
+ .word-dictionary .vocab-controls{grid-template-columns:1fr;gap:10px}
+ .word-dictionary .word-row{padding:8px 0;min-height:62px}
+ .reading-document{border-radius:11px;margin:11px 0 17px;padding:15px 14px}
+ .reading-paragraph{font-size:17px;line-height:1.85;margin-bottom:1.05em}
+ .reading-quiz{padding:15px 0 16px}
+ .reading-study .sentence-card>summary{padding:11px 1px}
+ .toast{bottom:calc(90px + env(safe-area-inset-bottom))}
+}
+@media(max-width:360px){
+ #tab-home .home-compact-hero h1{font-size:22px}
+ #tab-home .hero-actions .btn{font-size:12px}
+ .draft-resume-banner .btn{font-size:10px}
+ .word-pages{gap:5px}
+ .word-pages .btn{padding:7px 8px;font-size:11px}
+}
+
+/* V0.4.3.2 one-tap selectors: keep original select IDs as hidden sources of truth. */
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.tt-legacy-pick{display:none!important}
+select.tt-source-select{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;pointer-events:none!important;opacity:0!important}
+.tt-reading-browser,.tt-grammar-browser{display:grid;gap:10px;min-width:0}
+.tt-filter-heading{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.tt-filter-heading b{font-size:14px}
+.tt-filter-heading span,.tt-browser-count{font-size:12px;color:var(--mute)}
+.tt-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;min-width:0}
+.tt-tabs button{display:flex;justify-content:center;align-items:center;min-width:0;min-height:43px;padding:8px 5px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer}
+.tt-tabs button.active,.tt-tabs button[aria-pressed="true"]{border-color:var(--sage);background:var(--sage-soft);color:var(--ink);box-shadow:inset 0 0 0 1px var(--sage)}
+.tt-tabs button[hidden]{display:none!important}
+.tt-tabs button:focus-visible,.tt-list-row:focus-visible,.tt-more:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.tt-grammar-tabs{grid-template-columns:repeat(6,minmax(0,1fr))}
+.tt-vocab-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tt-vocab-categories{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tt-search-label{display:block;min-width:0}
+.tt-search-label input{width:100%;min-width:0;box-sizing:border-box}
+.tt-compact-list{border-top:1px solid var(--line);min-width:0}
+.tt-list-row{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;min-width:0;text-align:left;padding:13px 2px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;font:inherit}
+.tt-list-row:active{background:var(--sage-soft)}
+.tt-list-copy{display:grid;gap:4px;min-width:0;flex:1}
+.tt-list-copy b{font-size:14px;line-height:1.45;overflow-wrap:anywhere}
+.tt-list-copy small,.tt-list-trailing small{font-size:11px;line-height:1.45;color:var(--mute);font-weight:500}
+.tt-list-trailing{display:flex;align-items:center;gap:9px;flex:0 0 auto}
+.tt-list-trailing>span{font-size:22px;color:var(--mute);line-height:1}
+.tt-list-empty{margin:14px 0;color:var(--mute);font-size:13px}
+.tt-more{width:100%;min-height:43px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font:inherit;font-size:13px;font-weight:750;cursor:pointer}
+.tt-more[hidden]{display:none!important}
+.tt-grammar-row .tt-list-trailing{min-width:24px;justify-content:flex-end}
+.tt-grammar-browser+.tt-legacy-pick, .tt-grammar-browser~#grammarLessonPanel,.tt-grammar-browser~#weakGrammarPanel{display:none!important}
+.tt-vocab-controls{display:grid;gap:10px;margin:12px 0}
+.tt-subfilters{border-top:1px solid var(--line);margin:0;padding-top:8px}
+.tt-subfilters summary{cursor:pointer;font-size:12px;color:var(--mute);padding:6px 0;min-height:32px}
+.tt-subfilters .tt-tabs{padding-top:7px}
+.tt-choice-field{min-width:0;display:grid;gap:6px}
+.tt-choice-field>span{font-size:12px;font-weight:700;color:var(--mute)}
+.tt-choice-tabs{grid-template-columns:repeat(auto-fit,minmax(62px,1fr))}
+.tt-choice-tabs button{min-height:40px;font-size:12px;padding:7px 4px}
+.tt-reading-active #readingBrowser,.tt-reading-complete #readingBrowser{display:none!important}
+@media(max-width:700px){
+ .tt-grammar-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .tt-reading-tabs button{font-size:12px;min-height:42px;padding:8px 1px}
+ .tt-list-trailing small{max-width:91px;text-align:right}
+ .tt-choice-tabs{grid-template-columns:repeat(auto-fit,minmax(55px,1fr))}
+ .tt-reading-browser,.tt-grammar-browser{gap:9px}
+}
+@media(max-width:365px){
+ .tt-reading-tabs button{font-size:11px}
+ .tt-list-trailing small{max-width:71px}
+ .tt-list-copy b{font-size:13px}
+}
