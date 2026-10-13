@@ -12,6 +12,20 @@ const DEFAULT_SETTINGS=Object.freeze({
   scholarshipReminder:true,
   reminderDays:3
 });
+const SHARED_APPEARANCE_KEY='gm-suite:appearance-v1';
+// Appearance-only mirror. Never copy Goal Manager goals, logs, backups or identifiers.
+function sharedAppearancePayload(){
+  return {version:1,appearance:appSettings.appearance,accent:appSettings.accent,
+    textSize:appSettings.textSize,density:appSettings.density};
+}
+function publishSharedAppearance(){
+  try{
+    const raw=JSON.stringify(sharedAppearancePayload());
+    if(localStorage.getItem(SHARED_APPEARANCE_KEY)!==raw)
+      localStorage.setItem(SHARED_APPEARANCE_KEY,raw);
+    return localStorage.getItem(SHARED_APPEARANCE_KEY)===raw;
+  }catch(e){console.warn('共用外觀偏好尚未同步，Goal Manager 原始偏好不受影響',e);return false}
+}
 let appSettings=loadAppSettings();
 function loadAppSettings(){
   try{
@@ -59,7 +73,10 @@ function applyAppSettings(persist=true){
   root.dataset.reducedMotion=appSettings.reducedMotion?'true':'false';
   root.dataset.timeFormat=appSettings.timeFormat;
   if(isAppDark())root.classList.add('app-dark');else root.classList.remove('app-dark');
-  return persist?saveAppSettings():true;
+  if(!persist)return true;
+  const saved=saveAppSettings();
+  if(saved)publishSharedAppearance();
+  return saved;
 }
 function resetAppSettings(){
   const old={...appSettings};appSettings={...DEFAULT_SETTINGS};
@@ -93,10 +110,13 @@ function setAppSetting(key,value){
   }
   // Avoid re-rendering the whole modal: retain focus and scroll position.
   const feedback=document.getElementById('settingsSaveStatus');
-  if(feedback)feedback.textContent='已儲存於本機（不修改目標與學習紀錄）';
+  if(feedback)feedback.textContent=publishSharedAppearance()?'偏好已儲存；外觀連動 TOEIC（不修改學習資料）':'已儲存主系統偏好；TOEIC 外觀同步待重試';
 }
 // Restore persisted appearance at each startup without writing to storage.
 applyAppSettings(false);
+// Seed/reconcile the appearance-only mirror after load; never touch study data.
+// Keeping this out of initial evaluation preserves startup read-only guarantees.
+window.addEventListener?.('load',()=>publishSharedAppearance(),{once:true});
 // Follow OS appearance changes without writing to local storage or showing notifications.
 try{
   const gmScheme=window.matchMedia?.('(prefers-color-scheme: dark)');
@@ -166,6 +186,7 @@ function renderSettings(){
       <div class="settings-row"><div><b>字體大小</b><small>依手機閱讀需求調整字體</small></div>${settingsSelect('textSize',[['normal','標準'],['large','加大']])}</div>
       <div class="settings-row"><div><b>資訊密度</b><small>調整卡片間距，避免資訊過度擁擠</small></div>${settingsSelect('density',[['comfortable','舒適'],['standard','標準'],['compact','精簡']])}</div>
       <div class="settings-row">${settingsSwitch('reducedMotion','減少轉場動畫')}</div>
+      <p class="settings-hub-note">外觀會同步至同一瀏覽器中的 TOEIC Trainer；題庫、學習紀錄與目標資料仍各自獨立。</p>
       <div class="settings-hub-inline-actions"><button class="btn" type="button" onclick="resetAppSettings()">恢復顯示與提醒預設</button></div>
     </div>`;
   const notification=`
@@ -207,7 +228,7 @@ function renderSettings(){
     </div>
     <div id="settingsHealthMount" aria-label="自動資料健康與汰除歷程"><p class="settings-hub-note">活動雷達、獎學金及汰除歷程的監測資訊正在載入。</p></div>`;
   const tabs=[['appearance','外觀顯示'],['notification','提醒通知'],['application','應用程式'],['data','資料備份'],['health','系統健康']];
-  b.innerHTML=`<div class="settings-hub-intro"><div><strong>系統控制中心</strong><small>5 個區塊，集中設定與檢查；目標資料不受外觀更改影響。</small></div><span>${window.AppConfig?.version||'V98.12.0'}</span></div>
+  b.innerHTML=`<div class="settings-hub-intro"><div><strong>偏好與工具</strong><small>外觀共用 · 學習與備份資料各自獨立</small></div><span>${window.AppConfig?.version||'V98.12.0'}</span></div>
     <nav class="settings-hub-nav" aria-label="設定區域">${tabs.map(([id,label])=>`<button type="button" data-settings-jump="${id}" aria-pressed="false" onclick="showSettingsSection('${id}')">${label}</button>`).join('')}</nav>
     <p class="settings-hub-save-status" id="settingsSaveStatus" role="status" aria-live="polite">偏好儲存於這台裝置，與目標／學習紀錄分離。</p>`+
     settingsPanelMarkup('appearance','01','外觀與顯示','深淺模式、主色、字體、資訊密度',appearance)+
