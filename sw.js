@@ -19,7 +19,7 @@ const APP_SHELL=[/* suite-icons:assets:start */
 
   './','./index.html','./manifest-original.webmanifest','./icon.svg','./icon-original-192.png','./icon-original-512.png','./apple-touch-original.png',
   './icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png',
-  './404.html','./css/tokens.css','./css/base.css','./css/app-ui.css','./css/design-system.css','./css/calendar.css','./css/refinements.css','./css/mobile-fullbleed.css','./config/version.js','./config/system-config.js',
+  './404.html','./css/tokens.css','./css/base.css','./css/app-ui.css','./css/design-system.css','./css/calendar.css','./css/refinements.css','./css/mobile-fullbleed.css','./css/ui-layout-v4.css','./config/version.js','./config/system-config.js',
   './config/profiles/personal-thu.js','./js/core/runtime-profile.js','./js/core/data-boundary.js','./js/core/taiwan-time.js',
   './js/security.js','./js/store.js','./js/domain/goals.js','./js/domain/study-logs.js','./js/domain/execution.js','./js/domain/toeic-plan.js','./js/domain/analytics.js','./js/domain/calendar.js','./js/domain/radar-policy.js','./js/services/timer-service.js','./js/services/execution-service.js','./js/data/normalization.js','./js/data/migrations.js','./js/data/repository.js','./js/data/persistence.js','./js/data/history-guard.js','./js/ui/time-format.js','./js/ui/pages/calendar-page.js','./js/ui/pages/execution-page.js','./js/ui/pages/goals-page.js','./js/ui/pages/analytics-page.js','./js/ui/pages/dashboard-page.js','./js/application/orchestrator.js','./js/settings.js','./js/activity.js',
   './js/scholarship.js','./js/app.js','./js/scholarship-lifecycle.js',
@@ -74,7 +74,7 @@ const CRITICAL_SHELL=[/* suite-icons:assets:start */
 /* suite-icons:assets:end */
 
   './','./index.html','./config/version.js','./config/system-config.js',
-  './css/tokens.css','./css/base.css','./css/app-ui.css','./css/design-system.css','./css/calendar.css',
+  './css/tokens.css','./css/base.css','./css/app-ui.css','./css/design-system.css','./css/calendar.css','./css/ui-layout-v4.css',
   './js/pwa.js','./js/app.js','./js/bootstrap.js'
 ];
 
