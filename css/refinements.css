@@ -199,7 +199,7 @@
 #activity .activity-card .activity-score-block .activity-score{font-size:24px!important}
 #activity .activity-card .activity-meta{margin:7px 0 0!important;gap:5px!important}
 #activity .activity-card .activity-meta .tier-chip{display:none!important}
-#activity .activity-card .activity-chip{font-size:11px!important;padding:4px 7px!important}
+#activity .activity-card .activity-chip{font-size:12px!important;padding:4px 8px!important}
 #activity .gm-activity-deadline{
   margin:9px 0 3px;font-size:12px;line-height:1.45;
   color:var(--gm-text-secondary,#64748b);overflow-wrap:anywhere
@@ -296,7 +296,15 @@
 #activity .activity-card .activity-chip:last-child{display:none!important}
 #activity .activity-card .activity-head h3{margin:0 0 3px!important;line-height:1.3!important}
 #activity .activity-card .activity-meta{margin:5px 0 0!important;gap:4px!important}
-#activity .activity-card .activity-chip{padding:3px 7px!important}
+#activity .activity-card .activity-chip{
+  padding:4px 9px!important;border-radius:999px!important;
+  background:var(--gm-tag-neutral-bg)!important;color:var(--gm-tag-neutral-text)!important;
+  border:1px solid var(--gm-tag-neutral-border)!important
+}
+#activity .activity-card .activity-chip:not(.circle-chip):not(.tier-chip){
+  background:var(--gm-tag-warm-bg)!important;color:var(--gm-tag-warm-text)!important;
+  border-color:var(--gm-tag-warm-border)!important
+}
 #activity .activity-card .gm-activity-deadline{margin:6px 0 1px!important}
 #activity .activity-card .activity-actions>.btn{
   min-height:41px!important;padding:7px 11px!important;

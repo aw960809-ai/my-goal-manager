@@ -72,7 +72,7 @@ cfg=(root/'config'/'system-config.js').read_text(encoding='utf-8')
 assert all(x not in cfg for x in ['theme-v9793.css','theme-v9794.css','theme-v9795.css']), 'retired dynamic theme loaders remain'
 tokens=(root/'css'/'tokens.css').read_text(encoding='utf-8')
 design=(root/'css'/'design-system.css').read_text(encoding='utf-8')
-for needle in ['--gm-primary:#596A85','--gm-accent:#886B78','--gm-bg:#F3F1EE','--gm-font-size-body:16px','--gm-space-4:16px']:
+for needle in ['--gm-primary:#596A85','--gm-accent:#886B78','--gm-bg:#F3F1EE','--gm-font-size-body:15px','--gm-space-4:16px']:
  assert needle in tokens, f'design token missing: {needle}'
 assert '--ui-green:var(--gm-primary)' in design and '--ui-gold:var(--gm-accent)' in design, 'legacy aliases must map to canonical tokens'
 sw=(root/'sw.js').read_text(encoding='utf-8')

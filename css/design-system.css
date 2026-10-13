@@ -864,14 +864,17 @@ html[data-reduced-motion="true"] *,html[data-reduced-motion="true"] *::before,ht
 }
 .goal-browse-pct{font-size:19px;font-weight:700;color:var(--gm-primary)}
 .goal-browse-status{
-  font-size:11px;
-  padding:4px 7px;
+  font-size:12px;
+  font-weight:600;
+  line-height:1.35;
+  padding:4px 9px;
+  border:1px solid var(--gm-tag-neutral-border);
   border-radius:999px;
-  background:var(--gm-surface-soft);
-  color:var(--gm-text-secondary);
+  background:var(--gm-tag-neutral-bg);
+  color:var(--gm-tag-neutral-text);
 }
-.goal-browse-status.run{background:var(--gm-primary-soft);color:var(--gm-primary-dark)}
-.goal-browse-status.done{background:var(--gm-surface-soft);color:var(--gm-success)}
+.goal-browse-status.run{background:var(--gm-tag-warm-bg);color:var(--gm-tag-warm-text);border-color:var(--gm-tag-warm-border)}
+.goal-browse-status.done{background:var(--gm-tag-positive-bg);color:var(--gm-tag-positive-text);border-color:var(--gm-tag-positive-border)}
 .goal-browse-info{
   width:34px;height:34px;
   border:1px solid var(--gm-line);
@@ -1317,12 +1320,12 @@ html.app-dark .settings-hub-nav button.active{color:var(--gm-primary)}
 .settings-hub-save-status{margin:0 14px 12px;font-size:12px;color:var(--gm-text-muted);min-height:18px;line-height:1.5}
 .settings-hub-panel{margin:0 8px 10px;background:var(--gm-surface);border:1px solid var(--gm-line);border-radius:16px;overflow:clip}
 .settings-hub-panel[open]{border-color:var(--gm-primary);box-shadow:var(--gm-shadow-sm)}
-.settings-hub-summary{display:flex;align-items:center;gap:12px;min-height:65px;padding:13px 15px;cursor:pointer;list-style:none}
+.settings-hub-summary{display:flex;align-items:center;gap:10px;min-height:58px;padding:11px 14px;cursor:pointer;list-style:none}
 .settings-hub-summary::-webkit-details-marker{display:none}
 .settings-hub-summary::marker{content:""}
 .settings-hub-number{display:grid;place-items:center;flex:0 0 36px;height:36px;border-radius:10px;background:var(--gm-primary-soft);color:var(--gm-primary-deep);font-size:13px;font-variant-numeric:tabular-nums;font-weight:800}
 .settings-hub-label{display:grid;gap:2px;min-width:0;flex:1}
-.settings-hub-label b{color:var(--gm-text);font-size:16px;font-weight:780;line-height:1.4}
+.settings-hub-label b{color:var(--gm-text);font-size:15px;font-weight:680;line-height:1.4}
 .settings-hub-label small{color:var(--gm-text-secondary);font-size:12px;line-height:1.45}
 .settings-hub-chevron{font-size:22px;color:var(--gm-text-secondary);transition:transform .15s ease}
 .settings-hub-panel[open] .settings-hub-chevron{transform:rotate(180deg)}

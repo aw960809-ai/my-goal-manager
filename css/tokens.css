@@ -25,14 +25,14 @@
   --gm-shadow-md:0 9px 26px rgba(36,46,60,.07);
   --gm-shadow-lg:0 18px 46px rgba(48,52,59,.12);
   --gm-font-sans:"Noto Sans TC","Noto Sans CJK TC","PingFang TC","Microsoft JhengHei",system-ui,-apple-system,sans-serif;
-  --gm-font-size-body:16px;
+  --gm-font-size-body:15px;
   --gm-font-size-small:13px;
   --gm-font-size-meta:12px;
-  --gm-font-size-card-title:16px;
-  --gm-font-size-section:19px;
-  --gm-font-size-page:28px;
-  --gm-font-size-stat:30px;
-  --gm-line-height-body:1.6;
+  --gm-font-size-card-title:15px;
+  --gm-font-size-section:17px;
+  --gm-font-size-page:22px;
+  --gm-font-size-stat:24px;
+  --gm-line-height-body:1.55;
   --gm-space-1:4px;
   --gm-space-2:8px;
   --gm-space-3:12px;
@@ -48,9 +48,9 @@
   --gm-control-height:46px;
   --gm-touch-target:44px;
   --gm-on-primary:#FFFFFF;
-  --gm-layout-pad:18px;
-  --gm-layout-gap:14px;
-  --gm-layout-card:14px;
+  --gm-layout-pad:16px;
+  --gm-layout-gap:12px;
+  --gm-layout-card:12px;
 }
 html.app-dark,
 html[data-appearance="dark"]{
@@ -111,8 +111,8 @@ html[data-appearance="dark"]{
 }
 
 /* GM-VISUAL-PHASE3-20261008-BEGIN: density overrides on canonical tokens */
-html[data-density="comfortable"]{--gm-layout-pad:20px;--gm-layout-gap:16px;--gm-layout-card:15px}
-html[data-density="compact"]{--gm-layout-pad:14px;--gm-layout-gap:10px;--gm-layout-card:12px}
+html[data-density="comfortable"]{--gm-layout-pad:18px;--gm-layout-gap:14px;--gm-layout-card:14px}
+html[data-density="compact"]{--gm-layout-pad:12px;--gm-layout-gap:9px;--gm-layout-card:10px}
 
 /* GM-SETTINGS-HUB-20261008: optional accent palettes; existing slate is default. */
 html[data-accent="sage"]{
@@ -144,4 +144,20 @@ html[data-text-size="large"]{
   --gm-font-size-meta:13px;--gm-font-size-card-title:17px;
   --gm-font-size-section:21px;--gm-font-size-page:29px;
 }
+/* Dual-app design V1 — calm, role-specific status pills. No blanket chip restyle. */
+:root{
+  --gm-tag-neutral-bg:#EAF1F5;--gm-tag-neutral-text:#657C8B;--gm-tag-neutral-border:#D3E0E7;
+  --gm-tag-positive-bg:#E8F0EC;--gm-tag-positive-text:#557B68;--gm-tag-positive-border:#CFDDD5;
+  --gm-tag-warm-bg:#F3EEE2;--gm-tag-warm-text:#826C43;--gm-tag-warm-border:#E2D4B8;
+}
+html.app-dark,html[data-appearance="dark"]{
+  --gm-tag-neutral-bg:#293A4A;--gm-tag-neutral-text:#C2D5E2;--gm-tag-neutral-border:#405469;
+  --gm-tag-positive-bg:#253C36;--gm-tag-positive-text:#A8D4BD;--gm-tag-positive-border:#416153;
+  --gm-tag-warm-bg:#41382A;--gm-tag-warm-text:#E1C99B;--gm-tag-warm-border:#63513B;
+}
+@media(prefers-color-scheme:dark){html[data-appearance="system"]{
+  --gm-tag-neutral-bg:#293A4A;--gm-tag-neutral-text:#C2D5E2;--gm-tag-neutral-border:#405469;
+  --gm-tag-positive-bg:#253C36;--gm-tag-positive-text:#A8D4BD;--gm-tag-positive-border:#416153;
+  --gm-tag-warm-bg:#41382A;--gm-tag-warm-text:#E1C99B;--gm-tag-warm-border:#63513B;
+}}
 /* GM-VISUAL-PHASE3-20261008-END */
