@@ -1,0 +1,156 @@
+/* UI-LAYOUT-V4: Goal Manager full-suite responsive design. UI only.
+ * Owns cross-module spacing and typography without rewriting data or rendering.
+ * Deliberately loaded AFTER mobile-fullbleed.css and calendar.css.
+ */
+:root{
+  --ux-gap:10px;
+  --ux-panel-pad:14px;
+  --ux-control-height:44px;
+  --ux-title:20px;
+  --ux-section:16px;
+  --ux-body:14px;
+  --ux-muted:12px;
+  --ux-card-radius:12px;
+}
+/* Seven functional areas share a consistent but restrained hierarchy. */
+.app > :is(#dash,#goals,#activity,#scholarship,#calendar,#today,#stats){
+  min-width:0;overflow-wrap:break-word;
+}
+:is(#dash,#goals,#activity,#scholarship,#calendar,#today,#stats)
+  :is(.section-title h2,.goalnav-head h2,.calendar-hero h2){
+  font-size:var(--ux-section)!important;line-height:1.35!important;font-weight:650!important;
+  letter-spacing:-.015em;
+}
+:is(#dash,#goals,#activity,#scholarship,#calendar,#today,#stats)
+  :is(.home-eyebrow,.muted,.context,.notice){
+  line-height:1.5!important;
+}
+:is(#dash,#goals,#today,#stats) :is(.home-hero h2,.goal-page-head h2,.execution-page-head h2,.stats-hero h2),
+#calendar .calendar-hero h2{
+  font-size:var(--ux-title)!important;line-height:1.25!important;
+  font-weight:700!important;letter-spacing:-.02em!important;
+}
+/* Reduce unnecessary panel nesting, not the selected/high-priority state. */
+:is(#dash,#goals,#activity,#scholarship,#today,#stats)
+  :is(.panel,.card,.goal-result-card,.activity-card,.scholarship-card,.listitem){
+  box-shadow:none!important;min-width:0;
+}
+:is(#dash,#goals,#activity,#scholarship,#today,#stats)
+  :is(.card,.activity-card,.scholarship-card,.goal-result-card,.listitem){
+  border-radius:var(--ux-card-radius)!important;
+}
+/* Home: fewer framing layers and legible action/metric hierarchy. */
+#dash :is(.home-metrics,.home-meta-row,.home-explore-grid,.home-grid-two){
+  min-width:0;gap:var(--ux-gap)!important;
+}
+#dash :is(.home-metric,.home-explore-card){
+  min-width:0;box-shadow:none!important;
+}
+#dash .home-explore-card :is(b,strong,span){overflow-wrap:anywhere}
+#dash .home-focus-panel{min-width:0}
+#dash .home-metric :is(b,strong){font-variant-numeric:tabular-nums}
+/* Goal browsing and map: maintain all operations, one unified control size. */
+#goals :is(.goal-browse-panel,.goal-tree-panel,.goal-browse-list,.goal-browse-toolbar,
+          .goal-browse-actions,.goal-map-tools,.goal-crud-toolbar,.goal-search){min-width:0}
+#goals :is(.goal-view-switch button,.goal-browse-actions button,.goal-crud-toolbar button,
+          .goal-map-tools button){min-height:var(--ux-control-height)!important}
+#goals :is(.goal-browse-list,.goal-results,.tree){overflow-wrap:anywhere}
+/* Activity and scholarship retain the original semantic status-chip palette. */
+:is(#activity,#scholarship) :is(.activity-filter-row,.visual-filters,.list){
+  min-width:0;row-gap:var(--ux-gap)!important;
+}
+:is(#activity,#scholarship) :is(.filter-control,.filter-control select){min-width:0}
+:is(#activity,#scholarship) :is(.activity-card,.scholarship-card){
+  padding:12px!important;margin-bottom:8px!important;
+}
+#activity :is(.activity-search-panel,.activity-searchbox,.activity-radar-guide){min-width:0}
+#scholarship .scholarship-card :is(.title,.meta){overflow-wrap:anywhere}
+/* Calendar layout: do NOT modify its seven-column date grid or event semantics. */
+#calendar :is(.calendar-toolbar,.calendar-date-picker,.calendar-summary,.calendar-detail,
+             .cal-upcoming,.calendar-legend){min-width:0}
+#calendar .calendar-hero{box-shadow:none!important}
+#calendar .calendar-toolbar{gap:8px!important}
+#calendar .calendar-detail{box-shadow:none!important}
+#calendar :is(.calendar-nav button,.calendar-date-picker .btn,.cal-mode-option){
+  min-height:var(--ux-control-height)!important;
+}
+/* Focus/today: primary timer stays large, action targets stay reliable. */
+#today :is(.execution-now-panel,.compact-execution-panel,.compact-timer-panel){min-width:0}
+#today #todayList :is(.listitem,.today-item-main,.today-item-copy,.today-actions){min-width:0}
+#today #todayList .today-actions .btn{min-height:var(--ux-control-height)!important}
+#today .timer{font-variant-numeric:tabular-nums}
+/* Analytics: align metrics without changing what is counted. */
+#stats :is(.stats-kpi,.stats-grid,.stats-progress-panel,.weekly-review-panel,
+          .gm-stats-primary-metrics,.gm-stats-secondary-metrics){min-width:0}
+#stats :is(.stat-kpi,.stats-grid > .panel){box-shadow:none!important}
+#stats :is(.actual-log-compact-row,.actual-history-row){overflow-wrap:anywhere}
+/* Control language: no global badges, no forcing text sizes inside articles. */
+:is(#goals,#activity,#scholarship,#calendar,#today,#stats)
+  :is(input:not([type="checkbox"]),select,textarea){max-width:100%;box-sizing:border-box}
+:is(#goals,#activity,#scholarship,#calendar,#today,#stats)
+  :is(.btn,button[type="button"]):focus-visible{outline:3px solid var(--gm-focus)!important;outline-offset:2px}
+/* Settings: preserve all five destinations, safe close button, and field controls. */
+#settingsModal .settings-box{min-width:0}
+#settingsBody :is(.settings-hub-panel,.settings-hub-content,.settings-action-grid){min-width:0}
+#settingsBody :is(.settings-row,.settings-hub-link-status){overflow-wrap:anywhere}
+@media(max-width:700px){
+  :root{--ux-gap:8px;--ux-panel-pad:12px;--ux-title:20px;--ux-section:16px}
+  /* Align with the pre-existing edge-to-edge framework, not nested page cards. */
+  .app{padding-top:6px!important}
+  #dash :is(.home-grid-two,.home-metrics,.home-meta-row,.home-explore-grid){gap:7px!important}
+  #dash :is(.home-actions-panel,.home-next-panel,.home-explore-panel,.home-goals-panel){
+    margin-bottom:8px!important;
+  }
+  #dash :is(.home-explore-card,.home-metric){border-radius:10px!important}
+  #dash :is(.home-explore-card,.home-inline-link){min-height:44px}
+  /* The seven page bodies use safe side insets on rows and controls. */
+  #goals > :is(#goalBrowsePanel,#goalMapPanel),
+  #activity > .panel,#scholarship > .panel,#today > .panel,
+  #stats .stats-grid > .panel{
+    padding:var(--ux-panel-pad) max(10px,env(safe-area-inset-left))!important;
+  }
+  #goals .goal-page-head,#today .execution-page-head,#stats .stats-hero{
+    padding-left:max(12px,env(safe-area-inset-left))!important;
+    padding-right:max(12px,env(safe-area-inset-right))!important;
+  }
+  #goals :is(.goal-view-switch,.goal-browse-actions,.goal-crud-toolbar){
+    gap:6px!important;
+  }
+  #goals :is(.goal-browse-actions button,.goal-view-switch button){font-size:12px!important}
+  /* Filters may wrap; never squeeze text to unreadable sizes. */
+  #activity .activity-filter-row,
+  #scholarship .activity-filter-row{
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px!important;
+  }
+  #activity .activity-search-panel{margin-top:7px!important}
+  #activity :is(.activity-card,.activity-radar-guide){max-width:100%}
+  #scholarship .scholarship-card{margin:0 0 8px!important}
+  #calendar .calendar-hero{margin-bottom:9px!important}
+  #calendar .calendar-hero h2{font-size:var(--ux-title)!important}
+  #calendar .calendar-summary{gap:5px!important}
+  #calendar .calendar-date-picker{margin-bottom:9px!important}
+  #calendar .calendar-legend{row-gap:6px!important}
+  #today #todayList > .listitem{padding:10px 12px!important;row-gap:8px!important}
+  #today #todayList .today-actions{gap:7px!important}
+  #stats .stats-grid{gap:8px!important}
+  #stats .stats-kpi.cards{gap:7px!important}
+  #stats :is(.gm-stats-primary-metrics,.gm-stats-secondary-metrics){gap:7px}
+  /* Safe-edge full-screen settings; buttons are never shrunk under 44 px. */
+  #settingsModal .settings-box{
+    max-width:100vw!important;width:100%!important;
+    border-radius:16px 16px 0 0!important;
+  }
+  #settingsBody :is(.settings-hub-nav button,.settings-hub-link-actions .btn,
+                    .settings-hub-advanced > summary){min-height:44px!important}
+  .bottom-nav button{min-height:52px!important}
+}
+@media(max-width:390px){
+  #dash .home-explore-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #goals .goal-crud-toolbar{flex-wrap:wrap!important}
+  #activity .activity-filter-row,#scholarship .activity-filter-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  #stats .stats-kpi.cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(prefers-reduced-motion:reduce){
+  #dash .home-explore-card,#goals button,#today button{transition:none!important}
+}
