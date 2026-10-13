@@ -1,0 +1,45 @@
+name: Goal Manager V5 Real Browser UI Audit
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout Goal Manager PR
+        uses: actions/checkout@v4
+        with:
+          path: goal
+      - name: Checkout TOEIC Trainer main (read only)
+        uses: actions/checkout@v4
+        with:
+          repository: aw960809-ai/toeic-trainer
+          ref: main
+          path: toeic
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install isolated Chromium QA tools
+        run: |
+          python -m pip install --disable-pip-version-check playwright==1.57.0
+          python -m playwright install --with-deps chromium
+      - name: Visual QA self-check
+        run: python goal/tools/ui_v5_visual_qa.py --self-test
+      - name: Real-browser UI audit (360–1280 px, light/dark)
+        run: python goal/tools/ui_v5_visual_qa.py --goal-root goal --toeic-root toeic --out visual-qa --strict
+      - name: Write summary
+        if: always()
+        run: |
+          if test -f visual-qa/summary.md; then cat visual-qa/summary.md >> "$GITHUB_STEP_SUMMARY"; fi
+      - name: Upload page screenshots and JSON diagnosis
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v5-goal-real-browser-report
+          path: visual-qa/
+          retention-days: 7
+          if-no-files-found: warn
