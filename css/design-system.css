@@ -1387,4 +1387,18 @@ html.app-dark .settings-hub-nav button.active{color:var(--gm-primary)}
   .settings-hub-color-option{font-size:11px}
   .settings-hub-content .settings-action-grid{grid-template-columns:1fr}
 }
+/* SUITE-SETTINGS-UI-V1: compact settings controls, no change to touch safety. */
+.settings-hub-intro{padding:8px 12px 6px}
+.settings-hub-intro strong{font-size:15px;font-weight:680}
+.settings-hub-intro small{font-size:12px;line-height:1.4}
+.settings-hub-summary{min-height:52px;padding:9px 12px;gap:9px}
+.settings-hub-number{flex-basis:30px;height:30px;font-size:12px}
+.settings-hub-label b{font-size:14px;font-weight:680}
+.settings-hub-color-option{gap:4px;padding:8px 3px;min-height:65px;font-size:12px}
+.settings-hub-color-swatch{width:21px;height:21px}
+.settings-hub-content .settings-row select{font-size:13px}
+@media(max-width:700px){
+  .settings-hub-summary{padding:9px 11px}
+  .settings-hub-content{padding:0 11px 12px}
+}
 /* GM-VISUAL-PHASE3-20261008-END */

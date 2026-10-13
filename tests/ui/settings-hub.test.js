@@ -64,11 +64,13 @@ assert.ok(!settingsBody.innerHTML.includes('App 關閉後的定時背景推播�
 
 vm.runInContext("setAppSetting('accent','sage')",context);
 assert.strictEqual(documentElement.dataset.accent,'sage');
-assert.deepStrictEqual(changes,['lawLangGoalSystem_settings_v1']);
+assert.deepStrictEqual(changes,['lawLangGoalSystem_settings_v1','gm-suite:appearance-v1']);
+assert.strictEqual(JSON.parse(storage.get('gm-suite:appearance-v1')).accent,'sage');
+assert.strictEqual(JSON.parse(storage.get('gm-suite:appearance-v1')).version,1);
 assert.strictEqual(JSON.parse(storage.get('lawLangGoalSystem_settings_v1')).accent,'sage');
 vm.runInContext("setAppSetting('accent','javascript:invalid')",context);
 assert.strictEqual(documentElement.dataset.accent,'sage','invalid palette rejected');
-assert.strictEqual(changes.length,1);
+assert.strictEqual(changes.length,2);
 vm.runInContext("setAppSetting('appearance','light')",context);
 assert.strictEqual(classes.has('app-dark'),false);
 vm.runInContext("setAppSetting('appearance','system')",context);
@@ -77,9 +79,10 @@ const writes=changes.length;
 scheme.matches=false;scheme.onChange();
 assert.strictEqual(classes.has('app-dark'),false,'OS scheme change should apply without reloading');
 assert.strictEqual(changes.length,writes,'OS scheme must not write to localStorage');
-assert.ok(changes.every(k=>k==='lawLangGoalSystem_settings_v1'),'must never write the goal DB or backups');
+assert.ok(changes.every(k=>['lawLangGoalSystem_settings_v1','gm-suite:appearance-v1'].includes(k)),'only preferences may be written, never goal DB or backups');
 vm.runInContext('resetAppSettings()',context);
 assert.strictEqual(documentElement.dataset.accent,'slate');
+assert.strictEqual(JSON.parse(storage.get('gm-suite:appearance-v1')).accent,'slate');
 
 assert.ok(tokens.includes('html[data-accent="sage"]'));
 assert.ok(tokens.includes('html.app-dark[data-accent="plum"]'));
