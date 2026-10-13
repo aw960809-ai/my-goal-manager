@@ -83,7 +83,7 @@
       <div id="dashActions" class="list"></div>
     </div>
     <div class="panel home-next-panel">
-      <div class="section-title"><div><h2>接下來</h2><small class="muted">未來一個月的重要節點</small></div><button class="btn" type="button" onclick="go('calendar')">行事 →</button></div>
+      <div class="section-title"><div><h2>接下來</h2><small class="muted">未來一個月的重要節點</small></div><div class="home-next-actions"><button class="btn" type="button" onclick="go('calendar')">行事 →</button><button class="btn" id="homeQuickAddCalendar" type="button" onclick="go('calendar');openCalendarAddModal(todayKey())" aria-label="新增今天的行事曆行程">＋ 行程</button></div></div>
       <div id="deadlines" class="list"></div>
     </div>
   </div>
