@@ -27,8 +27,7 @@
       el=document.createElement('div');el.id='gmToeicBridgeEntry';
       el.style.cssText='display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:9px;padding:10px 12px;margin:6px 0 12px;border:1px solid var(--gm-line,#dae1e7);border-radius:12px;background:var(--gm-surface-elevated,#fff)';
       const msg=document.createElement('span');msg.id='gmToeicBridgeStatus';msg.style.cssText='font-size:12px;color:var(--gm-text-secondary,#667480)';
-      const a=document.createElement('a');a.href='/toeic-trainer/';a.textContent='開始 TOEIC 訓練 →';a.style.cssText='font-size:13px;font-weight:700;color:var(--gm-primary-deep,#526d98)';
-      el.append(msg,a);
+      el.append(msg);
       panel.insertBefore(el,panel.querySelector('#gmGoalSearchDisclosure')||panel.firstChild);
     }
     const msg=document.getElementById('gmToeicBridgeStatus');if(!msg)return;

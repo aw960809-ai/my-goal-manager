@@ -6,7 +6,9 @@ const app=src('js/app.js'), runtime=src('js/toeic-sync-runtime.js'),policy=src('
 const version=src('config/version.js'),sw=src('sw.js');
 assert.match(version,/GOAL_MANAGER_VERSION=\'98\.13\.8\'/);
 assert.match(version,/GOAL_MANAGER_SCHEMA_VERSION=6/);
-assert(runtime.includes("a.href='/toeic-trainer/';"),'link should point OUTSIDE Goal Manager scope');
+assert(!runtime.includes("a.href='/toeic-trainer/';"),'old goal-browser link removed');
+assert(src('index.html').includes('id="homeToeicTraining"'),'homepage TOEIC entry retained');
+assert(src('js/toeic-embed.js').includes("const TRAINER_PATH='/toeic-trainer/';"),'embed still points to independent project');
 assert(!runtime.includes("a.href='./apps/toeic-trainer/';"));
 assert(policy.includes("const CONSENT_KEY='toeic-trainer:v051-link-settings';"));
 assert(app.includes('let gmToeicLastCommittedRaw=null;'));
