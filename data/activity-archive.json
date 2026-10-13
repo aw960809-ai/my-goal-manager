@@ -2,18 +2,261 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-10-12T07:28:06.886402+00:00",
-    "count": 32,
-    "retiredThisRun": 0,
+    "updatedAt": "2026-10-13T07:49:21.561231+00:00",
+    "count": 35,
+    "retiredThisRun": 3,
     "revivedThisRun": 0,
-    "retiredTotal": 32,
+    "retiredTotal": 35,
     "revivedTotal": 0,
     "retainedOnFailure": 0,
-    "carriedMissing": 18,
-    "needsReview": 16,
+    "carriedMissing": 16,
+    "needsReview": 13,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
+    {
+      "id": "auto-thu-2026090003",
+      "title": "洞見永續影響力：運用 Scopus 與 SciVal 解析 SDG 學術能量與大學排名策略",
+      "date": "2026-10-13",
+      "time": "",
+      "scope": "東海校內",
+      "type": "法律／學術",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026090003",
+      "keywords": "洞見永續影響力：運用 Scopus 與 SciVal 解析 SDG 學術能量與大學排名策略 東海大學 圖書暨資訊處 教師專業成長活動 教職員，費用：0；學生，費用：0；說明：研究生 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 圖書暨資訊處；活動日 2026-10-13；截止 2026-10-12",
+      "government": false,
+      "deadline": "2026-10-12",
+      "eventEndDate": "2026-10-13",
+      "location": "良鑑廳",
+      "organizer": "圖書暨資訊處",
+      "audience": "教職員，費用：0；學生，費用：0；說明：研究生",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090003",
+        "fetchedAt": "2026-09-13T06:16:33.800410+00:00"
+      },
+      "fitScore": 39,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "直接連結法律學習目標+15",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-10T06:03:37.274328+00:00",
+      "lastSeen": "2026-09-13T06:17:56.439273+00:00",
+      "missCount": 23,
+      "needsReview": true,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-13T07:49:21.560728+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-09-13T06:17:56.439273+00:00"
+    },
+    {
+      "id": "auto-thu-2026090067",
+      "title": "【企業人才招募暨產業趨勢分享會】裕隆集團-新鑫股份有限公司",
+      "date": "2026-10-13",
+      "time": "",
+      "scope": "東海校內",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=2&conference_code=2026090067",
+      "keywords": "【企業人才招募暨產業趨勢分享會】裕隆集團-新鑫股份有限公司 東海大學 實習與學生成就中心 教育活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 實習與學生成就中心；活動日 2026-10-13；截止 2026-10-12",
+      "government": false,
+      "deadline": "2026-10-12",
+      "eventEndDate": "2026-10-13",
+      "location": "",
+      "organizer": "實習與學生成就中心",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090067",
+        "fetchedAt": "2026-10-12T07:26:20.828816+00:00"
+      },
+      "fitScore": 50,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "職涯／實習+5",
+        "直接連結法律學習目標+15",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "職涯／實習"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
+      "lastSeen": "2026-10-12T07:28:06.885824+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-13T07:49:21.560728+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-10-12T07:28:06.885824+00:00"
+    },
+    {
+      "id": "auto-thu-2026090024",
+      "title": "【勵學生與學生志工增能講座】數位小幫手養成記：用Google AI讓活動籌備變簡單",
+      "date": "2026-10-14",
+      "time": "",
+      "scope": "東海校內",
+      "type": "教育／青少年",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=2&conference_code=2026090024",
+      "keywords": "【勵學生與學生志工增能講座】數位小幫手養成記：用Google AI讓活動籌備變簡單 東海大學 學生事務處 學術活動 教職員，費用：0；學生，費用：0 學術／講座 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 學生事務處；活動日 2026-10-14；截止 2026-10-12",
+      "government": false,
+      "deadline": "2026-10-12",
+      "eventEndDate": "2026-10-14",
+      "location": "圖書館玉釵教室[LIB009]",
+      "organizer": "學生事務處",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090024",
+        "fetchedAt": "2026-10-12T07:26:18.417057+00:00"
+      },
+      "fitScore": 62,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "青少年／營隊／教學+34",
+        "通用能力／AI工具+14",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "青少年／營隊／教學",
+        "通用能力／AI工具"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-09T12:50:00.937440+00:00",
+      "lastSeen": "2026-10-12T07:28:06.885824+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-13T07:49:21.560728+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-10-12T07:28:06.885824+00:00"
+    },
     {
       "id": "auto-thu-2026090025",
       "title": "2027年日文系海外實習說明會",
