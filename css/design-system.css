@@ -1342,8 +1342,9 @@ html.app-dark .settings-hub-nav button.active{color:var(--gm-primary)}
 .settings-hub-content .settings-switch input:focus-visible+i{outline:3px solid var(--gm-focus);outline-offset:3px}
 .settings-hub-colors{display:flex;flex-wrap:wrap;align-items:flex-start}
 .settings-hub-color-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;width:100%}
-.settings-hub-color-option{position:relative;display:grid;justify-items:center;gap:6px;padding:10px 3px;border:1px solid var(--gm-line);border-radius:12px;background:var(--gm-surface-elevated);cursor:pointer;font-size:12px;text-align:center;color:var(--gm-text-secondary)}
-.settings-hub-color-option input{position:absolute;opacity:0;width:1px;height:1px;top:0;left:0}
+.settings-hub-color-option{position:relative;display:grid;justify-items:center;gap:6px;padding:10px 3px;border:1px solid var(--gm-line);border-radius:12px;background:var(--gm-surface-elevated);cursor:pointer;font-size:12px;text-align:center;color:var(--gm-text-secondary);-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;touch-action:manipulation;transition:transform .08s ease,filter .12s ease,border-color .12s ease,background-color .12s ease}
+.settings-hub-color-option input{position:absolute;opacity:0;width:1px;height:1px;top:0;left:0;clip-path:inset(50%);-webkit-tap-highlight-color:transparent}
+.settings-hub-color-option:active{transform:scale(.985);filter:brightness(.98)}
 .settings-hub-color-option:has(input:checked){border-color:var(--gm-primary);background:var(--gm-primary-soft);color:var(--gm-text);font-weight:700}
 .settings-hub-color-option:has(input:focus-visible){outline:3px solid var(--gm-focus);outline-offset:2px}
 .settings-hub-color-swatch{display:block;width:25px;height:25px;border-radius:50%;background:var(--settings-swatch);box-shadow:inset 0 0 0 1px rgba(0,0,0,.09)}

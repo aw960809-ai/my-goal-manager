@@ -89,6 +89,17 @@ assert.ok(tokens.includes('html.app-dark[data-accent="plum"]'));
 assert.ok(tokens.includes('html[data-text-size="large"]'));
 assert.ok(css.includes('.settings-hub-nav')&&css.includes('.settings-hub-panel'));
 assert.ok(css.includes('.settings-switch input:focus-visible'));
+const colorOptionRule=css.match(/\.settings-hub-color-option\{([^}]*)\}/)?.[1]||'';
+assert.match(colorOptionRule,/-webkit-tap-highlight-color:\s*transparent/, 'Android color cards must not show native blue tap highlight');
+assert.match(colorOptionRule,/-webkit-user-select:\s*none/, 'Color cards must avoid text-selection flash');
+assert.match(colorOptionRule,/touch-action:\s*manipulation/, 'Color tap stays mobile-friendly');
+assert.ok(css.includes('.settings-hub-color-option:active{transform:scale(.985);filter:brightness(.98)}'), 'Color cards retain gentle pressed feedback');
+assert.ok(css.includes('.settings-hub-color-option:has(input:checked)'), 'Selected accent remains visibly indicated');
+assert.ok(css.includes('.settings-hub-color-option:has(input:focus-visible)'), 'Keyboard focus ring remains accessible');
+assert.ok(css.includes('clip-path:inset(50%);-webkit-tap-highlight-color:transparent'), 'Hidden radio must not paint native blue');
+const appUI=read('css/app-ui.css');
+assert.ok(!appUI.includes('inset 0 0 0 999px'), 'Do not use a full-area tap overlay');
+assert.ok(appUI.includes('.tap-flash{filter:brightness(.97)!important}'), 'Buttons retain only gentle click feedback');
 // Regression: the existing activity review and mobile tests require the
 // canonical Phase-3 block to remain the final CSS block, not a new layer.
 for(const [name,source] of [['design-system.css',css],['tokens.css',tokens]]){
