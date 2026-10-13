@@ -35,7 +35,7 @@
     const s=lastSummary;
     if(!s){msg.textContent='TOEIC 學習連動 · 尚未檢查';return}
     if(s.blocked){msg.textContent='TOEIC 連動：'+s.blocked;return}
-    msg.textContent=`TOEIC · 本次新增 ${s.added} 分（${s.addedCount} 筆），待核對 ${s.held} 筆，已處理 ${s.already} 筆`;
+    msg.textContent=`TOEIC · 本次自動新增 ${s.added} 分（${s.addedCount} 筆），已入帳過 ${s.already} 筆，安全暫緩 ${s.held} 筆、排除 ${s.excluded||0} 筆`;
   }
   function isDatabaseCurrent(){
     // Avoid saving a stale in-memory tab over logs added in another tab.

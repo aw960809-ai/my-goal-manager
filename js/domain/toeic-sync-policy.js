@@ -65,7 +65,8 @@
     if(!Number.isFinite(end)||!Number.isFinite(start))errs.push('沒有有效完成時間');
     else{
       if(end>now+300000)errs.push('完成時間在未來');
-      if(Number.isFinite(enabledAt)&&end<=enabledAt)errs.push('啟用連動之前的歷史事件不自動補登');
+      // User-authorized auto reconciliation includes eligible historical events.
+      // Existing event ID, target period and interval collision guards remain active.
       if(validDate(s.date)&&(dateKey(end)!==s.date||dateKey(start)!==s.date))errs.push('跨日期或完成日期不同，需人工處理');
     }
     return {errors:errs,start,end};
