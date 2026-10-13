@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "project": "goal",
+  "linked_stylesheets": [
+    "css/tokens.css",
+    "css/base.css",
+    "css/app-ui.css",
+    "css/design-system.css",
+    "css/calendar.css",
+    "css/refinements.css",
+    "css/mobile-fullbleed.css",
+    "css/toeic-embed.css",
+    "css/ui-layout-v4.css"
+  ],
+  "files": {
+    "css/app-ui.css": {
+      "bytes": 31615,
+      "blocks": 315,
+      "important": 50,
+      "duplicate_scoped_rules": 5,
+      "duplicate_declarations": 0
+    },
+    "css/base.css": {
+      "bytes": 91307,
+      "blocks": 1302,
+      "important": 46,
+      "duplicate_scoped_rules": 217,
+      "duplicate_declarations": 0
+    },
+    "css/calendar.css": {
+      "bytes": 15389,
+      "blocks": 117,
+      "important": 235,
+      "duplicate_scoped_rules": 0,
+      "duplicate_declarations": 0
+    },
+    "css/design-system.css": {
+      "bytes": 62829,
+      "blocks": 577,
+      "important": 624,
+      "duplicate_scoped_rules": 66,
+      "duplicate_declarations": 0
+    },
+    "css/mobile-fullbleed.css": {
+      "bytes": 6135,
+      "blocks": 26,
+      "important": 92,
+      "duplicate_scoped_rules": 0,
+      "duplicate_declarations": 0
+    },
+    "css/refinements.css": {
+      "bytes": 25793,
+      "blocks": 174,
+      "important": 208,
+      "duplicate_scoped_rules": 4,
+      "duplicate_declarations": 0
+    },
+    "css/toeic-embed.css": {
+      "bytes": 1853,
+      "blocks": 14,
+      "important": 8,
+      "duplicate_scoped_rules": 1,
+      "duplicate_declarations": 0
+    },
+    "css/tokens.css": {
+      "bytes": 6051,
+      "blocks": 17,
+      "important": 0,
+      "duplicate_scoped_rules": 1,
+      "duplicate_declarations": 0
+    },
+    "css/ui-layout-v4.css": {
+      "bytes": 9631,
+      "blocks": 83,
+      "important": 61,
+      "duplicate_scoped_rules": 0,
+      "duplicate_declarations": 0
+    }
+  }
+}
