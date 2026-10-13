@@ -1542,6 +1542,13 @@ function renderCalendar(){
  });
 }
 function calendarSelectDay(key){showCalendarDay(key,true)}
+/* V5 phase 2: use the existing validated date-selection and rendering path. */
+function openCalendarFromDeadline(dayKey){
+ if(!CalendarDomain.validKey(dayKey)){toast('日期格式無效');return}
+ go('calendar');
+ calendarViewMode='month';
+ showCalendarDay(dayKey,false);
+}
 function calendarGoToPickedDate(){
  const value=document.getElementById('calendarDatePicker')?.value||'';
  if(!CalendarDomain.validKey(value)){toast('日期格式無效，請重新選擇');return}

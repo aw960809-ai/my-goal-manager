@@ -154,3 +154,30 @@
 @media(prefers-reduced-motion:reduce){
   #dash .home-explore-card,#goals button,#today button{transition:none!important}
 }
+
+/* V5-PHASE2-WORKFLOW: calendar shortcuts preserve existing calendar logic. */
+#dash .home-next-panel .home-next-actions{
+  display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;
+  gap:6px;margin-left:auto;min-width:0;
+}
+#dash .home-next-panel .home-next-actions .btn{
+  min-height:44px!important;font-size:12px!important;
+  padding:0 10px!important;white-space:nowrap;
+}
+#dash .home-next-panel .section-title{flex-wrap:wrap}
+#dash .home-deadline-link{
+  display:flex;justify-content:space-between;align-items:center;gap:9px;
+  width:100%;min-width:0;min-height:44px;box-sizing:border-box;
+  text-align:left;cursor:pointer;font:inherit;line-height:1.5;
+  color:var(--gm-text);background:var(--gm-surface);
+}
+#dash .home-deadline-link span{min-width:0;overflow-wrap:anywhere}
+#dash .home-deadline-link>small{flex:0 0 auto}
+#dash .home-deadline-link:focus-visible{
+  outline:3px solid var(--gm-focus)!important;outline-offset:2px;
+}
+#dash .home-deadline-link:active{background:var(--gm-primary-soft)!important}
+@media(max-width:390px){
+  #dash .home-next-panel .home-next-actions{margin-left:0;justify-content:flex-start}
+  #dash .home-next-panel .home-next-actions .btn{font-size:12px!important}
+}

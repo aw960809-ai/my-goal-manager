@@ -110,9 +110,16 @@
     const rows=Array.isArray(items)?items:[];
 
     return rows.length
-      ?rows.map(item=>
-        `<div class="listitem"><span><b>${esc(item.title)}</b><small class="muted" style="display:block">${esc(item.meta||'')}</small></span><small>${esc(item.date)}</small></div>`
-      ).join('')
+      ?rows.map(item=>{
+        const date=String(item.date||'');
+        const valid=/^\d{4}-\d{2}-\d{2}$/.test(date);
+        const row=`<span><b>${esc(item.title)}</b><small class="muted" style="display:block">${esc(item.meta||'')}</small></span><small>${esc(date)}</small>`;
+        // Only a validated date can enter a data-* attribute. Event handlers
+        // are constant source text; no calendar title enters JavaScript code.
+        return valid
+          ?`<button type="button" class="listitem home-deadline-link" data-date="${date}" onclick="openCalendarFromDeadline(this.dataset.date)" aria-label="查看 ${esc(item.title)} 的行事曆">${row}</button>`
+          :`<div class="listitem">${row}</div>`;
+      }).join('')
       :'<div class="empty">未來一個月沒有已登錄的重要時間節點。</div>';
   }
 
