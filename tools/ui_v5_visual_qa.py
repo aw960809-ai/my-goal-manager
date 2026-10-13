@@ -175,7 +175,11 @@ def audit_goal(page, width: int, theme: str, issues: list[dict], pictures: Path,
     # Integration smoke: real same-origin iframe, not a mock visual placeholder.
     before = len(issues)
     try:
-        page.locator('nav.bottom-nav button[data-view="dash"]').click(timeout=8000)
+        # The mobile nav deliberately auto-hides after scrolling or closing a
+        # dialog. Earlier page checks already exercise visible nav buttons;
+        # return to Home through the app route to set up this separate test.
+        page.evaluate("go('dash')")
+        page.locator('#dash.view.active').wait_for(state='visible', timeout=8000)
         page.locator('#homeToeicTraining').click(timeout=8000)
         page.locator('#gmToeicImmersive').wait_for(state='visible',timeout=8000)
         frame = page.frame_locator('#gmToeicFrame')
