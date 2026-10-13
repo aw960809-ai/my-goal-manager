@@ -75,6 +75,15 @@
       }
       fallback.hidden=true;
       frame.hidden=false;
+      // Same-origin iframe only: hide the duplicate masthead without changing
+      // the independent TOEIC PWA, learning records or its local preferences.
+      const skinId='gmToeicEmbeddedChromeV1';
+      if(child.head&&!child.getElementById(skinId)){
+        const skin=child.createElement('style');
+        skin.id=skinId;
+        skin.textContent='.masthead{display:none!important}';
+        child.head.appendChild(skin);
+      }
       // The Trainer retains its separate code and storage. This only maps the
       // existing "Open Goal Manager" link to the immersive view's back action.
       child.addEventListener('click',event=>{
