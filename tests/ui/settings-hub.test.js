@@ -102,4 +102,12 @@ assert.ok(catalog.includes('document.getElementById("settingsHealthMount")'));
 assert.ok(status.includes('document.getElementById("settingsHealthMount")'));
 assert.ok(status.includes('if(mount){mount.insertAdjacentHTML("beforeend",html);return;}'));
 assert.ok(catalog.includes('if(mount)mount.insertAdjacentHTML("beforeend",catalogLifecyclePanelHTML());'));
+// IA V3: five settings destinations with a read-only TOEIC link dashboard.
+for(const tag of ['學習連動','系統工具','id="settingsToeicLinkState"','id="settingsToeicLinkInfo"'])
+  assert(settingsBody.innerHTML.includes(tag),`missing settings destination ${tag}`);
+assert(source.includes('function renderToeicSuiteStatus()'));
+assert(source.includes('function openToeicSuiteTrainer()'));
+assert(source.includes("window.GoalToeicSyncRuntime?.sync?.('settings-check')"));
+assert(!source.includes('localStorage.clear('),'never clear app storage');
+assert(css.includes('SUITE-SETTINGS-IA-V3'));
 console.log('OK: Settings Hub five sections, safe settings state, system dark, accent, storage boundary, source-monitor mount, PWA schema');

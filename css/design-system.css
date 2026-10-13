@@ -1401,4 +1401,19 @@ html.app-dark .settings-hub-nav button.active{color:var(--gm-primary)}
   .settings-hub-summary{padding:9px 11px}
   .settings-hub-content{padding:0 11px 12px}
 }
+/* SUITE-SETTINGS-IA-V3: compact sections, existing 44px touch targets retained. */
+.settings-hub-intro{padding:8px 12px 5px}
+.settings-hub-nav{gap:5px;margin:4px 8px 6px}
+.settings-hub-nav button{min-height:44px;padding:7px 5px;font-size:12px;font-weight:650}
+.settings-hub-panel{margin-bottom:7px;border-radius:13px}
+.settings-hub-summary{min-height:50px;gap:8px;padding:9px 12px}
+.settings-hub-label b{font-size:14px;font-weight:650}
+.settings-hub-content{padding:0 12px 12px}
+.settings-hub-link-status{display:grid;gap:5px;padding:11px 12px;border:1px solid var(--gm-line);border-radius:11px;background:var(--gm-surface-soft)}
+.settings-hub-link-status b{font-size:14px;font-weight:650;color:var(--gm-text)}
+.settings-hub-link-status small{font-size:12px;line-height:1.5;color:var(--gm-text-secondary);overflow-wrap:anywhere}
+.settings-hub-link-actions{margin-top:10px}
+.settings-hub-link-actions .btn{min-height:44px;font-size:13px}
+.settings-hub-advanced-body.settings-action-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media(max-width:390px){.settings-hub-advanced-body.settings-action-grid{grid-template-columns:1fr}}
 /* GM-VISUAL-PHASE3-20261008-END */
