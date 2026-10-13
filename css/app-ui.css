@@ -193,18 +193,6 @@ html.app-dark .bottom-nav button.active .bn-icon{color:#d1ad61;}
   }
   body.nav-hidden .view{padding-bottom:14px!important}
 }
-@media(prefers-reduced-motion:reduce){
-  .bottom-nav{transition:none!important}
-}
-
-
-/* V96.4.3: mobile navigation follows gesture direction and fully leaves the canvas when hidden. */
-@media(max-width:700px){
-  .bottom-nav{transition:transform .22s ease,opacity .18s ease,visibility .22s ease;will-change:transform,opacity;touch-action:manipulation;}
-  body.nav-hidden .bottom-nav{transform:translate3d(-50%,calc(100% + env(safe-area-inset-bottom) + 12px),0)!important;opacity:0!important;visibility:hidden!important;pointer-events:none!important;}
-  body.nav-hidden .view{padding-bottom:12px!important;}
-}
-@media(prefers-reduced-motion:reduce){body.nav-hidden .bottom-nav{transition:none!important;}}
 
 
 /* V96.4.4: authoritative mobile bottom-nav state. Immediate gesture response; no residual ghost frame. */
