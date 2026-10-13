@@ -1,0 +1,26 @@
+/* Immersive TOEIC Trainer host. No Goal Manager data or navigation changes. */
+.gm-toeic-overlay{
+  position:fixed!important;inset:0!important;z-index:2147483000!important;
+  display:flex;flex-direction:column;box-sizing:border-box;
+  width:100vw;width:100dvw;height:100vh;height:100dvh;
+  max-width:none!important;max-height:none!important;overflow:hidden;
+  background:#f7f8fa;color:#21344a;
+}
+.gm-toeic-overlay[hidden],.gm-toeic-frame[hidden],.gm-toeic-fallback[hidden]{display:none!important}
+.gm-toeic-toolbar{
+  box-sizing:border-box;flex:0 0 auto;display:flex;align-items:center;
+  min-height:49px;padding:calc(3px + env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) 3px max(12px,env(safe-area-inset-left));
+  background:#273a50;color:white;
+}
+.gm-toeic-back{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-width:96px;min-height:42px;padding:8px 12px;border:1px solid rgba(255,255,255,.28);
+  border-radius:12px;color:#fff;background:rgba(255,255,255,.10);
+  font:600 15px/1.2 system-ui,-apple-system,sans-serif;cursor:pointer;
+}
+.gm-toeic-back:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.gm-toeic-frame{display:block;flex:1 1 0;min-height:0;width:100%;border:0;background:#fff}
+.gm-toeic-fallback{box-sizing:border-box;padding:24px;overflow:auto;flex:1 1 0}
+.gm-toeic-fallback a{color:#273a50;font-weight:700}
+html.gm-toeic-immersive,body.gm-toeic-immersive{overflow:hidden!important}
+body.gm-toeic-immersive .bottom-nav{display:none!important}
