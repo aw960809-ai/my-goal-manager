@@ -152,22 +152,6 @@ function settingsPanelMarkup(id,number,title,description,content){
     <div class="settings-hub-content">${content}</div>
   </details>`;
 }
-function syncSettingsHubNav(){
-  const body=document.getElementById('settingsBody');if(!body)return;
-  body.querySelectorAll('[data-settings-jump]').forEach(button=>{
-    const active=button.dataset.settingsJump===settingsOpenPanel;
-    button.classList.toggle('active',active);
-    button.setAttribute('aria-pressed',String(active));
-  });
-}
-function showSettingsSection(section){
-  const body=document.getElementById('settingsBody');if(!body)return;
-  const target=body.querySelector('#settings-panel-'+section);if(!target)return;
-  settingsOpenPanel=section;
-  body.querySelectorAll('.settings-hub-panel').forEach(panel=>{panel.open=panel===target;});
-  syncSettingsHubNav();
-  target.scrollIntoView?.({block:'start',behavior:appSettings.reducedMotion?'auto':'smooth'});
-}
 /* SUITE-SETTINGS-IA-V3: status only. Consent is owned by TOEIC Trainer. */
 function suiteSafeReadJSON(key,limit=4096){
   try{
@@ -191,9 +175,15 @@ function renderToeicSuiteStatus(){
     state.textContent='已啟用 · 需注意';
     detail.textContent=String(report.blocked).slice(0,240);return;
   }
+  // Read the existing receipt only. Never trigger data writes to display a timestamp.
+  const checkedAt=typeof report?.lastCheckedAt==='string'?Date.parse(report.lastCheckedAt):NaN;
+  const consentAt=typeof consent?.enabledAt==='string'?Date.parse(consent.enabledAt):NaN;
+  const lastChecked=Number.isFinite(checkedAt)&&(!Number.isFinite(consentAt)||checkedAt>=consentAt)
+    ?new Date(checkedAt).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false})
+    :'';
   state.textContent='自動連動已啟用';
   detail.textContent=report
-    ?`最近檢查：新增 ${Math.max(0,Number(report.addedCount)||0)} 筆 · 已處理 ${Math.max(0,Number(report.already)||0)} 筆 · 暫緩 ${Math.max(0,Number(report.held)||0)} 筆`
+    ?`新增 ${Math.max(0,Number(report.addedCount)||0)} 筆 · 已處理 ${Math.max(0,Number(report.already)||0)} 筆 · 暫緩 ${Math.max(0,Number(report.held)||0)} 筆${lastChecked?' · 最近核對 '+lastChecked:''}`
     :'等待 Goal Manager 首次核對有效學習紀錄。';
 }
 function reviewToeicSuiteLink(){
@@ -289,9 +279,7 @@ function renderSettings(){
     <details class="settings-hub-advanced"><summary>進階：自動資料來源與汰除歷程</summary>
       <div class="settings-hub-advanced-body"><div id="settingsHealthMount" aria-label="自動資料健康與汰除歷程"><p class="settings-hub-note">活動雷達、獎學金及汰除歷程的監測資訊正在載入。</p></div></div>
     </details>`;
-  const tabs=[['appearance','外觀'],['notification','通知'],['application','學習連動'],['data','資料備份'],['health','系統工具']];
-  b.innerHTML=`<div class="settings-hub-intro"><div><strong>偏好與工具</strong><small>外觀共用 · 學習與備份資料各自獨立</small></div><span>${window.AppConfig?.version||'V98.12.0'}</span></div>
-    <nav class="settings-hub-nav" aria-label="設定區域">${tabs.map(([id,label])=>`<button type="button" data-settings-jump="${id}" aria-pressed="false" onclick="showSettingsSection('${id}')">${label}</button>`).join('')}</nav>
+  b.innerHTML=`<div class="settings-hub-intro"><div><strong>系統偏好與工具</strong><small>外觀統一管理 · 學習、目標與備份資料獨立</small></div><span>${window.AppConfig?.version||'V98.12.0'}</span></div>
     <p class="settings-hub-save-status" id="settingsSaveStatus" role="status" aria-live="polite">偏好儲存於這台裝置，與目標／學習紀錄分離。</p>`+
     settingsPanelMarkup('appearance','01','外觀與顯示','深淺模式、主色、字體、資訊密度',appearance)+
     settingsPanelMarkup('notification','02','提醒與通知','提醒偏好與通知權限',notification)+
@@ -306,11 +294,9 @@ function renderSettings(){
         settingsOpenPanel=panel.dataset.section;
         b.querySelectorAll('.settings-hub-panel').forEach(other=>{if(other!==panel)other.open=false;});
       }else if(settingsOpenPanel===panel.dataset.section)settingsOpenPanel=null;
-      syncSettingsHubNav();
     },true);
     b.dataset.settingsHubBound='1';
   }
-  syncSettingsHubNav();
   renderToeicSuiteStatus();
   if(modal)modal.scrollTop=scrollTop;
   updateSettingsDataStatus();
