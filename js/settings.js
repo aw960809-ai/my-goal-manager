@@ -168,6 +168,49 @@ function showSettingsSection(section){
   syncSettingsHubNav();
   target.scrollIntoView?.({block:'start',behavior:appSettings.reducedMotion?'auto':'smooth'});
 }
+/* SUITE-SETTINGS-IA-V3: status only. Consent is owned by TOEIC Trainer. */
+function suiteSafeReadJSON(key,limit=4096){
+  try{
+    const raw=localStorage.getItem(key);
+    if(!raw||raw.length>limit)return null;
+    const value=JSON.parse(raw);
+    return value&&typeof value==='object'&&!Array.isArray(value)?value:null;
+  }catch(_){return null}
+}
+function renderToeicSuiteStatus(){
+  const state=document.getElementById('settingsToeicLinkState');
+  const detail=document.getElementById('settingsToeicLinkInfo');
+  if(!state||!detail)return;
+  const consent=suiteSafeReadJSON('toeic-trainer:v051-link-settings',2048);
+  const report=suiteSafeReadJSON('goal-manager:toeic-sync-status-v1');
+  if(consent?.version!==1||consent.enabled!==true){
+    state.textContent='尚未啟用';
+    detail.textContent='請至 TOEIC Trainer 啟用連動；此頁不會代替你修改授權。';return;
+  }
+  if(report?.blocked){
+    state.textContent='已啟用 · 需注意';
+    detail.textContent=String(report.blocked).slice(0,240);return;
+  }
+  state.textContent='自動連動已啟用';
+  detail.textContent=report
+    ?`最近檢查：新增 ${Math.max(0,Number(report.addedCount)||0)} 筆 · 已處理 ${Math.max(0,Number(report.already)||0)} 筆 · 暫緩 ${Math.max(0,Number(report.held)||0)} 筆`
+    :'等待 Goal Manager 首次核對有效學習紀錄。';
+}
+function reviewToeicSuiteLink(){
+  try{window.GoalToeicSyncRuntime?.sync?.('settings-check')}
+  catch(e){console.warn('TOEIC 核對暫時無法執行',e)}
+  renderToeicSuiteStatus();
+}
+function openToeicSuiteTrainer(){
+  closeSettings();
+  const launcher=document.getElementById('homeToeicTraining');
+  if(launcher?.click)launcher.click();
+  else window.location.assign('https://aw960809-ai.github.io/toeic-trainer/');
+}
+window.addEventListener?.('storage',event=>{
+  if(['goal-manager:toeic-sync-status-v1','toeic-trainer:v051-link-settings'].includes(event.key))
+    renderToeicSuiteStatus();
+});
 function renderSettings(){
   const b=document.getElementById('settingsBody');if(!b)return;
   const modal=document.getElementById('settingsModal');
@@ -197,6 +240,19 @@ function renderSettings(){
       <div class="settings-row"><div><b>提前天數</b><small>供支援提醒的功能使用</small></div>${settingsSelect('reminderDays',[['1','1 天前'],['3','3 天前'],['7','7 天前'],['14','14 天前']])}</div>
       <div class="settings-permission"><div>瀏覽器通知權限：<b>${notice}</b><small>${notif==='denied'?'請在瀏覽器網站設定中調整權限':'權限狀態不等於已啟用背景通知'}</small></div><button class="btn" type="button" onclick="requestNotificationPermission()" ${notif==='unsupported'||notif==='denied'?'disabled':''}>${notif==='granted'?'確認權限':'請求權限'}</button></div>
     </div>`;
+  const connection=`
+    <div class="settings-section">
+      <div class="settings-section-head"><div><h3>TOEIC 學習連動</h3><p>訓練端儲存學習成果，目標端依條件安全計入。</p></div></div>
+      <div class="settings-hub-link-status" role="status" aria-live="polite">
+        <b id="settingsToeicLinkState">連動狀態讀取中</b>
+        <small id="settingsToeicLinkInfo">正在核對本機連動資訊…</small>
+      </div>
+      <div class="settings-action-grid settings-hub-link-actions">
+        <button class="btn primary" type="button" onclick="openToeicSuiteTrainer()">開啟 TOEIC 訓練</button>
+        <button class="btn" type="button" onclick="reviewToeicSuiteLink()">檢查連動狀態</button>
+      </div>
+      <p class="settings-hub-note">連動授權仍由 TOEIC Trainer 管理。此處只檢視或觸發既有安全核對，不直接修改題庫、目標資料或授權。</p>
+    </div>`;
   const application=`
     ${typeof pwaSettingsPanelHTML==='function'?pwaSettingsPanelHTML():'<div class="settings-section">PWA 更新資訊載入中，仍可透過瀏覽器重新開啟。</div>'}
     <div class="settings-section about-section"><div class="settings-section-head"><div><h3>版本與應用程式資訊</h3><p>此處只呈現系統版本，不會修改使用者資料。</p></div></div>
@@ -208,10 +264,14 @@ function renderSettings(){
       <div class="settings-section-head"><div><h3>匯出與還原</h3><p>備份與檢查不會改變現有目標；匯入及還原會先驗證資料。</p></div></div>
       <div class="settings-action-grid">
         <button class="btn primary" type="button" onclick="exportDBWithFeedback()">匯出全部資料</button>
-        <button class="btn" type="button" onclick="importDB()">匯入備份檔</button>
         <button class="btn" type="button" onclick="createRestorePoint()">建立復原點</button>
-        <button class="btn" type="button" onclick="restoreLatestBackup()">還原最近備份</button>
       </div>
+      <details class="settings-hub-advanced"><summary>匯入與還原（需要時展開）</summary>
+        <div class="settings-hub-advanced-body settings-action-grid">
+          <button class="btn" type="button" onclick="importDB()">匯入備份檔</button>
+          <button class="btn" type="button" onclick="restoreLatestBackup()">還原最近備份</button>
+        </div>
+      </details>
       <div class="settings-data-status" id="settingsDataStatus">正在檢查資料狀態…</div>
       <div class="security-facts settings-hub-security"><div><b>使用者資料</b><span>主要儲存在本機瀏覽器</span></div><div><b>資料保護</b><span>多份備份、驗證與歷程保護維持不變</span></div></div>
       <details class="settings-hub-advanced"><summary>進階資料操作（須再次確認）</summary>
@@ -226,16 +286,18 @@ function renderSettings(){
       <div class="settings-section-head"><div><h3>系統診斷</h3><p>檢查資料完整性、程式邊界、快取與儲存；不執行資料修復。</p></div><button class="btn gold" type="button" onclick="runDiagnostics()">執行檢查</button></div>
       <div id="diagnosticResult" class="diagnostic-result"><div class="diagnostic-empty">尚未執行完整檢查。</div></div>
     </div>
-    <div id="settingsHealthMount" aria-label="自動資料健康與汰除歷程"><p class="settings-hub-note">活動雷達、獎學金及汰除歷程的監測資訊正在載入。</p></div>`;
-  const tabs=[['appearance','外觀顯示'],['notification','提醒通知'],['application','應用程式'],['data','資料備份'],['health','系統健康']];
+    <details class="settings-hub-advanced"><summary>進階：自動資料來源與汰除歷程</summary>
+      <div class="settings-hub-advanced-body"><div id="settingsHealthMount" aria-label="自動資料健康與汰除歷程"><p class="settings-hub-note">活動雷達、獎學金及汰除歷程的監測資訊正在載入。</p></div></div>
+    </details>`;
+  const tabs=[['appearance','外觀'],['notification','通知'],['application','學習連動'],['data','資料備份'],['health','系統工具']];
   b.innerHTML=`<div class="settings-hub-intro"><div><strong>偏好與工具</strong><small>外觀共用 · 學習與備份資料各自獨立</small></div><span>${window.AppConfig?.version||'V98.12.0'}</span></div>
     <nav class="settings-hub-nav" aria-label="設定區域">${tabs.map(([id,label])=>`<button type="button" data-settings-jump="${id}" aria-pressed="false" onclick="showSettingsSection('${id}')">${label}</button>`).join('')}</nav>
     <p class="settings-hub-save-status" id="settingsSaveStatus" role="status" aria-live="polite">偏好儲存於這台裝置，與目標／學習紀錄分離。</p>`+
     settingsPanelMarkup('appearance','01','外觀與顯示','深淺模式、主色、字體、資訊密度',appearance)+
     settingsPanelMarkup('notification','02','提醒與通知','提醒偏好與通知權限',notification)+
-    settingsPanelMarkup('application','03','應用程式','PWA 安裝、更新與版本',application)+
+    settingsPanelMarkup('application','03','學習連動','TOEIC 自動入帳與狀態',connection)+
     settingsPanelMarkup('data','04','資料與備份','匯入匯出、復原與資料安全',data)+
-    settingsPanelMarkup('health','05','系統健康','資料來源、汰除歷程與診斷',health);
+    settingsPanelMarkup('health','05','系統工具','應用程式更新、系統健康與診斷',application+health);
   if(b.dataset.settingsHubBound!=='1'){
     b.addEventListener('toggle',event=>{
       const panel=event.target;
@@ -249,6 +311,7 @@ function renderSettings(){
     b.dataset.settingsHubBound='1';
   }
   syncSettingsHubNav();
+  renderToeicSuiteStatus();
   if(modal)modal.scrollTop=scrollTop;
   updateSettingsDataStatus();
 }
