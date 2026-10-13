@@ -36,7 +36,7 @@ assert.equal(rec([session(1,{part:2})]).excluded.length,1);
 assert.equal(rec([session(1,{mode:'listening'})]).excluded.length,1);
 assert.equal(rec([session(1,{questionIds:['p2-01','p2-02']})]).excluded.length,1);
 assert.equal(rec([session(1,{createdAt:'2026-10-12T20:00:00Z'})]).excluded.length,1);
-assert.equal(rec([session(1,{createdAt:'2026-10-12T00:00:00Z'})]).excluded.length,1);
+assert.equal(rec([session(1,{createdAt:'2026-10-12T00:00:00Z'})]).eligible.length,1,'A valid previously completed event may be credited after consent');
 assert.equal(rec([session(1,{seconds:3600*7})]).excluded.length,1);
 assert.equal(rec([session(1,{goalImportStatus:'imported'})]).excluded.length,1);
 assert.equal(rec([session(1,{suggestedGoalTaskId:'g3-2026-10-article'})]).held.length,1);
@@ -52,7 +52,7 @@ assert.equal(rec([session(2)],[first]).eligible.length,1,'Distinct nonoverlappin
 const colliding=[session(1),session(2,{createdAt:new Date(Date.parse(session(1).createdAt)+30000).toISOString()})];
 assert.equal(rec(colliding).held.length,2,'Both overlapping sessions must be held');
 const older=rec([session(1)],[],{version:1,enabled:true,enabledAt:'2026-10-12T07:00:00Z'});
-assert.equal(older.excluded.length,1,'No automatic historical backfill');
+assert.equal(older.eligible.length,1,'Consented valid historical sessions can be reconciled');
 assert.equal(P.reconcile(bundle([session()]),{...CONSENT},{tasks:goals(),logs:[],now:NOW}).total,1);
 assert.equal(P.reconcile({appId:'fake',schema:1,sessions:[session()]},CONSENT,{tasks:goals(),logs:[],now:NOW}).eligible.length,0);
 // A hundred distinct valid future-only sessions, spaced at least four minutes,
