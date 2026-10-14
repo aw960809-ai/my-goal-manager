@@ -2,18 +2,99 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-10-13T07:49:21.561231+00:00",
-    "count": 35,
-    "retiredThisRun": 3,
+    "updatedAt": "2026-10-14T06:14:10.798048+00:00",
+    "count": 36,
+    "retiredThisRun": 1,
     "revivedThisRun": 0,
-    "retiredTotal": 35,
+    "retiredTotal": 36,
     "revivedTotal": 0,
     "retainedOnFailure": 0,
-    "carriedMissing": 16,
-    "needsReview": 13,
+    "carriedMissing": 19,
+    "needsReview": 15,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
+    {
+      "id": "auto-thu-2026090081",
+      "title": "基礎音控 以銘賢堂為範例",
+      "date": "2026-10-14",
+      "time": "",
+      "scope": "東海校內",
+      "type": "法律／學術",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=3&conference_code=2026090081",
+      "keywords": "基礎音控 以銘賢堂為範例 東海大學 課外活動暨學生發展組 教育活動 學生，費用：0；說明：藝術性社團與銘賢堂工讀生優先 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 課外活動暨學生發展組；活動日 2026-10-14；截止 2026-10-13",
+      "government": false,
+      "deadline": "2026-10-13",
+      "eventEndDate": "2026-10-14",
+      "location": "",
+      "organizer": "課外活動暨學生發展組",
+      "audience": "學生，費用：0；說明：藝術性社團與銘賢堂工讀生優先",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090081",
+        "fetchedAt": "2026-09-29T06:59:54.210417+00:00"
+      },
+      "fitScore": 45,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "青少年／營隊／教學+8",
+        "直接連結法律學習目標+15",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "青少年／營隊／教學"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-24T06:19:41.019607+00:00",
+      "lastSeen": "2026-09-29T07:01:11.559387+00:00",
+      "missCount": 10,
+      "needsReview": true,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-14T06:14:10.797433+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-09-29T07:01:11.559387+00:00"
+    },
     {
       "id": "auto-thu-2026090003",
       "title": "洞見永續影響力：運用 Scopus 與 SciVal 解析 SDG 學術能量與大學排名策略",
