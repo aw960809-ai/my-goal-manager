@@ -14,7 +14,7 @@ const status=read('js/autofetch-status.js');
 const version=read('config/version.js');
 const sw=read('sw.js');
 
-assert.match(version,/GOAL_MANAGER_VERSION='98\.13\.8'/);
+assert.match(version,/GOAL_MANAGER_VERSION='98\.13\.9'/);
 assert.match(version,/GOAL_MANAGER_SCHEMA_VERSION=6/);
 assert.ok(sw.includes("importScripts('./config/version.js')"));
 assert.ok(read('js/app.js').includes("const KEY='lawLangGoalSystemV92'"));

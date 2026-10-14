@@ -166,10 +166,13 @@ function renderToeicSuiteStatus(){
   const detail=document.getElementById('settingsToeicLinkInfo');
   if(!state||!detail)return;
   const consent=suiteSafeReadJSON('toeic-trainer:v051-link-settings',2048);
+  const toggle=document.getElementById('settingsToeicConsentBtn');
+  if(toggle){toggle.textContent=consent?.version===1&&consent.enabled?'暫停連動':'啟用連動';
+    toggle.disabled=!window.GoalToeicCentralSettings?.hosted(window.location);}
   const report=suiteSafeReadJSON('goal-manager:toeic-sync-status-v1');
   if(consent?.version!==1||consent.enabled!==true){
     state.textContent='尚未啟用';
-    detail.textContent='請至 TOEIC Trainer 啟用連動；此頁不會代替你修改授權。';return;
+    detail.textContent='可在此啟用連動。';return;
   }
   if(report?.blocked){
     state.textContent='已啟用 · 需注意';
@@ -201,6 +204,61 @@ window.addEventListener?.('storage',event=>{
   if(['goal-manager:toeic-sync-status-v1','toeic-trainer:v051-link-settings'].includes(event.key))
     renderToeicSuiteStatus();
 });
+/* SUITE-CENTRAL-SETTINGS-V71: consent and backup actions belong only to Goal Manager. */
+function toggleToeicSuiteLink(){
+  const manager=window.GoalToeicCentralSettings;
+  if(!manager){toast('TOEIC 設定載入中');return}
+  const active=manager.consent(localStorage)?.enabled===true;
+  if(!active&&!confirm('啟用 TOEIC 學習自動連動？有效紀錄將由 Goal Manager 核對，重複及重疊時間不會再次入帳。'))return;
+  try{
+    manager.setConsent(localStorage,window.location,!active);
+    renderToeicSuiteStatus();
+    if(!active){window.GoalToeicSyncRuntime?.sync?.('settings-enable');renderToeicSuiteStatus()}
+    toast(active?'已暫停連動':'已啟用連動');
+  }catch(error){toast(String(error.message||'連動設定失敗'))}
+}
+function exportToeicBackupFromGoal(){
+  try{
+    const manager=window.GoalToeicCentralSettings;
+    if(!manager)throw new Error('TOEIC 設定尚未載入');
+    const original=manager.currentBackup(localStorage);
+    const blob=new Blob([original.raw],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url;
+    link.download='TOEIC_Trainer_Backup_'+new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Taipei'})+'.json';
+    document.body.appendChild(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+    toast('TOEIC 備份已準備下載');
+  }catch(error){toast(String(error.message||'匯出失敗'))}
+}
+async function importToeicBackupFromGoal(file){
+  if(!file)return;
+  const manager=window.GoalToeicCentralSettings;
+  if(!manager){toast('TOEIC 設定尚未載入');return}
+  try{
+    if(file.size>8_000_000)throw new Error('檔案超過 8 MB');
+    const raw=await file.text();const incoming=manager.inspect(raw);
+    if(!confirm('確定用所選 TOEIC 備份（'+incoming.count+' 筆 Session）取代此瀏覽器的訓練紀錄？\n會先保留目前完整復原點；請勿在其他頁面作答。'))return;
+    const result=manager.restore(localStorage,window.location,raw);
+    const frame=document.getElementById('gmToeicFrame');
+    if(!result.unchanged&&frame?.dataset?.activated==='1'){
+      frame.src='about:blank';frame.dataset.activated='';
+    }
+    toast(result.unchanged?'備份與現有資料相同':'TOEIC 備份已還原');
+  }catch(error){toast('沒有修改 TOEIC 紀錄：'+String(error.message||'還原失敗'))}
+}
+function tryOpenCentralSettingsDeepLink(){
+  if(window.location?.hash!=='#settings')return;
+  const show=()=>{
+    openSettings();
+    try{window.history?.replaceState?.(window.history.state,'',window.location.pathname+window.location.search)}catch(_){}
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',show,{once:true});
+  else setTimeout(show,0);
+}
+tryOpenCentralSettingsDeepLink();
+
 function renderSettings(){
   const b=document.getElementById('settingsBody');if(!b)return;
   const modal=document.getElementById('settingsModal');
@@ -238,10 +296,10 @@ function renderSettings(){
         <small id="settingsToeicLinkInfo">正在核對本機連動資訊…</small>
       </div>
       <div class="settings-action-grid settings-hub-link-actions">
-        <button class="btn primary" type="button" onclick="openToeicSuiteTrainer()">開啟 TOEIC 訓練</button>
-        <button class="btn" type="button" onclick="reviewToeicSuiteLink()">檢查連動狀態</button>
+        <button class="btn primary" id="settingsToeicConsentBtn" type="button" onclick="toggleToeicSuiteLink()">啟用連動</button>
+        <button class="btn" type="button" onclick="reviewToeicSuiteLink()">立即核對</button>
       </div>
-      <p class="settings-hub-note">連動授權仍由 TOEIC Trainer 管理。此處只檢視或觸發既有安全核對，不直接修改題庫、目標資料或授權。</p>
+      <p class="settings-hub-note">設定集中於此；學習紀錄仍由 TOEIC Trainer 獨立保存。</p>
     </div>`;
   const application=`
     ${typeof pwaSettingsPanelHTML==='function'?pwaSettingsPanelHTML():'<div class="settings-section">PWA 更新資訊載入中，仍可透過瀏覽器重新開啟。</div>'}
@@ -253,21 +311,29 @@ function renderSettings(){
     <div class="settings-section">
       <div class="settings-section-head"><div><h3>匯出與還原</h3><p>備份與檢查不會改變現有目標；匯入及還原會先驗證資料。</p></div></div>
       <div class="settings-action-grid">
-        <button class="btn primary" type="button" onclick="exportDBWithFeedback()">匯出全部資料</button>
+        <button class="btn primary" type="button" onclick="exportDBWithFeedback()">匯出目標備份</button>
         <button class="btn" type="button" onclick="createRestorePoint()">建立復原點</button>
       </div>
       <details class="settings-hub-advanced"><summary>匯入與還原（需要時展開）</summary>
         <div class="settings-hub-advanced-body settings-action-grid">
-          <button class="btn" type="button" onclick="importDB()">匯入備份檔</button>
+          <button class="btn" type="button" onclick="importDB()">匯入目標備份</button>
           <button class="btn" type="button" onclick="restoreLatestBackup()">還原最近備份</button>
         </div>
       </details>
-      <div class="settings-data-status" id="settingsDataStatus">正在檢查資料狀態…</div>
+      <div class="settings-section-head"><div><h3>TOEIC 學習紀錄</h3></div></div>
+       <div class="settings-action-grid">
+         <button class="btn" type="button" onclick="exportToeicBackupFromGoal()">匯出 TOEIC 備份</button>
+         <details class="settings-hub-advanced"><summary>還原 TOEIC 備份</summary>
+           <div class="settings-hub-advanced-body"><button class="btn" type="button" onclick="document.getElementById('settingsToeicImportInput').click()">選擇 TOEIC 備份檔</button></div>
+         </details>
+       </div>
+       <input id="settingsToeicImportInput" type="file" accept=".json,application/json" hidden onchange="importToeicBackupFromGoal(this.files[0]);this.value=''">
+       <div class="settings-data-status" id="settingsDataStatus">正在檢查資料狀態…</div>
       <div class="security-facts settings-hub-security"><div><b>使用者資料</b><span>主要儲存在本機瀏覽器</span></div><div><b>資料保護</b><span>多份備份、驗證與歷程保護維持不變</span></div></div>
       <details class="settings-hub-advanced"><summary>進階資料操作（須再次確認）</summary>
         <div class="settings-hub-advanced-body"><p>只有明確選擇修復或清除時才會執行；請先匯出備份。</p>
           <div class="settings-action-grid"><button class="btn" type="button" onclick="clearCacheOnly()">僅清除應用快取</button><button class="btn" type="button" onclick="rebuildLocalIndexes()">重建資料索引</button></div>
-          <div class="settings-danger"><div><b>危險操作</b><small>清除本機資料前會再次確認並建立備份；唯讀救援模式禁止執行。</small></div><button class="dangerbtn" type="button" onclick="resetUserData()">清除本機使用者資料</button></div>
+          <div class="settings-danger"><div><b>危險操作</b><small>清除本機資料前會再次確認並建立備份；唯讀救援模式禁止執行。</small></div><button class="dangerbtn" type="button" onclick="resetUserData()">清除目標系統資料</button></div>
         </div>
       </details>
     </div>`;

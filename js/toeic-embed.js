@@ -21,6 +21,7 @@
     const overlay=document?.getElementById('gmToeicImmersive');
     const frame=document?.getElementById('gmToeicFrame');
     const back=document?.getElementById('gmToeicBack');
+    const settingsButton=document?.getElementById('gmToeicSettings');
     const fallback=document?.getElementById('gmToeicFallback');
     const fallbackText=document?.getElementById('gmToeicFallbackText');
     const app=document?.querySelector('.app');
@@ -99,6 +100,11 @@
     }
     launcher.addEventListener('click',launch);
     back.addEventListener('click',()=>restore(false));
+    if(settingsButton)settingsButton.addEventListener('click',()=>{
+      restore(false);
+      const openPanel=()=>{try{window.openSettings?.()}catch(_){}};
+      if(typeof window.setTimeout==='function')window.setTimeout(openPanel,0);else openPanel();
+    });
     frame.addEventListener('load',onFrameLoaded);
     frame.addEventListener('error',()=>{if(open)failed('TOEIC 訓練頁載入失敗，請使用備援入口。')});
     window.addEventListener('popstate',()=>{if(open)restore(true)});
