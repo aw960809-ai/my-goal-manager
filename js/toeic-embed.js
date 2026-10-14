@@ -12,6 +12,8 @@
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
   const TRAINER_PATH='/toeic-trainer/';
+  // Static content revision only; never used as a data or storage version.
+  const FRAME_REV='98.13.10';
   function isHosted(loc){
     return !!loc&&loc.protocol==='https:'&&loc.hostname==='aw960809-ai.github.io'&&
       /^\/my-goal-manager\/(?:index\.html)?$/.test(String(loc.pathname||''));
@@ -27,10 +29,34 @@
     const app=document?.querySelector('.app');
     if(!window||!launcher||!overlay||!frame||!back||!fallback||!app)return null;
     let open=false,ownsHistory=false,previousFocus=null;
+    let frameReloads=0,frameNonce=0;
+    function frameUrl(force=false){
+      const url=new URL(TRAINER_PATH,window.location.origin);
+      // A distinct document URL bypasses stale in-memory / HTTP HTML entries.
+      url.searchParams.set('gm_rev',FRAME_REV);
+      if(force)url.searchParams.set('_fresh',Date.now()+'-'+(++frameNonce));
+      return url.href;
+    }
+    function isOldFrame(child){
+      return !!child?.querySelector?.('.main-nav [data-tab="settings"]');
+    }
+    function hasActiveExam(child){
+      // Do NOT reload an in-progress test (only submitted/draft state is durable).
+      return !!child?.querySelector?.('#vocabSession:not([hidden]) .exam-panel, #practiceSession:not([hidden]) .exam-panel, #readingLessonPanel:not([hidden]) .reading-study');
+    }
+    function refreshTrainerWorker(){
+      try{
+        const sw=window.navigator?.serviceWorker;
+        if(sw?.getRegistration)Promise.resolve(sw.getRegistration(TRAINER_PATH))
+          .then(reg=>reg?.update?.()).catch(()=>{});
+      }catch(_){/* Offline and unsupported browsers retain the existing iframe fallback. */}
+    }
     function failed(message){
       frame.hidden=true;
       fallback.hidden=false;
       if(fallbackText)fallbackText.textContent=message;
+      const safeLink=fallback.querySelector?.('a[href]');
+      if(safeLink)safeLink.href=frameUrl(true);
     }
     function restore(fromPop=false){
       if(!open)return;
@@ -57,8 +83,20 @@
       if(!isHosted(window.location)){
         failed('此預覽環境無法共享兩套系統的本機資料；請至正式網站使用內嵌訓練。');
       }else if(frame.dataset.activated!=='1'){
+        refreshTrainerWorker();
         frame.dataset.activated='1';
-        frame.src=new URL(TRAINER_PATH,window.location.origin).href;
+        frame.src=frameUrl();
+      }else{
+        // Previous mobile WebViews can survive app switching and keep old DOM.
+        // Revalidate an idle legacy iframe instead of reusing its 6-tab page.
+        refreshTrainerWorker();
+        try{
+          const child=frame.contentDocument;
+          if(isOldFrame(child)&&!hasActiveExam(child)){
+            frameReloads=0;
+            frame.src=frameUrl(true);
+          }
+        }catch(_){/* Do not read from or mutate another origin. */}
       }
       try{
         window.history.pushState({gmToeicImmersive:true},'',window.location.href);
@@ -74,6 +112,25 @@
         failed('無法在 App 內顯示 TOEIC Trainer，請使用下方的獨立網頁備援入口。');
         return;
       }
+      if(isOldFrame(child)){
+        if(hasActiveExam(child)){
+          // Preserve work in progress, even when the frame is an older build.
+          fallback.hidden=true;
+          frame.hidden=false;
+          return;
+        }
+        if(frameReloads<1){
+          frameReloads++;
+          refreshTrainerWorker();
+          frame.src=frameUrl(true);
+          return;
+        }
+        failed('偵測到舊版 TOEIC 快取；請使用備援連結開啟最新頁面。不必清除學習資料。');
+        const link=fallback.querySelector?.('a[href]');
+        if(link)link.href=frameUrl(true);
+        return;
+      }
+      frameReloads=0;
       fallback.hidden=true;
       frame.hidden=false;
       // Same-origin iframe only: hide the duplicate masthead without changing

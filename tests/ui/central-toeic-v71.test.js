@@ -41,5 +41,5 @@ assert(settings.includes("settingsPanelMarkup('appearance'"));
 assert(settings.includes("settingsPanelMarkup('health'"));
 assert(embed.includes('settingsButton.addEventListener'));
 assert(sw.includes("'./js/toeic-settings-central.js'"));
-assert(read('config/version.js').includes("GOAL_MANAGER_VERSION='98.13.9'"));
+assert(read('config/version.js').includes("GOAL_MANAGER_VERSION='98.13.10'"));
 console.log('PASS: central Goal settings owns TOEIC consent and backup, guarded restore, no goal-data changes, Goal-hosted gear');
