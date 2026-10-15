@@ -2,18 +2,182 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-10-14T06:14:10.798048+00:00",
-    "count": 36,
-    "retiredThisRun": 1,
+    "updatedAt": "2026-10-15T07:45:45.126288+00:00",
+    "count": 38,
+    "retiredThisRun": 2,
     "revivedThisRun": 0,
-    "retiredTotal": 36,
+    "retiredTotal": 38,
     "revivedTotal": 0,
     "retainedOnFailure": 0,
-    "carriedMissing": 19,
-    "needsReview": 15,
+    "carriedMissing": 18,
+    "needsReview": 17,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
+    {
+      "id": "auto-thu-2026100003",
+      "title": "2027年國科會補助大專生專題研究計畫申請說明會",
+      "date": "2026-10-14",
+      "time": "",
+      "scope": "東海校內",
+      "type": "法律／學術",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=1&conference_code=2026100003",
+      "keywords": "2027年國科會補助大專生專題研究計畫申請說明會 東海大學 日本語言文化學系 教育活動 學生，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 日本語言文化學系；活動日 2026-10-14；截止 2026-10-14",
+      "government": false,
+      "deadline": "2026-10-14",
+      "eventEndDate": "2026-10-14",
+      "location": "",
+      "organizer": "日本語言文化學系",
+      "audience": "學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026100003",
+        "fetchedAt": "2026-10-02T07:03:22.533878+00:00"
+      },
+      "fitScore": 47,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "語言／國際／海外+10",
+        "直接連結法律學習目標+15",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "語言／國際／海外"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-10-02T07:05:01.119748+00:00",
+      "lastSeen": "2026-10-02T07:05:01.119748+00:00",
+      "missCount": 8,
+      "needsReview": true,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-15T07:45:45.125665+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-10-02T07:05:01.119748+00:00"
+    },
+    {
+      "id": "auto-thu-2026090041",
+      "title": "【企業實習人才招募說明會】2027台灣美光學期實習",
+      "date": "2026-10-15",
+      "time": "",
+      "scope": "東海校內",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026090041",
+      "keywords": "【企業實習人才招募說明會】2027台灣美光學期實習 東海大學 實習與學生成就中心 教育活動 教職員，費用：0；學生，費用：0；校外人士，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 實習與學生成就中心；活動日 2026-10-15；截止 2026-10-14",
+      "government": false,
+      "deadline": "2026-10-14",
+      "eventEndDate": "2026-10-15",
+      "location": "求真廳",
+      "organizer": "實習與學生成就中心",
+      "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090041",
+        "fetchedAt": "2026-10-13T07:47:40.470192+00:00"
+      },
+      "fitScore": 67,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "職涯／實習+20",
+        "直接連結法律學習目標+15",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "職涯／實習"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-14T06:24:52.182789+00:00",
+      "lastSeen": "2026-10-13T07:49:21.560728+00:00",
+      "missCount": 1,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-15T07:45:45.125665+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-10-13T07:49:21.560728+00:00"
+    },
     {
       "id": "auto-thu-2026090081",
       "title": "基礎音控 以銘賢堂為範例",
