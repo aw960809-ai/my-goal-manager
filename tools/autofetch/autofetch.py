@@ -536,7 +536,8 @@ def fetch(url, allowlist):
         raise RuntimeError('URL 白名單拒絕')
     cmd = [
         'curl', '--fail', '--location', '--silent', '--show-error',
-        '--connect-timeout', '10', '--max-time', '30',
+        '--connect-timeout', '8', '--max-time', '25',
+        '--retry', '1', '--retry-delay', '1', '--retry-max-time', '46',
         '--proto', '=https', '--proto-redir', '=https',
         '--user-agent', USER_AGENT,
         '--write-out', '\n__META__%{url_effective}\t%{http_code}',
@@ -544,7 +545,8 @@ def fetch(url, allowlist):
     ]
     result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if result.returncode:
-        raise RuntimeError(result.stderr.decode('utf-8', 'replace').strip())
+        reason = result.stderr.decode('utf-8', 'replace').strip() or f'curl exit {result.returncode}'
+        raise RuntimeError(f'{parsed.hostname}: {reason[-250:]}')
     marker = b'\n__META__'
     pos = result.stdout.rfind(marker)
     if pos < 0:
@@ -1170,7 +1172,17 @@ def source_health(discovered, parsed_ok, fetch_failed):
 def run_yda_source(limit):
     src = next(x for x in SOURCES['sources'] if x['id'] == 'yda_official')
     allowlist = src['domain_allowlist']
-    final, body = fetch(YDA_LIST, allowlist)
+    try:
+        final, body = fetch(YDA_LIST, allowlist)
+    except Exception as exc:
+        log(f'YDA LIST FAIL {exc}')
+        return {
+            'sourceId': 'yda_official', 'prefix': AUTO_PREFIX,
+            'discovered': 0, 'parsedOk': 0, 'accepted': [],
+            'skippedPast': 0, 'rejected': [],
+            'fetchFailures': [{'url': YDA_LIST, 'reason': str(exc)}],
+            'healthy': False,
+        }
     links = discover_links(body, final)
 
     details = []
@@ -2458,6 +2470,21 @@ def run(repo, limit, apply):
             backup_dir / f'activities-{datetime.now().strftime("%Y%m%d-%H%M%S")}.json',
         )
 
+        source_names = {s['id']: s.get('name') or s['id'] for s in SOURCES['sources']}
+        source_failures = []
+        for result in results:
+            if result['healthy']:
+                continue
+            details = result['fetchFailures'] or result['rejected']
+            first_error = details[0] if details else {}
+            source_id = result['sourceId']
+            source_failures.append({
+                'sourceId': source_id,
+                'name': source_names.get(source_id, source_id),
+                'url': first_error.get('url', ''),
+                'error': first_error.get('reason', '來源目前無法驗證活動頁面'),
+            })
+
         meta = dict(payload.get('meta', {}))
         meta.update({
             'updatedAt': now_iso(),
@@ -2472,6 +2499,7 @@ def run(repo, limit, apply):
             'totalSources': totals['sources'],
             'healthySources': totals['healthySources'],
             'failedSources': totals['sources'] - totals['healthySources'],
+            'sourceFailures': source_failures,
             'rejectedItems': totals['rejected'],
             'fetchFailedItems': totals['fetchFailed'],
             'skippedPast': totals['skippedPast'],

@@ -88,10 +88,10 @@
 
   function sourceStats(m,kind){
     if(kind==="activity"){
-      const total=pickNumber(m,["sources","sourceCount","totalSources"],0);
-      const healthy=pickNumber(m,["healthySources","okSources","successSources","ok"],total);
+      const total=pickNumber(m,["totalSources","sourceCount","sources"],0);
+      const healthy=pickNumber(m,["healthySources","okSources","successSources","sources","ok"],total);
       const failed=pickNumber(m,["failedSources","failureSources"],Math.max(0,total-healthy));
-      return {total,healthy,failed};
+      return {total:Math.max(total,healthy+failed),healthy,failed};
     }
     const total=pickNumber(m,["categories","sourceCount","totalSources"],0);
     const healthy=pickNumber(m,["healthyCategories","okCategories","successCategories"],total);
@@ -125,7 +125,10 @@
         out.push(`${name}：${v.error||v.reason||"失敗"}`);
       }
     };
-    add(m.error);add(m.errors);add(m.failures);add(m.report);add(m.sourceReport);add(m.categoryReport);
+    add(m.error);
+    if(Array.isArray(m.sourceFailures)&&m.sourceFailures.length)add(m.sourceFailures);
+    else add(m.errors);
+    add(m.failures);add(m.report);add(m.sourceReport);add(m.categoryReport);
     return [...new Set(out.map(x=>String(x).trim()).filter(Boolean))].slice(0,3);
   }
 
@@ -210,7 +213,7 @@
   function sourceText(item){
     const s=item.sources;
     if(!s.total)return "未提供";
-    return `${s.healthy}/${s.total}${s.failed?` · 失敗 ${s.failed}`:""}`;
+    return `成功 ${s.healthy}/${s.total}${s.failed?` · 失敗 ${s.failed}`:""}`;
   }
 
   function activityCard(item){
@@ -223,7 +226,7 @@
       archivedNow>0?metric("目前封存總數",archivedNow):"",
       retiredThisRun>0?metric("本次 AutoFetch 封存",retiredThisRun):"",
       item.sources.failed>0?metric("來源失敗",item.sources.failed):"",
-      item.itemFailures>0?metric("個別項目抓取失敗",item.itemFailures):"",
+      item.itemFailures>0?metric(item.sources.failed?"抓取失敗次數（含來源）":"個別項目抓取失敗",item.itemFailures):"",
       item.failedRetained>0?metric("失敗保留",item.failedRetained):""
     ].filter(Boolean).join("");
 
