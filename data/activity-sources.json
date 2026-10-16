@@ -288,6 +288,39 @@
       },
       "catalogPolicy": "public",
       "notes": "Strict official event pages; county location only, no automatically presumed eligibility."
+    },
+    {
+      "id": "moc_national",
+      "name": "文化部 iCulture 全國講座／競賽／徵件",
+      "enabled": true,
+      "adapter": "moc_national",
+      "scope": "nationwide",
+      "categories": [
+        "legal_academic",
+        "lecture",
+        "competition",
+        "training",
+        "public_activity"
+      ],
+      "priority": 3,
+      "trustLevel": "official",
+      "fetchType": "json",
+      "domainAllowlist": [
+        "cloud.culture.tw"
+      ],
+      "startUrls": [
+        "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?method=doFindTypeJ&category=7",
+        "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?method=doFindTypeJ&category=19",
+        "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?method=doFindTypeJ&category=13",
+        "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?method=doFindTypeJ&category=14"
+      ],
+      "profileMatch": {
+        "country": "TW",
+        "cities": [],
+        "schoolNames": []
+      },
+      "catalogPolicy": "public",
+      "notes": "全國無地區限制，採文化部官方 JSON，僅納入未來且可核對日期、來源連結及學習目標的活動。"
     }
   ]
 }

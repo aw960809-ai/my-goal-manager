@@ -13,6 +13,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urljoin, urlparse
 from lifecycle_archive import archive_document, atomic_write_json, reconcile_activity_catalog
 from central_official import REGIONS as CENTRAL_REGIONS, run_source as run_central_source
+from moc_national_opportunities import run_source as run_moc_national_source, API_ROOT as MOC_NATIONAL_API
 
 USER_AGENT = 'GoalManager-AutoFetch/96.6.11.1 (+https://github.com/aw960809-ai/my-goal-manager)'
 MAX_BYTES = 2_000_000
@@ -345,6 +346,16 @@ for _regional_id, _regional in CENTRAL_REGIONS.items():
         'notes':'Circle 3 bounded official HTML adapter; skip unverified dates and restricted entries.',
     })
 
+# Additional nationwide source; it is neither a county backup nor a site mirror.
+SOURCES['sources'].append({
+    'id':'moc_national','name':'文化部 iCulture 全國講座／競賽／徵件',
+    'scope':'national','priority':3,'enabled':True,
+    'domain_allowlist':['cloud.culture.tw'],
+    'start_urls':[MOC_NATIONAL_API+c for c in ('7','19','13','14')],
+    'fetch_type':'json','trust_level':'official',
+    'notes':'官方開放資料：全國講座、研習、競賽、徵件；只納入可確認日期與來源網址、且符合學習目標的活動。',
+})
+
 def now_iso():
     return datetime.now(timezone.utc).isoformat()
 
@@ -530,7 +541,7 @@ def allowed(host, allowlist):
     return any(host == a or host.endswith('.' + a) for a in [x.lower().strip('.') for x in allowlist])
 
 
-def fetch(url, allowlist):
+def fetch(url, allowlist, *, max_bytes=MAX_BYTES):
     parsed = urlparse(url)
     if parsed.scheme != 'https' or not allowed(parsed.hostname, allowlist):
         raise RuntimeError('URL 白名單拒絕')
@@ -557,7 +568,7 @@ def fetch(url, allowlist):
     final_p = urlparse(final)
     if status != '200' or final_p.scheme != 'https' or not allowed(final_p.hostname, allowlist):
         raise RuntimeError(f'HTTP/redirect 驗證失敗 {status}')
-    if len(body) > MAX_BYTES:
+    if len(body) > max_bytes:
         raise RuntimeError('頁面過大')
     return final, body
 
@@ -1979,6 +1990,8 @@ CIRCLE_META = {
 
 # Regional-source location follows the existing four-circle geography policy.
 CIRCLE_META.update({_sid:(3,'中部',2) for _sid in CENTRAL_REGIONS})
+# National belongs in the existing 4th concentric ring, not central region.
+CIRCLE_META['moc_national']=(4,'全國',0)
 
 LOW_VALUE_PATTERNS = [
     (r'適性就業輔導促進就業計畫', -24, '一般就業輔導，與目前學生目標連結較弱'),
@@ -2324,6 +2337,13 @@ def run(repo, limit, apply):
     if 'mofa_working_holiday' in enabled:
         results.append(run_mofa_working_holiday_source(limit))
 
+    # Nationwide official structured activities; no locality restriction.
+    # A failed national source cannot suppress old campus/county activities.
+    if 'moc_national' in enabled:
+        results.append(run_moc_national_source(
+            fetch_fn=lambda u,a: fetch(u,a,max_bytes=10_000_000),stamp=now_iso(),logger=log,
+            limit=max(50,min(limit*3,80))))
+
     # Fail-closed regional adapters: never insert synthetic opportunities.
     for _regional_id in CENTRAL_REGIONS:
         if _regional_id in enabled:
@@ -2486,7 +2506,14 @@ def run(repo, limit, apply):
             })
 
         meta = dict(payload.get('meta', {}))
+        national_r=next((r for r in results if r['sourceId']=='moc_national'),None)
+        national_active=sum(str(e.get('id','')).startswith('auto-moc-national-') for e in merged)
         meta.update({
+            'nationwideOfficialConfigured':national_r is not None,
+            'nationwideOfficialHealthy':bool(national_r and national_r['healthy']),
+            'nationwideOfficialEvents':national_active,
+            'nationwideOfficialEligible':len(national_r.get('radarEligible',[])) if national_r else 0,
+            'nationwideOfficialDiscovered':national_r.get('discovered',0) if national_r else 0,
             'updatedAt': now_iso(),
             'events': len(merged),
 

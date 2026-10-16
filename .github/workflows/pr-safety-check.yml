@@ -21,6 +21,8 @@ jobs:
           python-version: '3.12'
       - name: Full verification
         run: bash scripts/verify.sh
+      - name: Activity source offline regressions
+        run: python3 -m unittest discover -s tests/autofetch -p 'test_*.py'
       - name: Check PWA assets
         run: |
           test -s suite-icon-release.json

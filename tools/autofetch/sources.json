@@ -147,6 +147,25 @@
       "fetch_type": "html",
       "trust_level": "official",
       "notes": "Circle 3 bounded official HTML adapter; strict date and eligibility verification."
+    },
+    {
+      "id": "moc_national",
+      "name": "文化部 iCulture 全國講座／競賽／徵件",
+      "scope": "national",
+      "priority": 3,
+      "domain_allowlist": [
+        "cloud.culture.tw"
+      ],
+      "enabled": true,
+      "start_urls": [
+        "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?method=doFindTypeJ&category=7",
+        "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?method=doFindTypeJ&category=19",
+        "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?method=doFindTypeJ&category=13",
+        "https://cloud.culture.tw/frontsite/trans/SearchShowAction.do?method=doFindTypeJ&category=14"
+      ],
+      "fetch_type": "json",
+      "trust_level": "official",
+      "notes": "官方開放資料：全國講座、研習、競賽、徵件；嚴格日期、來源網址及主題驗證。"
     }
   ]
 }
