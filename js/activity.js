@@ -109,6 +109,18 @@ function activityPreferenceExclusion(a){
   return '';
 }
 function activityTimeState(a){
+  // Cache-only safeguard: a prior scraper used the *notes* as a THU title.
+  // No stored data is deleted; a subsequent official refresh repairs the title.
+  if(/^auto-thu-/.test(String(a?.id||'')) &&
+     /^[＊*\s]*注意事項\s*[：:]/.test(String(a?.title||''))){
+    return {eligible:false,state:'來源待修正',reason:'抓取內容為注意事項，尚未確認真正活動名稱'};
+  }
+  // Built-in nationwide plan portals lack a verified open application window.
+  // Keep the hyperlinks under 參考資料 rather than presenting them as bookable events.
+  if(['g02','g03','g04'].includes(String(a?.id||'')) &&
+     a?.kind==='plan' && !a?.date && !a?.deadline){
+    return {eligible:false,state:'參考計畫',reason:'目前只有官方計畫入口，尚未核實開放梯次與報名日期'};
+  }
   const preference=activityPreferenceExclusion(a);
   if(preference)return {eligible:false,state:'偏好排除',reason:preference};
   const review=RadarPolicy.activityReviewState(a);
@@ -261,7 +273,7 @@ function activityReviewRowHTML(a){
 function renderActivityReferences(){
  const box=document.getElementById('activityReferences');if(!box)return;
  const wasOpen=!!box.querySelector('.activity-review-disclosure')?.open;
- const refs=activityStore().filter(a=>a.kind==='reference'&&activityExternalUrl(a));
+ const refs=activityStore().filter(a=>(a.kind==='reference'||(a.kind==='plan'&&['g02','g03','g04'].includes(String(a.id||''))&&!a.date&&!a.deadline))&&activityExternalUrl(a));
  const review=activityStore().filter(a=>RadarPolicy.activityReviewState(a).blocked);
  const summary=activityReviewSummary();
  const reviewDescription=summary.latest===null

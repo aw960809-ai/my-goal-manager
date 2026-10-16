@@ -238,11 +238,26 @@
     function syncSourceSummary(){
       const message=byId('activityAutoMeta')?.textContent||'';
       const match=message.match(/來源健康\s*(\d+)\s*\/\s*(\d+)/);
-      if(!match){summary.textContent='活動資料更新狀態 · 點擊查看';return}
-      const healthy=Number(match[1]),total=Number(match[2]);
-      wrap.dataset.attention=String(total>0&&healthy<total);
-      summary.textContent=(total>0&&healthy<total?'來源需注意 · ':'資料來源正常 · ')+healthy+'/'+total;
+      let healthy=match?Number(match[1]):NaN;
+      let total=match?Number(match[2]):NaN;
+      // The activity page can retain a pre-update counter (e.g. 6/8), while
+      // settings has already fetched the new catalog (6/6). Use the same newer
+      // read-only official health snapshot as settings whenever it is available.
+      try{
+        const current=window.GoalManagerAutoFetchStatus?.status?.()?.activity?.sources;
+        if(current&&Number(current.total)>0&&Number.isFinite(Number(current.healthy))){
+          healthy=Number(current.healthy);
+          total=Number(current.total);
+        }
+      }catch(_){}
+      if(!Number.isFinite(healthy)||!Number.isFinite(total)||total<=0){
+        summary.textContent='活動資料更新狀態 · 點擊查看';
+        return;
+      }
+      wrap.dataset.attention=String(healthy<total);
+      summary.textContent=(healthy<total?'來源需注意 · ':'資料來源正常 · ')+healthy+'/'+total;
     }
+    window.addEventListener('goal-manager:autofetch-status-refreshed',syncSourceSummary);
     if(typeof MutationObserver==='function'){
       new MutationObserver(syncSourceSummary).observe(status,{
         childList:true,subtree:true,characterData:true

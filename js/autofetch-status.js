@@ -151,7 +151,8 @@
       semanticRetired:kind==="activity"?pickNumber(m,["semanticPolicyRetired"],0):0,
       nationwide:kind==="activity"&&m.nationwideOfficialConfigured===true
         ?{healthy:m.nationwideOfficialHealthy===true,active:pickNumber(m,["nationwideOfficialEvents"],0),
-          eligible:pickNumber(m,["nationwideOfficialEligible"],0)}:null,
+          eligible:pickNumber(m,["nationwideOfficialEligible"],0),
+          discovered:pickNumber(m,["nationwideOfficialDiscovered"],0)}:null,
       sources:sourceStats(m,kind),failures:collectFailures(m),
       itemFailures:kind==="activity"?pickNumber(m,["fetchFailedItems","failed"],0):0,
       failedRetained:pickNumber(m,["retainedOnFailure","preservedFailedAuto","preserveOnFailure"],0),
@@ -196,6 +197,10 @@
 
     state.lifecycle=lifecycleSnapshot();
     unifiedRender();
+    // Notify other read-only displays; do not change catalog or personal data.
+    if(typeof window.dispatchEvent==='function'&&typeof window.CustomEvent==='function'){
+      window.dispatchEvent(new window.CustomEvent('goal-manager:autofetch-status-refreshed'));
+    }
     return snapshot();
   }
 
@@ -227,8 +232,10 @@
   function activityCard(item){
     if(!item)return `<div class="gm-af-card warn"><div class="gm-af-card-head"><h4>活動雷達</h4><span>待讀取</span></div></div>`;
     const st=statusInfo(item),life=lifecycleFor("activity");
-    const retiredThisRun=pickNumber(life||item.meta,["retiredThisRun"],pickNumber(item.meta,["retiredThisRun"],0));
-    const archivedNow=pickNumber(life||{},["count"],0);
+    // Prefer this official data generation's archive metrics. Local lifecycle
+    // data can lag a page deploy (e.g. 39 vs the actual current archive 45).
+    const retiredThisRun=pickNumber(item.meta,["retiredThisRun"],pickNumber(life||{},["retiredThisRun"],0));
+    const archivedNow=pickNumber(item.meta,["archiveCount"],pickNumber(life||{},["count"],0));
 
     const secondary=[
       archivedNow>0?metric("目前封存總數",archivedNow):"",
@@ -236,7 +243,9 @@
       item.sources.failed>0?metric("來源失敗",item.sources.failed):"",
       item.itemFailures>0?metric(item.sources.failed?"抓取失敗次數（含來源）":"個別項目抓取失敗",item.itemFailures):"",
       item.failedRetained>0?metric("失敗保留",item.failedRetained):"",
-      item.nationwide?metric("全國活動（官方資料）",`${item.nationwide.active} 筆 · ${item.nationwide.healthy?"正常":"來源待修復"}`):"",
+      item.nationwide?metric("全國活動（官方資料）",item.nationwide.healthy&&item.nationwide.active===0
+        ? `已檢查 ${item.nationwide.discovered} 筆 · 合適活動 0 筆`
+        : `${item.nationwide.active} 筆 · ${item.nationwide.healthy?"正常":"來源待修復"}`):"",
       item.legalAcademia?metric("全國法律學術活動",`${item.legalAcademia.events} 筆 · 來源 ${item.legalAcademia.healthy}/${item.legalAcademia.total}`):"",
       item.semanticRetired>0?metric("低相關活動已封存",item.semanticRetired):""
     ].filter(Boolean).join("");
