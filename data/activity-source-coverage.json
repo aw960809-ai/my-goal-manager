@@ -1,6 +1,6 @@
 {
   "schemaVersion": "7B.2-coverage-1",
-  "generatedAt": "2026-10-16T06:12:17.145068+00:00",
+  "generatedAt": "2026-10-16T06:47:56.111096+00:00",
   "policy": {
     "localCoverageMustMatchUserProfile": true,
     "uncoveredLocalScopeFailClosed": true,
@@ -31,24 +31,6 @@
         "thu_official",
         "taichung_job"
       ]
-    },
-    {
-      "canonical": "彰化縣",
-      "aliases": [
-        "彰化縣"
-      ],
-      "sourceIds": [
-        "changhua_government"
-      ]
-    },
-    {
-      "canonical": "南投縣",
-      "aliases": [
-        "南投縣"
-      ],
-      "sourceIds": [
-        "nantou_culture"
-      ]
     }
   ],
   "scopes": {
@@ -64,13 +46,7 @@
     ],
     "nationwide": [
       "yda_official",
-      "moc_national",
-      "ntu_law",
-      "nccu_law"
-    ],
-    "regional": [
-      "changhua_government",
-      "nantou_culture"
+      "moc_national"
     ]
   },
   "sources": [
@@ -188,7 +164,7 @@
     {
       "id": "changhua_government",
       "name": "彰化縣政府活動快訊",
-      "enabled": true,
+      "enabled": false,
       "scope": "regional",
       "categories": [
         "legal_academic",
@@ -208,7 +184,7 @@
     {
       "id": "nantou_culture",
       "name": "南投縣政府文化局藝文活動",
-      "enabled": true,
+      "enabled": false,
       "scope": "regional",
       "categories": [
         "legal_academic",
@@ -266,7 +242,7 @@
     {
       "id": "ntu_law",
       "name": "國立臺灣大學法律學院學術活動",
-      "enabled": true,
+      "enabled": false,
       "scope": "nationwide",
       "categories": [
         "legal_academic",
@@ -282,7 +258,7 @@
     {
       "id": "nccu_law",
       "name": "國立政治大學法學院學術活動",
-      "enabled": true,
+      "enabled": false,
       "scope": "nationwide",
       "categories": [
         "legal_academic",
