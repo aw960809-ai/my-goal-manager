@@ -92,7 +92,25 @@ function activityMatchDetails(a){
  });
  return {task:best,matchScore:bestScore};
 }
+function activityPreferenceExclusion(a){
+  const id=String(a?.id||'');
+  // User-authored events and calendar records are not subject to auto-radar exclusions.
+  if(!id.startsWith('auto-'))return '';
+  const sourceId=String(a?.sourceId||a?.autofetch?.sourceId||'');
+  if(['changhua_government','nantou_culture','ntu_law','nccu_law'].includes(sourceId)||
+     /^(?:auto-central-ch-|auto-central-nt-|auto-law-ntu-|auto-law-nccu-)/.test(id)){
+    return '已停用彰化、南投來源與臺政實體講座推薦';
+  }
+  const location=String(a?.location||'').replace(/臺/g,'台');
+  if(/彰化[縣市]|南投[縣市]/.test(location)&&
+     !/線上|遠距|直播|webinar|online/i.test(location)){
+    return '彰化、南投的實體活動不列入自動推薦';
+  }
+  return '';
+}
 function activityTimeState(a){
+  const preference=activityPreferenceExclusion(a);
+  if(preference)return {eligible:false,state:'偏好排除',reason:preference};
   const review=RadarPolicy.activityReviewState(a);
   if(review.blocked)return {eligible:false,state:review.state,reason:review.reason};
   if(String(a?.id||'').startsWith('auto-moc-national-')&&

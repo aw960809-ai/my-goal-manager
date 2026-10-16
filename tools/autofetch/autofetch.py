@@ -361,7 +361,7 @@ SOURCES['sources'].append({
 for _law_id,_law in LAW_SOURCES.items():
     SOURCES['sources'].append({
         'id':_law_id,'name':_law['name'],'scope':'national','priority':3,
-        'domain_allowlist':[_law['host']],'enabled':True,
+        'domain_allowlist':[_law['host']],'enabled':False,
         'start_urls':[_law['url']],'fetch_type':'html',
         'trust_level':'official',
         'notes':'官方法律學院學術活動；未來日期、明確地點及自由入場須同時核實。',
@@ -2585,6 +2585,7 @@ def run(repo, limit, apply):
             'revivedThisRun': lifecycle_meta['revivedThisRun'],
             'archiveCount': lifecycle_meta['archiveCount'],
             'retainedOnFailure': lifecycle_meta['retainedOnFailure'],
+            'preferenceExcludedThisRun': lifecycle_meta.get('preferenceExcludedThisRun',0),
             'carriedMissing': lifecycle_meta['carriedMissing'],
             'needsReview': lifecycle_meta['needsReview'],
             'lifecyclePolicy': 'expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive',

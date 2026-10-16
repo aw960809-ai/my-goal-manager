@@ -20,13 +20,13 @@ REGIONS = {
         'prefix': 'auto-central-ml-', 'site': 'miaoli',
     },
     'changhua_government': {
-        'enabled': True,
+        'enabled': False,
         'county': '彰化', 'name': '彰化縣政府活動快訊', 'host': 'www.chcg.gov.tw',
         'url': 'https://www.chcg.gov.tw/ch2/actives.aspx',
         'prefix': 'auto-central-ch-', 'site': 'changhua',
     },
     'nantou_culture': {
-        'enabled': True,
+        'enabled': False,
         'county': '南投', 'name': '南投縣政府文化局藝文活動', 'host': 'www.nthcc.gov.tw',
         'url': 'https://www.nthcc.gov.tw/A4_1/list2',
         'prefix': 'auto-central-nt-', 'site': 'nantou',

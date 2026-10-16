@@ -72,7 +72,7 @@ class OfficialRegionTests(unittest.TestCase):
     def test_official_registry(self):
         self.assertEqual(len(region.REGIONS),4)
         self.assertEqual({sid for sid,x in region.REGIONS.items() if x['enabled']},
-                         {'changhua_government','nantou_culture'})
+                         set())
         for sid,v in region.REGIONS.items():
             self.assertEqual(v['url'].split('/')[2],v['host'])
             self.assertTrue(v['url'].startswith('https://'))

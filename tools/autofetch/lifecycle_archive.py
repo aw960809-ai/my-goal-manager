@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 import os
 import tempfile
 from datetime import date, datetime, timezone
@@ -51,6 +52,36 @@ def _is_date(value):
         return True
     except Exception:
         return False
+
+
+PREFERENCE_DISABLED_SOURCE_IDS = frozenset({
+    'changhua_government','nantou_culture','ntu_law','nccu_law'
+})
+
+
+def activity_preference_state(row):
+    """Only auto-fetched opportunities: preserve manual calendar/goal records.
+
+    Online events can still be useful even when their organizer is in a region
+    that the user cannot conveniently visit. NTU/NCCU dedicated lecture feeds
+    are disabled entirely; other nationwide online/competition feeds remain.
+    """
+    if not isinstance(row,dict):
+        return None
+    rid=str(row.get('id') or '')
+    if not rid.startswith('auto-'):
+        return None
+    af=row.get('autofetch')
+    sid=str(row.get('sourceId') or (af.get('sourceId') if isinstance(af,dict) else '') or '')
+    if (sid in PREFERENCE_DISABLED_SOURCE_IDS or
+        rid.startswith(('auto-central-ch-','auto-central-nt-',
+                        'auto-law-ntu-','auto-law-nccu-'))):
+        return ('user_preference_source','使用者停用彰化／南投來源與臺政實體法學講座推薦')
+    place=str(row.get('location') or '').replace('臺','台')
+    if (re.search(r'彰化[縣市]|南投[縣市]',place)
+        and not re.search(r'線上|遠距|直播|webinar|online',place,re.I)):
+        return ('user_preference_location','使用者不推薦彰化／南投需親自到場的活動')
+    return None
 
 
 def _retire_state(row, kind, today):
@@ -176,6 +207,7 @@ def reconcile_activity_catalog(*, old_rows, candidate_rows, source_results, arch
 
     stats = {
         "retiredThisRun": 0,
+        "preferenceExcludedThisRun": 0,
         "revivedThisRun": 0,
         "carriedMissing": 0,
         "retainedOnFailure": 0,
@@ -192,6 +224,15 @@ def reconcile_activity_catalog(*, old_rows, candidate_rows, source_results, arch
     for row in candidate_rows:
         rid = str(row.get("id") or "")
         if not rid:
+            continue
+        preference=activity_preference_state(row)
+        if preference:
+            retired_ids.add(rid)
+            if rid not in archive_map:
+                archive_map[rid]=_archive_item(row,preference[0],preference[1],now,'activity')
+                archive_order.insert(0,rid)
+                stats['retiredThisRun']+=1
+                stats['preferenceExcludedThisRun']+=1
             continue
         own = owner(row)
         if not own:
@@ -224,6 +265,15 @@ def reconcile_activity_catalog(*, old_rows, candidate_rows, source_results, arch
     for old in old_rows:
         rid = str(old.get("id") or "")
         if not rid or rid in active_ids or rid in retired_ids:
+            continue
+        preference=activity_preference_state(old)
+        if preference:
+            retired_ids.add(rid)
+            if rid not in archive_map:
+                archive_map[rid]=_archive_item(old,preference[0],preference[1],now,'activity')
+                archive_order.insert(0,rid)
+                stats['retiredThisRun']+=1
+                stats['preferenceExcludedThisRun']+=1
             continue
         own = owner(old)
         if not own:
