@@ -198,6 +198,42 @@
       "fetch_type": "html",
       "trust_level": "official",
       "notes": "校方法律學院官網，僅收錄已確認對外開放、有未來日期與地點之講座。"
+    },
+    {
+      "id": "youthfirst_national",
+      "name": "教育部青年第一讚｜全國競賽及徵件",
+      "scope": "national",
+      "priority": 3,
+      "domain_allowlist": [
+        "youthfirst.yda.gov.tw"
+      ],
+      "enabled": true,
+      "start_urls": [
+        "https://youthfirst.yda.gov.tw/index.php/subject/index?project_type%5B%5D=%E7%AB%B6%E8%B3%BD",
+        "https://youthfirst.yda.gov.tw/index.php/subject/index?project_type%5B%5D=%E6%B4%BB%E5%8B%95"
+      ],
+      "fetch_type": "html",
+      "trust_level": "official",
+      "notes": "官方列表及詳情雙重核對；期限與線上參與有證據才推薦；單來源失敗不覆蓋舊資料。"
+    },
+    {
+      "id": "yda_national_news",
+      "name": "教育部青年發展署｜全國徵件及線上機會",
+      "scope": "national",
+      "priority": 3,
+      "domain_allowlist": [
+        "www.yda.gov.tw"
+      ],
+      "enabled": true,
+      "start_urls": [
+        "https://www.yda.gov.tw/",
+        "https://www.yda.gov.tw/docList.aspx?pid=53&uid=59",
+        "https://www.yda.gov.tw/planDocList.aspx?c=1&p=1008",
+        "https://www.yda.gov.tw/planDocList.aspx?c=1&p=1014"
+      ],
+      "fetch_type": "html",
+      "trust_level": "official",
+      "notes": "官方列表及詳情雙重核對；期限與線上參與有證據才推薦；單來源失敗不覆蓋舊資料。"
     }
   ]
 }
