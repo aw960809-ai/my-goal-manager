@@ -1,5 +1,5 @@
 'use strict';
-// Combined contract tests: Python adapters + twelve-source manifest parity.
+// Combined contract tests: Python adapters + fourteen-source manifest parity.
 // No network or personal/browser data access is used by this test.
 const assert=require('assert');
 const fs=require('fs');
@@ -12,14 +12,14 @@ const manifest=JSON.parse(fs.readFileSync(path.join(root,'tools/autofetch/source
 const publicRegistry=JSON.parse(fs.readFileSync(path.join(root,'data/activity-sources.json'),'utf8'));
 const ids=['miaoli_government','changhua_government','nantou_culture','yunlin_government'];
 const names=manifest.sources.map(s=>s.id);
-assert.strictEqual(names.length,12,'ten prior sources plus two nationwide law-school sources');
-assert.strictEqual(new Set(names).size,12,'unique source IDs required');
+assert.strictEqual(names.length,14,'twelve prior sources plus two nationwide youth sources');
+assert.strictEqual(new Set(names).size,14,'unique source IDs required');
 assert.deepStrictEqual(new Set(names),new Set(publicRegistry.sources.map(s=>s.id)),'public registry must match actual source manifest');
 // Expansion must preserve all original sources, not just increase a counter.
 const priorSourceIds=['thu_official','taichung_job','pathfinder_official',
   'mofa_working_holiday','yda_official','miaoli_government',
   'changhua_government','nantou_culture','yunlin_government'];
-assert.deepStrictEqual(new Set(names),new Set([...priorSourceIds,'moc_national','ntu_law','nccu_law']),
+assert.deepStrictEqual(new Set(names),new Set([...priorSourceIds,'moc_national','ntu_law','nccu_law','youthfirst_national','yda_national_news']),
   'must retain original sources, culture feed, and two official law schools');
 const nation=manifest.sources.find(s=>s.id==='moc_national');
 const nationPublic=publicRegistry.sources.find(s=>s.id==='moc_national');
@@ -39,6 +39,17 @@ for(const [id,domain] of [['ntu_law','www.law.ntu.edu.tw'],['nccu_law','law.nccu
   assert.deepStrictEqual(manifestRow.domain_allowlist,[domain]);
   assert.deepStrictEqual(manifestRow.start_urls,publicRow.startUrls);
   assert(publicRow.profileMatch.cities.length===0,'public national scope must not infer user residence');
+}
+// Nationwide expansion must keep disabled sources disabled and manifest parity.
+for(const [id,domain] of [['youthfirst_national','youthfirst.yda.gov.tw'],
+                           ['yda_national_news','www.yda.gov.tw']]){
+  const actual=manifest.sources.find(x=>x.id===id),pub=publicRegistry.sources.find(x=>x.id===id);
+  assert(actual&&pub&&actual.enabled&&pub.enabled);
+  assert.strictEqual(actual.scope,'national');
+  assert.strictEqual(pub.scope,'nationwide');
+  assert.deepStrictEqual(actual.domain_allowlist,[domain]);
+  assert.deepStrictEqual(actual.start_urls,pub.startUrls);
+  assert(pub.profileMatch.cities.length===0,'Nationwide is not personal location data');
 }
 for(const id of ids){
  const a=manifest.sources.find(s=>s.id===id);

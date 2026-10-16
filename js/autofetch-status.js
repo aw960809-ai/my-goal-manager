@@ -149,6 +149,12 @@
           healthy:pickNumber(m,["legalAcademicSourcesHealthy"],0),
           events:pickNumber(m,["legalAcademicEvents"],0)}:null,
       semanticRetired:kind==="activity"?pickNumber(m,["semanticPolicyRetired"],0):0,
+      nationalExpansion:kind==="activity"&&pickNumber(m,["nationalExpansionSources"],0)>0
+        ?{total:pickNumber(m,["nationalExpansionSources"],0),
+          healthy:pickNumber(m,["nationalExpansionHealthy"],0),
+          fresh:pickNumber(m,["nationalExpansionFreshEligible"],0),
+          active:pickNumber(m,["nationalExpansionActive"],0),
+          discovered:pickNumber(m,["nationalExpansionDiscovered"],0)}:null,
       nationwide:kind==="activity"&&m.nationwideOfficialConfigured===true
         ?{healthy:m.nationwideOfficialHealthy===true,active:pickNumber(m,["nationwideOfficialEvents"],0),
           eligible:pickNumber(m,["nationwideOfficialEligible"],0),
@@ -247,7 +253,9 @@
         ? `已檢查 ${item.nationwide.discovered} 筆 · 合適活動 0 筆`
         : `${item.nationwide.active} 筆 · ${item.nationwide.healthy?"正常":"來源待修復"}`):"",
       item.legalAcademia?metric("全國法律學術活動",`${item.legalAcademia.events} 筆 · 來源 ${item.legalAcademia.healthy}/${item.legalAcademia.total}`):"",
-      item.semanticRetired>0?metric("低相關活動已封存",item.semanticRetired):""
+      item.semanticRetired>0?metric("低相關活動已封存",item.semanticRetired):"",
+      item.nationalExpansion?metric("全國新來源（線上徵件／競賽）",
+        `本輪 ${item.nationalExpansion.fresh} 筆 · 來源 ${item.nationalExpansion.healthy}/${item.nationalExpansion.total}`):""
     ].filter(Boolean).join("");
 
     return `<div class="gm-af-card ${st.cls}">

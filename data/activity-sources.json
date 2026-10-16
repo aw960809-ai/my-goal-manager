@@ -377,6 +377,70 @@
       },
       "catalogPolicy": "public",
       "notes": "全國可參與之大學法律學術活動；必須明確允許一般參與者、提供活動日期與地點。"
+    },
+    {
+      "id": "youthfirst_national",
+      "name": "教育部青年第一讚｜全國競賽及徵件",
+      "enabled": true,
+      "adapter": "youthfirst_national",
+      "scope": "nationwide",
+      "categories": [
+        "competition",
+        "youth_program",
+        "online_activity",
+        "legal_academic",
+        "international"
+      ],
+      "priority": 3,
+      "trustLevel": "official",
+      "fetchType": "html",
+      "domainAllowlist": [
+        "youthfirst.yda.gov.tw"
+      ],
+      "startUrls": [
+        "https://youthfirst.yda.gov.tw/index.php/subject/index?project_type%5B%5D=%E7%AB%B6%E8%B3%BD",
+        "https://youthfirst.yda.gov.tw/index.php/subject/index?project_type%5B%5D=%E6%B4%BB%E5%8B%95"
+      ],
+      "profileMatch": {
+        "country": "TW",
+        "cities": [],
+        "schoolNames": []
+      },
+      "catalogPolicy": "public",
+      "notes": "全國競賽／徵件與線上機會；需有官方明確截止日、實際遠端參與證據；不假設資格。"
+    },
+    {
+      "id": "yda_national_news",
+      "name": "教育部青年發展署｜全國徵件及線上機會",
+      "enabled": true,
+      "adapter": "yda_national_news",
+      "scope": "nationwide",
+      "categories": [
+        "competition",
+        "youth_program",
+        "online_activity",
+        "legal_academic",
+        "international"
+      ],
+      "priority": 3,
+      "trustLevel": "official",
+      "fetchType": "html",
+      "domainAllowlist": [
+        "www.yda.gov.tw"
+      ],
+      "startUrls": [
+        "https://www.yda.gov.tw/",
+        "https://www.yda.gov.tw/docList.aspx?pid=53&uid=59",
+        "https://www.yda.gov.tw/planDocList.aspx?c=1&p=1008",
+        "https://www.yda.gov.tw/planDocList.aspx?c=1&p=1014"
+      ],
+      "profileMatch": {
+        "country": "TW",
+        "cities": [],
+        "schoolNames": []
+      },
+      "catalogPolicy": "public",
+      "notes": "全國競賽／徵件與線上機會；需有官方明確截止日、實際遠端參與證據；不假設資格。"
     }
   ]
 }

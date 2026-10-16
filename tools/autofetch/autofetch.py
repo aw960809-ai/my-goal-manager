@@ -15,6 +15,7 @@ from lifecycle_archive import archive_document, atomic_write_json, reconcile_act
 from central_official import REGIONS as CENTRAL_REGIONS, run_source as run_central_source
 from moc_national_opportunities import run_source as run_moc_national_source, API_ROOT as MOC_NATIONAL_API, topic_relevant as moc_topic_relevant
 from university_law_opportunities import SOURCES as LAW_SOURCES, run_source as run_law_source
+from national_youth_feeds import SOURCES as NATIONAL_YOUTH_SOURCES, run_source as run_national_youth_source
 
 USER_AGENT = 'GoalManager-AutoFetch/96.6.11.1 (+https://github.com/aw960809-ai/my-goal-manager)'
 MAX_BYTES = 2_000_000
@@ -365,6 +366,17 @@ for _law_id,_law in LAW_SOURCES.items():
         'start_urls':[_law['url']],'fetch_type':'html',
         'trust_level':'official',
         'notes':'官方法律學院學術活動；未來日期、明確地點及自由入場須同時核實。',
+    })
+
+# Independently checked government nationwide competitions + online opportunities.
+# Keep disabled regional and distant law-school lecture feeds unchanged.
+for _national_id,_national in NATIONAL_YOUTH_SOURCES.items():
+    SOURCES['sources'].append({
+        'id':_national_id, 'name':_national['name'], 'scope':'national',
+        'priority':3, 'domain_allowlist':[_national['host']], 'enabled':True,
+        'start_urls':list(_national['lists']), 'fetch_type':'html',
+        'trust_level':'official',
+        'notes':'官方清單與詳情核實；需具明確截止日及線上參與/投件條件。',
     })
 
 def now_iso():
@@ -2010,6 +2022,7 @@ CIRCLE_META.update({_sid:(3,'中部',2) for _sid in CENTRAL_REGIONS})
 # National belongs in the existing 4th concentric ring, not central region.
 CIRCLE_META['moc_national']=(4,'全國',0)
 CIRCLE_META.update({_sid:(4,'全國',0) for _sid in LAW_SOURCES})
+CIRCLE_META.update({_sid:(4,'全國',0) for _sid in NATIONAL_YOUTH_SOURCES})
 
 LOW_VALUE_PATTERNS = [
     (r'適性就業輔導促進就業計畫', -24, '一般就業輔導，與目前學生目標連結較弱'),
@@ -2362,6 +2375,24 @@ def run(repo, limit, apply):
             fetch_fn=lambda u,a: fetch(u,a,max_bytes=10_000_000),stamp=now_iso(),logger=log,
             limit=max(50,min(limit*3,80))))
 
+    # Official, bounded nationwide sources. Distinct failures are isolated and
+    # must not interrupt THU/Taichung or overwrite last verified source data.
+    for _nation_id,_nation in NATIONAL_YOUTH_SOURCES.items():
+        if _nation_id not in enabled:
+            continue
+        try:
+            results.append(run_national_youth_source(
+                _nation_id, fetch_fn=fetch, stamp=now_iso(), logger=log,
+                limit=10))
+        except Exception as exc:
+            results.append({
+                'sourceId':_nation_id,'prefix':_nation['prefix'],
+                'discovered':0,'parsedOk':0,'accepted':[],
+                'skippedPast':0,'rejected':[],
+                'fetchFailures':[{'url':_nation['lists'][0], 'reason':str(exc)[:220]}],
+                'healthy':False,
+            })
+
     # Verified academic events, no assumption that visitors can register.
     for law_id in LAW_SOURCES:
         if law_id in enabled:
@@ -2553,6 +2584,9 @@ def run(repo, limit, apply):
         national_active=sum(str(e.get('id','')).startswith('auto-moc-national-') for e in merged)
         law_runs=[r for r in results if r['sourceId'] in LAW_SOURCES]
         law_active=sum(str(e.get('id','')).startswith(('auto-law-ntu-','auto-law-nccu-')) for e in merged)
+        youth_national_runs=[r for r in results if r['sourceId'] in NATIONAL_YOUTH_SOURCES]
+        youth_national_ids=tuple(s['prefix'] for s in NATIONAL_YOUTH_SOURCES.values())
+        youth_national_active=sum(str(e.get('id','')).startswith(youth_national_ids) for e in merged)
         meta.update({
             'nationwideOfficialConfigured':national_r is not None,
             'nationwideOfficialHealthy':bool(national_r and national_r['healthy']),
@@ -2562,6 +2596,11 @@ def run(repo, limit, apply):
             'legalAcademicSourcesConfigured':len(law_runs),
             'legalAcademicSourcesHealthy':sum(r['healthy'] for r in law_runs),
             'legalAcademicEvents':law_active,
+            'nationalExpansionSources':len(youth_national_runs),
+            'nationalExpansionHealthy':sum(r['healthy'] for r in youth_national_runs),
+            'nationalExpansionDiscovered':sum(r['discovered'] for r in youth_national_runs),
+            'nationalExpansionFreshEligible':sum(len(r.get('radarEligible',[])) for r in youth_national_runs),
+            'nationalExpansionActive':youth_national_active,
             'semanticPolicyRetired':len(semantic_retired),
             'updatedAt': now_iso(),
             'events': len(merged),
