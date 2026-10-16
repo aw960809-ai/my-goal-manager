@@ -13,7 +13,8 @@ from pathlib import Path
 from urllib.parse import parse_qs, urljoin, urlparse
 from lifecycle_archive import archive_document, atomic_write_json, reconcile_activity_catalog
 from central_official import REGIONS as CENTRAL_REGIONS, run_source as run_central_source
-from moc_national_opportunities import run_source as run_moc_national_source, API_ROOT as MOC_NATIONAL_API
+from moc_national_opportunities import run_source as run_moc_national_source, API_ROOT as MOC_NATIONAL_API, topic_relevant as moc_topic_relevant
+from university_law_opportunities import SOURCES as LAW_SOURCES, run_source as run_law_source
 
 USER_AGENT = 'GoalManager-AutoFetch/96.6.11.1 (+https://github.com/aw960809-ai/my-goal-manager)'
 MAX_BYTES = 2_000_000
@@ -355,6 +356,16 @@ SOURCES['sources'].append({
     'fetch_type':'json','trust_level':'official',
     'notes':'官方開放資料：全國講座、研習、競賽、徵件；只納入可確認日期與來源網址、且符合學習目標的活動。',
 })
+
+# Independent nationwide law-school sources, not county mirrors.
+for _law_id,_law in LAW_SOURCES.items():
+    SOURCES['sources'].append({
+        'id':_law_id,'name':_law['name'],'scope':'national','priority':3,
+        'domain_allowlist':[_law['host']],'enabled':True,
+        'start_urls':[_law['url']],'fetch_type':'html',
+        'trust_level':'official',
+        'notes':'官方法律學院學術活動；未來日期、明確地點及自由入場須同時核實。',
+    })
 
 def now_iso():
     return datetime.now(timezone.utc).isoformat()
@@ -1992,6 +2003,7 @@ CIRCLE_META = {
 CIRCLE_META.update({_sid:(3,'中部',2) for _sid in CENTRAL_REGIONS})
 # National belongs in the existing 4th concentric ring, not central region.
 CIRCLE_META['moc_national']=(4,'全國',0)
+CIRCLE_META.update({_sid:(4,'全國',0) for _sid in LAW_SOURCES})
 
 LOW_VALUE_PATTERNS = [
     (r'適性就業輔導促進就業計畫', -24, '一般就業輔導，與目前學生目標連結較弱'),
@@ -2344,6 +2356,13 @@ def run(repo, limit, apply):
             fetch_fn=lambda u,a: fetch(u,a,max_bytes=10_000_000),stamp=now_iso(),logger=log,
             limit=max(50,min(limit*3,80))))
 
+    # Verified academic events, no assumption that visitors can register.
+    for law_id in LAW_SOURCES:
+        if law_id in enabled:
+            results.append(run_law_source(
+                law_id,fetch_fn=fetch,parse_lines=parse_plain_lines,
+                stamp=now_iso(),limit=12,logger=log))
+
     # Fail-closed regional adapters: never insert synthetic opportunities.
     for _regional_id in CENTRAL_REGIONS:
         if _regional_id in enabled:
@@ -2471,6 +2490,24 @@ def run(repo, limit, apply):
             merged = [e for e in merged if not str(e.get('id', '')).startswith(prefix)]
             merged.extend(r.get('radarEligible', []))
 
+        # A previous version mistakenly recommended children's English
+        # picture-book events as professional language study. Only after the
+        # new MOC source succeeds can these old auto-owned rows be archived.
+        # Source failures must NOT trigger a reclassification/mass deletion.
+        semantic_retired = []
+        moc_healthy = any(r['sourceId']=='moc_national' and r['healthy'] for r in results)
+        if moc_healthy:
+            existing_ids = {str(x.get('id','')) for x in merged}
+            for old in payload.get('events', []):
+                rid = str(old.get('id',''))
+                if (rid.startswith('auto-moc-national-') and rid not in existing_ids
+                        and not moc_topic_relevant(old.get('title',''))):
+                    retired = dict(old)
+                    retired['semanticRetire'] = True
+                    merged.append(retired)
+                    semantic_retired.append(rid)
+                    log(f'QUALITY_ARCHIVE source=moc_national id={rid}')
+
         merged = list({str(e.get('id', '')): e for e in merged}.values())
 
         activity_archive_file = repo / 'data/activity-archive.json'
@@ -2508,12 +2545,18 @@ def run(repo, limit, apply):
         meta = dict(payload.get('meta', {}))
         national_r=next((r for r in results if r['sourceId']=='moc_national'),None)
         national_active=sum(str(e.get('id','')).startswith('auto-moc-national-') for e in merged)
+        law_runs=[r for r in results if r['sourceId'] in LAW_SOURCES]
+        law_active=sum(str(e.get('id','')).startswith(('auto-law-ntu-','auto-law-nccu-')) for e in merged)
         meta.update({
             'nationwideOfficialConfigured':national_r is not None,
             'nationwideOfficialHealthy':bool(national_r and national_r['healthy']),
             'nationwideOfficialEvents':national_active,
             'nationwideOfficialEligible':len(national_r.get('radarEligible',[])) if national_r else 0,
             'nationwideOfficialDiscovered':national_r.get('discovered',0) if national_r else 0,
+            'legalAcademicSourcesConfigured':len(law_runs),
+            'legalAcademicSourcesHealthy':sum(r['healthy'] for r in law_runs),
+            'legalAcademicEvents':law_active,
+            'semanticPolicyRetired':len(semantic_retired),
             'updatedAt': now_iso(),
             'events': len(merged),
 

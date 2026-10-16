@@ -321,6 +321,62 @@
       },
       "catalogPolicy": "public",
       "notes": "全國無地區限制，採文化部官方 JSON，僅納入未來且可核對日期、來源連結及學習目標的活動。"
+    },
+    {
+      "id": "ntu_law",
+      "name": "國立臺灣大學法律學院學術活動",
+      "enabled": true,
+      "adapter": "ntu_law",
+      "scope": "nationwide",
+      "categories": [
+        "legal_academic",
+        "lecture",
+        "academic_conference"
+      ],
+      "priority": 3,
+      "trustLevel": "official",
+      "fetchType": "html",
+      "domainAllowlist": [
+        "www.law.ntu.edu.tw"
+      ],
+      "startUrls": [
+        "https://www.law.ntu.edu.tw/"
+      ],
+      "profileMatch": {
+        "country": "TW",
+        "cities": [],
+        "schoolNames": []
+      },
+      "catalogPolicy": "public",
+      "notes": "全國可參與之大學法律學術活動；必須明確允許一般參與者、提供活動日期與地點。"
+    },
+    {
+      "id": "nccu_law",
+      "name": "國立政治大學法學院學術活動",
+      "enabled": true,
+      "adapter": "nccu_law",
+      "scope": "nationwide",
+      "categories": [
+        "legal_academic",
+        "lecture",
+        "academic_conference"
+      ],
+      "priority": 3,
+      "trustLevel": "official",
+      "fetchType": "html",
+      "domainAllowlist": [
+        "law.nccu.edu.tw"
+      ],
+      "startUrls": [
+        "https://law.nccu.edu.tw/zh_tw/news/events"
+      ],
+      "profileMatch": {
+        "country": "TW",
+        "cities": [],
+        "schoolNames": []
+      },
+      "catalogPolicy": "public",
+      "notes": "全國可參與之大學法律學術活動；必須明確允許一般參與者、提供活動日期與地點。"
     }
   ]
 }

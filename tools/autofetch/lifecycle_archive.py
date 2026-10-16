@@ -56,6 +56,8 @@ def _is_date(value):
 def _retire_state(row, kind, today):
     if not isinstance(row, dict):
         return ("invalid", "資料格式無效")
+    if kind == "activity" and row.get("semanticRetire") is True and str(row.get("id","")).startswith("auto-moc-national-"):
+        return ("source_quality_mismatch", "官方活動受眾與個人學習目標不符；品質審查後封存")
     if row.get("available") is False:
         return ("disabled", "來源標示不可用")
     if row.get("kind") == "reference" or row.get("reference") is True:
@@ -183,6 +185,7 @@ def reconcile_activity_catalog(*, old_rows, candidate_rows, source_results, arch
 
     active = []
     active_ids = set()
+    retired_ids = set()
     fresh_ids = set()
 
     # Candidate rows already contain all fresh healthy-source rows and all preserved failed-source rows.
@@ -198,6 +201,7 @@ def reconcile_activity_catalog(*, old_rows, candidate_rows, source_results, arch
         prefix, healthy, _sid = own
         state = _retire_state(row, "activity", today)
         if state:
+            retired_ids.add(rid)
             archive_map[rid] = _archive_item(row, state[0], state[1], now, "activity")
             archive_order.insert(0, rid)
             stats["retiredThisRun"] += 1
@@ -219,7 +223,7 @@ def reconcile_activity_catalog(*, old_rows, candidate_rows, source_results, arch
     # otherwise use the same two-miss + 30-day stale rule as the Chiayi system.
     for old in old_rows:
         rid = str(old.get("id") or "")
-        if not rid or rid in active_ids:
+        if not rid or rid in active_ids or rid in retired_ids:
             continue
         own = owner(old)
         if not own:

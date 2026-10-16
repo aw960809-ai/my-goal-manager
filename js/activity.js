@@ -95,6 +95,10 @@ function activityMatchDetails(a){
 function activityTimeState(a){
   const review=RadarPolicy.activityReviewState(a);
   if(review.blocked)return {eligible:false,state:review.state,reason:review.reason};
+  if(String(a?.id||'').startsWith('auto-moc-national-')&&
+      /繪本|親子|幼兒|學齡前|兒童故事|說故事|故事時間|故事屋|寶寶|幼兒園|幼稚園/.test(String(a?.title||''))){
+    return {eligible:false,state:'受眾不符',reason:'兒童／親子活動不是成人語言檢定或法學進修活動'};
+  }
   const today=todayKey(),date=String(a.date||'').trim(),duration=Number(a.durationMinutes||a.duration||0)||0,deadline=activityDeadlineInfo(a);
   if(a.radarEligible===false)return {eligible:false,state:'已排除',reason:a.eligibilityReason||a.hardFilterReason||'後端雷達判斷為不適用'};
   if(a.available===false)return {eligible:false,state:'停用',reason:'資料標示不可用'};

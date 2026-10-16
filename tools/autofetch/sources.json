@@ -166,6 +166,38 @@
       "fetch_type": "json",
       "trust_level": "official",
       "notes": "官方開放資料：全國講座、研習、競賽、徵件；嚴格日期、來源網址及主題驗證。"
+    },
+    {
+      "id": "ntu_law",
+      "name": "國立臺灣大學法律學院學術活動",
+      "scope": "national",
+      "priority": 3,
+      "domain_allowlist": [
+        "www.law.ntu.edu.tw"
+      ],
+      "enabled": true,
+      "start_urls": [
+        "https://www.law.ntu.edu.tw/"
+      ],
+      "fetch_type": "html",
+      "trust_level": "official",
+      "notes": "校方法律學院官網，僅收錄已確認對外開放、有未來日期與地點之講座。"
+    },
+    {
+      "id": "nccu_law",
+      "name": "國立政治大學法學院學術活動",
+      "scope": "national",
+      "priority": 3,
+      "domain_allowlist": [
+        "law.nccu.edu.tw"
+      ],
+      "enabled": true,
+      "start_urls": [
+        "https://law.nccu.edu.tw/zh_tw/news/events"
+      ],
+      "fetch_type": "html",
+      "trust_level": "official",
+      "notes": "校方法律學院官網，僅收錄已確認對外開放、有未來日期與地點之講座。"
     }
   ]
 }
