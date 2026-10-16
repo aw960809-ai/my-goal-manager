@@ -957,7 +957,13 @@ class THUDetailParser(HTMLParser):
             self.skip -= 1
         if tag == 'h1' and self.in_h1:
             title = self.clean(' '.join(self.h1_parts))
-            if title:
+            # The official page may contain additional <h1> in its notes block.
+            # Choose the first credible event heading, never the last heading.
+            boilerplate = bool(re.match(
+                r'^[＊*\s]*(?:注意事項|報名注意事項|活動備註|基本資訊|開放對象|報名場次|活動報名)(?:\s*[：:]|$)',
+                title,
+            )) or title in {'東海大學活動報名系統', '活動報名系統', '東海大學'}
+            if (not self.title and 4 <= len(title) <= 200 and not boilerplate):
                 self.title = title
             self.in_h1 = False
             self.h1_parts = []
@@ -1137,7 +1143,7 @@ def build_thu_candidate(url, body):
     scope = '東海校內'
 
     if category == '學術活動':
-        typ = '法律／學術' if re.search(r'法律|憲法|民法|刑法|法學', '\n'.join(lines)) else '學術／講座'
+        typ = '法律／學術' if re.search(r'法律|憲法|民法|刑法|法學|司法|人權|訴訟', title) else '學術／講座'
     elif category == '教育活動' and typ == '公共參與':
         typ = '教育／青少年'
 

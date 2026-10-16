@@ -75,6 +75,14 @@ async function main(){
   assert(status.host.rendered.includes('部分項目抓取失敗'));
   assert(status.host.rendered.includes('個別項目抓取失敗'));
   assert(status.host.rendered.includes('5/5'));
+  // A locally cached lifecycle archive must not override the newer official
+  // archive metrics shipped alongside the same activities.json catalog.
+  payload.activities.meta.archiveCount=45;
+  payload.activities.meta.retiredThisRun=3;
+  status.window.GoalManagerCatalogLifecycle={status:()=>({activity:{count:39,retiredThisRun:1}})};
+  await status.window.GoalManagerAutoFetchStatus.refresh();
+  assert(status.host.rendered.includes('目前封存總數</small><b>45</b>'));
+  assert(status.host.rendered.includes('本次 AutoFetch 封存</small><b>3</b>'));
   // Production regression, 2026-10-15: legacy sources=5 is healthy, NOT total=7.
   Object.assign(payload.activities.meta,{
     sources:5,totalSources:7,healthySources:5,failedSources:2,fetchFailedItems:2,
@@ -95,6 +103,13 @@ async function main(){
   assert.strictEqual(nationwide.activity.nationwide.active,7);
   assert(status.host.rendered.includes('全國活動（官方資料）'));
   assert(status.host.rendered.includes('7 筆 · 正常'));
+  // A healthy source with zero matches is not a healthy supply of opportunities.
+  Object.assign(payload.activities.meta,{nationwideOfficialEvents:0,
+    nationwideOfficialDiscovered:149});
+  const zeroNational=await status.window.GoalManagerAutoFetchStatus.refresh();
+  assert.strictEqual(zeroNational.activity.nationwide.discovered,149);
+  assert(status.host.rendered.includes('已檢查 149 筆 · 合適活動 0 筆'));
+  payload.activities.meta.nationwideOfficialEvents=7;
   Object.assign(payload.activities.meta,{legalAcademicSourcesConfigured:2,
     legalAcademicSourcesHealthy:2,legalAcademicEvents:3,semanticPolicyRetired:2});
   const law=await status.window.GoalManagerAutoFetchStatus.refresh();
