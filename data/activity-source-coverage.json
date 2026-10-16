@@ -1,6 +1,6 @@
 {
   "schemaVersion": "7B.2-coverage-1",
-  "generatedAt": "2026-10-16T03:53:24.789819+00:00",
+  "generatedAt": "2026-10-16T06:12:17.145068+00:00",
   "policy": {
     "localCoverageMustMatchUserProfile": true,
     "uncoveredLocalScopeFailClosed": true,
@@ -64,7 +64,9 @@
     ],
     "nationwide": [
       "yda_official",
-      "moc_national"
+      "moc_national",
+      "ntu_law",
+      "nccu_law"
     ],
     "regional": [
       "changhua_government",
@@ -254,6 +256,38 @@
         "competition",
         "training",
         "public_activity"
+      ],
+      "profileMatch": {
+        "country": "TW",
+        "cities": [],
+        "schoolNames": []
+      }
+    },
+    {
+      "id": "ntu_law",
+      "name": "國立臺灣大學法律學院學術活動",
+      "enabled": true,
+      "scope": "nationwide",
+      "categories": [
+        "legal_academic",
+        "lecture",
+        "academic_conference"
+      ],
+      "profileMatch": {
+        "country": "TW",
+        "cities": [],
+        "schoolNames": []
+      }
+    },
+    {
+      "id": "nccu_law",
+      "name": "國立政治大學法學院學術活動",
+      "enabled": true,
+      "scope": "nationwide",
+      "categories": [
+        "legal_academic",
+        "lecture",
+        "academic_conference"
       ],
       "profileMatch": {
         "country": "TW",

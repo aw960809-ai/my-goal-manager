@@ -1,37 +1,37 @@
 {
   "meta": {
-    "updatedAt": "2026-10-16T03:53:24.743328+00:00",
-    "sources": 6,
+    "updatedAt": "2026-10-16T06:12:17.111077+00:00",
+    "sources": 8,
     "events": 39,
-    "ok": 15,
+    "ok": 16,
     "failed": 2,
     "errors": [
       "www.chcg.gov.tw: curl: (22) The requested URL returned error: 403",
-      "www.nthcc.gov.tw: curl: (28) Failed to connect to www.nthcc.gov.tw port 443 after 8001 ms: Timeout was reached\ncurl: (28) Failed to connect to www.nthcc.gov.tw port 443 after 8002 ms: Timeout was reached"
+      "www.nthcc.gov.tw: curl: (28) Failed to connect to www.nthcc.gov.tw port 443 after 8002 ms: Timeout was reached\ncurl: (28) Failed to connect to www.nthcc.gov.tw port 443 after 8002 ms: Timeout was reached"
     ],
     "generator": "V96.6.11.1.1 Multi-Source AutoFetch + Activity Radar",
     "sourcePolicy": "政府資訊為主；東海官方活動為活動核心；獎學金獨立資料集合與獨立判斷",
     "scholarships": 7,
-    "totalSources": 8,
-    "healthySources": 6,
+    "totalSources": 10,
+    "healthySources": 8,
     "failedSources": 2,
     "rejectedItems": 0,
     "fetchFailedItems": 2,
     "skippedPast": 96,
     "fitFiltered": 25,
     "semanticDuplicates": 0,
-    "retiredThisRun": 1,
+    "retiredThisRun": 3,
     "revivedThisRun": 0,
-    "archiveCount": 39,
+    "archiveCount": 42,
     "retainedOnFailure": 0,
-    "carriedMissing": 18,
-    "needsReview": 16,
+    "carriedMissing": 17,
+    "needsReview": 17,
     "lifecyclePolicy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive",
     "nationwideOfficialConfigured": true,
     "nationwideOfficialHealthy": true,
-    "nationwideOfficialEvents": 2,
-    "nationwideOfficialEligible": 2,
-    "nationwideOfficialDiscovered": 152,
+    "nationwideOfficialEvents": 0,
+    "nationwideOfficialEligible": 0,
+    "nationwideOfficialDiscovered": 149,
     "sourceFailures": [
       {
         "sourceId": "changhua_government",
@@ -43,9 +43,13 @@
         "sourceId": "nantou_culture",
         "name": "南投縣政府文化局藝文活動",
         "url": "https://www.nthcc.gov.tw/A4_1/list2",
-        "error": "www.nthcc.gov.tw: curl: (28) Failed to connect to www.nthcc.gov.tw port 443 after 8001 ms: Timeout was reached\ncurl: (28) Failed to connect to www.nthcc.gov.tw port 443 after 8002 ms: Timeout was reached"
+        "error": "www.nthcc.gov.tw: curl: (28) Failed to connect to www.nthcc.gov.tw port 443 after 8002 ms: Timeout was reached\ncurl: (28) Failed to connect to www.nthcc.gov.tw port 443 after 8002 ms: Timeout was reached"
       }
-    ]
+    ],
+    "legalAcademicSourcesConfigured": 2,
+    "legalAcademicSourcesHealthy": 2,
+    "legalAcademicEvents": 3,
+    "semanticPolicyRetired": 2
   },
   "events": [
     {
@@ -161,7 +165,7 @@
       "scope": "東海校內",
       "type": "法律／學術",
       "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=1&conference_code=2026090060",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=2&conference_code=2026090060",
       "keywords": "115-1 建造屬於我的島嶼~小島支持團體諮商 東海大學 健康暨諮商中心 藝文活動 學生，費用：0；說明： 大一新生、轉學生、或渴望適應新環境的你 法律／學術 校內",
       "direct": true,
       "team": false,
@@ -178,7 +182,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090060",
-        "fetchedAt": "2026-10-16T03:50:49.140071+00:00"
+        "fetchedAt": "2026-10-16T06:09:42.176508+00:00"
       },
       "fitScore": 39,
       "fitTier": "探索",
@@ -199,7 +203,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-23T06:04:32.174585+00:00",
-      "lastSeen": "2026-10-16T03:53:24.742587+00:00",
+      "lastSeen": "2026-10-16T06:12:17.110448+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -236,7 +240,7 @@
       "scope": "東海校內",
       "type": "教育／青少年",
       "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=1&conference_code=2026100043",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=2&conference_code=2026100043",
       "keywords": "【勵學生專屬】跨域學習第二波申請說明會(線上) 東海大學 學生事務處 教育活動 學生，費用：0 法律／學術 校內",
       "direct": true,
       "team": false,
@@ -253,7 +257,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026100043",
-        "fetchedAt": "2026-10-16T03:50:50.342347+00:00"
+        "fetchedAt": "2026-10-16T06:09:43.915487+00:00"
       },
       "fitScore": 47,
       "fitTier": "探索",
@@ -276,7 +280,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-16T03:53:24.742587+00:00",
-      "lastSeen": "2026-10-16T03:53:24.742587+00:00",
+      "lastSeen": "2026-10-16T06:12:17.110448+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -313,7 +317,7 @@
       "scope": "東海校內",
       "type": "法律／學術",
       "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=2&conference_code=2026080007",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=3&conference_code=2026080007",
       "keywords": "*注意事項： 1.報名參加會議的人員，主辦單位不另提供午膳。 2.報名者出現發燒、呼吸道不適等類流感症狀者，建議避免出席會議。 3.本場會議廳內至多接受40人同時於場內。 4.報名參加者，主辦單位於會議前二天提供手冊電子檔，當天會場不另發紙本論文。 東海大學 哲學系  教職員，費用：0；學生，費用：0；校外人士，費用：0；說明：校外人士依照本校校園臨時停車收費標準: 逾三十分鐘未滿一小時收費40元，依此累計。當日收費上限為280元，隔日 (凌晨零時起) 另計。 法律／學術 校內",
       "direct": true,
       "team": false,
@@ -330,7 +334,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026080007",
-        "fetchedAt": "2026-10-16T03:50:54.483729+00:00"
+        "fetchedAt": "2026-10-16T06:09:51.127141+00:00"
       },
       "fitScore": 39,
       "fitTier": "探索",
@@ -351,7 +355,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-16T03:53:24.742587+00:00",
-      "lastSeen": "2026-10-16T03:53:24.742587+00:00",
+      "lastSeen": "2026-10-16T06:12:17.110448+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -405,7 +409,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090065",
-        "fetchedAt": "2026-10-16T03:50:57.219013+00:00"
+        "fetchedAt": "2026-10-16T06:09:54.935700+00:00"
       },
       "fitScore": 67,
       "fitTier": "中適配",
@@ -429,7 +433,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-21T06:32:35.703147+00:00",
-      "lastSeen": "2026-10-16T03:53:24.742587+00:00",
+      "lastSeen": "2026-10-16T06:12:17.110448+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -483,7 +487,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026100040",
-        "fetchedAt": "2026-10-16T03:50:58.078585+00:00"
+        "fetchedAt": "2026-10-16T06:09:57.621999+00:00"
       },
       "fitScore": 45,
       "fitTier": "探索",
@@ -505,7 +509,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-14T06:14:10.797433+00:00",
-      "lastSeen": "2026-10-16T03:53:24.742587+00:00",
+      "lastSeen": "2026-10-16T06:12:17.110448+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -542,7 +546,7 @@
       "scope": "東海校內",
       "type": "法律／學術",
       "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=3&conference_code=2026100037",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026100037",
       "keywords": "校外賃居安全教育宣導講座-學生租屋必懂的法律保障與常見糾紛解析 東海大學 生活輔導組 教育活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
       "direct": true,
       "team": false,
@@ -559,7 +563,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026100037",
-        "fetchedAt": "2026-10-16T03:50:58.957002+00:00"
+        "fetchedAt": "2026-10-16T06:10:07.688943+00:00"
       },
       "fitScore": 71,
       "fitTier": "中適配",
@@ -580,7 +584,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-14T06:14:10.797433+00:00",
-      "lastSeen": "2026-10-16T03:53:24.742587+00:00",
+      "lastSeen": "2026-10-16T06:12:17.110448+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -634,7 +638,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026100036",
-        "fetchedAt": "2026-10-16T03:51:01.851219+00:00"
+        "fetchedAt": "2026-10-16T06:10:20.538948+00:00"
       },
       "fitScore": 66,
       "fitTier": "中適配",
@@ -655,7 +659,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-14T06:14:10.797433+00:00",
-      "lastSeen": "2026-10-16T03:53:24.742587+00:00",
+      "lastSeen": "2026-10-16T06:12:17.110448+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -709,7 +713,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026100013",
-        "fetchedAt": "2026-10-16T03:51:05.491108+00:00"
+        "fetchedAt": "2026-10-16T06:10:21.867089+00:00"
       },
       "fitScore": 39,
       "fitTier": "探索",
@@ -730,7 +734,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-14T06:14:10.797433+00:00",
-      "lastSeen": "2026-10-16T03:53:24.742587+00:00",
+      "lastSeen": "2026-10-16T06:12:17.110448+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -784,7 +788,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090080",
-        "fetchedAt": "2026-10-16T03:51:07.450342+00:00"
+        "fetchedAt": "2026-10-16T06:10:24.183952+00:00"
       },
       "fitScore": 40,
       "fitTier": "探索",
@@ -804,7 +808,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-24T06:19:41.019607+00:00",
-      "lastSeen": "2026-10-16T03:53:24.742587+00:00",
+      "lastSeen": "2026-10-16T06:12:17.110448+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -858,7 +862,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090062",
-        "fetchedAt": "2026-10-16T03:51:08.308057+00:00"
+        "fetchedAt": "2026-10-16T06:10:25.419927+00:00"
       },
       "fitScore": 65,
       "fitTier": "中適配",
@@ -881,7 +885,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-21T06:32:35.703147+00:00",
-      "lastSeen": "2026-10-16T03:53:24.742587+00:00",
+      "lastSeen": "2026-10-16T06:12:17.110448+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -935,7 +939,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "taichung_job",
         "act": "5634",
-        "fetchedAt": "2026-10-16T03:51:13.464053+00:00"
+        "fetchedAt": "2026-10-16T06:10:33.633795+00:00"
       },
       "fitScore": 44,
       "fitTier": "探索",
@@ -957,7 +961,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-22T06:20:42.670284+00:00",
-      "lastSeen": "2026-10-16T03:53:24.742587+00:00",
+      "lastSeen": "2026-10-16T06:12:17.110448+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "taichung_job",
@@ -1005,7 +1009,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "taichung_job",
         "act": "5633",
-        "fetchedAt": "2026-10-16T03:51:15.225295+00:00"
+        "fetchedAt": "2026-10-16T06:10:36.235770+00:00"
       },
       "fitScore": 46,
       "fitTier": "探索",
@@ -1028,7 +1032,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-22T06:20:42.670284+00:00",
-      "lastSeen": "2026-10-16T03:53:24.742587+00:00",
+      "lastSeen": "2026-10-16T06:12:17.110448+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "taichung_job",
@@ -1076,7 +1080,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-10-16T03:53:02.960725+00:00"
+        "fetchedAt": "2026-10-16T06:11:24.934132+00:00"
       },
       "fitScore": 94,
       "fitTier": "高適配",
@@ -1098,7 +1102,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-10-16T03:53:24.742587+00:00",
+      "lastSeen": "2026-10-16T06:12:17.110448+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "mofa_working_holiday",
@@ -1118,48 +1122,47 @@
       "category": "international"
     },
     {
-      "id": "auto-moc-national-6a2b070b26b3243414ccd1fd",
-      "title": "2026年11月【員林市立圖書館-英文繪本快樂遊】",
-      "date": "2026-11-08",
-      "eventEndDate": "2026-11-08",
-      "time": "15:00",
+      "id": "auto-law-ntu-ffc233e085d4f6e8a265",
+      "title": "國立臺灣大學法律學院｜追究人工智慧刑事責任之可能性",
+      "date": "2026-11-03",
+      "eventEndDate": "2026-11-03",
+      "time": "10:00",
       "deadline": "",
       "scope": "全國",
-      "type": "語言／國際",
+      "type": "法律／學術",
       "kind": "event",
-      "url": "https://www.facebook.com/yuanlinlibrary",
-      "keywords": "2026年11月【員林市立圖書館-英文繪本快樂遊】",
+      "url": "https://www.law.ntu.edu.tw/index.php/公告/item/3573-專題演講-1115-11-3（二）、11-6（五）井田良教授法學國際講座專題演講",
+      "keywords": "專題演講: 1115/11/3（二）、11/6（五）井田良教授法學國際講座專題演講 追究人工智慧刑事責任之可能性",
       "direct": true,
       "team": false,
       "available": true,
       "government": false,
-      "source": "文化部 iCulture 全國活動開放資料",
-      "sourceId": "moc_national",
-      "statusText": "文化部官方資料彙整；活動日期 2026-11-08，報名資格與截止時間請以原公告為準。",
-      "location": "彰化縣員林市三民街2之1號",
-      "organizer": "彰化縣員林市立圖書館、彰化縣員林市公所",
-      "audience": "依活動公告確認",
+      "source": "國立臺灣大學法律學院學術活動",
+      "sourceId": "ntu_law",
+      "location": "國立臺灣大學法律學院霖澤館3樓1301多媒體教室",
+      "organizer": "國立臺灣大學法律學院學術活動",
+      "audience": "官方明示自由入場／無需報名；實際條件依官方公告",
       "openEnded": false,
-      "nationwideTopics": [
-        "語言／國際"
-      ],
+      "statusText": "法律學院官網：已確認開放參與；活動日期 2026-11-03，地點及入場規則請依原公告。",
       "autofetch": {
-        "engine": "moc-national-v1",
-        "sourceId": "moc_national",
-        "mocUID": "6a2b070b26b3243414ccd1fd",
-        "mocCategory": "7",
-        "fetchedAt": "2026-10-16T03:53:02.960777+00:00",
-        "catalog": "https://data.gov.tw/dataset/6478"
+        "engine": "official-university-law-v1",
+        "sourceId": "ntu_law",
+        "fetchedAt": "2026-10-16T06:11:29.140670+00:00"
       },
-      "fitScore": 42,
-      "fitTier": "探索",
+      "fitScore": 83,
+      "fitTier": "高適配",
       "fitReasons": [
         "同心圓第4圈：全國+0",
-        "語言／國際／海外+40",
+        "法律／轉學考+42",
+        "語言／國際／海外+10",
+        "通用能力／AI工具+14",
+        "直接連結法律學習目標+15",
         "有明確地點+2"
       ],
       "goalMatches": [
-        "語言／國際／海外"
+        "法律／轉學考",
+        "語言／國際／海外",
+        "通用能力／AI工具"
       ],
       "circleLevel": 4,
       "circleLabel": "全國",
@@ -1167,16 +1170,14 @@
       "hardFilterReason": "",
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
-      "firstSeen": "2026-10-16T03:53:24.742587+00:00",
-      "lastSeen": "2026-10-16T03:53:24.742587+00:00",
+      "firstSeen": "2026-10-16T06:12:17.110448+00:00",
+      "lastSeen": "2026-10-16T06:12:17.110448+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceCategories": [
         "legal_academic",
         "lecture",
-        "competition",
-        "training",
-        "public_activity"
+        "academic_conference"
       ],
       "sourceTrust": "official",
       "sourcePriority": 3,
@@ -1189,47 +1190,44 @@
       "category": "legal_academic"
     },
     {
-      "id": "auto-moc-national-6a2b070b26b3243414ccd1fe",
-      "title": "2026年12月【員林市立圖書館-英文繪本快樂遊】",
-      "date": "2026-12-13",
-      "eventEndDate": "2026-12-13",
+      "id": "auto-law-ntu-dce189f5025a27157129",
+      "title": "國立臺灣大學法律學院｜理論刑法學的思想與方法：Welzel、Habermas與Hegel",
+      "date": "2026-11-06",
+      "eventEndDate": "2026-11-06",
       "time": "15:00",
       "deadline": "",
       "scope": "全國",
-      "type": "語言／國際",
+      "type": "法律／學術",
       "kind": "event",
-      "url": "https://www.facebook.com/yuanlinlibrary",
-      "keywords": "2026年12月【員林市立圖書館-英文繪本快樂遊】",
+      "url": "https://www.law.ntu.edu.tw/index.php/公告/item/3573-專題演講-1115-11-3（二）、11-6（五）井田良教授法學國際講座專題演講",
+      "keywords": "專題演講: 1115/11/3（二）、11/6（五）井田良教授法學國際講座專題演講 理論刑法學的思想與方法：Welzel、Habermas與Hegel",
       "direct": true,
       "team": false,
       "available": true,
       "government": false,
-      "source": "文化部 iCulture 全國活動開放資料",
-      "sourceId": "moc_national",
-      "statusText": "文化部官方資料彙整；活動日期 2026-12-13，報名資格與截止時間請以原公告為準。",
-      "location": "彰化縣員林市三民街2之1號",
-      "organizer": "彰化縣員林市立圖書館、彰化縣員林市公所",
-      "audience": "依活動公告確認",
+      "source": "國立臺灣大學法律學院學術活動",
+      "sourceId": "ntu_law",
+      "location": "國立臺灣大學法律學院霖澤館7樓第1會議室",
+      "organizer": "國立臺灣大學法律學院學術活動",
+      "audience": "官方明示自由入場／無需報名；實際條件依官方公告",
       "openEnded": false,
-      "nationwideTopics": [
-        "語言／國際"
-      ],
+      "statusText": "法律學院官網：已確認開放參與；活動日期 2026-11-06，地點及入場規則請依原公告。",
       "autofetch": {
-        "engine": "moc-national-v1",
-        "sourceId": "moc_national",
-        "mocUID": "6a2b070b26b3243414ccd1fe",
-        "mocCategory": "7",
-        "fetchedAt": "2026-10-16T03:53:02.960777+00:00",
-        "catalog": "https://data.gov.tw/dataset/6478"
+        "engine": "official-university-law-v1",
+        "sourceId": "ntu_law",
+        "fetchedAt": "2026-10-16T06:11:29.140670+00:00"
       },
-      "fitScore": 42,
-      "fitTier": "探索",
+      "fitScore": 69,
+      "fitTier": "中適配",
       "fitReasons": [
         "同心圓第4圈：全國+0",
-        "語言／國際／海外+40",
+        "法律／轉學考+42",
+        "語言／國際／海外+10",
+        "直接連結法律學習目標+15",
         "有明確地點+2"
       ],
       "goalMatches": [
+        "法律／轉學考",
         "語言／國際／海外"
       ],
       "circleLevel": 4,
@@ -1238,16 +1236,78 @@
       "hardFilterReason": "",
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
-      "firstSeen": "2026-10-16T03:53:24.742587+00:00",
-      "lastSeen": "2026-10-16T03:53:24.742587+00:00",
+      "firstSeen": "2026-10-16T06:12:17.110448+00:00",
+      "lastSeen": "2026-10-16T06:12:17.110448+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceCategories": [
         "legal_academic",
         "lecture",
-        "competition",
-        "training",
-        "public_activity"
+        "academic_conference"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 3,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [],
+        "schoolNames": []
+      },
+      "country": "TW",
+      "category": "legal_academic"
+    },
+    {
+      "id": "auto-law-nccu-55d72f588a527e5aef3d",
+      "title": "115.11.05（四）當代刑法學的角色與課題（今日の刑法学の役割と課題）",
+      "date": "2026-11-05",
+      "eventEndDate": "2026-11-05",
+      "time": "10:00",
+      "deadline": "",
+      "scope": "全國",
+      "type": "法律／學術",
+      "kind": "event",
+      "url": "https://law.nccu.edu.tw/zh_tw/news/events/115-11-05%EF%BC%88%E5%9B%9B%EF%BC%89%E7%95%B6%E4%BB%A3%E5%88%91%E6%B3%95%E5%AD%B8%E7%9A%84%E8%A7%92%E8%89%B2%E8%88%87%E8%AA%B2%E9%A1%8C%EF%BC%88%E4%BB%8A%E6%97%A5%E3%81%AE%E5%88%91%E6%B3%95%E5%AD%A6%E3%81%AE%E5%BD%B9%E5%89%B2%E3%81%A8%E8%AA%B2%E9%A1%8C%EF%BC%89-74360647",
+      "keywords": "115.11.05（四）當代刑法學的角色與課題（今日の刑法学の役割と課題） 當代刑法學的角色與課題（今日の刑法学の役割と課題）",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "government": false,
+      "source": "國立政治大學法學院學術活動",
+      "sourceId": "nccu_law",
+      "location": "國立政治大學法學院4F 王文杰講堂",
+      "organizer": "國立政治大學法學院學術活動",
+      "audience": "官方明示自由入場／無需報名；實際條件依官方公告",
+      "openEnded": false,
+      "statusText": "法律學院官網：已確認開放參與；活動日期 2026-11-05，地點及入場規則請依原公告。",
+      "autofetch": {
+        "engine": "official-university-law-v1",
+        "sourceId": "nccu_law",
+        "fetchedAt": "2026-10-16T06:11:36.845446+00:00"
+      },
+      "fitScore": 59,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第4圈：全國+0",
+        "法律／轉學考+42",
+        "直接連結法律學習目標+15",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考"
+      ],
+      "circleLevel": 4,
+      "circleLabel": "全國",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-10-16T06:12:17.110448+00:00",
+      "lastSeen": "2026-10-16T06:12:17.110448+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "academic_conference"
       ],
       "sourceTrust": "official",
       "sourcePriority": 3,
@@ -1307,8 +1367,8 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-13T07:49:21.560728+00:00",
       "lastSeen": "2026-10-15T07:45:45.125665+00:00",
-      "missCount": 1,
-      "needsReview": false,
+      "missCount": 2,
+      "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
         "legal_academic",
@@ -1383,8 +1443,8 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-16T06:07:49.530864+00:00",
       "lastSeen": "2026-10-15T07:45:45.125665+00:00",
-      "missCount": 1,
-      "needsReview": false,
+      "missCount": 2,
+      "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
         "legal_academic",
@@ -1458,7 +1518,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-12T07:28:06.885824+00:00",
       "lastSeen": "2026-10-14T06:14:10.797433+00:00",
-      "missCount": 2,
+      "missCount": 3,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1535,7 +1595,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-22T06:20:42.670284+00:00",
       "lastSeen": "2026-10-13T07:49:21.560728+00:00",
-      "missCount": 3,
+      "missCount": 4,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1613,7 +1673,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
       "lastSeen": "2026-10-13T07:49:21.560728+00:00",
-      "missCount": 3,
+      "missCount": 4,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1690,7 +1750,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-08T05:49:56.532833+00:00",
       "lastSeen": "2026-10-13T07:49:21.560728+00:00",
-      "missCount": 3,
+      "missCount": 4,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1765,7 +1825,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-08T05:49:56.532833+00:00",
       "lastSeen": "2026-10-12T07:28:06.885824+00:00",
-      "missCount": 4,
+      "missCount": 5,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1841,7 +1901,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-08T05:49:56.532833+00:00",
       "lastSeen": "2026-10-12T07:28:06.885824+00:00",
-      "missCount": 4,
+      "missCount": 5,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1918,7 +1978,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-18T06:01:08.427013+00:00",
       "lastSeen": "2026-10-11T07:17:50.227435+00:00",
-      "missCount": 5,
+      "missCount": 6,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1996,7 +2056,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-01T07:15:37.685597+00:00",
       "lastSeen": "2026-10-11T07:17:50.227435+00:00",
-      "missCount": 5,
+      "missCount": 6,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2075,7 +2135,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-17T08:01:17.326390+00:00",
       "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 10,
+      "missCount": 11,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2152,7 +2212,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-01T07:15:37.685597+00:00",
       "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 10,
+      "missCount": 11,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2228,7 +2288,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-01T07:15:37.685597+00:00",
       "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 10,
+      "missCount": 11,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2304,7 +2364,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-30T06:49:51.580785+00:00",
       "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 10,
+      "missCount": 11,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2379,7 +2439,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-19T05:59:16.875680+00:00",
       "lastSeen": "2026-09-29T07:01:11.559387+00:00",
-      "missCount": 13,
+      "missCount": 14,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2457,7 +2517,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-22T06:20:42.670284+00:00",
       "lastSeen": "2026-09-27T08:38:20.904863+00:00",
-      "missCount": 14,
+      "missCount": 15,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2535,80 +2595,6 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-14T06:24:52.182789+00:00",
       "lastSeen": "2026-09-17T08:01:17.326390+00:00",
-      "missCount": 23,
-      "needsReview": true,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026090009",
-      "title": "2026 Fall (115-1) English Corner 英語角落",
-      "date": "2026-09-29",
-      "time": "",
-      "scope": "東海校內",
-      "type": "語言／國際",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026090009",
-      "keywords": "2026 Fall (115-1) English Corner 英語角落 東海大學 英語中心 學術活動 學生，費用：0 學術／講座 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 英語中心；活動日 2026-09-29；截止 2026-11-16",
-      "government": false,
-      "deadline": "2026-11-16",
-      "eventEndDate": "2026-09-29",
-      "location": "語文館 LAN105",
-      "organizer": "英語中心",
-      "audience": "學生，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026090009",
-        "fetchedAt": "2026-09-16T06:06:54.969326+00:00"
-      },
-      "fitScore": 54,
-      "fitTier": "中適配",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "語言／國際／海外+40",
-        "有明確截止日+4",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "語言／國際／海外"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-14T06:24:52.182789+00:00",
-      "lastSeen": "2026-09-16T06:07:49.530864+00:00",
       "missCount": 24,
       "needsReview": true,
       "sourceId": "thu_official",
