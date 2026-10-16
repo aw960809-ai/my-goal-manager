@@ -144,6 +144,11 @@
     const list=rows(payload,kind==="activity"?"events":"scholarships");
     return {
       kind,count:list.length,autoCount:autoCount(list),meta:m,updatedAt:m.updatedAt||m.fetchedAt||"",
+      legalAcademia:kind==="activity"&&pickNumber(m,["legalAcademicSourcesConfigured"],0)>0
+        ?{total:pickNumber(m,["legalAcademicSourcesConfigured"],0),
+          healthy:pickNumber(m,["legalAcademicSourcesHealthy"],0),
+          events:pickNumber(m,["legalAcademicEvents"],0)}:null,
+      semanticRetired:kind==="activity"?pickNumber(m,["semanticPolicyRetired"],0):0,
       nationwide:kind==="activity"&&m.nationwideOfficialConfigured===true
         ?{healthy:m.nationwideOfficialHealthy===true,active:pickNumber(m,["nationwideOfficialEvents"],0),
           eligible:pickNumber(m,["nationwideOfficialEligible"],0)}:null,
@@ -231,7 +236,9 @@
       item.sources.failed>0?metric("來源失敗",item.sources.failed):"",
       item.itemFailures>0?metric(item.sources.failed?"抓取失敗次數（含來源）":"個別項目抓取失敗",item.itemFailures):"",
       item.failedRetained>0?metric("失敗保留",item.failedRetained):"",
-      item.nationwide?metric("全國活動（官方資料）",`${item.nationwide.active} 筆 · ${item.nationwide.healthy?"正常":"來源待修復"}`):""
+      item.nationwide?metric("全國活動（官方資料）",`${item.nationwide.active} 筆 · ${item.nationwide.healthy?"正常":"來源待修復"}`):"",
+      item.legalAcademia?metric("全國法律學術活動",`${item.legalAcademia.events} 筆 · 來源 ${item.legalAcademia.healthy}/${item.legalAcademia.total}`):"",
+      item.semanticRetired>0?metric("低相關活動已封存",item.semanticRetired):""
     ].filter(Boolean).join("");
 
     return `<div class="gm-af-card ${st.cls}">

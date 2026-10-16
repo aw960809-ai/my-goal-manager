@@ -33,6 +33,9 @@ async function main(){
   assert.strictEqual(JSON.stringify(db),unchanged,'render-only summary must leave all stored activities untouched');
   vm.runInContext('activityRemoteLoaded=false',scope);
   assert.strictEqual(vm.runInContext('activityReviewSummary().latest',scope),null);
+  const disallowed=JSON.parse(vm.runInContext("JSON.stringify(activityTimeState({id:'auto-moc-national-cached',title:'員林市立圖書館-英文繪本快樂遊'}))",scope));
+  assert.strictEqual(disallowed.eligible,false,'cached childhood event must be hidden without storage mutation');
+  assert.strictEqual(JSON.stringify(db),unchanged);
   assert(source.includes('本輪來源 ${review.latest} · 本機額外保留 ${review.retained}'));
   assert(source.includes('來源健康 ${activityAutoMeta.healthySources'));
   assert(source.includes('項目抓取失敗 ${activityAutoMeta.fetchFailedItems'));
@@ -92,6 +95,17 @@ async function main(){
   assert.strictEqual(nationwide.activity.nationwide.active,7);
   assert(status.host.rendered.includes('全國活動（官方資料）'));
   assert(status.host.rendered.includes('7 筆 · 正常'));
+  Object.assign(payload.activities.meta,{legalAcademicSourcesConfigured:2,
+    legalAcademicSourcesHealthy:2,legalAcademicEvents:3,semanticPolicyRetired:2});
+  const law=await status.window.GoalManagerAutoFetchStatus.refresh();
+  assert.strictEqual(law.activity.legalAcademia.events,3);
+  assert(status.host.rendered.includes('全國法律學術活動'));
+  assert(status.host.rendered.includes('3 筆 · 來源 2/2'));
+  assert(status.host.rendered.includes('低相關活動已封存'));
+  delete payload.activities.meta.legalAcademicSourcesConfigured;
+  delete payload.activities.meta.legalAcademicSourcesHealthy;
+  delete payload.activities.meta.legalAcademicEvents;
+  delete payload.activities.meta.semanticPolicyRetired;
   delete payload.activities.meta.nationwideOfficialConfigured;
   delete payload.activities.meta.nationwideOfficialHealthy;
   delete payload.activities.meta.nationwideOfficialEvents;

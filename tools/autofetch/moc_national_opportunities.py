@@ -41,6 +41,41 @@ CLOSED_RE = re.compile(r'取消辦理|活動取消|已停辦|停止報名|報名
 RESTRICTED_TITLE = re.compile(r'^[【［（(\[]?\s*(?:國小專屬|國中專屬|教師專用|教職員專用|銀髮|樂齡|長者|原住民專屬|身障專屬|新住民專屬)')
 RESTRICTED_DETAILS = re.compile(r'僅限(?:教師|教職員|國小|國中|原住民|身心障礙|新住民|銀髮|本校教職員)|不開放一般民眾|不受理個人報名')
 ADDRESS_ONLINE = re.compile(r'線上|線上參與|直播|遠距|webinar|online', re.I)
+# Strict relevance gate: an English word by itself is NOT evidence of adult
+# language study. Picture-book/storytime activities should never use the same
+# recommendation channel as TOEIC, legal study or academic lectures.
+CHILD_AUDIENCE = re.compile(
+    r'繪本|親子|幼兒|學齡前|小朋友|兒童故事|說故事|故事時間|故事屋|故事媽媽|'
+    r'兒童劇|童玩|寶寶|幼稚園|幼兒園|國小專屬|國中小專屬|英語遊戲日')
+PROFESSIONAL_LANGUAGE = re.compile(
+    r'多益|TOEIC|日檢|JLPT|托福|TOEFL|雅思|IELTS|口譯|翻譯|'
+    r'語言檢定|外語檢定|學術英語|專業英語|商務英文|商務英語|英語辯論|英語演說|'
+    r'英語學習策略|英語簡報|跨文化溝通|英文寫作|日文寫作')
+ADULT_CONTEXT = re.compile(
+    r'大學生|大專|研究生|碩博士|成人|社會人士|職場|專業人士|'
+    r'青年培訓|國際交流|海外交流|工作坊|研習|研討會|專題講座|專業課程')
+BARE_LANGUAGE = re.compile(r'英文|英語|日文|日語|外語|雙語')
+
+
+def topic_relevant(title, description=''):
+    """Prevent generic vocabulary from masquerading as relevant study.
+
+    Language by itself needs academic/professional context; legal and debate
+    titles continue to qualify even if they discuss children's *rights*.
+    """
+    title = clean_text(title,175)
+    description = clean_text(description,1800)
+    if CHILD_AUDIENCE.search(title):
+        return False
+    topics = matching_topics(title)
+    if not topics:
+        return False
+    if topics == ['語言／國際'] and BARE_LANGUAGE.search(title):
+        return bool(PROFESSIONAL_LANGUAGE.search(title) or ADULT_CONTEXT.search(title)
+                    or ADULT_CONTEXT.search(description[:450]))
+    return True
+
+
 CATE_WEIGHT = {'7':0, '19':0, '13':0, '14':0}
 
 
@@ -128,10 +163,10 @@ def event_candidate(row, category, stamp, today=None):
     title=clean_text(row.get('title'),175)
     if not (5<=len(title)<=175) or CLOSED_RE.search(title) or RESTRICTED_TITLE.search(title):
         return None
-    topics=matching_topics(title)
-    if not topics:
-        return None
     description=clean_text(row.get('descriptionFilterHtml'),1800)
+    if not topic_relevant(title, description):
+        return None
+    topics=matching_topics(title)
     if RESTRICTED_DETAILS.search(description[:700]) or CLOSED_RE.search(description[:230]):
         return None
     info=row.get('showInfo')
