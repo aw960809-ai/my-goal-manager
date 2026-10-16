@@ -1,5 +1,5 @@
 'use strict';
-// Combined contract tests: Python adapters + nine-source manifest parity.
+// Combined contract tests: Python adapters + ten-source manifest parity.
 // No network or personal/browser data access is used by this test.
 const assert=require('assert');
 const fs=require('fs');
@@ -12,9 +12,25 @@ const manifest=JSON.parse(fs.readFileSync(path.join(root,'tools/autofetch/source
 const publicRegistry=JSON.parse(fs.readFileSync(path.join(root,'data/activity-sources.json'),'utf8'));
 const ids=['miaoli_government','changhua_government','nantou_culture','yunlin_government'];
 const names=manifest.sources.map(s=>s.id);
-assert.strictEqual(names.length,9,'five existing sources and four new ones');
-assert.strictEqual(new Set(names).size,9,'unique source IDs required');
+assert.strictEqual(names.length,10,'nine prior sources plus one nationwide official source');
+assert.strictEqual(new Set(names).size,10,'unique source IDs required');
 assert.deepStrictEqual(new Set(names),new Set(publicRegistry.sources.map(s=>s.id)),'public registry must match actual source manifest');
+// Expansion must preserve all original sources, not just increase a counter.
+const priorSourceIds=['thu_official','taichung_job','pathfinder_official',
+  'mofa_working_holiday','yda_official','miaoli_government',
+  'changhua_government','nantou_culture','yunlin_government'];
+assert.deepStrictEqual(new Set(names),new Set([...priorSourceIds,'moc_national']),
+  'must retain all nine earlier sources and add exactly one nationwide source');
+const nation=manifest.sources.find(s=>s.id==='moc_national');
+const nationPublic=publicRegistry.sources.find(s=>s.id==='moc_national');
+assert(nation&&nationPublic&&nation.enabled&&nationPublic.enabled,
+  'national source must be enabled in both official registries');
+assert.strictEqual(nation.scope,'national');
+assert.strictEqual(nationPublic.scope,'nationwide');
+assert.deepStrictEqual(nation.domain_allowlist,['cloud.culture.tw']);
+assert(nation.start_urls.length===4&&nation.start_urls.every(u=>u.startsWith('https://cloud.culture.tw/')),
+  'nationwide inputs must use four verified HTTPS official endpoints');
+assert.deepStrictEqual(nation.start_urls,nationPublic.startUrls);
 for(const id of ids){
  const a=manifest.sources.find(s=>s.id===id);
  const b=publicRegistry.sources.find(s=>s.id===id);
@@ -35,4 +51,4 @@ assert(pythonSource.includes('network_errors==0 and structural_errors==0'), 'sou
 const test=spawnSync('python3',['tests/autofetch/test_central_official.py'],{cwd:root,encoding:'utf8',timeout:30000});
 assert.strictEqual(test.status,0,`${test.stdout}\n${test.stderr}`);
 assert(test.stderr.includes('Ran 10 tests'));
-console.log('OK: four independent county-government adapters, nine-source registry, fail-closed and offline regression');
+console.log('OK: four county adapters, original nine sources preserved + one nationwide source, fail-closed offline QA');

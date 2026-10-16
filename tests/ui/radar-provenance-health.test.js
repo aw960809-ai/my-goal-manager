@@ -82,6 +82,22 @@ async function main(){
   assert.strictEqual(partial.activity.sources.healthy,5);
   assert.strictEqual(partial.activity.sources.failed,2);
   assert(status.host.rendered.includes('成功 5/7 · 失敗 2'));
+  // Nationwide source is visible without pretending failed county sources recovered.
+  Object.assign(payload.activities.meta,{totalSources:8,healthySources:6,failedSources:2,
+    nationwideOfficialConfigured:true,nationwideOfficialHealthy:true,
+    nationwideOfficialEvents:7,nationwideOfficialEligible:4});
+  const nationwide=await status.window.GoalManagerAutoFetchStatus.refresh();
+  assert.strictEqual(nationwide.activity.sources.total,8);
+  assert.strictEqual(nationwide.activity.sources.failed,2);
+  assert.strictEqual(nationwide.activity.nationwide.active,7);
+  assert(status.host.rendered.includes('全國活動（官方資料）'));
+  assert(status.host.rendered.includes('7 筆 · 正常'));
+  delete payload.activities.meta.nationwideOfficialConfigured;
+  delete payload.activities.meta.nationwideOfficialHealthy;
+  delete payload.activities.meta.nationwideOfficialEvents;
+  delete payload.activities.meta.nationwideOfficialEligible;
+  payload.activities.meta.totalSources=7;
+  payload.activities.meta.healthySources=5;
   assert(status.host.rendered.includes('南投縣政府文化局藝文活動'));
   assert(status.host.rendered.includes('抓取失敗次數（含來源）'));
   delete payload.activities.meta.sources;
