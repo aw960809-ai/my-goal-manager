@@ -108,7 +108,7 @@
       "domain_allowlist": [
         "www.chcg.gov.tw"
       ],
-      "enabled": true,
+      "enabled": false,
       "start_urls": [
         "https://www.chcg.gov.tw/ch2/actives.aspx"
       ],
@@ -124,7 +124,7 @@
       "domain_allowlist": [
         "www.nthcc.gov.tw"
       ],
-      "enabled": true,
+      "enabled": false,
       "start_urls": [
         "https://www.nthcc.gov.tw/A4_1/list2"
       ],
@@ -175,7 +175,7 @@
       "domain_allowlist": [
         "www.law.ntu.edu.tw"
       ],
-      "enabled": true,
+      "enabled": false,
       "start_urls": [
         "https://www.law.ntu.edu.tw/"
       ],
@@ -191,7 +191,7 @@
       "domain_allowlist": [
         "law.nccu.edu.tw"
       ],
-      "enabled": true,
+      "enabled": false,
       "start_urls": [
         "https://law.nccu.edu.tw/zh_tw/news/events"
       ],

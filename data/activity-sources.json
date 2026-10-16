@@ -196,7 +196,7 @@
     {
       "id": "changhua_government",
       "name": "彰化縣政府活動快訊",
-      "enabled": true,
+      "enabled": false,
       "adapter": "changhua_government",
       "scope": "regional",
       "categories": [
@@ -228,7 +228,7 @@
     {
       "id": "nantou_culture",
       "name": "南投縣政府文化局藝文活動",
-      "enabled": true,
+      "enabled": false,
       "adapter": "nantou_culture",
       "scope": "regional",
       "categories": [
@@ -325,7 +325,7 @@
     {
       "id": "ntu_law",
       "name": "國立臺灣大學法律學院學術活動",
-      "enabled": true,
+      "enabled": false,
       "adapter": "ntu_law",
       "scope": "nationwide",
       "categories": [
@@ -353,7 +353,7 @@
     {
       "id": "nccu_law",
       "name": "國立政治大學法學院學術活動",
-      "enabled": true,
+      "enabled": false,
       "adapter": "nccu_law",
       "scope": "nationwide",
       "categories": [

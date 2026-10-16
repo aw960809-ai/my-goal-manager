@@ -34,7 +34,7 @@ assert.deepStrictEqual(nation.start_urls,nationPublic.startUrls);
 for(const [id,domain] of [['ntu_law','www.law.ntu.edu.tw'],['nccu_law','law.nccu.edu.tw']]){
   const manifestRow=manifest.sources.find(x=>x.id===id);
   const publicRow=publicRegistry.sources.find(x=>x.id===id);
-  assert(manifestRow&&publicRow&&manifestRow.enabled&&publicRow.enabled,`enabled ${id}`);
+  assert(manifestRow&&publicRow&&!manifestRow.enabled&&!publicRow.enabled,`disabled ${id} by preference`);
   assert(manifestRow.scope==='national'&&publicRow.scope==='nationwide');
   assert.deepStrictEqual(manifestRow.domain_allowlist,[domain]);
   assert.deepStrictEqual(manifestRow.start_urls,publicRow.startUrls);
@@ -44,7 +44,7 @@ for(const id of ids){
  const a=manifest.sources.find(s=>s.id===id);
  const b=publicRegistry.sources.find(s=>s.id===id);
  assert(a&&b&&a.enabled===b.enabled,`manifest parity ${id}`);
- const enabled=['changhua_government','nantou_culture'].includes(id);
+ const enabled=false; // regional scrapers disabled by user preference
  assert.strictEqual(a.enabled,enabled,`source enabled only after live health test ${id}`);
  assert(a.scope==='regional'&&b.scope==='regional',`Circle 3 ${id}`);
  assert(a.start_urls.length===1&&a.start_urls[0].startsWith('https://'),`https ${id}`);
