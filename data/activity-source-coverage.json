@@ -1,6 +1,6 @@
 {
   "schemaVersion": "7B.2-coverage-1",
-  "generatedAt": "2026-10-16T11:06:49.523685+00:00",
+  "generatedAt": "2026-10-16T14:11:09.318713+00:00",
   "policy": {
     "localCoverageMustMatchUserProfile": true,
     "uncoveredLocalScopeFailClosed": true,
@@ -46,7 +46,9 @@
     ],
     "nationwide": [
       "yda_official",
-      "moc_national"
+      "moc_national",
+      "youthfirst_national",
+      "yda_national_news"
     ]
   },
   "sources": [
@@ -264,6 +266,42 @@
         "legal_academic",
         "lecture",
         "academic_conference"
+      ],
+      "profileMatch": {
+        "country": "TW",
+        "cities": [],
+        "schoolNames": []
+      }
+    },
+    {
+      "id": "youthfirst_national",
+      "name": "教育部青年第一讚｜全國競賽及徵件",
+      "enabled": true,
+      "scope": "nationwide",
+      "categories": [
+        "competition",
+        "youth_program",
+        "online_activity",
+        "legal_academic",
+        "international"
+      ],
+      "profileMatch": {
+        "country": "TW",
+        "cities": [],
+        "schoolNames": []
+      }
+    },
+    {
+      "id": "yda_national_news",
+      "name": "教育部青年發展署｜全國徵件及線上機會",
+      "enabled": true,
+      "scope": "nationwide",
+      "categories": [
+        "competition",
+        "youth_program",
+        "online_activity",
+        "legal_academic",
+        "international"
       ],
       "profileMatch": {
         "country": "TW",
