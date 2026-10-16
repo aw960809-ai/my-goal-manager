@@ -72,6 +72,22 @@ async function main(){
   assert(status.host.rendered.includes('部分項目抓取失敗'));
   assert(status.host.rendered.includes('個別項目抓取失敗'));
   assert(status.host.rendered.includes('5/5'));
+  // Production regression, 2026-10-15: legacy sources=5 is healthy, NOT total=7.
+  Object.assign(payload.activities.meta,{
+    sources:5,totalSources:7,healthySources:5,failedSources:2,fetchFailedItems:2,
+    sourceFailures:[{sourceId:'nantou_culture',name:'南投縣政府文化局藝文活動',error:'www.nthcc.gov.tw: curl 28 timeout'}]
+  });
+  const partial=await status.window.GoalManagerAutoFetchStatus.refresh();
+  assert.strictEqual(partial.activity.sources.total,7);
+  assert.strictEqual(partial.activity.sources.healthy,5);
+  assert.strictEqual(partial.activity.sources.failed,2);
+  assert(status.host.rendered.includes('成功 5/7 · 失敗 2'));
+  assert(status.host.rendered.includes('南投縣政府文化局藝文活動'));
+  assert(status.host.rendered.includes('抓取失敗次數（含來源）'));
+  delete payload.activities.meta.sources;
+  delete payload.activities.meta.sourceFailures;
+  payload.activities.meta.totalSources=5;
+  payload.activities.meta.failedSources=0;
   payload.activities.meta.fetchFailedItems=0;
   payload.activities.meta.failed=0;
   const clean=await health.window.GoalManagerAutoFetchHealth.refresh();
