@@ -1,6 +1,6 @@
 {
   "schemaVersion": "7B.2-coverage-1",
-  "generatedAt": "2026-10-15T07:45:45.171148+00:00",
+  "generatedAt": "2026-10-16T03:53:24.789819+00:00",
   "policy": {
     "localCoverageMustMatchUserProfile": true,
     "uncoveredLocalScopeFailClosed": true,
@@ -63,7 +63,8 @@
       "mofa_working_holiday"
     ],
     "nationwide": [
-      "yda_official"
+      "yda_official",
+      "moc_national"
     ],
     "regional": [
       "changhua_government",
@@ -239,6 +240,24 @@
         "cities": [
           "雲林縣"
         ],
+        "schoolNames": []
+      }
+    },
+    {
+      "id": "moc_national",
+      "name": "文化部 iCulture 全國講座／競賽／徵件",
+      "enabled": true,
+      "scope": "nationwide",
+      "categories": [
+        "legal_academic",
+        "lecture",
+        "competition",
+        "training",
+        "public_activity"
+      ],
+      "profileMatch": {
+        "country": "TW",
+        "cities": [],
         "schoolNames": []
       }
     }

@@ -2,18 +2,96 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-10-15T07:45:45.126288+00:00",
-    "count": 38,
-    "retiredThisRun": 2,
+    "updatedAt": "2026-10-16T03:53:24.743328+00:00",
+    "count": 39,
+    "retiredThisRun": 1,
     "revivedThisRun": 0,
-    "retiredTotal": 38,
+    "retiredTotal": 39,
     "revivedTotal": 0,
     "retainedOnFailure": 0,
     "carriedMissing": 18,
-    "needsReview": 17,
+    "needsReview": 16,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
+    {
+      "id": "auto-thu-2026100015",
+      "title": "【行政講堂】10/15(四)，新南向教育政策—印度概述，陳立穎 (教育部國際及兩岸教育司 副司長)",
+      "date": "2026-10-15",
+      "time": "",
+      "scope": "東海校內",
+      "type": "語言／國際",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026100015",
+      "keywords": "【行政講堂】10/15(四)，新南向教育政策—印度概述，陳立穎 (教育部國際及兩岸教育司 副司長) 東海大學 行政管理暨政策學系 學術活動 教職員，費用：0；學生，費用：0 學術／講座 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 行政管理暨政策學系；活動日 2026-10-15；截止 2026-10-15",
+      "government": false,
+      "deadline": "2026-10-15",
+      "eventEndDate": "2026-10-15",
+      "location": "",
+      "organizer": "行政管理暨政策學系",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026100015",
+        "fetchedAt": "2026-10-12T07:26:34.648941+00:00"
+      },
+      "fitScore": 52,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "語言／國際／海外+40",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "語言／國際／海外"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-10-08T05:49:56.532833+00:00",
+      "lastSeen": "2026-10-12T07:28:06.885824+00:00",
+      "missCount": 3,
+      "needsReview": true,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-16T03:53:24.742587+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-10-12T07:28:06.885824+00:00"
+    },
     {
       "id": "auto-thu-2026100003",
       "title": "2027年國科會補助大專生專題研究計畫申請說明會",
