@@ -1,6 +1,6 @@
 {
   "schemaVersion": "7B.2-coverage-1",
-  "generatedAt": "2026-10-17T04:33:34.505269+00:00",
+  "generatedAt": "2026-10-17T05:00:04.606433+00:00",
   "policy": {
     "localCoverageMustMatchUserProfile": true,
     "uncoveredLocalScopeFailClosed": true,
@@ -48,7 +48,8 @@
       "yda_official",
       "moc_national",
       "youthfirst_national",
-      "yda_national_news"
+      "yda_national_news",
+      "ncut_competitions_official"
     ]
   },
   "sources": [
@@ -302,6 +303,23 @@
         "online_activity",
         "legal_academic",
         "international"
+      ],
+      "profileMatch": {
+        "country": "TW",
+        "cities": [],
+        "schoolNames": []
+      }
+    },
+    {
+      "id": "ncut_competitions_official",
+      "name": "國立勤益科技大學｜全國競賽公告",
+      "enabled": true,
+      "scope": "nationwide",
+      "categories": [
+        "competition",
+        "legal_academic",
+        "international",
+        "career_internship"
       ],
       "profileMatch": {
         "country": "TW",
