@@ -46,7 +46,7 @@ class Tests(unittest.TestCase):
         self.assertEqual(e['date'],'2026-11-25')
         self.assertEqual(e['dateKind'],'application_deadline')
         self.assertEqual(e['deadline'],'2026-11-25')
-        self.assertEqual(e['location'],'線上投稿／全國參與')
+        self.assertEqual(e['location'],'線上初賽／投稿')
         self.assertTrue(e['id'].startswith('auto-youthfirst-'))
         self.assertIn('非活動舉辦日期',e['statusText'])
     def test_yda_news_candidate(self):
@@ -59,7 +59,7 @@ class Tests(unittest.TestCase):
         for title in ['兒童英文繪本快樂遊','國際友好音樂祭','跨文化美食料理講座','台北金融知識平台','2026臺大人工智慧法學研討會入選名單']:
             with self.subTest(title=title):
                 self.assertFalse(y.topic_ok(title))
-    def test_past_and_undated_rejected(self):
+    def test_past_deadlines_rejected_and_detail_deadlines_allowed(self):
         title='全國青年公共政策提案競賽'
         for day in ('2026.10.15','2026.09.13'):
             html,detail=self.yf(title=title,end=day)
@@ -68,7 +68,13 @@ class Tests(unittest.TestCase):
         html,detail=self.yf()
         cards,_=y.listing(html,y.SOURCES['youthfirst_national'])
         cards[0]['deadline']=''
-        self.assertIsNone(y.candidate(cards[0],detail,'youthfirst_national','s',today=TODAY))
+        result=y.candidate(cards[0],detail,'youthfirst_national','s',today=TODAY)
+        self.assertIsNotNone(result,'details can verify a deadline absent from listing')
+        self.assertEqual(result['deadline'],'2026-11-25')
+        missing=detail.decode().replace('2026.11.25','依官網通知')
+        reasons=[]
+        self.assertIsNone(y.candidate(cards[0],missing.encode(),'youthfirst_national','s',today=TODAY,reasons=reasons))
+        self.assertEqual(reasons,['deadline_not_verified'])
     def test_onsite_camp_not_online_due_to_signup(self):
         title='116年YOUNG飛全球行動計畫培訓營開始報名'
         html,detail=self.yn(title=title,desc='需先線上報名，並完成線上課程學習，北區於臺北飯店實體辦理。')
@@ -78,10 +84,76 @@ class Tests(unittest.TestCase):
         html,detail=self.yn(title='青年帶路公共政策創意提案線上徵件',desc='須於投稿截止日前實際參與青年壯遊點，採線上投稿。')
         cards,_=y.listing(html,y.SOURCES['yda_national_news'])
         self.assertIsNone(y.candidate(cards[0],detail,'yda_national_news','s',today=TODAY))
-    def test_inperson_final_disqualifies(self):
+    def test_online_submission_with_onsite_final_recommended_with_warning(self):
         html,detail=self.yf(desc='採線上投稿，初賽通過後決賽須到場。')
         cards,_=y.listing(html,y.SOURCES['youthfirst_national'])
-        self.assertIsNone(y.candidate(cards[0],detail,'youthfirst_national','s',today=TODAY))
+        item=y.candidate(cards[0],detail,'youthfirst_national','s',today=TODAY)
+        self.assertIsNotNone(item)
+        self.assertTrue(item['finalAttendanceRequired'])
+        self.assertEqual(item['participationMode'],'online_submission_onsite_final')
+        self.assertEqual(item['finalLocation'],'')
+        self.assertIn('決賽需到場',item['location'])
+        self.assertIn('地點依官方公告',item['statusText'])
+
+    def test_final_city_only_from_explicit_final_clause(self):
+        html,detail=self.yf(desc='臺中市主辦，全國採線上投稿；初賽通過後決賽在臺北市實體舉辦。')
+        cards,_=y.listing(html,y.SOURCES['youthfirst_national'])
+        item=y.candidate(cards[0],detail,'youthfirst_national','s',today=TODAY)
+        self.assertIsNotNone(item)
+        self.assertEqual(item['finalLocation'],'臺北市')
+        self.assertIn('臺北市',item['location'])
+
+    def test_final_at_city_then_in_person_after_comma(self):
+        html,detail=self.yf(desc='採線上投稿並上傳計畫書，決賽在臺北市，需現場發表。')
+        cards,_=y.listing(html,y.SOURCES['youthfirst_national'])
+        item=y.candidate(cards[0],detail,'youthfirst_national','s',today=TODAY)
+        self.assertIsNotNone(item)
+        self.assertTrue(item['finalAttendanceRequired'])
+        self.assertEqual(item['finalLocation'],'臺北市')
+
+    def test_online_registration_is_not_online_preliminary(self):
+        html,detail=self.yf(desc='線上報名，於臺北市現場繳交紙本作品，初賽須到場。')
+        cards,_=y.listing(html,y.SOURCES['youthfirst_national'])
+        reasons=[]
+        self.assertIsNone(y.candidate(cards[0],detail,'youthfirst_national','s',today=TODAY,reasons=reasons))
+        self.assertIn(reasons[0],('mandatory_in_person_stage','remote_submission_not_verified'))
+
+    def test_initial_stage_inperson_with_online_submission_not_allowed(self):
+        html,detail=self.yf(desc='採線上投稿並上傳計畫書；初賽須現場出席，決賽須到場。')
+        cards,_=y.listing(html,y.SOURCES['youthfirst_national'])
+        reasons=[]
+        self.assertIsNone(y.candidate(cards[0],detail,'youthfirst_national','s',today=TODAY,reasons=reasons))
+        self.assertEqual(reasons,['mandatory_in_person_stage'])
+
+    def test_national_distant_inperson_lecture_not_recommended(self):
+        html,detail=self.yn(title='全國青年公共政策研習講座',desc='只需網路報名，於臺北市實體出席研習。')
+        cards,_=y.listing(html,y.SOURCES['yda_national_news'])
+        reasons=[]
+        self.assertIsNone(y.candidate(cards[0],detail,'yda_national_news','s',today=TODAY,reasons=reasons))
+        self.assertEqual(reasons,['online_event_not_verified'])
+
+    def test_youthfirst_source_verified_from_detail_when_listing_undated(self):
+        h,d=self.yf()
+        h=h.decode().replace('申請期限： 2026.10.01 - 2026.11.25','申請詳情請閱官網')
+        src='youthfirst_national'
+        def mock(url,allowlist):
+            return url, d if '/subject/content/' in url else h.encode()
+        result=y.run_source(src,fetch_fn=mock,stamp='s',today=TODAY,logger=lambda _:None)
+        self.assertTrue(result['healthy'],result)
+        self.assertEqual(len(result['accepted']),1)
+        self.assertEqual(result['accepted'][0]['deadline'],'2026-11-25')
+        self.assertEqual(result['reviewReasons'].get('deadline_not_verified',0),0)
+
+    def test_exclusion_reason_diagnostics_without_fake_acceptance(self):
+        h,d=self.yf(title='全國青年公共政策提案競賽',desc='線上報名，現場繳交文件。')
+        src='youthfirst_national'
+        def mock(url,allowlist):
+            return url, d if '/subject/content/' in url else h
+        result=y.run_source(src,fetch_fn=mock,stamp='s',today=TODAY,logger=lambda _:None)
+        self.assertTrue(result['healthy'])
+        self.assertEqual(len(result['accepted']),0)
+        self.assertEqual(result['reviewReasons']['remote_submission_not_verified'],1)
+        self.assertTrue(result['reviewSamples']['remote_submission_not_verified'][0]['url'].startswith('https://'))
     def test_restrict_qualifications(self):
         html,detail=self.yf(desc='採線上投稿，僅限本校教師參與。')
         cards,_=y.listing(html,y.SOURCES['youthfirst_national'])

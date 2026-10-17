@@ -154,7 +154,9 @@
           healthy:pickNumber(m,["nationalExpansionHealthy"],0),
           fresh:pickNumber(m,["nationalExpansionFreshEligible"],0),
           active:pickNumber(m,["nationalExpansionActive"],0),
-          discovered:pickNumber(m,["nationalExpansionDiscovered"],0)}:null,
+          discovered:pickNumber(m,["nationalExpansionDiscovered"],0),
+          onsiteFinal:pickNumber(m,["nationalExpansionOnsiteFinal"],0),
+          reviewReasons:m.nationalExpansionReviewReasons||{}}:null,
       nationwide:kind==="activity"&&m.nationwideOfficialConfigured===true
         ?{healthy:m.nationwideOfficialHealthy===true,active:pickNumber(m,["nationwideOfficialEvents"],0),
           eligible:pickNumber(m,["nationwideOfficialEligible"],0),
@@ -255,7 +257,20 @@
       item.legalAcademia?metric("全國法律學術活動",`${item.legalAcademia.events} 筆 · 來源 ${item.legalAcademia.healthy}/${item.legalAcademia.total}`):"",
       item.semanticRetired>0?metric("低相關活動已封存",item.semanticRetired):"",
       item.nationalExpansion?metric("全國新來源（線上徵件／競賽）",
-        `本輪 ${item.nationalExpansion.fresh} 筆 · 來源 ${item.nationalExpansion.healthy}/${item.nationalExpansion.total}`):""
+        `本輪 ${item.nationalExpansion.fresh} 筆 · 來源 ${item.nationalExpansion.healthy}/${item.nationalExpansion.total}`):"",
+      item.nationalExpansion?.onsiteFinal>0
+        ?metric("線上初賽／實體決賽",`${item.nationalExpansion.onsiteFinal} 筆 · 須確認決賽地點`):"",
+      item.nationalExpansion?.fresh===0&&item.nationalExpansion?.reviewReasons
+        ?metric("全國未收錄主因",Object.entries(item.nationalExpansion.reviewReasons)
+          .filter(([,n])=>Number(n)>0)
+          .sort((a,b)=>Number(b[1])-Number(a[1])).slice(0,3)
+          .map(([key,n])=>`${({topic_mismatch:"主題無關",listing_deadline_closed:"已截止",
+            deadline_not_verified:"截止日未確認",deadline_closed_or_too_far:"期限不符",
+            remote_submission_not_verified:"無線上交件證據",online_event_not_verified:"無遠距參加證據",
+            eligibility_restricted:"資格限制",mandatory_prerequisite:"有前置條件",
+            mandatory_in_person_stage:"初賽須實體到場",detail_fetch_or_structure_failure:"詳情無法核驗",
+            detail_verification_budget_exceeded:"超出核驗額度"})[key]||"其他"} ${n}`)
+          .join("、")||"尚無可收錄活動"):""
     ].filter(Boolean).join("");
 
     return `<div class="gm-af-card ${st.cls}">
