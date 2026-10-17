@@ -77,6 +77,9 @@ def activity_preference_state(row):
         rid.startswith(('auto-central-ch-','auto-central-nt-',
                         'auto-law-ntu-','auto-law-nccu-'))):
         return ('user_preference_source','使用者停用彰化／南投來源與臺政實體法學講座推薦')
+    final_place=str(row.get('finalLocation') or '').replace('臺','台')
+    if row.get('finalAttendanceRequired') is True and re.search(r'彰化|南投',final_place):
+        return ('user_preference_final_region','使用者不推薦彰化／南投的實體決賽')
     place=str(row.get('location') or '').replace('臺','台')
     if (re.search(r'彰化[縣市]|南投[縣市]',place)
         and not re.search(r'線上|遠距|直播|webinar|online',place,re.I)):

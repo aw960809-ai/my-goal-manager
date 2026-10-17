@@ -101,6 +101,8 @@ function activityPreferenceExclusion(a){
      /^(?:auto-central-ch-|auto-central-nt-|auto-law-ntu-|auto-law-nccu-)/.test(id)){
     return '已停用彰化、南投來源與臺政實體講座推薦';
   }
+  const finalPlace=String(a?.finalLocation||'').replace(/臺/g,'台');
+  if(a?.finalAttendanceRequired===true&&/彰化|南投/.test(finalPlace))return '決賽地點為不參加的地區';
   const location=String(a?.location||'').replace(/臺/g,'台');
   if(/彰化[縣市]|南投[縣市]/.test(location)&&
      !/線上|遠距|直播|webinar|online/i.test(location)){

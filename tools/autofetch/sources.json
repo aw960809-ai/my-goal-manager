@@ -234,6 +234,22 @@
       "fetch_type": "html",
       "trust_level": "official",
       "notes": "官方列表及詳情雙重核對；期限與線上參與有證據才推薦；單來源失敗不覆蓋舊資料。"
+    },
+    {
+      "id": "ncut_competitions_official",
+      "name": "國立勤益科技大學｜全國競賽公告",
+      "scope": "national",
+      "priority": 3,
+      "domain_allowlist": [
+        "n058.ncut.edu.tw"
+      ],
+      "enabled": true,
+      "start_urls": [
+        "https://n058.ncut.edu.tw/p/403-1058-292-1.php?Lang=zh-tw"
+      ],
+      "fetch_type": "html",
+      "trust_level": "official",
+      "notes": "可信校方競賽轉知；同網域詳情確認截止日期、對象及遠端作品繳交。"
     }
   ]
 }
