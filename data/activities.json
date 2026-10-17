@@ -1,45 +1,105 @@
 {
   "meta": {
-    "updatedAt": "2026-10-16T14:11:09.270516+00:00",
-    "sources": 8,
-    "events": 37,
-    "ok": 14,
-    "failed": 0,
-    "errors": [],
+    "updatedAt": "2026-10-17T03:34:34.790272+00:00",
+    "sources": 4,
+    "events": 34,
+    "ok": 13,
+    "failed": 16,
+    "errors": [
+      "www.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (28) Resolving timed out after 8001 milliseconds",
+      "twpathfinder.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (28) Resolving timed out after 8001 milliseconds",
+      "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8000 milliseconds\ncurl: (28) Resolving timed out after 8000 milliseconds",
+      "youthfirst.yda.gov.tw: curl: (6) Could not resolve host: youthfirst.yda.gov.tw\ncurl: (28) Resolving timed out after 8000 milliseconds",
+      "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8000 milliseconds\ncurl: (6) Could not resolve host: youthfirst.yda.gov.tw",
+      "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (28) Resolving timed out after 8002 milliseconds",
+      "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8002 milliseconds\ncurl: (28) Resolving timed out after 8002 milliseconds",
+      "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8002 milliseconds\ncurl: (6) Could not resolve host: youthfirst.yda.gov.tw",
+      "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (6) Could not resolve host: youthfirst.yda.gov.tw",
+      "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8002 milliseconds\ncurl: (6) Could not resolve host: youthfirst.yda.gov.tw",
+      "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (28) Resolving timed out after 8000 milliseconds",
+      "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8000 milliseconds\ncurl: (28) Resolving timed out after 8001 milliseconds",
+      "www.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (28) Resolving timed out after 8000 milliseconds",
+      "www.yda.gov.tw: curl: (28) Resolving timed out after 8000 milliseconds\ncurl: (6) Could not resolve host: www.yda.gov.tw",
+      "www.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (28) Resolving timed out after 8000 milliseconds",
+      "www.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (6) Could not resolve host: www.yda.gov.tw"
+    ],
     "generator": "V96.6.11.1.1 Multi-Source AutoFetch + Activity Radar",
     "sourcePolicy": "政府資訊為主；東海官方活動為活動核心；獎學金獨立資料集合與獨立判斷",
     "scholarships": 7,
     "totalSources": 8,
-    "healthySources": 8,
-    "failedSources": 0,
+    "healthySources": 4,
+    "failedSources": 4,
     "rejectedItems": 0,
-    "fetchFailedItems": 0,
-    "skippedPast": 98,
+    "fetchFailedItems": 16,
+    "skippedPast": 83,
     "fitFiltered": 24,
     "semanticDuplicates": 0,
-    "retiredThisRun": 0,
+    "retiredThisRun": 3,
     "revivedThisRun": 0,
-    "archiveCount": 45,
+    "archiveCount": 48,
     "retainedOnFailure": 0,
-    "carriedMissing": 17,
-    "needsReview": 17,
+    "carriedMissing": 15,
+    "needsReview": 15,
     "lifecyclePolicy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive",
     "nationwideOfficialConfigured": true,
     "nationwideOfficialHealthy": true,
     "nationwideOfficialEvents": 0,
     "nationwideOfficialEligible": 0,
-    "nationwideOfficialDiscovered": 146,
-    "sourceFailures": [],
+    "nationwideOfficialDiscovered": 145,
+    "sourceFailures": [
+      {
+        "sourceId": "yda_official",
+        "name": "教育部青年發展署",
+        "url": "https://www.yda.gov.tw/EventList.aspx?pid=56&uid=101",
+        "error": "www.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (28) Resolving timed out after 8001 milliseconds"
+      },
+      {
+        "sourceId": "pathfinder_official",
+        "name": "青年百億海外圓夢基金計畫",
+        "url": "https://twpathfinder.yda.gov.tw/downloads",
+        "error": "twpathfinder.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (28) Resolving timed out after 8001 milliseconds"
+      },
+      {
+        "sourceId": "youthfirst_national",
+        "name": "教育部青年第一讚｜全國競賽及徵件",
+        "url": "https://youthfirst.yda.gov.tw/index.php/subject/index?project_type%5B%5D=%E7%AB%B6%E8%B3%BD",
+        "error": "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8000 milliseconds\ncurl: (28) Resolving timed out after 8000 milliseconds"
+      },
+      {
+        "sourceId": "yda_national_news",
+        "name": "教育部青年發展署｜全國徵件及線上機會",
+        "url": "https://www.yda.gov.tw/",
+        "error": "www.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (28) Resolving timed out after 8000 milliseconds"
+      }
+    ],
     "legalAcademicSourcesConfigured": 0,
     "legalAcademicSourcesHealthy": 0,
     "legalAcademicEvents": 0,
     "semanticPolicyRetired": 0,
     "preferenceExcludedThisRun": 0,
     "nationalExpansionSources": 2,
-    "nationalExpansionHealthy": 2,
-    "nationalExpansionDiscovered": 131,
+    "nationalExpansionHealthy": 0,
+    "nationalExpansionDiscovered": 0,
     "nationalExpansionFreshEligible": 0,
-    "nationalExpansionActive": 0
+    "nationalExpansionActive": 0,
+    "nationalExpansionOnsiteFinal": 0,
+    "nationalExpansionReviewReasons": {},
+    "nationalExpansionReviewBySource": {
+      "youthfirst_national": {
+        "discovered": 0,
+        "detailVerified": 0,
+        "accepted": 0,
+        "reasons": {},
+        "samples": {}
+      },
+      "yda_national_news": {
+        "discovered": 0,
+        "detailVerified": 0,
+        "accepted": 0,
+        "reasons": {},
+        "samples": {}
+      }
+    }
   },
   "events": [
     {
@@ -172,7 +232,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026100035",
-        "fetchedAt": "2026-10-16T14:09:16.978918+00:00"
+        "fetchedAt": "2026-10-17T03:29:10.160892+00:00"
       },
       "fitScore": 45,
       "fitTier": "探索",
@@ -194,7 +254,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-16T11:06:49.492009+00:00",
-      "lastSeen": "2026-10-16T14:11:09.269541+00:00",
+      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -248,7 +308,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026060032",
-        "fetchedAt": "2026-10-16T14:09:18.061754+00:00"
+        "fetchedAt": "2026-10-17T03:29:11.104733+00:00"
       },
       "fitScore": 51,
       "fitTier": "探索",
@@ -270,7 +330,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-16T06:07:49.530864+00:00",
-      "lastSeen": "2026-10-16T14:11:09.269541+00:00",
+      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -324,7 +384,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090060",
-        "fetchedAt": "2026-10-16T14:09:23.363113+00:00"
+        "fetchedAt": "2026-10-17T03:29:16.245657+00:00"
       },
       "fitScore": 39,
       "fitTier": "探索",
@@ -345,7 +405,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-23T06:04:32.174585+00:00",
-      "lastSeen": "2026-10-16T14:11:09.269541+00:00",
+      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -399,7 +459,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026100043",
-        "fetchedAt": "2026-10-16T14:09:24.745093+00:00"
+        "fetchedAt": "2026-10-17T03:29:17.479761+00:00"
       },
       "fitScore": 47,
       "fitTier": "探索",
@@ -422,7 +482,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-16T03:53:24.742587+00:00",
-      "lastSeen": "2026-10-16T14:11:09.269541+00:00",
+      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -476,7 +536,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090065",
-        "fetchedAt": "2026-10-16T14:09:31.914993+00:00"
+        "fetchedAt": "2026-10-17T03:29:23.948050+00:00"
       },
       "fitScore": 67,
       "fitTier": "中適配",
@@ -500,7 +560,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-21T06:32:35.703147+00:00",
-      "lastSeen": "2026-10-16T14:11:09.269541+00:00",
+      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -554,7 +614,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026100040",
-        "fetchedAt": "2026-10-16T14:09:32.871821+00:00"
+        "fetchedAt": "2026-10-17T03:29:24.910695+00:00"
       },
       "fitScore": 45,
       "fitTier": "探索",
@@ -576,7 +636,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-14T06:14:10.797433+00:00",
-      "lastSeen": "2026-10-16T14:11:09.269541+00:00",
+      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -630,7 +690,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026100037",
-        "fetchedAt": "2026-10-16T14:09:33.807366+00:00"
+        "fetchedAt": "2026-10-17T03:29:25.720373+00:00"
       },
       "fitScore": 71,
       "fitTier": "中適配",
@@ -651,7 +711,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-14T06:14:10.797433+00:00",
-      "lastSeen": "2026-10-16T14:11:09.269541+00:00",
+      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -705,7 +765,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026100036",
-        "fetchedAt": "2026-10-16T14:09:37.566935+00:00"
+        "fetchedAt": "2026-10-17T03:29:28.588215+00:00"
       },
       "fitScore": 66,
       "fitTier": "中適配",
@@ -726,7 +786,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-14T06:14:10.797433+00:00",
-      "lastSeen": "2026-10-16T14:11:09.269541+00:00",
+      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -780,7 +840,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026100013",
-        "fetchedAt": "2026-10-16T14:09:38.520492+00:00"
+        "fetchedAt": "2026-10-17T03:29:29.553359+00:00"
       },
       "fitScore": 39,
       "fitTier": "探索",
@@ -801,7 +861,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-14T06:14:10.797433+00:00",
-      "lastSeen": "2026-10-16T14:11:09.269541+00:00",
+      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -855,7 +915,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090080",
-        "fetchedAt": "2026-10-16T14:09:40.483863+00:00"
+        "fetchedAt": "2026-10-17T03:29:31.417032+00:00"
       },
       "fitScore": 40,
       "fitTier": "探索",
@@ -875,7 +935,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-24T06:19:41.019607+00:00",
-      "lastSeen": "2026-10-16T14:11:09.269541+00:00",
+      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -929,7 +989,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090062",
-        "fetchedAt": "2026-10-16T14:09:41.458577+00:00"
+        "fetchedAt": "2026-10-17T03:29:32.292900+00:00"
       },
       "fitScore": 65,
       "fitTier": "中適配",
@@ -952,7 +1012,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-21T06:32:35.703147+00:00",
-      "lastSeen": "2026-10-16T14:11:09.269541+00:00",
+      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -1006,7 +1066,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "taichung_job",
         "act": "5634",
-        "fetchedAt": "2026-10-16T14:09:46.500915+00:00"
+        "fetchedAt": "2026-10-17T03:29:38.877458+00:00"
       },
       "fitScore": 44,
       "fitTier": "探索",
@@ -1028,78 +1088,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-22T06:20:42.670284+00:00",
-      "lastSeen": "2026-10-16T14:11:09.269541+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "taichung_job",
-      "sourceCategories": [
-        "career_internship",
-        "lecture"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 2,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": []
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "category": "career_internship"
-    },
-    {
-      "id": "auto-tcjob-5633",
-      "title": "◎ 走進麥當勞 × 餐飲服務業職場體驗 ◎",
-      "date": "2026-10-19",
-      "time": "09:30",
-      "scope": "台中",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://1catchjob.taichung.gov.tw/detail.aspx?act=5633",
-      "keywords": "◎ 走進麥當勞 × 餐飲服務業職場體驗 ◎ 台中 臺中市 青年 職涯 職涯／實習",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "臺中市就業服務一鍵Catch",
-      "statusText": "臺中市就業服務處官方活動；活動日 2026-10-19；截止 2026-10-16",
-      "government": true,
-      "deadline": "2026-10-16",
-      "eventEndDate": "",
-      "location": "麥當勞-麥當勞-太平中山餐廳（臺中市太平區中山路三段45號）",
-      "organizer": "臺中市就業服務處",
-      "audience": "有限制",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "taichung_job",
-        "act": "5633",
-        "fetchedAt": "2026-10-16T14:09:48.546631+00:00"
-      },
-      "fitScore": 46,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第2圈：台中+4",
-        "青少年／營隊／教學+8",
-        "職涯／實習+20",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "青少年／營隊／教學",
-        "職涯／實習"
-      ],
-      "circleLevel": 2,
-      "circleLabel": "台中",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
-      "lastSeen": "2026-10-16T14:11:09.269541+00:00",
+      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "taichung_job",
@@ -1147,7 +1136,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-10-16T14:10:37.075247+00:00"
+        "fetchedAt": "2026-10-17T03:30:39.641428+00:00"
       },
       "fitScore": 94,
       "fitTier": "高適配",
@@ -1169,7 +1158,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-10-16T14:11:09.269541+00:00",
+      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "mofa_working_holiday",
@@ -1235,7 +1224,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-16T03:53:24.742587+00:00",
       "lastSeen": "2026-10-16T06:47:56.062812+00:00",
-      "missCount": 2,
+      "missCount": 3,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1311,7 +1300,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-13T07:49:21.560728+00:00",
       "lastSeen": "2026-10-15T07:45:45.125665+00:00",
-      "missCount": 5,
+      "missCount": 6,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1386,7 +1375,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-12T07:28:06.885824+00:00",
       "lastSeen": "2026-10-14T06:14:10.797433+00:00",
-      "missCount": 6,
+      "missCount": 7,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1463,7 +1452,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-22T06:20:42.670284+00:00",
       "lastSeen": "2026-10-13T07:49:21.560728+00:00",
-      "missCount": 7,
+      "missCount": 8,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1541,7 +1530,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
       "lastSeen": "2026-10-13T07:49:21.560728+00:00",
-      "missCount": 7,
+      "missCount": 8,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1618,7 +1607,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-08T05:49:56.532833+00:00",
       "lastSeen": "2026-10-13T07:49:21.560728+00:00",
-      "missCount": 7,
+      "missCount": 8,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1693,7 +1682,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-08T05:49:56.532833+00:00",
       "lastSeen": "2026-10-12T07:28:06.885824+00:00",
-      "missCount": 8,
+      "missCount": 9,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1769,7 +1758,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-08T05:49:56.532833+00:00",
       "lastSeen": "2026-10-12T07:28:06.885824+00:00",
-      "missCount": 8,
+      "missCount": 9,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1846,7 +1835,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-18T06:01:08.427013+00:00",
       "lastSeen": "2026-10-11T07:17:50.227435+00:00",
-      "missCount": 9,
+      "missCount": 10,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1924,7 +1913,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-01T07:15:37.685597+00:00",
       "lastSeen": "2026-10-11T07:17:50.227435+00:00",
-      "missCount": 9,
+      "missCount": 10,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2003,7 +1992,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-17T08:01:17.326390+00:00",
       "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 14,
+      "missCount": 15,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2080,7 +2069,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-01T07:15:37.685597+00:00",
       "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 14,
+      "missCount": 15,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2156,83 +2145,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-01T07:15:37.685597+00:00",
       "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 14,
-      "needsReview": true,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026090083",
-      "title": "東海大學教師宿舍區保育共生地環境教育課程",
-      "date": "2026-10-08",
-      "time": "",
-      "scope": "東海校內",
-      "type": "教育／青少年",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026090083",
-      "keywords": "東海大學教師宿舍區保育共生地環境教育課程 東海大學 永續發展暨校務研究處 教育活動 教職員，費用：0；學生，費用：0；校外人士，費用：0 法律／學術 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 永續發展暨校務研究處；活動日 2026-10-08；截止 2026-10-16",
-      "government": false,
-      "deadline": "2026-10-16",
-      "eventEndDate": "2026-10-08",
-      "location": "",
-      "organizer": "永續發展暨校務研究處",
-      "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026090083",
-        "fetchedAt": "2026-10-02T07:03:38.080827+00:00"
-      },
-      "fitScore": 45,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "法律／轉學考+10",
-        "青少年／營隊／教學+8",
-        "直接連結法律學習目標+15",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "法律／轉學考",
-        "青少年／營隊／教學"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-30T06:49:51.580785+00:00",
-      "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 14,
+      "missCount": 15,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2307,7 +2220,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-19T05:59:16.875680+00:00",
       "lastSeen": "2026-09-29T07:01:11.559387+00:00",
-      "missCount": 17,
+      "missCount": 18,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2385,85 +2298,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-22T06:20:42.670284+00:00",
       "lastSeen": "2026-09-27T08:38:20.904863+00:00",
-      "missCount": 18,
-      "needsReview": true,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026090042",
-      "title": "適應體育宣導-芬蘭木柱體驗活動",
-      "date": "2026-10-21",
-      "time": "",
-      "scope": "東海校內",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026090042",
-      "keywords": "適應體育宣導-芬蘭木柱體驗活動 東海大學 健康暨諮商中心 其他活動 教職員，費用：0；學生，費用：0；校外人士，費用：0 法律／學術 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 健康暨諮商中心；活動日 2026-10-21；截止 2026-10-16",
-      "government": false,
-      "deadline": "2026-10-16",
-      "eventEndDate": "2026-10-21",
-      "location": "學生活動中心一樓木地板區",
-      "organizer": "健康暨諮商中心",
-      "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026090042",
-        "fetchedAt": "2026-09-17T08:00:17.171620+00:00"
-      },
-      "fitScore": 52,
-      "fitTier": "中適配",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "法律／轉學考+10",
-        "職涯／實習+5",
-        "直接連結法律學習目標+15",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "法律／轉學考",
-        "職涯／實習"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-14T06:24:52.182789+00:00",
-      "lastSeen": "2026-09-17T08:01:17.326390+00:00",
-      "missCount": 27,
+      "missCount": 19,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
