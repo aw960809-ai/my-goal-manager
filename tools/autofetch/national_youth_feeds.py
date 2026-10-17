@@ -59,7 +59,28 @@ ONLINE_APPLICATION = re.compile(
     r'(?:Google|網路)(?:線上)?表單|填寫線上表單|電子郵件(?:投稿|繳件)|'
     r'(?:e-mail|Email)(?:報名|投稿)|(?:上傳|提交)(?:作品|計畫書|報名表)',re.I)
 ONLINE_EVENT = re.compile(r'線上(?:講座|課程|研習|交流|培訓|工作坊|座談|活動|舉行|辦理|進行)|線上直播|遠距課程|全程線上|Webex\s*線上|Zoom\s*線上|Google\s*Meet\s*線上',re.I)
-IN_PERSON_REQUIRED = re.compile(r'必須(?:親自)?到場|須(?:親自)?出席|限現場參加|僅限現場|不得線上參與|決賽須(?:親自)?到場|決賽需(?:親自)?到場|決賽.{0,65}(?:現場|實體|臺北|台北|高雄|彰化|南投)|必須現場發表',re.I)
+# Finals may be in-person if (and only if) the initial competition submission
+# is verifiably remote. An obligatory in-person PRELIMINARY round is excluded.
+FINAL_ONSITE_RE = re.compile(
+    r'(?:總決賽|決賽|決審|決選|複賽)[^。；;\n]{0,60}?'
+    r'(?:須|需|必須|應|採|於|在|為)[^。；;\n]{0,35}?'
+    r'(?:親自到場|到場|出席|現場|實體|舉辦|辦理|發表|進行)',re.I)
+IN_PERSON_REQUIRED = re.compile(
+    r'必須(?:親自)?到場|須(?:親自)?出席|限現場參加|僅限現場|不得線上參與|'
+    r'必須現場發表|(?:初賽|初審|第一階段|資格審查|初選)[^。；;]{0,40}'
+    r'(?:須|需|必須|採)[^。；;]{0,15}(?:現場|實體|到場|出席)',re.I)
+# A registration link alone is NOT proof of remote submission of the work.
+ONLINE_SUBMISSION = re.compile(
+    r'線上(?:投稿|投件|繳件|徵件|提案|上傳(?:作品|計畫書|檔案|影片))|'
+    r'(?:網路|網上)(?:投稿|投件|繳件)|'
+    r'(?:上傳|提交|遞交)(?:作品|計畫書|企劃書|報名作品|參賽作品|論文|影片)|'
+    r'(?:電子郵件|e-?mail|Email)(?:投稿|寄送作品|繳件|投件)|'
+    r'線上初賽|初賽(?:採|以|為)(?:線上|遠距)|'
+    r'(?:(?:Google|線上|網路)表單)[^。；;]{0,25}(?:投稿|繳交作品|上傳|投件)',re.I)
+CITY_RE = re.compile(r'臺北市|台北市|新北市|臺中市|台中市|高雄市|臺南市|台南市|'
+                     r'桃園市|新竹市|新竹縣|基隆市|宜蘭縣|彰化縣|南投縣|嘉義市|'
+                     r'嘉義縣|屏東縣|花蓮縣|臺東縣|台東縣|雲林縣|苗栗縣|臺北|台北|高雄')
+
 RESTRICTED = re.compile(r'僅限(?:本校|本院|本系|教師|教職員|博士生|國小|國中|高中|原住民|原住民族)|須設籍(?:本|該)|限本[縣市]戶籍|不開放一般民眾|未開放個人', re.I)
 PREREQUISITE = re.compile(r'(?:須|必須|需)(?:於.{0,22})?先(?:行)?(?:參加|完成).{0,25}(?:特定|指定|壯遊點)|(?:須|必須)於投稿截止日前.{0,24}實際參與', re.I)
 DATE_RE = re.compile(r'(?<!\d)(20\d{2}|1\d{2})[./\-年]\s*(\d{1,2})[./\-月]\s*(\d{1,2})日?(?!\d)')
@@ -232,13 +253,18 @@ def deadline_from_text(lines, *, expected=''):
             continue
         # A registration *period* gives opening then closing dates.
         is_period=bool(re.search(r'期間|期程',marker.group(0)))
-        if is_period and len(found)>=2:
+        if is_period:
+            # A period's first date is the OPENING date, never the deadline.
+            # If the closing date is absent or malformed, reject the period.
+            if len(found)<2:
+                continue
             between=tail[found[0].end():found[1].start()]
-            if re.search(r'至|~|～|[-–—]',between):
-                end=iso(found[1].group(0))
-                if end and end>=first:
-                    candidates.append(end)
-                    continue
+            if not re.search(r'至|~|～|[-–—]',between):
+                continue
+            end=iso(found[1].group(0))
+            if end and end>=first:
+                candidates.append(end)
+            continue
         candidates.append(first)
     if expected:
         # Official listing's deadline must also be explicitly found in the
@@ -262,31 +288,71 @@ def source_type(title):
     return '教育／青少年'
 
 
-def candidate(card,body,source_id,stamp,*,today=None):
+def onsite_final_phases(text):
+    """Extract only explicitly in-person finals; never infer a venue."""
+    stages=[m.group(0) for m in FINAL_ONSITE_RE.finditer(text)
+            if not ONLINE_EVENT.search(m.group(0))]
+    # Remove the final-stage obligation before checking for mandatory attendance
+    # at another stage, including preliminaries and eligibility reviews.
+    remaining=FINAL_ONSITE_RE.sub('',text)
+    # City evidence is restricted to the matching finals span (not event header).
+    city=next((m.group(0) for part in stages if (m:=CITY_RE.search(part))), '')
+    city={'台北':'臺北市','臺北':'臺北市','高雄':'高雄市',
+          '台北市':'臺北市','台中市':'臺中市','台南市':'臺南市',
+          '台東縣':'臺東縣'}.get(city,city)
+    return bool(stages),city,remaining
+
+
+def candidate(card,body,source_id,stamp,*,today=None,reasons=None):
+    """Return an opportunity or a concrete reason in a read-only audit list."""
     today=today or taipei_today()
     spec=SOURCES[source_id]
     title=card['title']
-    if source_id=='youthfirst_national' and not card.get('deadline'):
+
+    def reject(reason):
+        if reasons is not None:
+            reasons.append(reason)
         return None
+
     if not topic_ok(title):
-        return None
+        return reject('topic_mismatch')
     lines=article(body,title)
     if len(lines)<3:
-        return None
+        return reject('detail_unverified')
     all_text=clean(' '.join(lines))
-    if (RESTRICTED.search(all_text) or IN_PERSON_REQUIRED.search(all_text)
-            or PREREQUISITE.search(all_text)):
-        return None
+    if RESTRICTED.search(all_text):
+        return reject('eligibility_restricted')
+    if PREREQUISITE.search(all_text):
+        return reject('mandatory_prerequisite')
+    # The official detail must explicitly state an open deadline. A dated
+    # *listing* alone is insufficient; a listing without a deadline may still
+    # link to a perfectly verifiable deadline in the detail.
     deadline=deadline_from_text(lines,expected=card.get('deadline',''))
-    if not deadline or not today.isoformat()<=deadline<=f'{today.year+2}-12-31':
-        return None
+    if not deadline:
+        return reject('deadline_not_verified')
+    if not today.isoformat()<=deadline<=f'{today.year+2}-12-31':
+        return reject('deadline_closed_or_too_far')
+
     is_submission=bool(re.search(r'競賽|徵件|徵文|投稿|提案|徵選|徵稿|比賽|挑戰賽',title,re.I))
-    # A compulsory on-site camp with an online prerequisite is NOT an online
-    # activity. Non-submission events need an explicitly online *title*.
-    is_remote=(bool(ONLINE_APPLICATION.search(all_text)) if is_submission
-               else bool(re.search(r'線上|遠距|Webinar',title,re.I) and ONLINE_EVENT.search(all_text)))
-    if not is_remote:
-        return None
+    final_attendance,final_city,other_stages=onsite_final_phases(all_text)
+    if IN_PERSON_REQUIRED.search(other_stages):
+        return reject('mandatory_in_person_stage')
+
+    if is_submission:
+        if not ONLINE_SUBMISSION.search(all_text):
+            return reject('remote_submission_not_verified')
+        # A hybrid competition may require a physical FINAL, but cannot
+        # require in-person submission, preliminary attendance or review.
+        mode='online_submission_onsite_final' if final_attendance else 'online_submission'
+        place='線上初賽／投稿'
+        if final_attendance:
+            place+='；決賽需到場' + (f'（{final_city}）' if final_city else '（地點以官方公告為準）')
+    else:
+        if final_attendance or not (re.search(r'線上|遠距|Webinar',title,re.I) and ONLINE_EVENT.search(all_text)):
+            return reject('online_event_not_verified')
+        mode='online_event'
+        place='線上參與'
+
     ident=urlparse(card['url'])
     if source_id=='youthfirst_national':
         unique=re.search(r'/(\d+)$',ident.path).group(1)
@@ -294,16 +360,23 @@ def candidate(card,body,source_id,stamp,*,today=None):
         unique=parse_qs(ident.query)['docid'][0]
     prefix=spec['prefix']
     owner='教育部青年發展署' if source_id=='yda_national_news' else '青年第一讚官方平台所刊登之主辦機關'
+    status=(f'官方截止日 {deadline}（非活動舉辦日期）；已確認'
+            +('線上投稿／初賽' if is_submission else '線上參與'))
+    if final_attendance:
+        status+=f'；決賽須實體到場（{final_city or "舉辦地點依官方公告"}）'
+    status+='；實際參賽資格及初、決賽規則請核對官方簡章。'
     return {
         'id':prefix+unique,'title':title,'date':deadline,'deadline':deadline,
         'time':'','dateKind':'application_deadline','eventEndDate':deadline,
         'scope':'全國','type':source_type(title),'kind':'event','url':card['url'],
         'keywords':title,'direct':True,'team':False,'available':True,
         'government':False,'source':spec['name'],'sourceId':source_id,
-        'organizer':owner,'location':'線上投稿／全國參與' if is_submission else '線上參與',
+        'organizer':owner,'location':place,
+        'participationMode':mode,'finalAttendanceRequired':final_attendance,
+        'finalLocation':final_city,
         'audience':'申請資格與參與方式以官方徵件簡章為準（尚未完成個人資格核驗）',
-        'statusText':f'官方截止日 {deadline}（非活動舉辦日期）；已確認線上'+('繳件' if is_submission else '參與')+'，實際資格依公告。',
-        'autofetch':{'engine':'national-yda-v2','sourceId':source_id,'fetchedAt':stamp,
+        'statusText':status,
+        'autofetch':{'engine':'national-yda-v3','sourceId':source_id,'fetchedAt':stamp,
                      'provenance':'official-list-and-detail'},
     }
 
@@ -314,8 +387,14 @@ def run_source(source_id,*,fetch_fn,stamp,logger=print,limit=10,today=None):
     spec=SOURCES[source_id]
     out={'sourceId':source_id,'prefix':spec['prefix'],'discovered':0,
          'parsedOk':0,'accepted':[],'skippedPast':0,'rejected':[],
-         'fetchFailures':[],'healthy':False}
+         'fetchFailures':[],'healthy':False,'reviewReasons':{},'reviewSamples':{}}
     seen={}
+    def note(code, rec=None):
+        reasons=out['reviewReasons']
+        reasons[code]=reasons.get(code,0)+1
+        if rec and len(out['reviewSamples'].get(code,[]))<2:
+            out['reviewSamples'].setdefault(code,[]).append({
+                'title':rec['title'][:120],'url':rec['url']})
     urls=list(spec['lists'])
     if source_id=='youthfirst_national':
         # Explicit category + page. Never domain-wide crawl.
@@ -349,21 +428,22 @@ def run_source(source_id,*,fetch_fn,stamp,logger=print,limit=10,today=None):
     eligible_cards=[]
     for rec in seen.values():
         if not topic_ok(rec['title']):
+            note('topic_mismatch',rec)
             continue
-        if source_id=='youthfirst_national':
-            # Listing must give an explicit verified period: do not scrape an
-            # indefinite resource or substitute today's date.
-            if not rec['deadline']:
-                continue
-            if rec['deadline']<today.isoformat():
-                out['skippedPast']+=1
-                continue
+        if rec.get('deadline') and rec['deadline']<today.isoformat():
+            out['skippedPast']+=1
+            note('listing_deadline_closed',rec)
+            continue
+        # Older code rejected every YouthFirst entry without a listing-level
+        # deadline. Check the official detail instead, while still requiring a
+        # verified, open explicit deadline before a recommendation is made.
         eligible_cards.append(rec)
     eligible_cards.sort(key=lambda x:(x['deadline'] or '9999-12-31',x['url']))
     # If the upstream publishes more than the bounded budget, mark the source
     # unhealthy rather than pretending this was a complete replacement set.
     budget=min(20,max(1,limit*2))
     if len(eligible_cards)>budget:
+        note('detail_verification_budget_exceeded')
         failures.append({'url':spec['lists'][0],'reason':'too_many_candidates_for_bounded_verification'})
     checked=eligible_cards[:budget]
     admitted=[]
@@ -377,15 +457,20 @@ def run_source(source_id,*,fetch_fn,stamp,logger=print,limit=10,today=None):
                 # Mark a structural drift, not an intentional zero-match.
                 raise ValueError('official article heading not verified')
             out['parsedOk']+=1
-            item=candidate(rec,html,source_id,stamp,today=today)
+            reasons=[]
+            item=candidate(rec,html,source_id,stamp,today=today,reasons=reasons)
             if item:
                 admitted.append(item)
+            else:
+                note(reasons[0] if reasons else 'unclassified_rejection',rec)
         except Exception as exc:
             failures.append({'url':rec['url'],'reason':str(exc)[:220]})
+            note('detail_fetch_or_structure_failure',rec)
     out['fetchFailures']=failures
     out['healthy']=not failures and (bool(seen) or empty_verified)
     out['accepted']=list({x['id']:x for x in admitted}.values()) if out['healthy'] else []
     logger(f'NATIONAL_YOUTH source={source_id} healthy={out["healthy"]} '
            f'lists={len(urls)} links={out["discovered"]} verified={out["parsedOk"]} '
-           f'accepted={len(out["accepted"])} skipped={out["skippedPast"]} failures={len(failures)}')
+           f'accepted={len(out["accepted"])} skipped={out["skippedPast"]} failures={len(failures)} '
+           f'reasons={dict(sorted(out["reviewReasons"].items()))}')
     return out

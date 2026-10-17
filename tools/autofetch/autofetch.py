@@ -2587,6 +2587,20 @@ def run(repo, limit, apply):
         youth_national_runs=[r for r in results if r['sourceId'] in NATIONAL_YOUTH_SOURCES]
         youth_national_ids=tuple(s['prefix'] for s in NATIONAL_YOUTH_SOURCES.values())
         youth_national_active=sum(str(e.get('id','')).startswith(youth_national_ids) for e in merged)
+        youth_review={r['sourceId']:{
+            'discovered':r.get('discovered',0),
+            'detailVerified':r.get('parsedOk',0),
+            'accepted':len(r.get('accepted',[])),
+            'reasons':r.get('reviewReasons',{}),
+            'samples':r.get('reviewSamples',{}),
+        } for r in youth_national_runs}
+        review_totals={}
+        for summary in youth_review.values():
+            for reason,count in summary['reasons'].items():
+                review_totals[reason]=review_totals.get(reason,0)+count
+        onsite_final_count=sum(
+            1 for e in merged if str(e.get('id','')).startswith(youth_national_ids)
+            and e.get('finalAttendanceRequired') is True)
         meta.update({
             'nationwideOfficialConfigured':national_r is not None,
             'nationwideOfficialHealthy':bool(national_r and national_r['healthy']),
@@ -2601,6 +2615,9 @@ def run(repo, limit, apply):
             'nationalExpansionDiscovered':sum(r['discovered'] for r in youth_national_runs),
             'nationalExpansionFreshEligible':sum(len(r.get('radarEligible',[])) for r in youth_national_runs),
             'nationalExpansionActive':youth_national_active,
+            'nationalExpansionOnsiteFinal':onsite_final_count,
+            'nationalExpansionReviewReasons':review_totals,
+            'nationalExpansionReviewBySource':youth_review,
             'semanticPolicyRetired':len(semantic_retired),
             'updatedAt': now_iso(),
             'events': len(merged),
