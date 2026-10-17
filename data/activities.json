@@ -1,40 +1,23 @@
 {
   "meta": {
-    "updatedAt": "2026-10-17T03:34:34.790272+00:00",
-    "sources": 4,
+    "updatedAt": "2026-10-17T04:33:34.469323+00:00",
+    "sources": 8,
     "events": 34,
     "ok": 13,
-    "failed": 16,
-    "errors": [
-      "www.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (28) Resolving timed out after 8001 milliseconds",
-      "twpathfinder.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (28) Resolving timed out after 8001 milliseconds",
-      "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8000 milliseconds\ncurl: (28) Resolving timed out after 8000 milliseconds",
-      "youthfirst.yda.gov.tw: curl: (6) Could not resolve host: youthfirst.yda.gov.tw\ncurl: (28) Resolving timed out after 8000 milliseconds",
-      "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8000 milliseconds\ncurl: (6) Could not resolve host: youthfirst.yda.gov.tw",
-      "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (28) Resolving timed out after 8002 milliseconds",
-      "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8002 milliseconds\ncurl: (28) Resolving timed out after 8002 milliseconds",
-      "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8002 milliseconds\ncurl: (6) Could not resolve host: youthfirst.yda.gov.tw",
-      "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (6) Could not resolve host: youthfirst.yda.gov.tw",
-      "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8002 milliseconds\ncurl: (6) Could not resolve host: youthfirst.yda.gov.tw",
-      "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (28) Resolving timed out after 8000 milliseconds",
-      "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8000 milliseconds\ncurl: (28) Resolving timed out after 8001 milliseconds",
-      "www.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (28) Resolving timed out after 8000 milliseconds",
-      "www.yda.gov.tw: curl: (28) Resolving timed out after 8000 milliseconds\ncurl: (6) Could not resolve host: www.yda.gov.tw",
-      "www.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (28) Resolving timed out after 8000 milliseconds",
-      "www.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (6) Could not resolve host: www.yda.gov.tw"
-    ],
+    "failed": 0,
+    "errors": [],
     "generator": "V96.6.11.1.1 Multi-Source AutoFetch + Activity Radar",
     "sourcePolicy": "政府資訊為主；東海官方活動為活動核心；獎學金獨立資料集合與獨立判斷",
     "scholarships": 7,
     "totalSources": 8,
-    "healthySources": 4,
-    "failedSources": 4,
+    "healthySources": 8,
+    "failedSources": 0,
     "rejectedItems": 0,
-    "fetchFailedItems": 16,
-    "skippedPast": 83,
+    "fetchFailedItems": 0,
+    "skippedPast": 99,
     "fitFiltered": 24,
     "semanticDuplicates": 0,
-    "retiredThisRun": 3,
+    "retiredThisRun": 0,
     "revivedThisRun": 0,
     "archiveCount": 48,
     "retainedOnFailure": 0,
@@ -45,59 +28,93 @@
     "nationwideOfficialHealthy": true,
     "nationwideOfficialEvents": 0,
     "nationwideOfficialEligible": 0,
-    "nationwideOfficialDiscovered": 145,
-    "sourceFailures": [
-      {
-        "sourceId": "yda_official",
-        "name": "教育部青年發展署",
-        "url": "https://www.yda.gov.tw/EventList.aspx?pid=56&uid=101",
-        "error": "www.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (28) Resolving timed out after 8001 milliseconds"
-      },
-      {
-        "sourceId": "pathfinder_official",
-        "name": "青年百億海外圓夢基金計畫",
-        "url": "https://twpathfinder.yda.gov.tw/downloads",
-        "error": "twpathfinder.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (28) Resolving timed out after 8001 milliseconds"
-      },
-      {
-        "sourceId": "youthfirst_national",
-        "name": "教育部青年第一讚｜全國競賽及徵件",
-        "url": "https://youthfirst.yda.gov.tw/index.php/subject/index?project_type%5B%5D=%E7%AB%B6%E8%B3%BD",
-        "error": "youthfirst.yda.gov.tw: curl: (28) Resolving timed out after 8000 milliseconds\ncurl: (28) Resolving timed out after 8000 milliseconds"
-      },
-      {
-        "sourceId": "yda_national_news",
-        "name": "教育部青年發展署｜全國徵件及線上機會",
-        "url": "https://www.yda.gov.tw/",
-        "error": "www.yda.gov.tw: curl: (28) Resolving timed out after 8001 milliseconds\ncurl: (28) Resolving timed out after 8000 milliseconds"
-      }
-    ],
+    "nationwideOfficialDiscovered": 144,
+    "sourceFailures": [],
     "legalAcademicSourcesConfigured": 0,
     "legalAcademicSourcesHealthy": 0,
     "legalAcademicEvents": 0,
     "semanticPolicyRetired": 0,
     "preferenceExcludedThisRun": 0,
     "nationalExpansionSources": 2,
-    "nationalExpansionHealthy": 0,
-    "nationalExpansionDiscovered": 0,
+    "nationalExpansionHealthy": 2,
+    "nationalExpansionDiscovered": 131,
     "nationalExpansionFreshEligible": 0,
     "nationalExpansionActive": 0,
     "nationalExpansionOnsiteFinal": 0,
-    "nationalExpansionReviewReasons": {},
+    "nationalExpansionReviewReasons": {
+      "topic_mismatch": 123,
+      "listing_deadline_closed": 3,
+      "deadline_not_verified": 5
+    },
     "nationalExpansionReviewBySource": {
       "youthfirst_national": {
-        "discovered": 0,
-        "detailVerified": 0,
+        "discovered": 63,
+        "detailVerified": 1,
         "accepted": 0,
-        "reasons": {},
-        "samples": {}
+        "reasons": {
+          "topic_mismatch": 59,
+          "listing_deadline_closed": 3,
+          "deadline_not_verified": 1
+        },
+        "samples": {
+          "topic_mismatch": [
+            {
+              "title": "教育部補助大學校院學生出國參加國際性學術技藝能競賽作業要點",
+              "url": "https://youthfirst.yda.gov.tw/index.php/subject/content/81"
+            },
+            {
+              "title": "臺北市聽障者職場臺灣手語翻譯及聽打服務",
+              "url": "https://youthfirst.yda.gov.tw/index.php/subject/content/307"
+            }
+          ],
+          "listing_deadline_closed": [
+            {
+              "title": "2026 臺灣國家公園保育研討會青年論文徵文競賽",
+              "url": "https://youthfirst.yda.gov.tw/index.php/subject/content/73100"
+            },
+            {
+              "title": "嘉義縣114年青年創新創意影展競賽-嘉映職人",
+              "url": "https://youthfirst.yda.gov.tw/index.php/subject/content/18198"
+            }
+          ],
+          "deadline_not_verified": [
+            {
+              "title": "青年志工行動競賽表揚計畫（青志獎）",
+              "url": "https://youthfirst.yda.gov.tw/index.php/subject/content/86541"
+            }
+          ]
+        }
       },
       "yda_national_news": {
-        "discovered": 0,
-        "detailVerified": 0,
+        "discovered": 68,
+        "detailVerified": 4,
         "accepted": 0,
-        "reasons": {},
-        "samples": {}
+        "reasons": {
+          "topic_mismatch": 64,
+          "deadline_not_verified": 4
+        },
+        "samples": {
+          "topic_mismatch": [
+            {
+              "title": "【入選團隊名單】115年獎勵青年自組團隊參與志工行動計畫（第26批次）",
+              "url": "https://www.yda.gov.tw/docDetail.aspx?docid=69699&pid=53&uid=60"
+            },
+            {
+              "title": "跨越北極圈的韌性訊號 iYouth Voice串起臺挪青年無線電交流",
+              "url": "https://www.yda.gov.tw/docDetail.aspx?docid=69698&pid=53&uid=60"
+            }
+          ],
+          "deadline_not_verified": [
+            {
+              "title": "113年青年社區參與行動2.0 Changemaker計畫 團隊成果審查獲獎名單",
+              "url": "https://www.yda.gov.tw/docDetail.aspx?docid=58725&pid=53&uid=60"
+            },
+            {
+              "title": "114年青年社區參與行動2.0 Changemaker計畫 團隊成果審查獲獎名單揭曉",
+              "url": "https://www.yda.gov.tw/docDetail.aspx?docid=59262&pid=53&uid=60"
+            }
+          ]
+        }
       }
     }
   },
@@ -232,7 +249,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026100035",
-        "fetchedAt": "2026-10-17T03:29:10.160892+00:00"
+        "fetchedAt": "2026-10-17T04:31:38.810783+00:00"
       },
       "fitScore": 45,
       "fitTier": "探索",
@@ -254,7 +271,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-16T11:06:49.492009+00:00",
-      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
+      "lastSeen": "2026-10-17T04:33:34.468678+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -308,7 +325,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026060032",
-        "fetchedAt": "2026-10-17T03:29:11.104733+00:00"
+        "fetchedAt": "2026-10-17T04:31:40.126903+00:00"
       },
       "fitScore": 51,
       "fitTier": "探索",
@@ -330,7 +347,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-16T06:07:49.530864+00:00",
-      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
+      "lastSeen": "2026-10-17T04:33:34.468678+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -384,7 +401,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090060",
-        "fetchedAt": "2026-10-17T03:29:16.245657+00:00"
+        "fetchedAt": "2026-10-17T04:31:46.472633+00:00"
       },
       "fitScore": 39,
       "fitTier": "探索",
@@ -405,7 +422,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-23T06:04:32.174585+00:00",
-      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
+      "lastSeen": "2026-10-17T04:33:34.468678+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -459,7 +476,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026100043",
-        "fetchedAt": "2026-10-17T03:29:17.479761+00:00"
+        "fetchedAt": "2026-10-17T04:31:47.881381+00:00"
       },
       "fitScore": 47,
       "fitTier": "探索",
@@ -482,7 +499,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-16T03:53:24.742587+00:00",
-      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
+      "lastSeen": "2026-10-17T04:33:34.468678+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -536,7 +553,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090065",
-        "fetchedAt": "2026-10-17T03:29:23.948050+00:00"
+        "fetchedAt": "2026-10-17T04:31:55.850135+00:00"
       },
       "fitScore": 67,
       "fitTier": "中適配",
@@ -560,7 +577,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-21T06:32:35.703147+00:00",
-      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
+      "lastSeen": "2026-10-17T04:33:34.468678+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -614,7 +631,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026100040",
-        "fetchedAt": "2026-10-17T03:29:24.910695+00:00"
+        "fetchedAt": "2026-10-17T04:31:56.811656+00:00"
       },
       "fitScore": 45,
       "fitTier": "探索",
@@ -636,7 +653,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-14T06:14:10.797433+00:00",
-      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
+      "lastSeen": "2026-10-17T04:33:34.468678+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -690,7 +707,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026100037",
-        "fetchedAt": "2026-10-17T03:29:25.720373+00:00"
+        "fetchedAt": "2026-10-17T04:31:57.853514+00:00"
       },
       "fitScore": 71,
       "fitTier": "中適配",
@@ -711,7 +728,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-14T06:14:10.797433+00:00",
-      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
+      "lastSeen": "2026-10-17T04:33:34.468678+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -765,7 +782,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026100036",
-        "fetchedAt": "2026-10-17T03:29:28.588215+00:00"
+        "fetchedAt": "2026-10-17T04:32:01.363368+00:00"
       },
       "fitScore": 66,
       "fitTier": "中適配",
@@ -786,7 +803,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-14T06:14:10.797433+00:00",
-      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
+      "lastSeen": "2026-10-17T04:33:34.468678+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -840,7 +857,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026100013",
-        "fetchedAt": "2026-10-17T03:29:29.553359+00:00"
+        "fetchedAt": "2026-10-17T04:32:02.515555+00:00"
       },
       "fitScore": 39,
       "fitTier": "探索",
@@ -861,7 +878,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-14T06:14:10.797433+00:00",
-      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
+      "lastSeen": "2026-10-17T04:33:34.468678+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -915,7 +932,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090080",
-        "fetchedAt": "2026-10-17T03:29:31.417032+00:00"
+        "fetchedAt": "2026-10-17T04:32:04.800207+00:00"
       },
       "fitScore": 40,
       "fitTier": "探索",
@@ -935,7 +952,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-24T06:19:41.019607+00:00",
-      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
+      "lastSeen": "2026-10-17T04:33:34.468678+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -989,7 +1006,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "thu_official",
         "conferenceCode": "2026090062",
-        "fetchedAt": "2026-10-17T03:29:32.292900+00:00"
+        "fetchedAt": "2026-10-17T04:32:05.969415+00:00"
       },
       "fitScore": 65,
       "fitTier": "中適配",
@@ -1012,7 +1029,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-21T06:32:35.703147+00:00",
-      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
+      "lastSeen": "2026-10-17T04:33:34.468678+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "thu_official",
@@ -1066,7 +1083,7 @@
         "engine": "V96.6.11.1.1",
         "sourceId": "taichung_job",
         "act": "5634",
-        "fetchedAt": "2026-10-17T03:29:38.877458+00:00"
+        "fetchedAt": "2026-10-17T04:32:11.498367+00:00"
       },
       "fitScore": 44,
       "fitTier": "探索",
@@ -1088,7 +1105,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-22T06:20:42.670284+00:00",
-      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
+      "lastSeen": "2026-10-17T04:33:34.468678+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "taichung_job",
@@ -1136,7 +1153,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-10-17T03:30:39.641428+00:00"
+        "fetchedAt": "2026-10-17T04:33:01.831318+00:00"
       },
       "fitScore": 94,
       "fitTier": "高適配",
@@ -1158,7 +1175,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-10-17T03:34:34.789264+00:00",
+      "lastSeen": "2026-10-17T04:33:34.468678+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "mofa_working_holiday",
@@ -1224,7 +1241,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-16T03:53:24.742587+00:00",
       "lastSeen": "2026-10-16T06:47:56.062812+00:00",
-      "missCount": 3,
+      "missCount": 4,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1300,7 +1317,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-13T07:49:21.560728+00:00",
       "lastSeen": "2026-10-15T07:45:45.125665+00:00",
-      "missCount": 6,
+      "missCount": 7,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1375,7 +1392,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-12T07:28:06.885824+00:00",
       "lastSeen": "2026-10-14T06:14:10.797433+00:00",
-      "missCount": 7,
+      "missCount": 8,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1452,7 +1469,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-22T06:20:42.670284+00:00",
       "lastSeen": "2026-10-13T07:49:21.560728+00:00",
-      "missCount": 8,
+      "missCount": 9,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1530,7 +1547,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
       "lastSeen": "2026-10-13T07:49:21.560728+00:00",
-      "missCount": 8,
+      "missCount": 9,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1607,7 +1624,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-08T05:49:56.532833+00:00",
       "lastSeen": "2026-10-13T07:49:21.560728+00:00",
-      "missCount": 8,
+      "missCount": 9,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1682,7 +1699,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-08T05:49:56.532833+00:00",
       "lastSeen": "2026-10-12T07:28:06.885824+00:00",
-      "missCount": 9,
+      "missCount": 10,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1758,7 +1775,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-08T05:49:56.532833+00:00",
       "lastSeen": "2026-10-12T07:28:06.885824+00:00",
-      "missCount": 9,
+      "missCount": 10,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1835,7 +1852,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-18T06:01:08.427013+00:00",
       "lastSeen": "2026-10-11T07:17:50.227435+00:00",
-      "missCount": 10,
+      "missCount": 11,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1913,7 +1930,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-01T07:15:37.685597+00:00",
       "lastSeen": "2026-10-11T07:17:50.227435+00:00",
-      "missCount": 10,
+      "missCount": 11,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -1992,7 +2009,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-17T08:01:17.326390+00:00",
       "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 15,
+      "missCount": 16,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2069,7 +2086,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-01T07:15:37.685597+00:00",
       "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 15,
+      "missCount": 16,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2145,7 +2162,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-01T07:15:37.685597+00:00",
       "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 15,
+      "missCount": 16,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2220,7 +2237,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-19T05:59:16.875680+00:00",
       "lastSeen": "2026-09-29T07:01:11.559387+00:00",
-      "missCount": 18,
+      "missCount": 19,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2298,7 +2315,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-22T06:20:42.670284+00:00",
       "lastSeen": "2026-09-27T08:38:20.904863+00:00",
-      "missCount": 19,
+      "missCount": 20,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
