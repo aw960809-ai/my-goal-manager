@@ -16,6 +16,8 @@ from central_official import REGIONS as CENTRAL_REGIONS, run_source as run_centr
 from moc_national_opportunities import run_source as run_moc_national_source, API_ROOT as MOC_NATIONAL_API, topic_relevant as moc_topic_relevant
 from university_law_opportunities import SOURCES as LAW_SOURCES, run_source as run_law_source
 from national_youth_feeds import SOURCES as NATIONAL_YOUTH_SOURCES, run_source as run_national_youth_source
+from official_competition_feed import (SOURCE_ID as OFFICIAL_CONTEST_ID, PREFIX as OFFICIAL_CONTEST_PREFIX,
+    HOST as OFFICIAL_CONTEST_HOST, LIST_URL as OFFICIAL_CONTEST_LIST, run_source as run_official_competitions)
 
 USER_AGENT = 'GoalManager-AutoFetch/96.6.11.1 (+https://github.com/aw960809-ai/my-goal-manager)'
 MAX_BYTES = 2_000_000
@@ -378,6 +380,18 @@ for _national_id,_national in NATIONAL_YOUTH_SOURCES.items():
         'trust_level':'official',
         'notes':'官方清單與詳情核實；需具明確截止日及線上參與/投件條件。',
     })
+
+# Official institutional competition directory, NOT a general news stream.
+# Every candidate requires the original university announcement detail page.
+SOURCES['sources'].append({
+    'id':OFFICIAL_CONTEST_ID,
+    'name':'國立勤益科技大學｜全國競賽公告',
+    'scope':'national','priority':3,'enabled':True,
+    'domain_allowlist':[OFFICIAL_CONTEST_HOST],
+    'start_urls':[OFFICIAL_CONTEST_LIST], 'fetch_type':'html',
+    'trust_level':'official',
+    'notes':'官方校際轉知之競賽清單；核對同站公告、截止日、線上初賽繳件證據。',
+})
 
 def now_iso():
     return datetime.now(timezone.utc).isoformat()
@@ -2023,6 +2037,7 @@ CIRCLE_META.update({_sid:(3,'中部',2) for _sid in CENTRAL_REGIONS})
 CIRCLE_META['moc_national']=(4,'全國',0)
 CIRCLE_META.update({_sid:(4,'全國',0) for _sid in LAW_SOURCES})
 CIRCLE_META.update({_sid:(4,'全國',0) for _sid in NATIONAL_YOUTH_SOURCES})
+CIRCLE_META[OFFICIAL_CONTEST_ID]=(4,'全國',0)
 
 LOW_VALUE_PATTERNS = [
     (r'適性就業輔導促進就業計畫', -24, '一般就業輔導，與目前學生目標連結較弱'),
@@ -2393,6 +2408,21 @@ def run(repo, limit, apply):
                 'healthy':False,
             })
 
+    # Competition-first discovery: reputable university contest bulletin,
+    # source independent from YDA news. Any failure retains its old records.
+    if OFFICIAL_CONTEST_ID in enabled:
+        try:
+            results.append(run_official_competitions(
+                fetch_fn=fetch, stamp=now_iso(), logger=log, limit=15))
+        except Exception as exc:
+            results.append({
+                'sourceId':OFFICIAL_CONTEST_ID,'prefix':OFFICIAL_CONTEST_PREFIX,
+                'discovered':0,'parsedOk':0,'accepted':[],
+                'skippedPast':0,'rejected':[],
+                'fetchFailures':[{'url':OFFICIAL_CONTEST_LIST,'reason':str(exc)[:220]}],
+                'healthy':False,'reviewReasons':{},'reviewSamples':{},
+            })
+
     # Verified academic events, no assumption that visitors can register.
     for law_id in LAW_SOURCES:
         if law_id in enabled:
@@ -2601,7 +2631,16 @@ def run(repo, limit, apply):
         onsite_final_count=sum(
             1 for e in merged if str(e.get('id','')).startswith(youth_national_ids)
             and e.get('finalAttendanceRequired') is True)
+        official_contest_result=next((r for r in results if r['sourceId']==OFFICIAL_CONTEST_ID),None)
+        official_contest_active=sum(str(e.get('id','')).startswith(OFFICIAL_CONTEST_PREFIX) for e in merged)
         meta.update({
+            'officialCompetitionSourceCount':int(official_contest_result is not None),
+            'officialCompetitionSourceHealthy':int(bool(official_contest_result and official_contest_result['healthy'])),
+            'officialCompetitionDiscovered':official_contest_result.get('discovered',0) if official_contest_result else 0,
+            'officialCompetitionVerified':official_contest_result.get('parsedOk',0) if official_contest_result else 0,
+            'officialCompetitionFreshEligible':len(official_contest_result.get('radarEligible',[])) if official_contest_result else 0,
+            'officialCompetitionActive':official_contest_active,
+            'officialCompetitionReviewReasons':official_contest_result.get('reviewReasons',{}) if official_contest_result else {},
             'nationwideOfficialConfigured':national_r is not None,
             'nationwideOfficialHealthy':bool(national_r and national_r['healthy']),
             'nationwideOfficialEvents':national_active,

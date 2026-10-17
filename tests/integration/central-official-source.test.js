@@ -12,14 +12,14 @@ const manifest=JSON.parse(fs.readFileSync(path.join(root,'tools/autofetch/source
 const publicRegistry=JSON.parse(fs.readFileSync(path.join(root,'data/activity-sources.json'),'utf8'));
 const ids=['miaoli_government','changhua_government','nantou_culture','yunlin_government'];
 const names=manifest.sources.map(s=>s.id);
-assert.strictEqual(names.length,14,'twelve prior sources plus two nationwide youth sources');
-assert.strictEqual(new Set(names).size,14,'unique source IDs required');
+assert.strictEqual(names.length,15,'existing fourteen plus the verified university competition directory');
+assert.strictEqual(new Set(names).size,15,'unique source IDs required');
 assert.deepStrictEqual(new Set(names),new Set(publicRegistry.sources.map(s=>s.id)),'public registry must match actual source manifest');
 // Expansion must preserve all original sources, not just increase a counter.
 const priorSourceIds=['thu_official','taichung_job','pathfinder_official',
   'mofa_working_holiday','yda_official','miaoli_government',
   'changhua_government','nantou_culture','yunlin_government'];
-assert.deepStrictEqual(new Set(names),new Set([...priorSourceIds,'moc_national','ntu_law','nccu_law','youthfirst_national','yda_national_news']),
+assert.deepStrictEqual(new Set(names),new Set([...priorSourceIds,'moc_national','ntu_law','nccu_law','youthfirst_national','yda_national_news','ncut_competitions_official']),
   'must retain original sources, culture feed, and two official law schools');
 const nation=manifest.sources.find(s=>s.id==='moc_national');
 const nationPublic=publicRegistry.sources.find(s=>s.id==='moc_national');
@@ -51,6 +51,12 @@ for(const [id,domain] of [['youthfirst_national','youthfirst.yda.gov.tw'],
   assert.deepStrictEqual(actual.start_urls,pub.startUrls);
   assert(pub.profileMatch.cities.length===0,'Nationwide is not personal location data');
 }
+const contests=manifest.sources.find(s=>s.id==='ncut_competitions_official');
+const contestsPublic=publicRegistry.sources.find(s=>s.id==='ncut_competitions_official');
+assert(contests&&contestsPublic&&contests.enabled&&contestsPublic.enabled);
+assert.deepStrictEqual(contests.domain_allowlist,['n058.ncut.edu.tw']);
+assert.deepStrictEqual(contests.start_urls,contestsPublic.startUrls);
+assert.deepStrictEqual(contestsPublic.profileMatch.cities,[], 'national access is not a home address');
 for(const id of ids){
  const a=manifest.sources.find(s=>s.id===id);
  const b=publicRegistry.sources.find(s=>s.id===id);

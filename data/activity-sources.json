@@ -441,6 +441,35 @@
       },
       "catalogPolicy": "public",
       "notes": "全國競賽／徵件與線上機會；需有官方明確截止日、實際遠端參與證據；不假設資格。"
+    },
+    {
+      "id": "ncut_competitions_official",
+      "name": "國立勤益科技大學｜全國競賽公告",
+      "enabled": true,
+      "adapter": "ncut_competitions_official",
+      "scope": "nationwide",
+      "categories": [
+        "competition",
+        "legal_academic",
+        "international",
+        "career_internship"
+      ],
+      "priority": 3,
+      "trustLevel": "official",
+      "fetchType": "html",
+      "domainAllowlist": [
+        "n058.ncut.edu.tw"
+      ],
+      "startUrls": [
+        "https://n058.ncut.edu.tw/p/403-1058-292-1.php?Lang=zh-tw"
+      ],
+      "profileMatch": {
+        "country": "TW",
+        "cities": [],
+        "schoolNames": []
+      },
+      "catalogPolicy": "public",
+      "notes": "國立勤益科大官方校際轉知，受眾、截止、初賽投件以各公告明確證據為準。"
     }
   ]
 }
