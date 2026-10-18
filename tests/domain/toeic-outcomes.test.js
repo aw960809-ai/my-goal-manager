@@ -53,7 +53,10 @@ const recalc=Normalize.normalizeTasks(tasks);
 assert.equal(D.migrate(recalc).changed,false,'Schema6 normalization must preserve migration');
 const q=D.pendingQueue({appId:'toeic-trainer-standalone',schema:1,
  questionStats:{a:{wrong:1,dueAt:'2026-10-01'},b:{wrong:1,mastered:true},c:{wrong:1,dueAt:'2026-12-01'}},
- review:{v001:{times:3,dueAt:'2026-10-02'}}},new Date('2026-10-18T00:00:00Z'));
+ review:{v001:{times:3,dueAt:'2026-10-02'}}},
+{source:'toeic-trainer-standalone',schema:1,version:1,kind:'active-audited-bank-ids',
+ writtenIds:['a','b','c'],vocabIds:['v001'],writtenCount:3,vocabCount:1,
+ signature:D.catalogSignature(['a','b','c'],['v001'])},new Date('2026-10-18T00:00:00Z'));
 assert.equal(q.due,1);assert.equal(q.mastered,1);assert.equal(q.waiting,1);assert.equal(q.dueWords,1);
 assert.equal(tasks.find(x=>x.id==='g3-2026-integrated').previousTimeProgress,0);
 console.log('PASS result-first TOEIC goal tree: IDs/history preserved, 6 outcomes, due-only, de-dup and time isolation');

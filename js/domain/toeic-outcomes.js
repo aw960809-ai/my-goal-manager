@@ -83,20 +83,45 @@
    for(const id of bad)result.delete(id);
    return result;
  }
- function pendingQueue(trainer,now=new Date()){
+
+ const CATALOG_KEY='toeic-trainer:review-catalog-v1';
+ const VALID_CATALOG_ID=/^[a-z0-9_-]{1,90}$/i;
+ function catalogSignature(writtenIds,vocabIds){
+   const data=writtenIds.join('\n')+'\n#\n'+vocabIds.join('\n');
+   let h=2166136261;
+   for(let i=0;i<data.length;i++){h^=data.charCodeAt(i);h=Math.imul(h,16777619)}
+   return (h>>>0).toString(16).padStart(8,'0');
+ }
+ function reviewCatalogIds(catalog){
+   if(!catalog||catalog.source!=='toeic-trainer-standalone'||catalog.schema!==1||
+      catalog.version!==1||catalog.kind!=='active-audited-bank-ids')return null;
+   const {writtenIds,writtenCount,vocabIds,vocabCount}=catalog;
+   const good=ids=>Array.isArray(ids)&&ids.length>0&&ids.length<=1500&&
+      ids.every(x=>typeof x==='string'&&VALID_CATALOG_ID.test(x))&&
+      new Set(ids).size===ids.length&&ids.every((x,i)=>i===0||ids[i-1]<x);
+   if(!good(writtenIds)||!good(vocabIds)||writtenCount!==writtenIds.length||
+      vocabCount!==vocabIds.length||catalog.signature!==catalogSignature(writtenIds,vocabIds)||
+      writtenIds.some(x=>vocabIds.includes(x)))return null;
+   return {written:new Set(writtenIds),vocab:new Set(vocabIds)};
+ }
+ function validReviewCatalog(catalog){return !!reviewCatalogIds(catalog)}
+ function pendingQueue(trainer,catalog,now=new Date()){
+   const allowed=reviewCatalogIds(catalog);
+   if(!allowed)return null; // Never show stale historical IDs as currently answerable.
+
    if(!trainer||trainer.appId!=='toeic-trainer-standalone'||Number(trainer.schema)!==1)return null;
    const time=now instanceof Date?now.getTime():new Date(now).getTime();
    if(!Number.isFinite(time))return null;
    const s=trainer.questionStats||{},v=trainer.review||{};
    const out={due:0,mastered:0,waiting:0,dueWords:0};
-   for(const rec of Object.values(s)){
-     if(!rec||typeof rec!=='object'||!(Number(rec.wrong)>0))continue;
+   for(const [id,rec] of Object.entries(s)){
+     if(!allowed.written.has(id)||!rec||typeof rec!=='object'||!(Number(rec.wrong)>0))continue;
      if(rec.mastered===true){out.mastered++;continue;}
      const at=Date.parse(rec.dueAt||'');
      if(!Number.isFinite(at)||at<=time)out.due++;else out.waiting++;
    }
-   for(const rec of Object.values(v)){
-     if(!rec||typeof rec!=='object'||!rec.dueAt||!(Number(rec.times)>0))continue;
+   for(const [id,rec] of Object.entries(v)){
+     if(!allowed.vocab.has(id)||!rec||typeof rec!=='object'||!rec.dueAt||!(Number(rec.times)>0))continue;
      const at=Date.parse(rec.dueAt);
      if(Number.isFinite(at)&&at<=time)out.dueWords++;
    }
@@ -108,10 +133,12 @@
    const active=!!rule&&!!parent&&!!start&&!!end&&parent.start&&parent.due&&
      start<=parent.due&&end>=parent.start&&parent.status!=='已封存'&&task.status!=='已封存';
    const result={target,done:0,remaining:active?target:0,accuracy:null,actualAnswered:0,
+     reviewAnswered:0,reviewCorrect:0,masteredThisWeek:0,
      evidenceMissing:0,active:!!active,kind:rule?.kind||'',unit:'題'};
    if(!active||!target)return result;
    const index=sessionIndex(trainer),ids=new Set(),events=new Set();
-   let answered=0,correct=0;
+   let answered=0,correct=0,dueAttempts=0,dueCorrect=0;
+   const masteredThisWeek=new Set();
    for(const log of list(logs)){
      if(log?.status==='已刪除'||log?.actual!==true||log?.source!=='toeic-trainer-v05'||
        String(log.taskId)!==String(task.id)||log.progressAlias===true)continue;
@@ -128,16 +155,35 @@
      // Only real submitted sessions acknowledged by GM may generate progress.
      let items=e.questionIds;
      if(rule.kind==='review'){
-       // Old sessions cannot prove what was *due at submission time*.
-       if(!Array.isArray(e.reviewDueIds)){result.evidenceMissing++;continue;}
+       // Score ONLY original due items, never sibling variations/whole-paper accuracy.
+       if(!Array.isArray(e.reviewDueIds)||!Array.isArray(e.reviewCorrectIds)){
+         result.evidenceMissing++;continue;
+       }
        const allowed=new Set(e.questionIds);
-       items=e.reviewDueIds.filter(id=>allowed.has(id));
+       const masteredRows=e.reviewMasteredIds===undefined?[]:e.reviewMasteredIds;
+       if(!Array.isArray(masteredRows)){result.evidenceMissing++;continue;}
+       const due=new Set(e.reviewDueIds),right=new Set(e.reviewCorrectIds);
+       const mastered=new Set(masteredRows);
+       if(due.size!==e.reviewDueIds.length||right.size!==e.reviewCorrectIds.length||
+          ![...due].every(id=>allowed.has(id))||
+          ![...right].every(id=>due.has(id))||
+          mastered.size!==masteredRows.length||
+          ![...mastered].every(id=>right.has(id))){
+         result.evidenceMissing++;continue;
+       }
+       items=[...due];
+       dueAttempts+=due.size;dueCorrect+=right.size;
+       for(const id of mastered)masteredThisWeek.add(id);
      }
      for(const qid of items){if(!ids.has(qid))ids.add(qid);}
      answered+=e.questionsAnswered;correct+=e.correct;
    }
    result.done=ids.size;result.remaining=Math.max(0,target-ids.size);
-   result.accuracy=answered>0?Math.round(correct*100/answered):null;
+   result.reviewAnswered=dueAttempts;result.reviewCorrect=dueCorrect;
+   result.masteredThisWeek=masteredThisWeek.size;
+   result.accuracy=rule.kind==='review'
+     ?(dueAttempts?Math.round(dueCorrect*100/dueAttempts):null)
+     :(answered?Math.round(correct*100/answered):null);
    result.actualAnswered=answered;
    return result;
  }
@@ -154,5 +200,5 @@
    }
    return weeks?Math.max(0,Math.min(100,Math.round(value/(weeks*target)*100))):0;
  }
- return Object.freeze({RULES,isOutcomeTask,migrate,dateKey,monday,sunday,pendingQueue,summary,leafProgress});
+ return Object.freeze({RULES,CATALOG_KEY,catalogSignature,validReviewCatalog,isOutcomeTask,migrate,dateKey,monday,sunday,pendingQueue,summary,leafProgress});
 });
