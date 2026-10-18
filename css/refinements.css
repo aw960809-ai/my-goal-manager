@@ -608,7 +608,9 @@
   #activity .gm-radar-advanced > summary,
   #activity .gm-activity-reason-details > summary,
   #settingsBody .settings-hub-panel > summary.settings-hub-summary,
-  #settingsBody .settings-hub-advanced > summary
+  #settingsBody .settings-hub-advanced > summary,
+  #activity .activity-review-disclosure > summary,
+  #activity .activity-review-why > summary
 ) {
   -webkit-tap-highlight-color: transparent !important;
   -webkit-user-select: none !important;
@@ -627,7 +629,9 @@
   #activity .gm-radar-advanced > summary,
   #activity .gm-activity-reason-details > summary,
   #settingsBody .settings-hub-panel > summary.settings-hub-summary,
-  #settingsBody .settings-hub-advanced > summary
+  #settingsBody .settings-hub-advanced > summary,
+  #activity .activity-review-disclosure > summary,
+  #activity .activity-review-why > summary
 ):focus:not(:focus-visible) {
   outline: none !important;
 }
@@ -639,7 +643,9 @@
   #activity .gm-radar-advanced > summary,
   #activity .gm-activity-reason-details > summary,
   #settingsBody .settings-hub-panel > summary.settings-hub-summary,
-  #settingsBody .settings-hub-advanced > summary
+  #settingsBody .settings-hub-advanced > summary,
+  #activity .activity-review-disclosure > summary,
+  #activity .activity-review-why > summary
 ):focus-visible {
   outline: 3px solid var(--gm-focus, rgba(89,106,133,.3)) !important;
   outline-offset: -3px !important;
@@ -652,7 +658,9 @@
   #activity .gm-radar-advanced > summary,
   #activity .gm-activity-reason-details > summary,
   #settingsBody .settings-hub-panel > summary.settings-hub-summary,
-  #settingsBody .settings-hub-advanced > summary
+  #settingsBody .settings-hub-advanced > summary,
+  #activity .activity-review-disclosure > summary,
+  #activity .activity-review-why > summary
 ):active {
   filter: brightness(.98);
 }
