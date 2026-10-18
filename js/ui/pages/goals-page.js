@@ -25,7 +25,10 @@
       if(summary.outcome){
         const o=summary.outcome;
         return `本週 ${o.done}/${o.target} 題 · 尚需 ${o.remaining} 題 · 累計 ${calc(task)}%`+
-          (o.queue?` · 到期 ${o.queue.due} 題／已掌握 ${o.queue.mastered} 題`:'')+
+          (o.kind==='review'
+  ?` · 重測 ${o.accuracy===null?'—':o.accuracy+'%'} · 新掌握 ${o.masteredThisWeek} 題`+
+    (o.queue?` · 可練到期 ${o.queue.due} 題／累計掌握 ${o.queue.mastered} 題`:' · 題庫待同步')
+  :'')+
           (task.previousTimeProgress!==undefined?` · 改制前時數進度 ${Math.round(task.previousTimeProgress)}%`:'');
       }
       return `本週 ${TimeFormat.minutes(summary.weeklyActual)}/${TimeFormat.minutes(summary.weeklyTarget)} 分 · 剩餘 ${TimeFormat.minutes(summary.weeklyRemaining)} 分 · 累計 ${calc(task)}%`;

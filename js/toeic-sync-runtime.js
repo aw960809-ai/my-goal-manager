@@ -82,6 +82,11 @@
         }
         added=unique.reduce((sum,x)=>sum+x.minutes,0);
         if(typeof renderAll==='function')renderAll();
+      }else if(['focus','resume','other-tab-write','completed-session'].includes(reason)){
+        // Read-only refresh even when no new session is eligible for minutes sync.
+        if(typeof toeicTrainerCache!=='undefined')toeicTrainerCache=undefined;
+        if(typeof toeicReviewCatalogCache!=='undefined')toeicReviewCatalogCache=undefined;
+        if(typeof renderAll==='function')renderAll();
       }
       recordSummary({version:1,lastCheckedAt:new Date().toISOString(),reason,blocked:'',added,addedCount:unique.length,
         held:report.held.length,excluded:report.excluded.length,already:report.already.length,
@@ -103,7 +108,8 @@
         recordSummary({blocked:'目標系統另有分頁更新資料；請重新載入再連動',added:0,addedCount:0,held:0,already:0});
         return;
       }
-      if(event.key===policy.TRAINER_KEY||event.key===policy.CONSENT_KEY)sync('other-tab-write');
+      if(event.key===policy.TRAINER_KEY||event.key===policy.CONSENT_KEY||
+         event.key==='toeic-trainer:review-catalog-v1')sync('other-tab-write');
     });
     window.addEventListener('focus',()=>sync('focus'));
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync('resume')});

@@ -25,13 +25,17 @@
         const parent=ancestors(task.id).slice(-2,-1)[0]?.name||'';
 
         const outcome=week.outcome;
-        const metrics=outcome
-          ?`${calc(task)}% · 本週 ${outcome.done}/${outcome.target} 題 · 剩餘 ${outcome.remaining} 題`+
-            (outcome.accuracy===null?' · 尚無正確率證據':` · 正確率 ${outcome.accuracy}%`)+
-            (outcome.evidenceMissing?` · ${outcome.evidenceMissing} 筆待補證據`:'')+
-            (outcome.queue?` · 目前到期 ${outcome.queue.due} 題／已掌握 ${outcome.queue.mastered} 題`:'' )
-          :`${calc(task)}% · 本週 ${TimeFormat.minutes(week.actual)}/${TimeFormat.minutes(week.target)} 分 · 剩餘 ${TimeFormat.minutes(week.remaining)} 分`;
-        return `<div class="listitem dash-exec"><div><b>${esc(task.name)}</b><small>${metrics}${parent?' · '+esc(parent):''}</small></div><button class="btn primary" onclick="executeFromDashboard('${task.id}')">${outcome?'去練習':'開始'}</button></div>`;
+        const metrics=outcome?.kind==='review'
+          ?`本週 ${outcome.done}/${outcome.target} 題 · 待 ${outcome.remaining} 題`+
+            ` · 重測 ${outcome.accuracy===null?'—':outcome.accuracy+'%'} · 新掌握 ${outcome.masteredThisWeek}`+
+            (outcome.queue?` · 到期 ${outcome.queue.due}`:' · 題庫待同步')+
+            (outcome.evidenceMissing?` · 待證 ${outcome.evidenceMissing}`:'')
+          :outcome
+            ?`${calc(task)}% · 本週 ${outcome.done}/${outcome.target} 題 · 剩餘 ${outcome.remaining} 題`+
+              (outcome.accuracy===null?' · 尚無正確率證據':` · 正確率 ${outcome.accuracy}%`)+
+              (outcome.evidenceMissing?` · ${outcome.evidenceMissing} 筆待補證據`:'')
+            :`${calc(task)}% · 本週 ${TimeFormat.minutes(week.actual)}/${TimeFormat.minutes(week.target)} 分 · 剩餘 ${TimeFormat.minutes(week.remaining)} 分`;
+        return `<div class="listitem dash-exec"><div><b>${esc(task.name)}</b><small>${metrics}${outcome?.kind==='review'?'':parent?' · '+esc(parent):''}</small></div><button class="btn primary" onclick="executeFromDashboard('${task.id}')">${outcome?'去練習':'開始'}</button></div>`;
       }).join('')
       :'<div class="empty">本週沒有待辦執行事項。</div>';
   }

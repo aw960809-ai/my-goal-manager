@@ -582,7 +582,21 @@ function actualMinutesInRange(t,start,end){return ExecutionDomain.actualMinutesI
 function actualMinutes(t){return ExecutionDomain.actualMinutes(db.tasks,db.logs,t)}
 // Read-only evidence, under the trainer's original consent and same-origin keys.
 // The Trainer remains the source of detailed answers; never copy its DB into GM.
-let toeicTrainerCache;
+let toeicTrainerCache,toeicReviewCatalogCache;
+function toeicReviewCatalogSnapshot(){
+ if(toeicReviewCatalogCache!==undefined)return toeicReviewCatalogCache;
+ toeicReviewCatalogCache=null;
+ try{
+  if(!window.GoalToeicSyncPolicy||!window.ToeicOutcomeDomain)return null;
+  const consent=JSON.parse(storeGet(GoalToeicSyncPolicy.CONSENT_KEY)||'null');
+  if(consent?.enabled!==true||consent.version!==1)return null;
+  const raw=storeGet(ToeicOutcomeDomain.CATALOG_KEY);
+  if(!raw||raw.length>180000)return null;
+  const record=JSON.parse(raw);
+  if(ToeicOutcomeDomain.validReviewCatalog(record))toeicReviewCatalogCache=record;
+ }catch(_){toeicReviewCatalogCache=null}
+ return toeicReviewCatalogCache;
+}
 function toeicTrainerSnapshot(){
  if(toeicTrainerCache!==undefined)return toeicTrainerCache;
  toeicTrainerCache=null;
@@ -601,13 +615,13 @@ function toeicTrainerSnapshot(){
 function currentWeekSummary(t,date=todayKey()){
  const trainer=toeicTrainerSnapshot();
  const week=ExecutionDomain.currentWeekSummary(db.tasks,db.logs,t,date,trainer);
- if(week.outcome?.kind==='review')week.outcome.queue=ToeicOutcomeDomain.pendingQueue(trainer);
+ if(week.outcome?.kind==='review')week.outcome.queue=ToeicOutcomeDomain.pendingQueue(trainer,toeicReviewCatalogSnapshot());
  return week;
 }
 function leafProgress(t){return ExecutionDomain.leafProgress(db.tasks,db.logs,t,toeicTrainerSnapshot())}
 function executionSummary(t){
  const trainer=toeicTrainerSnapshot(),report=ExecutionDomain.executionSummary(db.tasks,db.logs,t,todayKey(),trainer);
- if(report.outcome?.kind==='review')report.outcome.queue=ToeicOutcomeDomain.pendingQueue(trainer);
+ if(report.outcome?.kind==='review')report.outcome.queue=ToeicOutcomeDomain.pendingQueue(trainer,toeicReviewCatalogSnapshot());
  return report;
 }
 function inPeriod(date,period){return ExecutionDomain.inPeriod(date,period)}
@@ -781,7 +795,7 @@ function openGoalInfoModal(id,autoSchedule=false){
   <div class="info-kv"><small>上層目標</small><b>${esc(parent)}</b></div>
   <div class="info-kv"><small>執行期間</small><b>${esc(p?.start&&p?.due?p.start+' ～ '+p.due:'由下層／尚未設定')}</b></div>
   ${t.level===4?(es.outcome
-   ?`<div class="info-kv"><small>本週複習／練習</small><b>${es.outcome.done}/${es.outcome.target} 題</b></div><div class="info-kv"><small>正確率</small><b>${es.outcome.accuracy===null?'待證據':es.outcome.accuracy+'%'}</b></div><div class="info-kv"><small>本週獨立投入</small><b>${es.weeklyActual} 分鐘</b></div>${es.outcome.evidenceMissing?`<div class="info-kv"><small>待補證據事件</small><b>${es.outcome.evidenceMissing} 筆</b></div>`:''}`
+   ?`<div class="info-kv"><small>本週複習／練習</small><b>${es.outcome.done}/${es.outcome.target} 題</b></div><div class="info-kv"><small>${es.outcome.kind==='review'?'重測正確率':'正確率'}</small><b>${es.outcome.accuracy===null?'待證據':es.outcome.accuracy+'%'}</b></div>${es.outcome.kind==='review'?`<div class="info-kv"><small>到期重測題次</small><b>${es.outcome.reviewCorrect}/${es.outcome.reviewAnswered} 題次</b></div><div class="info-kv"><small>本週新掌握</small><b>${es.outcome.masteredThisWeek} 題</b></div>`:''}<div class="info-kv"><small>本週獨立投入</small><b>${es.weeklyActual} 分鐘</b></div>${es.outcome.evidenceMissing?`<div class="info-kv"><small>待補證據事件</small><b>${es.outcome.evidenceMissing} 筆</b></div>`:''}`
    :`<div class="info-kv"><small>本週投入</small><b>${es.weeklyTarget} 分鐘</b></div><div class="info-kv"><small>本週已投入</small><b>${es.weeklyActual} 分鐘</b></div><div class="info-kv"><small>本週剩餘</small><b>${es.weeklyRemaining} 分鐘</b></div>`):''}
   </div>
   ${t.level===4?`<div class="goal-info-actions"><button class="btn primary" type="button" onclick="closeGoalInfoModal();${es.outcome?'executeFromDashboard':'useTimer'}('${t.id}')">${es.outcome?'前往 TOEIC 訓練':'直接執行'}</button><button class="btn" type="button" onclick="openEditFromInfo('${t.id}')">修改</button><button class="btn" type="button" onclick="closeGoalInfoModal()">關閉</button></div>`:`<div class="goal-info-actions"><button class="btn primary" type="button" onclick="openEditFromInfo('${t.id}')">修改</button><button class="btn" type="button" onclick="closeGoalInfoModal()">關閉</button></div>`}`;
@@ -1651,6 +1665,7 @@ function calendarToday(){
 }
 function renderAll(){
  toeicTrainerCache=undefined;
+ toeicReviewCatalogCache=undefined;
  AppOrchestrator.renderAll({
   normalizeState:()=>{db=normalize(db)},
   rebuildExecutionPlanActuals,

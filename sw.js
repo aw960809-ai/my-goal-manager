@@ -5,7 +5,7 @@ const PWA_VERSION=String(globalThis.GOAL_MANAGER_VERSION||'98.13.10');
 const PWA_SIGNATURE='thu-personal-'+PWA_VERSION+'-core';
 const CACHE_PREFIX='thu-goal-personal-v';
 const LEGACY_CACHE_PREFIX='law-goal-web-v';
-const CACHE=CACHE_PREFIX+PWA_VERSION+'-icons-20261005a-outcome-20261018';
+const CACHE=CACHE_PREFIX+PWA_VERSION+'-icons-20261005a-outcome-20261018-review-v76';
 const APP_SHELL=[/* suite-icons:assets:start */
   "./assets/suite-icons/20261005a/icon-64.png",
   "./assets/suite-icons/20261005a/apple-touch-icon.png",
