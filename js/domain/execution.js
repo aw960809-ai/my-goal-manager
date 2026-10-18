@@ -6,11 +6,14 @@
   const study=typeof module==='object'&&module.exports
     ?require('./study-logs.js')
     :root.StudyLogDomain;
-  const api=factory(goal,study);
+  const toeicOutcomes=typeof module==='object'&&module.exports
+    ?require('./toeic-outcomes.js')
+    :root.ToeicOutcomeDomain;
+  const api=factory(goal,study,toeicOutcomes);
 
   if(typeof module==='object'&&module.exports)module.exports=api;
   root.ExecutionDomain=api;
-})(typeof globalThis!=='undefined'?globalThis:this,function(GoalDomain,StudyLogDomain){
+})(typeof globalThis!=='undefined'?globalThis:this,function(GoalDomain,StudyLogDomain,ToeicOutcomeDomain){
   'use strict';
 
   if(!GoalDomain)throw new Error('ExecutionDomain requires GoalDomain');
@@ -100,7 +103,7 @@
     return actualMinutesInRange(tasks,logs,task,p.start,p.due);
   }
 
-  function currentWeekSummary(tasks,logs,task,date){
+  function currentWeekSummary(tasks,logs,task,date,trainer=null){
     if(!task||Number(task.level)!==4){
       return {target:0,actual:0,credited:0,overrun:0,remaining:0,start:'',end:'',active:false};
     }
@@ -120,6 +123,13 @@
 
     const target=Math.max(0,+task.weeklyMinutes||0);
     const actual=actualMinutesInRange(tasks,logs,task,ws,we);
+    if(ToeicOutcomeDomain?.isOutcomeTask(task)){
+      const outcome=ToeicOutcomeDomain.summary(tasks,logs,task,date,trainer);
+      // Keep actual minutes in analytic totals. Never credit those minutes
+      // as an outcome goal's completed-question progress.
+      return {target:0,actual,credited:0,overrun:0,remaining:0,
+        start:ws,end:we,active:true,outcome};
+    }
     const accounting=timeAccounting(target,actual);
 
     return {
@@ -134,8 +144,11 @@
     };
   }
 
-  function leafProgress(tasks,logs,task){
+  function leafProgress(tasks,logs,task,trainer=null){
     if(!task||Number(task.level)!==4)return 0;
+    if(ToeicOutcomeDomain?.isOutcomeTask(task)){
+      return ToeicOutcomeDomain.leafProgress(tasks,logs,task,trainer);
+    }
 
     const weekly=Math.max(0,+task.weeklyMinutes||0);
     const weeks=activeWeekCount(tasks,task);
@@ -146,8 +159,8 @@
     return timeAccounting(planned,actualMinutes(tasks,logs,task)).progress;
   }
 
-  function executionSummary(tasks,logs,task,date){
-    const w=currentWeekSummary(tasks,logs,task,date);
+  function executionSummary(tasks,logs,task,date,trainer=null){
+    const w=currentWeekSummary(tasks,logs,task,date,trainer);
 
     return {
       weeklyTarget:w.target,
@@ -156,8 +169,9 @@
       weeklyOverrun:w.overrun,
       weeklyRemaining:w.remaining,
       totalActual:actualMinutes(tasks,logs,task),
-      progress:leafProgress(tasks,logs,task),
-      active:w.active
+      progress:leafProgress(tasks,logs,task,trainer),
+      active:w.active,
+      outcome:w.outcome||null
     };
   }
 
