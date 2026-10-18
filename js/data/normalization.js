@@ -26,7 +26,7 @@
       }
     }
 
-    return {
+    const out={
       id:String(t.id),
       name:String(t.name||'未命名目標'),
       level,
@@ -39,6 +39,17 @@
       due:level===3?(t.due||''):'',
       progress:Math.max(0,Math.min(100,+t.progress||0))
     };
+    // Schema 6 additive fields: retain outcome goals and pre-migration
+    // historical percent on EVERY normalize/import/render roundtrip.
+    if(level===4&&t.progressMetric==='questions'&&Number.isFinite(+t.weeklyTargetCount)
+       &&+t.weeklyTargetCount>0){
+      out.progressMetric='questions';
+      out.weeklyTargetCount=Math.max(1,Math.min(300,Math.round(+t.weeklyTargetCount)));
+    }
+    if(t.previousTimeProgress!==undefined&&Number.isFinite(+t.previousTimeProgress)){
+      out.previousTimeProgress=Math.max(0,Math.min(100,+t.previousTimeProgress));
+    }
+    return out;
   }
 
   function normalizeTasks(tasks){

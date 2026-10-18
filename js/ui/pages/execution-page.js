@@ -15,6 +15,13 @@
     const isSelected=String(timer.id)===String(task.id);
     const week=currentWeekSummary(task);
     const path=ancestors(task.id).slice(0,-1).map(x=>x.name).join(' › ');
+    if(week.outcome){
+      const o=week.outcome;
+      const metric=`本週 ${o.done}/${o.target} 題 · 尚需 ${o.remaining} 題 · ${calc(task)}%`+
+        (o.accuracy===null?' · 待有效交卷證據':` · 正確率 ${o.accuracy}%`)+
+        (o.queue?` · 到期 ${o.queue.due} 題／已掌握 ${o.queue.mastered} 題`:'');
+      return `<div class="listitem"><div class="today-item-main"><span class="today-select-icon" aria-hidden="true">○</span><div class="today-item-copy"><b>${esc(task.name)}</b><small class="muted today-metrics">${metric}</small>${path?`<small class="today-path">${esc(path)}</small>`:''}</div></div><div class="today-actions"><button class="btn primary" onclick="executeFromDashboard('${task.id}')">前往 TOEIC</button></div></div>`;
+    }
     const credited=Math.max(0,+week.credited||Math.min(+week.actual||0,+week.target||0));
     const overrun=Math.max(0,+week.overrun||0);
     const overrunText=overrun?` · 超時 ${TimeFormat.minutes(overrun)} 分`:'';

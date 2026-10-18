@@ -22,6 +22,12 @@
 
     if(task.level===4){
       const summary=executionSummary(task);
+      if(summary.outcome){
+        const o=summary.outcome;
+        return `本週 ${o.done}/${o.target} 題 · 尚需 ${o.remaining} 題 · 累計 ${calc(task)}%`+
+          (o.queue?` · 到期 ${o.queue.due} 題／已掌握 ${o.queue.mastered} 題`:'')+
+          (task.previousTimeProgress!==undefined?` · 改制前時數進度 ${Math.round(task.previousTimeProgress)}%`:'');
+      }
       return `本週 ${TimeFormat.minutes(summary.weeklyActual)}/${TimeFormat.minutes(summary.weeklyTarget)} 分 · 剩餘 ${TimeFormat.minutes(summary.weeklyRemaining)} 分 · 累計 ${calc(task)}%`;
     }
 
@@ -215,7 +221,9 @@
     const meta=task.level===3
       ?('期間 '+periodLabel(task))
       :task.level===4
-        ?`本週 ${TimeFormat.minutes(summary.weeklyActual)}/${TimeFormat.minutes(summary.weeklyTarget)} 分 · 剩餘 ${TimeFormat.minutes(summary.weeklyRemaining)} 分 · 累計 ${TimeFormat.minutes(summary.totalActual)} 分 · 期間 ${periodLabel(task)}${planned.length?` · 已安排 ${planned.length} 次`:''}`
+        ?(summary.outcome
+          ?`本週 ${summary.outcome.done}/${summary.outcome.target} 題 · 尚需 ${summary.outcome.remaining} 題 · 本週實際投入 ${TimeFormat.minutes(summary.weeklyActual)} 分 · 期間 ${periodLabel(task)}`
+          :`本週 ${TimeFormat.minutes(summary.weeklyActual)}/${TimeFormat.minutes(summary.weeklyTarget)} 分 · 剩餘 ${TimeFormat.minutes(summary.weeklyRemaining)} 分 · 累計 ${TimeFormat.minutes(summary.totalActual)} 分 · 期間 ${periodLabel(task)}${planned.length?` · 已安排 ${planned.length} 次`:''}`)
         :'期間由下層子任務決定';
 
     return `<div class="task ${hit?'search-hit':''}" id="task-${task.id}"><div class="taskline"><button class="chev ${children.length?'has-kids':''}" aria-label="${children.length?(open?'收合下層':'展開下層'):'無下層'}" title="${children.length?(open?'點擊收合下層':'點擊展開下層'):'沒有下層'}" onclick="toggleKids('${task.id}')">${children.length?(open?'▾':'▸'):'•'}</button><button class="taskname" aria-label="查看 ${esc(task.name)}" onclick="openGoalInfoModal('${task.id}')"><span>${esc(task.name)}</span><small>${levelLabels[task.level]} · ${meta}</small></button><span class="pill ${task.status==='已完成'?'done':task.status==='進行中'?'run':''}">${task.status}</span><span class="pct">${progress}%</span><span class="mini"><button type="button" title="查看資訊" aria-label="查看資訊" onclick="openGoalInfoModal('${task.id}')">ⓘ</button>${task.level===4?`<button type="button" title="安排執行" aria-label="安排執行" onclick="openGoalInfoModal('${task.id}',true)">＋</button>`:''}</span></div><div class="barwrap"><div class="bar" style="width:${progress}%"></div></div>${children.length&&open?`<div class="kids">${children.map(child=>taskNode(child,{calc,kids,isOpen,isHit,executionSummary,executionPlans,activeExecutionPlan,periodLabel,levelLabels,esc})).join('')}</div>`:''}</div>`;

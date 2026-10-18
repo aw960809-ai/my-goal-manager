@@ -535,6 +535,7 @@ function ensureToeicPlan(){
  const result=done?{applied:false,bootstrapEligible:false}:ToeicPlanDomain.apply(db.tasks);
  const aliases=ToeicPlanDomain.progressAliases(db.tasks,db.logs);
  if(aliases.length)db.logs.push(...aliases);
+ const outcomes=window.ToeicOutcomeDomain?ToeicOutcomeDomain.migrate(db.tasks):{changed:false,leaves:0};
  try{storeSet('o'+ToeicPlanDomain.ROOT_ID,'1')}catch(_){}
  if(!Array.isArray(db.calendarEvents))db.calendarEvents=[];
  [
@@ -542,7 +543,8 @@ function ensureToeicPlan(){
   ['toeic-reg-close','2026-12-04','TOEIC 12/20 場次｜報名截止','依官方報名系統'],
   ['toeic-20261220','2026-12-20','TOEIC 聽力與閱讀測驗｜正式考試','依准考證']
  ].forEach(([id,date,title,time])=>{if(!db.calendarEvents.some(e=>e.id===id)){db.calendarEvents.push({id,type:'school',date,time,title,meta:'TOEIC 重要節點'})}})
- return {...result,applied:!!(result.applied||aliases.length),progressAliasesAdded:aliases.length};
+ return {...result,applied:!!(result.applied||aliases.length||outcomes.changed),
+   progressAliasesAdded:aliases.length,outcomeLeavesMigrated:outcomes.leaves};
 }
 
 function save(options={}){
@@ -578,9 +580,36 @@ function otherStudyMinutesInRange(start,end){return StudyLogDomain.otherStudyMin
 function rebuildExecutionPlanActuals(){db.executionPlans=ExecutionDomain.rebuildExecutionPlanActuals(db.executionPlans,db.logs,db.tasks,new Date().toISOString())}
 function actualMinutesInRange(t,start,end){return ExecutionDomain.actualMinutesInRange(db.tasks,db.logs,t,start,end)}
 function actualMinutes(t){return ExecutionDomain.actualMinutes(db.tasks,db.logs,t)}
-function currentWeekSummary(t,date=todayKey()){return ExecutionDomain.currentWeekSummary(db.tasks,db.logs,t,date)}
-function leafProgress(t){return ExecutionDomain.leafProgress(db.tasks,db.logs,t)}
-function executionSummary(t){return ExecutionDomain.executionSummary(db.tasks,db.logs,t,todayKey())}
+// Read-only evidence, under the trainer's original consent and same-origin keys.
+// The Trainer remains the source of detailed answers; never copy its DB into GM.
+let toeicTrainerCache;
+function toeicTrainerSnapshot(){
+ if(toeicTrainerCache!==undefined)return toeicTrainerCache;
+ toeicTrainerCache=null;
+ try{
+  if(!window.GoalToeicSyncPolicy)return null;
+  const consent=JSON.parse(storeGet(GoalToeicSyncPolicy.CONSENT_KEY)||'null');
+  if(consent?.enabled!==true||consent.version!==1)return null;
+  const raw=storeGet(GoalToeicSyncPolicy.TRAINER_KEY);
+  if(!raw||raw.length>3*1024*1024)return null;
+  const trainer=JSON.parse(raw);
+  if(trainer?.appId==='toeic-trainer-standalone'&&Number(trainer.schema)===1&&
+    Array.isArray(trainer.sessions)&&trainer.sessions.length<=2000)toeicTrainerCache=trainer;
+ }catch(_){toeicTrainerCache=null}
+ return toeicTrainerCache;
+}
+function currentWeekSummary(t,date=todayKey()){
+ const trainer=toeicTrainerSnapshot();
+ const week=ExecutionDomain.currentWeekSummary(db.tasks,db.logs,t,date,trainer);
+ if(week.outcome?.kind==='review')week.outcome.queue=ToeicOutcomeDomain.pendingQueue(trainer);
+ return week;
+}
+function leafProgress(t){return ExecutionDomain.leafProgress(db.tasks,db.logs,t,toeicTrainerSnapshot())}
+function executionSummary(t){
+ const trainer=toeicTrainerSnapshot(),report=ExecutionDomain.executionSummary(db.tasks,db.logs,t,todayKey(),trainer);
+ if(report.outcome?.kind==='review')report.outcome.queue=ToeicOutcomeDomain.pendingQueue(trainer);
+ return report;
+}
 function inPeriod(date,period){return ExecutionDomain.inPeriod(date,period)}
 function periodLabel(t){const p=periodForTask(t);if(!p?.start||!p?.due)return '尚未設定子任務期間';return `${p.start} ～ ${p.due}`}
 function calc(t,stack=new Set()){
@@ -751,9 +780,11 @@ function openGoalInfoModal(id,autoSchedule=false){
   <div class="info-kv"><small>完成度</small><b>${calc(t)}%</b></div>
   <div class="info-kv"><small>上層目標</small><b>${esc(parent)}</b></div>
   <div class="info-kv"><small>執行期間</small><b>${esc(p?.start&&p?.due?p.start+' ～ '+p.due:'由下層／尚未設定')}</b></div>
-  ${t.level===4?`<div class="info-kv"><small>本週投入</small><b>${es.weeklyTarget} 分鐘</b></div><div class="info-kv"><small>本週已投入</small><b>${es.weeklyActual} 分鐘</b></div><div class="info-kv"><small>本週剩餘</small><b>${es.weeklyRemaining} 分鐘</b></div>`:''}
- </div>
- ${t.level===4?`<div class="goal-info-actions"><button class="btn primary" type="button" onclick="closeGoalInfoModal();useTimer('${t.id}')">直接執行</button><button class="btn" type="button" onclick="openEditFromInfo('${t.id}')">修改</button><button class="btn" type="button" onclick="closeGoalInfoModal()">關閉</button></div>`:`<div class="goal-info-actions"><button class="btn primary" type="button" onclick="openEditFromInfo('${t.id}')">修改</button><button class="btn" type="button" onclick="closeGoalInfoModal()">關閉</button></div>`}`;
+  ${t.level===4?(es.outcome
+   ?`<div class="info-kv"><small>本週複習／練習</small><b>${es.outcome.done}/${es.outcome.target} 題</b></div><div class="info-kv"><small>正確率</small><b>${es.outcome.accuracy===null?'待證據':es.outcome.accuracy+'%'}</b></div><div class="info-kv"><small>本週獨立投入</small><b>${es.weeklyActual} 分鐘</b></div>${es.outcome.evidenceMissing?`<div class="info-kv"><small>待補證據事件</small><b>${es.outcome.evidenceMissing} 筆</b></div>`:''}`
+   :`<div class="info-kv"><small>本週投入</small><b>${es.weeklyTarget} 分鐘</b></div><div class="info-kv"><small>本週已投入</small><b>${es.weeklyActual} 分鐘</b></div><div class="info-kv"><small>本週剩餘</small><b>${es.weeklyRemaining} 分鐘</b></div>`):''}
+  </div>
+  ${t.level===4?`<div class="goal-info-actions"><button class="btn primary" type="button" onclick="closeGoalInfoModal();${es.outcome?'executeFromDashboard':'useTimer'}('${t.id}')">${es.outcome?'前往 TOEIC 訓練':'直接執行'}</button><button class="btn" type="button" onclick="openEditFromInfo('${t.id}')">修改</button><button class="btn" type="button" onclick="closeGoalInfoModal()">關閉</button></div>`:`<div class="goal-info-actions"><button class="btn primary" type="button" onclick="openEditFromInfo('${t.id}')">修改</button><button class="btn" type="button" onclick="closeGoalInfoModal()">關閉</button></div>`}`;
  document.getElementById('goalInfoTitle').textContent=t.name;
  document.getElementById('goalInfoModal').classList.add('show');document.body.style.overflow='hidden';bindInteractionFeedback();
 }
@@ -781,7 +812,8 @@ function renderWeeklyReview(date=todayKey()){
 }function deleteActualLog(id){
  const log=(Array.isArray(db.logs)?db.logs:[]).find(x=>String(x.id)===String(id));
  if(!log||!isCountableActualLog(log)){toast(log?.status==='已刪除'?'這筆紀錄已刪除':'找不到可刪除的實際紀錄');return}
- const impact=isOtherStudyLog(log)?'總讀書時數與其他讀書分析':'完成度與實際時數分析';
+  const impact=isOtherStudyLog(log)?'總讀書時數與其他讀書分析':
+   window.ToeicOutcomeDomain?.isOutcomeTask(getTask(log.taskId))?'實際時數分析；成果題數另由交卷證據計算':'完成度與實際時數分析';
  if(!confirm(`確定刪除「${log.name||getTask(log.taskId)?.name||'這筆實際紀錄'}」的 ${Math.max(0,+log.minutes||0)} 分鐘實際投入紀錄？\n\n刪除後將不再計入${impact}，但紀錄可恢復。`))return;
  const oldLogs=db.logs,oldPlans=db.executionPlans;
  db.logs=oldLogs.map(x=>x===log?{...x,status:'已刪除',deletedAt:new Date().toISOString()}:x);
@@ -1105,8 +1137,10 @@ function addGoalStudyLog(){
   toast('補登失敗；目前資料未變更');
   return;
  }
- renderAll();
- toast(`已補登「${t.name}」${mins} 分鐘；完成度與總讀書時間已更新`);
+  renderAll();
+  toast(window.ToeicOutcomeDomain?.isOutcomeTask(t)
+   ?`已補登「${t.name}」${mins} 分鐘；保留時間分析，不增加成果題數`
+   :`已補登「${t.name}」${mins} 分鐘；完成度與總讀書時間已更新`);
 }
 function otherStudyInputName(){return (document.getElementById('otherStudyName')?.value||'').trim()}
 function freeStudyInputName(){return (document.getElementById('freeStudyName')?.value||'').trim()}
@@ -1165,7 +1199,9 @@ function renderTimerState(){
 
 function selectTodayExecution(id){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中，請先完成或暫停');return}timer=TimerService.selectGoal(id,null);saveActiveTimer();renderTimerState();today();toast('已選取今日欲執行項目；尚未開始計時')}
 function cancelTodaySelection(){if(timer.running){toast('計時進行中，請先暫停或完成後再取消');return}timer=TimerService.empty();clearActiveTimer();renderTimerState();today();toast('已取消今日執行選取')}
-function startTodayExecution(id){const t=getTask(id);if(!t)return;if(timer.running){toast('目前已有計時進行中');return}selectTodayExecution(id);startTimer()}
+function startTodayExecution(id){const t=getTask(id);if(!t)return;
+ if(window.ToeicOutcomeDomain?.isOutcomeTask(t)){executeFromDashboard(id);return;}
+ if(timer.running){toast('目前已有計時進行中');return}selectTodayExecution(id);startTimer()}
 function useTimer(id){selected=id;timer=TimerService.selectGoal(id,null);saveActiveTimer();document.getElementById('timerTask').textContent=getTask(id)?.name||'';go('today');updateClock();updateTimerButtons();toast('已選擇具體行動，可開始計時')}
 function startTimer(){
  if(!timerHasSelection()){toast('請先選擇具體行動或其他讀書');return false}
@@ -1239,7 +1275,10 @@ function finishTimer(){
  document.getElementById('timerTask').textContent='已記錄：'+(t.name||done);
  document.getElementById('timerTaskCancel').style.display='none';
  updateClock();updateTimerButtons();
- toast(planId?`已記錄 ${mins} 分鐘；本次安排累計已實際 ${db.executionPlans.find(x=>String(x.id)===String(planId))?.actualMinutes||mins} 分鐘`:`已記錄 ${mins} 分鐘；完成度已更新`);
+  toast(window.ToeicOutcomeDomain?.isOutcomeTask(t)
+   ?`已記錄 ${mins} 分鐘；不計入成果題數`
+   :planId?`已記錄 ${mins} 分鐘；本次安排累計已實際 ${db.executionPlans.find(x=>String(x.id)===String(planId))?.actualMinutes||mins} 分鐘`
+   :`已記錄 ${mins} 分鐘；完成度已更新`);
 }
 function updateTimerButtons(){const bs=document.querySelectorAll('.timerbtns button'),has=timerHasSelection(),panel=document.getElementById('executionNowPanel');if(panel){panel.classList.toggle('has-selection',has);panel.classList.toggle('is-running',!!timer.running)}if(bs.length<3)return;bs[0].disabled=!!timer.running||!has;bs[1].disabled=!timer.running;bs[2].disabled=!has||timer.elapsed<=0;bs[0].textContent=timer.running?'計時中…':'開始';bs[1].textContent='暫停';bs[2].textContent=has&&timer.elapsed>0?'完成並記錄':'完成'}
 function selectTask(id,focusEdit=false){const t=getTask(id);if(!t)return;selected=id;const chain=ancestors(id);goalPath={long:chain.find(x=>x.level===1)?.id||null,mid:chain.find(x=>x.level===2)?.id||null,short:chain.find(x=>chain.find(y=>y.level===3)?.id===x.id)?.id||chain.find(x=>x.level===3)?.id||null,exec:chain.find(x=>x.level===4)?.id||null};renderTree();updateHubContext();if(focusEdit)openEditModal(id)}
@@ -1251,7 +1290,9 @@ function editModalField(t){
  else if(t.level===2) timing=`<div class="auto-status"><span>階段期間</span><b>${p?.start&&p?.due?esc(p.start+' ～ '+p.due):'尚無完整子任務期間'}</b><small>由下層子任務期間自動決定。</small></div>`;
  else if(t.level===3) timing=`<div class="form-section"><div class="section-label">子任務期間</div><div class="row"><div><label>始期</label><input id="mStart" type="date" value="${esc(t.start||'')}"></div><div><label>終期</label><input id="mDue" type="date" value="${esc(t.due||'')}"></div></div></div>`;
  else timing=`<div class="form-section"><div class="section-label">執行期間</div><div class="auto-status"><span>自動繼承</span><b>${p?.start&&p?.due?esc(p.start+' ～ '+p.due):'尚無完整子任務期間'}</b></div></div>`;
- const action=t.level===4?`<div class="form-section"><div class="section-label">本週總投入</div><div class="row"><div><label>本週投入</label><div class="unit-input"><input id="mWeekly" type="number" min="0" step="0.5" value="${esc(hours)}"><select id="mWeeklyUnit"><option value="min" ${unit==='min'?'selected':''}>分鐘</option><option value="hour" ${unit==='hour'?'selected':''}>小時</option></select></div></div><div class="auto-status"><span>彈性分配</span></div></div></div>`:'';
+  const action=t.level===4&&window.ToeicOutcomeDomain?.isOutcomeTask(t)
+   ?`<div class="form-section"><div class="section-label">本週成果目標</div><div class="row"><div><label>每週有效完成題數</label><div class="unit-input"><input id="mWeeklyQuestions" type="number" min="1" max="300" step="1" value="${esc(t.weeklyTargetCount)}"><span>題</span></div></div></div><small>只將正式交卷、經連動核驗的題數計入成果；投入分鐘保留於歷史分析。</small></div>`
+   :t.level===4?`<div class="form-section"><div class="section-label">本週總投入</div><div class="row"><div><label>本週投入</label><div class="unit-input"><input id="mWeekly" type="number" min="0" step="0.5" value="${esc(hours)}"><select id="mWeeklyUnit"><option value="min" ${unit==='min'?'selected':''}>分鐘</option><option value="hour" ${unit==='hour'?'selected':''}>小時</option></select></div></div><div class="auto-status"><span>彈性分配</span></div></div></div>`:'';
  return `<div class="context edit-modal-path"><b>目前目標路徑</b><br>${chain.map(x=>esc(x.name)).join(' → ')}<br><span class="muted">${L[t.level]} · 完成度 ${calc(t)}% · ${esc(t.status)}</span></div><div class="form"><label>名稱</label><input id="mName" value="${esc(t.name)}">${t.level>1?`<label>直接上層目標</label><select id="mParent">${parentOptions}</select>`:''}${timing}${action}<div class="auto-status"><span>目前狀態</span><b>${esc(t.status)}</b><small>狀態與完成度由實際投入紀錄自動計算。</small></div><div class="edit-modal-actions"><button class="btn" type="button" onclick="closeEditModal()">取消</button><button class="btn gold" type="button" onclick="saveEditModal()">保存修改</button></div><div class="edit-modal-crud"><button class="softbtn" type="button" onclick="closeEditModal();addChild('${t.id}')">＋ 新增下層</button><button class="softbtn" type="button" onclick="closeEditModal();moveTask('${t.id}')">↗ 移動</button><button class="softbtn" type="button" onclick="closeEditModal();archiveTask('${t.id}')">封存</button><button class="dangerbtn" type="button" onclick="closeEditModal();safeRemove('${t.id}')">刪除</button></div></div>`;
 }
 function openEditModal(id){const t=getTask(id);if(!t)return;selected=id;const chain=ancestors(id);goalPath={long:chain.find(x=>x.level===1)?.id||null,mid:chain.find(x=>x.level===2)?.id||null,short:chain.find(x=>x.level===3)?.id||null,exec:chain.find(x=>x.level===4)?.id||null};const modal=document.getElementById('editModal'),body=document.getElementById('editModalBody');if(!modal||!body)return;document.getElementById('editModalTitle').textContent='編輯：'+t.name;body.innerHTML=editModalField(t);modal.classList.add('show');document.body.style.overflow='hidden';setTimeout(()=>document.getElementById('mName')?.focus(),30);bindInteractionFeedback()}
@@ -1263,14 +1304,23 @@ function saveEditModal(){
  if(t.level>1){const pnew=getTask(newParent);if(!pnew||pnew.level!==t.level-1||wouldCycle(t.id,newParent)){toast('直接上層目標無效或會形成循環');return}}
  const draft={name,parent:newParent};
  if(t.level===3){const st=document.getElementById('mStart')?.value||'',du=document.getElementById('mDue')?.value||'';if(!st||!du){toast('子任務必須設定始期與終期');return}if(st>du){toast('始期不能晚於終期');return}draft.start=st;draft.due=du}
- if(t.level===4){const pp=periodForTask(getTask(newParent));if(!pp?.start||!pp?.due){toast('請先為所屬子任務設定完整期間');return}const n=Math.max(0,+document.getElementById('mWeekly').value||0),u=document.getElementById('mWeeklyUnit').value;draft.weeklyMinutes=u==='hour'?Math.round(n*60):Math.round(n)}
+  if(t.level===4){const pp=periodForTask(getTask(newParent));if(!pp?.start||!pp?.due){toast('請先為所屬子任務設定完整期間');return}
+   if(window.ToeicOutcomeDomain?.isOutcomeTask(t)){
+    const n=Number(document.getElementById('mWeeklyQuestions')?.value);
+    if(!Number.isInteger(n)||n<1||n>300){toast('本週成果題數需介於 1～300 題');return}
+    draft.weeklyTargetCount=n;
+   }else{
+    const n=Math.max(0,+document.getElementById('mWeekly').value||0),u=document.getElementById('mWeeklyUnit').value;
+    draft.weeklyMinutes=u==='hour'?Math.round(n*60):Math.round(n);
+   }
+  }
  const before=JSON.parse(JSON.stringify(db));
  Object.assign(t,draft);recalcAllStatuses();
  if(!save()){
   db=before;
   toast('修改未保存，原目標內容已恢復');return;
  }
- closeEditModal();renderAll();toast('修改已保存；本週時數邏輯已同步全部模組')
+  closeEditModal();renderAll();toast('修改已保存；成果制與時間制依任務各自計算')
 }
 
 function wouldCycle(id,parent){let cur=parent,guard=0;while(cur&&guard++<10){if(cur===id)return true;cur=getTask(cur)?.parent}return false}
@@ -1285,7 +1335,17 @@ function dashExecuteList(){
   calc
  });
 }
-function executeFromDashboard(id){selected=id;const chain=ancestors(id);goalPath={long:chain.find(x=>x.level===1)?.id||null,mid:chain.find(x=>x.level===2)?.id||null,short:chain.find(x=>x.level===3)?.id||null,exec:id};useTimer(id);startTimer();toast('已開始執行')}
+function executeFromDashboard(id){
+ const t=getTask(id);if(!t)return;
+ if(window.ToeicOutcomeDomain?.isOutcomeTask(t)){
+  const target='https://aw960809-ai.github.io/toeic-trainer/';
+  window.open(target,'_blank','noopener');
+  return;
+ }
+ selected=id;const chain=ancestors(id);goalPath={long:chain.find(x=>x.level===1)?.id||null,
+  mid:chain.find(x=>x.level===2)?.id||null,short:chain.find(x=>x.level===3)?.id||null,exec:id};
+ useTimer(id);startTimer();toast('已開始執行')
+}
 function overviewMonthItems(date=todayKey()){
  const start=date;const d0=new Date(start+'T00:00:00');d0.setDate(d0.getDate()+30);const end=`${d0.getFullYear()}-${String(d0.getMonth()+1).padStart(2,'0')}-${String(d0.getDate()).padStart(2,'0')}`;
  const map=new Map();
@@ -1310,7 +1370,8 @@ function weeklyWorkload(date=todayKey()){
  return {target,hours,level,score:Math.round(score),actual,used:Math.round(used),capacity};
 }
 function decisionState(t,date=todayKey()){
- const w=currentWeekSummary(t,date),p=periodForTask(t);if(!w.active||w.remaining<=0)return null;
+  const w=currentWeekSummary(t,date),p=periodForTask(t);
+  if(!w.active||(w.outcome?w.outcome.remaining<=0:w.remaining<=0))return null;
  const days=daysUntil(p?.due);const totalDays=p?.start&&p?.due?Math.max(1,Math.ceil((new Date(p.due)-new Date(p.start))/86400000)+1):1;
  const elapsed=Math.max(0,Math.min(totalDays,Math.ceil((new Date(date)-new Date(p.start))/86400000)+1));
  const expected=Math.round(elapsed/totalDays*100),progress=calc(t),gap=Math.max(0,expected-progress);
@@ -1318,7 +1379,8 @@ function decisionState(t,date=todayKey()){
  let score=0,state='normal',label='正常';
  if(days<=7){score+=55;state='urgent';label='接近截止'}else if(days<=14){score+=32}
  score+=Math.min(30,gap*0.6);
- score+=Math.min(20,w.target?Math.round(w.remaining/w.target*20):0);
+  const workload=w.outcome?w.outcome:w;
+  score+=Math.min(20,workload.target?Math.round(workload.remaining/workload.target*20):0);
  // 忙碌度會影響「是否值得現在做」，但不會壓過真正緊急的事項。
  if(load.score>=85){
    if(days>14&&gap<10)score-=18;
@@ -1328,7 +1390,11 @@ function decisionState(t,date=todayKey()){
  return {t,w,days,gap,score,state,label,progress,load};
 }
 function decisionItems(date=todayKey()){
- return getTodayItems().map(t=>decisionState(t,date)).filter(Boolean).sort((a,b)=>b.score-a.score||a.days-b.days||b.w.remaining-a.w.remaining).slice(0,3);
+  return getTodayItems().map(t=>decisionState(t,date)).filter(Boolean).sort((a,b)=>{
+    const aw=a.w.outcome||a.w,bw=b.w.outcome||b.w;
+    return b.score-a.score||a.days-b.days||
+      (bw.target?bw.remaining/bw.target:0)-(aw.target?aw.remaining/aw.target:0);
+  }).slice(0,3);
 }
 function renderDecisionList(){
  const load=weeklyWorkload();
@@ -1381,9 +1447,12 @@ function updateHubContext(){}
 function getTodayItems(){
  const base=db.tasks.filter(t=>{
    if(t.level!==4||t.status==='已完成'||t.status==='已封存')return false;
-   const w=currentWeekSummary(t);return w.active&&w.remaining>0;
+    const w=currentWeekSummary(t);return w.outcome?(w.active&&w.outcome.remaining>0):(w.active&&w.remaining>0);
  });
- return base.sort((a,b)=>{const ar=currentWeekSummary(a),br=currentWeekSummary(b);return br.remaining-ar.remaining||ar.target-br.target||calc(a)-calc(b)});
+  return base.sort((a,b)=>{const ar=currentWeekSummary(a),br=currentWeekSummary(b),
+   ao=ar.outcome||ar,bo=br.outcome||br;
+   const aRatio=ao.target?ao.remaining/ao.target:0,bRatio=bo.target?bo.remaining/bo.target:0;
+   return bRatio-aRatio||calc(a)-calc(b)});
 }
 /* V97.9.6 execution five-item preview */
 let todayItemsExpanded=false;
@@ -1581,6 +1650,7 @@ function calendarToday(){
  calendarViewMode='month';calendarCategory='all';renderCalendar();
 }
 function renderAll(){
+ toeicTrainerCache=undefined;
  AppOrchestrator.renderAll({
   normalizeState:()=>{db=normalize(db)},
   rebuildExecutionPlanActuals,
