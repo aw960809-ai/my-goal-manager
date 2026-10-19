@@ -2,18 +2,99 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-10-18T06:01:30.851409+00:00",
-    "count": 48,
-    "retiredThisRun": 0,
+    "updatedAt": "2026-10-19T06:18:50.686452+00:00",
+    "count": 49,
+    "retiredThisRun": 1,
     "revivedThisRun": 0,
-    "retiredTotal": 48,
+    "retiredTotal": 49,
     "revivedTotal": 0,
     "retainedOnFailure": 0,
-    "carriedMissing": 15,
-    "needsReview": 15,
+    "carriedMissing": 16,
+    "needsReview": 14,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
+    {
+      "id": "auto-thu-2026100009",
+      "title": "知法.懂法-你該知道的法律問題",
+      "date": "2026-10-20",
+      "time": "",
+      "scope": "東海校內",
+      "type": "法律／學術",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026100009",
+      "keywords": "知法.懂法-你該知道的法律問題 東海大學 課外活動暨學生發展組 教育活動 學生，費用：0；說明：僅限社團、系學會成員 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 課外活動暨學生發展組；活動日 2026-10-20；截止 2026-10-18",
+      "government": false,
+      "deadline": "2026-10-18",
+      "eventEndDate": "2026-10-20",
+      "location": "",
+      "organizer": "課外活動暨學生發展組",
+      "audience": "學生，費用：0；說明：僅限社團、系學會成員",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026100009",
+        "fetchedAt": "2026-10-12T07:26:40.170009+00:00"
+      },
+      "fitScore": 77,
+      "fitTier": "高適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+42",
+        "青少年／營隊／教學+8",
+        "直接連結法律學習目標+15",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "青少年／營隊／教學"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-10-08T05:49:56.532833+00:00",
+      "lastSeen": "2026-10-12T07:28:06.885824+00:00",
+      "missCount": 12,
+      "needsReview": true,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-19T06:18:50.685484+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-10-12T07:28:06.885824+00:00"
+    },
     {
       "id": "auto-thu-2026090042",
       "title": "適應體育宣導-芬蘭木柱體驗活動",
