@@ -2,18 +2,101 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-10-20T06:09:03.241421+00:00",
-    "count": 52,
-    "retiredThisRun": 3,
+    "updatedAt": "2026-10-21T06:08:56.973849+00:00",
+    "count": 53,
+    "retiredThisRun": 1,
     "revivedThisRun": 0,
-    "retiredTotal": 52,
+    "retiredTotal": 53,
     "revivedTotal": 0,
     "retainedOnFailure": 0,
-    "carriedMissing": 16,
-    "needsReview": 13,
+    "carriedMissing": 14,
+    "needsReview": 14,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
+    {
+      "id": "auto-thu-2026070019",
+      "title": "【線上學生增能工作坊X勵學基金】大學生的第一堂 AI 使喚術：Claude 與 GPT Live 實戰入門",
+      "date": "2026-10-21",
+      "time": "",
+      "scope": "東海校內",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026070019",
+      "keywords": "【線上學生增能工作坊X勵學基金】大學生的第一堂 AI 使喚術：Claude 與 GPT Live 實戰入門 東海大學 教學發展中心 學術活動 教職員，費用：0；學生，費用：0 學術／講座 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 教學發展中心；活動日 2026-10-21；截止 2026-10-20",
+      "government": false,
+      "deadline": "2026-10-20",
+      "eventEndDate": "2026-10-21",
+      "location": "Google Meet會議連結：",
+      "organizer": "教學發展中心",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026070019",
+        "fetchedAt": "2026-10-13T07:47:36.024576+00:00"
+      },
+      "fitScore": 48,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "職涯／實習+5",
+        "通用能力／AI工具+14",
+        "明確以大學生／學生為對象+7",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "職涯／實習",
+        "通用能力／AI工具"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-09T12:50:00.937440+00:00",
+      "lastSeen": "2026-10-13T07:49:21.560728+00:00",
+      "missCount": 13,
+      "needsReview": true,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-21T06:08:56.973058+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-10-13T07:49:21.560728+00:00"
+    },
     {
       "id": "auto-thu-2026100043",
       "title": "【勵學生專屬】跨域學習第二波申請說明會(線上)",
