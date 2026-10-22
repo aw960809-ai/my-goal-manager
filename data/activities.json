@@ -1,37 +1,48 @@
 {
   "meta": {
-    "updatedAt": "2026-10-21T06:08:56.973849+00:00",
-    "sources": 8,
-    "events": 36,
-    "ok": 16,
-    "failed": 1,
+    "updatedAt": "2026-10-22T06:14:14.143903+00:00",
+    "sources": 7,
+    "events": 33,
+    "ok": 2,
+    "failed": 6,
     "errors": [
+      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8001 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached",
+      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8001 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached",
+      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8001 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached",
+      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8001 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached",
+      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8001 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached",
       "youthfirst.yda.gov.tw: curl: (22) The requested URL returned error: 404"
     ],
     "generator": "V96.6.11.1.1 Multi-Source AutoFetch + Activity Radar",
     "sourcePolicy": "政府資訊為主；東海官方活動為活動核心；獎學金獨立資料集合與獨立判斷",
     "scholarships": 7,
     "totalSources": 9,
-    "healthySources": 8,
-    "failedSources": 1,
+    "healthySources": 7,
+    "failedSources": 2,
     "rejectedItems": 0,
-    "fetchFailedItems": 1,
-    "skippedPast": 101,
-    "fitFiltered": 32,
+    "fetchFailedItems": 6,
+    "skippedPast": 100,
+    "fitFiltered": 20,
     "semanticDuplicates": 0,
-    "retiredThisRun": 1,
+    "retiredThisRun": 3,
     "revivedThisRun": 0,
-    "archiveCount": 53,
-    "retainedOnFailure": 0,
-    "carriedMissing": 14,
-    "needsReview": 14,
+    "archiveCount": 56,
+    "retainedOnFailure": 25,
+    "carriedMissing": 0,
+    "needsReview": 0,
     "lifecyclePolicy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive",
     "nationwideOfficialConfigured": true,
     "nationwideOfficialHealthy": true,
     "nationwideOfficialEvents": 0,
     "nationwideOfficialEligible": 0,
-    "nationwideOfficialDiscovered": 129,
+    "nationwideOfficialDiscovered": 128,
     "sourceFailures": [
+      {
+        "sourceId": "thu_official",
+        "name": "東海大學活動報名系統",
+        "url": "https://tevent.thu.edu.tw/tEvent_front/index.php",
+        "error": "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8001 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached"
+      },
       {
         "sourceId": "youthfirst_national",
         "name": "教育部青年第一讚｜全國競賽及徵件",
@@ -46,14 +57,14 @@
     "preferenceExcludedThisRun": 0,
     "nationalExpansionSources": 2,
     "nationalExpansionHealthy": 1,
-    "nationalExpansionDiscovered": 130,
+    "nationalExpansionDiscovered": 131,
     "nationalExpansionFreshEligible": 0,
     "nationalExpansionActive": 0,
     "nationalExpansionOnsiteFinal": 0,
     "nationalExpansionReviewReasons": {
       "topic_mismatch": 120,
       "listing_deadline_closed": 3,
-      "deadline_not_verified": 7
+      "deadline_not_verified": 8
     },
     "nationalExpansionReviewBySource": {
       "youthfirst_national": {
@@ -95,12 +106,12 @@
         }
       },
       "yda_national_news": {
-        "discovered": 68,
-        "detailVerified": 6,
+        "discovered": 69,
+        "detailVerified": 7,
         "accepted": 0,
         "reasons": {
           "topic_mismatch": 62,
-          "deadline_not_verified": 6
+          "deadline_not_verified": 7
         },
         "samples": {
           "topic_mismatch": [
@@ -134,9 +145,9 @@
     "officialCompetitionActive": 1,
     "officialCompetitionReviewReasons": {
       "topic_mismatch": 2,
-      "eligibility_not_verified": 5,
+      "eligibility_not_verified": 6,
       "remote_submission_not_verified": 2,
-      "deadline_expired": 2
+      "deadline_expired": 1
     }
   },
   "events": [
@@ -1236,212 +1247,6 @@
       "category": "legal_academic"
     },
     {
-      "id": "auto-tcjob-5634",
-      "title": "◎晴天花藝 × 花藝服務業職場體驗 ◎",
-      "date": "2026-10-22",
-      "time": "09:30",
-      "scope": "台中",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://1catchjob.taichung.gov.tw/detail.aspx?act=5634",
-      "keywords": "◎晴天花藝 × 花藝服務業職場體驗 ◎ 台中 臺中市 青年 職涯 職涯／實習",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "臺中市就業服務一鍵Catch",
-      "statusText": "臺中市就業服務處官方活動；活動日 2026-10-22；截止 2026-10-21",
-      "government": true,
-      "deadline": "2026-10-21",
-      "eventEndDate": "",
-      "location": "",
-      "organizer": "臺中市就業服務處",
-      "audience": "有限制",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "taichung_job",
-        "act": "5634",
-        "fetchedAt": "2026-10-21T06:07:06.649975+00:00"
-      },
-      "fitScore": 44,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第2圈：台中+4",
-        "青少年／營隊／教學+8",
-        "職涯／實習+20",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "青少年／營隊／教學",
-        "職涯／實習"
-      ],
-      "circleLevel": 2,
-      "circleLabel": "台中",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
-      "lastSeen": "2026-10-21T06:08:56.973058+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "taichung_job",
-      "sourceCategories": [
-        "career_internship",
-        "lecture"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 2,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": []
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "category": "career_internship"
-    },
-    {
-      "id": "auto-mofa-wh-portal",
-      "title": "青年度假打工｜外交部官方計畫入口",
-      "date": "",
-      "time": "",
-      "scope": "海外／國際",
-      "type": "語言／國際",
-      "kind": "program",
-      "url": "https://youthtaiwan.mofa.gov.tw/WorkingHoliday/",
-      "keywords": "青年度假打工 海外工作 國際交流 海外生活 外語 澳洲 日本 加拿大 紐西蘭 英國 德國 韓國",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "中華民國外交部｜臺灣青年FUN眼世界",
-      "statusText": "外交部常設青年度假打工官方入口；各國年齡、名額、簽證與保險條件依官方國別資訊",
-      "government": true,
-      "deadline": "",
-      "eventEndDate": "",
-      "location": "海外／依度假打工協定國",
-      "organizer": "中華民國外交部",
-      "audience": "青年；實際年齡與簽證資格依各協定國規定",
-      "openEnded": true,
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-10-21T06:08:04.430949+00:00"
-      },
-      "fitScore": 94,
-      "fitTier": "高適配",
-      "fitReasons": [
-        "同心圓第4圈：海外／國際+0",
-        "語言／國際／海外+40",
-        "青少年／營隊／教學+34",
-        "直接連結海外／國際經驗目標+18",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "語言／國際／海外",
-        "青少年／營隊／教學"
-      ],
-      "circleLevel": 4,
-      "circleLabel": "海外／國際",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-10-21T06:08:56.973058+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "mofa_working_holiday",
-      "sourceCategories": [
-        "international",
-        "career_internship",
-        "youth_program"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 4,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [],
-        "schoolNames": []
-      },
-      "country": "TW",
-      "category": "international"
-    },
-    {
-      "id": "auto-ncut-competition-96514",
-      "title": "德明財經科技大學-2026 全國大專綠色商品展暨海外行銷企劃大賽",
-      "date": "2026-10-30",
-      "deadline": "2026-10-30",
-      "time": "",
-      "dateKind": "application_deadline",
-      "eventEndDate": "2026-10-30",
-      "scope": "全國",
-      "type": "語言／國際",
-      "kind": "event",
-      "url": "https://n058.ncut.edu.tw/p/406-1058-96514,r292.php?Lang=zh-tw",
-      "keywords": "德明財經科技大學-2026 全國大專綠色商品展暨海外行銷企劃大賽",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "government": false,
-      "source": "國立勤益科技大學研發處｜全國競賽官方轉知",
-      "sourceId": "ncut_competitions_official",
-      "organizer": "原主辦機關詳見公告（勤益科大為轉知平台）",
-      "location": "線上初賽／企劃書投稿；決賽需到場（原公告稱「本校」綜合大樓 A506 國際會議廳（請核對主辦校地址））",
-      "participationMode": "online_submission_onsite_final",
-      "finalAttendanceRequired": true,
-      "finalLocation": "原公告稱「本校」綜合大樓 A506 國際會議廳（請核對主辦校地址）",
-      "audience": "已見大專／青年參加對象；實際跨系限制、組隊及其他資格應以競賽簡章核實",
-      "statusText": "校方公告已核實截止日 2026-10-30 及線上初賽交件；決賽需到場：原公告稱「本校」綜合大樓 A506 國際會議廳（請核對主辦校地址）。報名／截止日期不代表競賽實際舉辦日期。",
-      "autofetch": {
-        "engine": "official-contests-v4",
-        "sourceId": "ncut_competitions_official",
-        "noticeId": "96514",
-        "fetchedAt": "2026-10-21T06:08:41.849366+00:00",
-        "reviewLevel": "official_list_and_detail"
-      },
-      "fitScore": 46,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第4圈：全國+0",
-        "語言／國際／海外+40",
-        "有明確截止日+4",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "語言／國際／海外"
-      ],
-      "circleLevel": 4,
-      "circleLabel": "全國",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-10-17T05:00:04.565139+00:00",
-      "lastSeen": "2026-10-21T06:08:56.973058+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceCategories": [
-        "competition",
-        "legal_academic",
-        "international",
-        "career_internship"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 3,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [],
-        "schoolNames": []
-      },
-      "country": "TW",
-      "category": "competition"
-    },
-    {
       "id": "auto-thu-2026100036",
       "title": "【行政講堂】10/22(四)，AI大數據驅動交通決策論壇，陳志龍(台灣國際開發事業有限公司 副總經理)、蔡國鼎(台灣國際開發事業有限公司 資訊長)",
       "date": "2026-10-22",
@@ -1564,80 +1369,6 @@
       "firstSeen": "2026-10-14T06:14:10.797433+00:00",
       "lastSeen": "2026-10-19T06:18:50.685484+00:00",
       "missCount": 2,
-      "needsReview": true,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026090080",
-      "title": "【企業實習暨產業趨勢分享會】-京元電子116年學期實習生招募",
-      "date": "2026-10-22",
-      "time": "",
-      "scope": "東海校內",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026090080",
-      "keywords": "【企業實習暨產業趨勢分享會】-京元電子116年學期實習生招募 東海大學 實習與學生成就中心 學術活動 教職員，費用：0；學生，費用：0 學術／講座 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 實習與學生成就中心；活動日 2026-10-22；截止 2026-10-21",
-      "government": false,
-      "deadline": "2026-10-21",
-      "eventEndDate": "2026-10-22",
-      "location": "",
-      "organizer": "實習與學生成就中心",
-      "audience": "教職員，費用：0；學生，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026090080",
-        "fetchedAt": "2026-10-18T05:59:41.328475+00:00"
-      },
-      "fitScore": 40,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "職涯／實習+20",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "職涯／實習"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-24T06:19:41.019607+00:00",
-      "lastSeen": "2026-10-18T06:01:30.850743+00:00",
-      "missCount": 3,
       "needsReview": true,
       "sourceId": "thu_official",
       "sourceCategories": [
@@ -2277,82 +2008,6 @@
       "category": "legal_academic"
     },
     {
-      "id": "auto-thu-2026090096",
-      "title": "藝術性社團聚落-舞台燈光設計基礎與模擬系列",
-      "date": "2026-10-23",
-      "time": "",
-      "scope": "東海校內",
-      "type": "法律／學術",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026090096",
-      "keywords": "藝術性社團聚落-舞台燈光設計基礎與模擬系列 東海大學 課外活動暨學生發展組 教育活動 學生，費用：0；說明：如報名人數眾多，以舞蹈性社團正式社員優先，其次為藝術性社團正式社員。 法律／學術 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 課外活動暨學生發展組；活動日 2026-10-23；截止 2026-10-21",
-      "government": false,
-      "deadline": "2026-10-21",
-      "eventEndDate": "2026-10-23",
-      "location": "",
-      "organizer": "課外活動暨學生發展組",
-      "audience": "學生，費用：0；說明：如報名人數眾多，以舞蹈性社團正式社員優先，其次為藝術性社團正式社員。",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026090096",
-        "fetchedAt": "2026-10-02T07:03:36.951200+00:00"
-      },
-      "fitScore": 71,
-      "fitTier": "中適配",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "法律／轉學考+10",
-        "青少年／營隊／教學+34",
-        "直接連結法律學習目標+15",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "法律／轉學考",
-        "青少年／營隊／教學"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-10-01T07:15:37.685597+00:00",
-      "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 21,
-      "needsReview": true,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
       "id": "auto-thu-2026090056",
       "title": "115學年第1學期活力體適能",
       "date": "2026-09-30",
@@ -2504,6 +2159,142 @@
       "city": "臺中市",
       "schoolName": "東海大學",
       "category": "legal_academic"
+    },
+    {
+      "id": "auto-mofa-wh-portal",
+      "title": "青年度假打工｜外交部官方計畫入口",
+      "date": "",
+      "time": "",
+      "scope": "海外／國際",
+      "type": "語言／國際",
+      "kind": "program",
+      "url": "https://youthtaiwan.mofa.gov.tw/WorkingHoliday/",
+      "keywords": "青年度假打工 海外工作 國際交流 海外生活 外語 澳洲 日本 加拿大 紐西蘭 英國 德國 韓國",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "中華民國外交部｜臺灣青年FUN眼世界",
+      "statusText": "外交部常設青年度假打工官方入口；各國年齡、名額、簽證與保險條件依官方國別資訊",
+      "government": true,
+      "deadline": "",
+      "eventEndDate": "",
+      "location": "海外／依度假打工協定國",
+      "organizer": "中華民國外交部",
+      "audience": "青年；實際年齡與簽證資格依各協定國規定",
+      "openEnded": true,
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "mofa_working_holiday",
+        "fetchedAt": "2026-10-22T06:13:24.099583+00:00"
+      },
+      "fitScore": 94,
+      "fitTier": "高適配",
+      "fitReasons": [
+        "同心圓第4圈：海外／國際+0",
+        "語言／國際／海外+40",
+        "青少年／營隊／教學+34",
+        "直接連結海外／國際經驗目標+18",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "語言／國際／海外",
+        "青少年／營隊／教學"
+      ],
+      "circleLevel": 4,
+      "circleLabel": "海外／國際",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-09T12:50:00.937440+00:00",
+      "lastSeen": "2026-10-22T06:14:14.143045+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "mofa_working_holiday",
+      "sourceCategories": [
+        "international",
+        "career_internship",
+        "youth_program"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 4,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [],
+        "schoolNames": []
+      },
+      "country": "TW",
+      "category": "international"
+    },
+    {
+      "id": "auto-ncut-competition-96514",
+      "title": "德明財經科技大學-2026 全國大專綠色商品展暨海外行銷企劃大賽",
+      "date": "2026-10-30",
+      "deadline": "2026-10-30",
+      "time": "",
+      "dateKind": "application_deadline",
+      "eventEndDate": "2026-10-30",
+      "scope": "全國",
+      "type": "語言／國際",
+      "kind": "event",
+      "url": "https://n058.ncut.edu.tw/p/406-1058-96514,r292.php?Lang=zh-tw",
+      "keywords": "德明財經科技大學-2026 全國大專綠色商品展暨海外行銷企劃大賽",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "government": false,
+      "source": "國立勤益科技大學研發處｜全國競賽官方轉知",
+      "sourceId": "ncut_competitions_official",
+      "organizer": "原主辦機關詳見公告（勤益科大為轉知平台）",
+      "location": "線上初賽／企劃書投稿；決賽需到場（原公告稱「本校」綜合大樓 A506 國際會議廳（請核對主辦校地址））",
+      "participationMode": "online_submission_onsite_final",
+      "finalAttendanceRequired": true,
+      "finalLocation": "原公告稱「本校」綜合大樓 A506 國際會議廳（請核對主辦校地址）",
+      "audience": "已見大專／青年參加對象；實際跨系限制、組隊及其他資格應以競賽簡章核實",
+      "statusText": "校方公告已核實截止日 2026-10-30 及線上初賽交件；決賽需到場：原公告稱「本校」綜合大樓 A506 國際會議廳（請核對主辦校地址）。報名／截止日期不代表競賽實際舉辦日期。",
+      "autofetch": {
+        "engine": "official-contests-v4",
+        "sourceId": "ncut_competitions_official",
+        "noticeId": "96514",
+        "fetchedAt": "2026-10-22T06:13:59.293500+00:00",
+        "reviewLevel": "official_list_and_detail"
+      },
+      "fitScore": 46,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第4圈：全國+0",
+        "語言／國際／海外+40",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "語言／國際／海外"
+      ],
+      "circleLevel": 4,
+      "circleLabel": "全國",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-10-17T05:00:04.565139+00:00",
+      "lastSeen": "2026-10-22T06:14:14.143045+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceCategories": [
+        "competition",
+        "legal_academic",
+        "international",
+        "career_internship"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 3,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [],
+        "schoolNames": []
+      },
+      "country": "TW",
+      "category": "competition"
     }
   ]
 }

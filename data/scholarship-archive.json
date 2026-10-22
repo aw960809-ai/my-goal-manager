@@ -2,13 +2,13 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "scholarship",
-    "updatedAt": "2026-10-21T06:05:48+00:00",
+    "updatedAt": "2026-10-22T06:10:39+00:00",
     "count": 162,
-    "retiredThisRun": 4,
+    "retiredThisRun": 5,
     "revivedThisRun": 0,
-    "retiredTotal": 164,
+    "retiredTotal": 169,
     "revivedTotal": 1,
-    "retainedOnFailure": 0,
+    "retainedOnFailure": 64,
     "carriedMissing": 0,
     "needsReview": 0,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
