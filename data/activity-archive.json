@@ -2,18 +2,181 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-10-22T06:14:14.143903+00:00",
-    "count": 56,
-    "retiredThisRun": 3,
+    "updatedAt": "2026-10-23T06:09:13.949197+00:00",
+    "count": 58,
+    "retiredThisRun": 2,
     "revivedThisRun": 0,
-    "retiredTotal": 56,
+    "retiredTotal": 58,
     "revivedTotal": 0,
-    "retainedOnFailure": 25,
+    "retainedOnFailure": 23,
     "carriedMissing": 0,
     "needsReview": 0,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
+    {
+      "id": "auto-thu-2026100036",
+      "title": "【行政講堂】10/22(四)，AI大數據驅動交通決策論壇，陳志龍(台灣國際開發事業有限公司 副總經理)、蔡國鼎(台灣國際開發事業有限公司 資訊長)",
+      "date": "2026-10-22",
+      "time": "",
+      "scope": "東海校內",
+      "type": "語言／國際",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026100036",
+      "keywords": "【行政講堂】10/22(四)，AI大數據驅動交通決策論壇，陳志龍(台灣國際開發事業有限公司 副總經理)、蔡國鼎(台灣國際開發事業有限公司 資訊長) 東海大學 行政管理暨政策學系 學術活動 教職員，費用：0；學生，費用：0 學術／講座 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 行政管理暨政策學系；活動日 2026-10-22；截止 2026-10-22",
+      "government": false,
+      "deadline": "2026-10-22",
+      "eventEndDate": "2026-10-22",
+      "location": "",
+      "organizer": "行政管理暨政策學系",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026100036",
+        "fetchedAt": "2026-10-19T06:17:25.280563+00:00"
+      },
+      "fitScore": 66,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "語言／國際／海外+40",
+        "通用能力／AI工具+14",
+        "有明確截止日+4"
+      ],
+      "goalMatches": [
+        "語言／國際／海外",
+        "通用能力／AI工具"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-10-14T06:14:10.797433+00:00",
+      "lastSeen": "2026-10-19T06:18:50.685484+00:00",
+      "missCount": 2,
+      "needsReview": true,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-23T06:09:13.948370+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-10-19T06:18:50.685484+00:00"
+    },
+    {
+      "id": "auto-thu-2026090065",
+      "title": "最後名額!!【富邦產險】企業參訪暨實習說明會(參加抽全聯禮券、星巴克兌換券、環保袋、東海專屬禮品....)",
+      "date": "2026-10-29",
+      "time": "",
+      "scope": "東海校內",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=1&conference_code=2026090065",
+      "keywords": "最後名額!!【富邦產險】企業參訪暨實習說明會(參加抽全聯禮券、星巴克兌換券、環保袋、東海專屬禮品....) 東海大學 實習與學生成就中心 教育活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 實習與學生成就中心；活動日 2026-10-29；截止 2026-10-22",
+      "government": false,
+      "deadline": "2026-10-22",
+      "eventEndDate": "2026-10-29",
+      "location": "富邦產險台中分公司",
+      "organizer": "實習與學生成就中心",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090065",
+        "fetchedAt": "2026-10-21T06:05:59.482963+00:00"
+      },
+      "fitScore": 67,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "職涯／實習+20",
+        "直接連結法律學習目標+15",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "職涯／實習"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-21T06:32:35.703147+00:00",
+      "lastSeen": "2026-10-21T06:08:56.973058+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-23T06:09:13.948370+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-10-21T06:08:56.973058+00:00"
+    },
     {
       "id": "auto-tcjob-5634",
       "title": "◎晴天花藝 × 花藝服務業職場體驗 ◎",
