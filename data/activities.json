@@ -1,33 +1,34 @@
 {
   "meta": {
-    "updatedAt": "2026-10-23T06:09:13.949197+00:00",
-    "sources": 7,
-    "events": 31,
-    "ok": 2,
-    "failed": 6,
+    "updatedAt": "2026-10-24T06:02:46.816998+00:00",
+    "sources": 6,
+    "events": 29,
+    "ok": 1,
+    "failed": 7,
     "errors": [
+      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached",
+      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached",
       "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8001 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached",
       "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached",
       "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached",
-      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached",
-      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached",
-      "youthfirst.yda.gov.tw: curl: (22) The requested URL returned error: 404"
+      "youthfirst.yda.gov.tw: curl: (22) The requested URL returned error: 404",
+      "n058.ncut.edu.tw: curl: (28) Failed to connect to n058.ncut.edu.tw port 443 after 8002 ms: Timeout was reached\ncurl: (28) Failed to connect to n058.ncut.edu.tw port 443 after 8002 ms: Timeout was reached"
     ],
     "generator": "V96.6.11.1.1 Multi-Source AutoFetch + Activity Radar",
     "sourcePolicy": "政府資訊為主；東海官方活動為活動核心；獎學金獨立資料集合與獨立判斷",
     "scholarships": 7,
     "totalSources": 9,
-    "healthySources": 7,
-    "failedSources": 2,
+    "healthySources": 6,
+    "failedSources": 3,
     "rejectedItems": 0,
-    "fetchFailedItems": 6,
-    "skippedPast": 95,
-    "fitFiltered": 20,
+    "fetchFailedItems": 7,
+    "skippedPast": 97,
+    "fitFiltered": 18,
     "semanticDuplicates": 0,
     "retiredThisRun": 2,
     "revivedThisRun": 0,
-    "archiveCount": 58,
-    "retainedOnFailure": 23,
+    "archiveCount": 60,
+    "retainedOnFailure": 22,
     "carriedMissing": 0,
     "needsReview": 0,
     "lifecyclePolicy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive",
@@ -35,19 +36,25 @@
     "nationwideOfficialHealthy": true,
     "nationwideOfficialEvents": 0,
     "nationwideOfficialEligible": 0,
-    "nationwideOfficialDiscovered": 128,
+    "nationwideOfficialDiscovered": 129,
     "sourceFailures": [
       {
         "sourceId": "thu_official",
         "name": "東海大學活動報名系統",
         "url": "https://tevent.thu.edu.tw/tEvent_front/index.php",
-        "error": "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8001 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached"
+        "error": "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached"
       },
       {
         "sourceId": "youthfirst_national",
         "name": "教育部青年第一讚｜全國競賽及徵件",
         "url": "https://youthfirst.yda.gov.tw/index.php/subject/index/0/7?project_type%5B%5D=%E7%AB%B6%E8%B3%BD",
         "error": "youthfirst.yda.gov.tw: curl: (22) The requested URL returned error: 404"
+      },
+      {
+        "sourceId": "ncut_competitions_official",
+        "name": "國立勤益科技大學｜全國競賽公告",
+        "url": "https://n058.ncut.edu.tw/p/403-1058-292-1.php?Lang=zh-tw",
+        "error": "n058.ncut.edu.tw: curl: (28) Failed to connect to n058.ncut.edu.tw port 443 after 8002 ms: Timeout was reached\ncurl: (28) Failed to connect to n058.ncut.edu.tw port 443 after 8002 ms: Timeout was reached"
       }
     ],
     "legalAcademicSourcesConfigured": 0,
@@ -138,16 +145,12 @@
       }
     },
     "officialCompetitionSourceCount": 1,
-    "officialCompetitionSourceHealthy": 1,
-    "officialCompetitionDiscovered": 12,
-    "officialCompetitionVerified": 10,
-    "officialCompetitionFreshEligible": 1,
+    "officialCompetitionSourceHealthy": 0,
+    "officialCompetitionDiscovered": 0,
+    "officialCompetitionVerified": 0,
+    "officialCompetitionFreshEligible": 0,
     "officialCompetitionActive": 1,
-    "officialCompetitionReviewReasons": {
-      "topic_mismatch": 2,
-      "eligibility_not_verified": 7,
-      "remote_submission_not_verified": 2
-    }
+    "officialCompetitionReviewReasons": {}
   },
   "events": [
     {
@@ -606,80 +609,6 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-20T06:09:03.240736+00:00",
-      "lastSeen": "2026-10-21T06:08:56.973058+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026100042",
-      "title": "【學期實習招募說明會】群益金鼎證券&板信商銀",
-      "date": "2026-10-27",
-      "time": "",
-      "scope": "東海校內",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026100042",
-      "keywords": "【學期實習招募說明會】群益金鼎證券&板信商銀 東海大學 財務金融學系 學術活動 教職員，費用：0；學生，費用：0 學術／講座 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 財務金融學系；活動日 2026-10-27；截止 2026-10-23",
-      "government": false,
-      "deadline": "2026-10-23",
-      "eventEndDate": "2026-10-27",
-      "location": "",
-      "organizer": "財務金融學系",
-      "audience": "教職員，費用：0；學生，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026100042",
-        "fetchedAt": "2026-10-21T06:06:31.965525+00:00"
-      },
-      "fitScore": 40,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "職涯／實習+20",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "職涯／實習"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-10-19T06:18:50.685484+00:00",
       "lastSeen": "2026-10-21T06:08:56.973058+00:00",
       "missCount": 0,
       "needsReview": false,
@@ -1777,83 +1706,6 @@
       "category": "legal_academic"
     },
     {
-      "id": "auto-thu-2026100001",
-      "title": "【工工系專題演講】10/23 為什麼你完美的AI履歷正在被批量淘汰-AI時代下未來科技人的求職準備與因應策略",
-      "date": "2026-10-23",
-      "time": "",
-      "scope": "東海校內",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=3&conference_code=2026100001",
-      "keywords": "【工工系專題演講】10/23 為什麼你完美的AI履歷正在被批量淘汰-AI時代下未來科技人的求職準備與因應策略 東海大學 工業工程與經營資訊學系 學術活動 教職員，費用：0；學生，費用：0；校外人士，費用：0 學術／講座 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 工業工程與經營資訊學系；活動日 2026-10-23；截止 2026-10-23",
-      "government": false,
-      "deadline": "2026-10-23",
-      "eventEndDate": "2026-10-23",
-      "location": "東海大學工學院 E108教室",
-      "organizer": "工業工程與經營資訊學系",
-      "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026100001",
-        "fetchedAt": "2026-10-02T07:03:30.477714+00:00"
-      },
-      "fitScore": 56,
-      "fitTier": "中適配",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "職涯／實習+20",
-        "通用能力／AI工具+14",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "職涯／實習",
-        "通用能力／AI工具"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-10-01T07:15:37.685597+00:00",
-      "lastSeen": "2026-10-02T07:05:01.119748+00:00",
-      "missCount": 21,
-      "needsReview": true,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
       "id": "auto-thu-2026090056",
       "title": "115學年第1學期活力體適能",
       "date": "2026-09-30",
@@ -2007,72 +1859,6 @@
       "category": "legal_academic"
     },
     {
-      "id": "auto-mofa-wh-portal",
-      "title": "青年度假打工｜外交部官方計畫入口",
-      "date": "",
-      "time": "",
-      "scope": "海外／國際",
-      "type": "語言／國際",
-      "kind": "program",
-      "url": "https://youthtaiwan.mofa.gov.tw/WorkingHoliday/",
-      "keywords": "青年度假打工 海外工作 國際交流 海外生活 外語 澳洲 日本 加拿大 紐西蘭 英國 德國 韓國",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "中華民國外交部｜臺灣青年FUN眼世界",
-      "statusText": "外交部常設青年度假打工官方入口；各國年齡、名額、簽證與保險條件依官方國別資訊",
-      "government": true,
-      "deadline": "",
-      "eventEndDate": "",
-      "location": "海外／依度假打工協定國",
-      "organizer": "中華民國外交部",
-      "audience": "青年；實際年齡與簽證資格依各協定國規定",
-      "openEnded": true,
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-10-23T06:08:25.361792+00:00"
-      },
-      "fitScore": 94,
-      "fitTier": "高適配",
-      "fitReasons": [
-        "同心圓第4圈：海外／國際+0",
-        "語言／國際／海外+40",
-        "青少年／營隊／教學+34",
-        "直接連結海外／國際經驗目標+18",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "語言／國際／海外",
-        "青少年／營隊／教學"
-      ],
-      "circleLevel": 4,
-      "circleLabel": "海外／國際",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-10-23T06:09:13.948370+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "mofa_working_holiday",
-      "sourceCategories": [
-        "international",
-        "career_internship",
-        "youth_program"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 4,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [],
-        "schoolNames": []
-      },
-      "country": "TW",
-      "category": "international"
-    },
-    {
       "id": "auto-ncut-competition-96514",
       "title": "德明財經科技大學-2026 全國大專綠色商品展暨海外行銷企劃大賽",
       "date": "2026-10-30",
@@ -2141,6 +1927,72 @@
       },
       "country": "TW",
       "category": "competition"
+    },
+    {
+      "id": "auto-mofa-wh-portal",
+      "title": "青年度假打工｜外交部官方計畫入口",
+      "date": "",
+      "time": "",
+      "scope": "海外／國際",
+      "type": "語言／國際",
+      "kind": "program",
+      "url": "https://youthtaiwan.mofa.gov.tw/WorkingHoliday/",
+      "keywords": "青年度假打工 海外工作 國際交流 海外生活 外語 澳洲 日本 加拿大 紐西蘭 英國 德國 韓國",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "中華民國外交部｜臺灣青年FUN眼世界",
+      "statusText": "外交部常設青年度假打工官方入口；各國年齡、名額、簽證與保險條件依官方國別資訊",
+      "government": true,
+      "deadline": "",
+      "eventEndDate": "",
+      "location": "海外／依度假打工協定國",
+      "organizer": "中華民國外交部",
+      "audience": "青年；實際年齡與簽證資格依各協定國規定",
+      "openEnded": true,
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "mofa_working_holiday",
+        "fetchedAt": "2026-10-24T06:01:58.207318+00:00"
+      },
+      "fitScore": 94,
+      "fitTier": "高適配",
+      "fitReasons": [
+        "同心圓第4圈：海外／國際+0",
+        "語言／國際／海外+40",
+        "青少年／營隊／教學+34",
+        "直接連結海外／國際經驗目標+18",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "語言／國際／海外",
+        "青少年／營隊／教學"
+      ],
+      "circleLevel": 4,
+      "circleLabel": "海外／國際",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-09T12:50:00.937440+00:00",
+      "lastSeen": "2026-10-24T06:02:46.816154+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "mofa_working_holiday",
+      "sourceCategories": [
+        "international",
+        "career_internship",
+        "youth_program"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 4,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [],
+        "schoolNames": []
+      },
+      "country": "TW",
+      "category": "international"
     }
   ]
 }
