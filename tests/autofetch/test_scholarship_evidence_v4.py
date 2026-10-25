@@ -16,6 +16,12 @@ class QualificationEvidenceV4(unittest.TestCase):
         self.assertEqual(a.review_scholarship_evidence({"eligibilityTarget":"一般學生","restrictions":"另可申請低收入戶加發補助。"})[0],"eligible_evidence")
     def test_negative_constraint_is_not_required_low_income(self):
         self.assertEqual(a.review_scholarship_evidence({"eligibilityTarget":"一般學生","restrictions":"不得具低收入戶身分。"})[0],"eligible_evidence")
+    def test_non_undergraduate_audience_not_eligible(self):
+        self.assertEqual(a.review_scholarship_evidence({"eligibilityTarget":"高中職學生"})[0],"unverified")
+    def test_nonempty_generic_major_is_not_an_audience(self):
+        self.assertEqual(a.review_scholarship_evidence({"eligibilityTarget":"不限科系"})[0],"unverified")
+    def test_application_note_mandatory_restricted_identity(self):
+        self.assertEqual(a.review_scholarship_evidence({"eligibilityTarget":"一般學生", "applicationNote":"申請資格：須具備低收入戶身分"})[0],"excluded")
     def test_only_grades_no_audience(self):
         self.assertEqual(a.review_scholarship_evidence({"scoreCondition":"學業平均75分以上"})[0],"unverified")
     def test_attachment_qualification(self):

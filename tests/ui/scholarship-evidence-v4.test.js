@@ -14,5 +14,8 @@ assert.equal(eligibility({...base,eligibilityReviewStatus:'unverified'}).code,'U
 assert.equal(eligibility({...base,eligibilityReviewStatus:'excluded'}).code,'EVIDENCE_EXCLUDED');
 assert.equal(eligibility({...base,eligibilityReviewStatus:'eligible_evidence',eligibilityVerified:false}).code,'UNVERIFIED');
 assert.equal(eligibility({...base,eligibilityReviewStatus:'eligible_evidence',restrictions:'申請資格：須具備低收入戶身分。'}).eligible,false);
+assert.equal(eligibility({...base,eligibilityReviewStatus:'eligible_evidence',eligibilityTarget:'高中職學生'}).eligible,false);
+assert.equal(eligibility({...base,eligibilityReviewStatus:'eligible_evidence',eligibilityTarget:'非法律系學生'}).eligible,false);
+assert.equal(eligibility({...base,eligibilityReviewStatus:'eligible_evidence',eligibilityTarget:'全校學生，僅限管理學院'}).eligible,false);
 assert.ok(src.includes('a.assessment.eligible&&!a.duplicateOf'),'canonical display should hide duplicate alias');
 console.log('PASS scholarship V4 three-state qualification and duplicate display');

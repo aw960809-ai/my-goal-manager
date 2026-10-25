@@ -163,6 +163,9 @@ function scholarshipStrictAffiliation(c){
 
 function scholarshipStrictStudentLevel(c){
   const s=[c.title,c.target,c.academic,c.restrictions].join(' ');
+  const target=String(c.target||'').replace(/\s+/g,'');
+  if(/^(?:國小|國中|高中|高職|高中職|碩士|博士|研究所|在職專班)(?:學生|生|班|研究生)?$/.test(target))
+    return '獎助對象限定其他教育階段／學制';
   const acceptsUndergrad=/(?:大學部|學士班|大專校院|大專院校|大學生|大專生|日間學士班|各級學生|全校學生)/.test(s);
   if(acceptsUndergrad)return null;
   if(/(?:僅限|限|限定|專供|申請對象|獎助對象).{0,24}(?:國小|國中|高中|高職|高中職|五專前三年|碩士班|博士班|研究生|在職專班)/.test(s))return '限定其他教育階段／學制';
@@ -173,6 +176,12 @@ function scholarshipStrictStudentLevel(c){
 function scholarshipStrictMajor(c){
   const s=[c.target,c.academic,c.restrictions].join(' ');
   if(!s)return null;
+  // Explicit exclusions and restricted majors take precedence over generic
+  // phrases like '全校學生' or the substring '法律' in '非法律'.
+  if(/(?:非法律(?:系|學系)?|排除法律|不含法律|法律(?:系|學系)?不得|法律(?:系|學系)?不適用)/.test(s))
+    return '官方條件明確排除法律系';
+  if(/(?:僅限|只限|限於|限定|必須為|須為).{0,32}(?:管理學院|財務金融|財金系|會計系|工學院|資訊工程|電機工程|機械工程|醫學院|護理系|教育學系|藝術學院)/.test(s))
+    return '官方條件明確限定其他科系／學門';
   if(/(?:法律|法學|不限科系|不限學系|各系|各學系|全校學生|全校各系)/.test(s))return null;
   const hasDepartmentSignal=/(?:學院|學系|科系|系所|學門)/.test(s);
   if(!hasDepartmentSignal)return null;

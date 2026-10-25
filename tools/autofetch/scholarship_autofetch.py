@@ -232,12 +232,13 @@ def review_scholarship_evidence(info, title=""):
     academic=clean(info.get("academicScope"))
     documents=clean(info.get("requiredDocuments"))
     note=clean(info.get("applicationNote"))
-    text=clean(" ".join((target,restrictions,academic,documents,note)))
+    score=clean(info.get("scoreCondition"))
+    text=clean(" ".join((target,restrictions,academic,documents,note,score)))
     if REVIEW_DISALLOWED.search(clean(title)):
         return "excluded","restricted_title"
     # A restrictive status must be an essential applicant condition, not an
     # optional top-up, an illustrative example, or a negative prohibition.
-    clauses=re.split(r"[。；;\n]",clean(" ".join((target,restrictions,academic,documents))))
+    clauses=re.split(r"[。；;\n]",clean("。".join((target,restrictions,academic,documents,note,score))))
     for clause in clauses:
         clause=clean(clause)
         if (REVIEW_DISALLOWED.search(clause) and REVIEW_MANDATORY.search(clause)
@@ -249,8 +250,10 @@ def review_scholarship_evidence(info, title=""):
             return "excluded","mandatory_restricted_identity_or_economics"
     if REVIEW_ATTACHMENT_ONLY.search(text):
         return "unverified","eligibility_requires_attachment"
-    if target and not re.fullmatch(r"(?:請參閱|詳見|依|同)(?:公告|簡章|附件|辦法|規定|網站).*",target):
-        return "eligible_evidence","official_audience_published"
+    # A nonempty audience field is NOT sufficient: e.g. "高中職學生"
+    # or merely "不限科系" does not establish general undergraduate access.
+    if REVIEW_GENERAL.search(target) and re.search(r"學生|學士班|在學",target):
+        return "eligible_evidence","official_general_student_audience"
     if REVIEW_GENERAL.search(restrictions) and REVIEW_AUDIENCE.search(restrictions):
         return "eligible_evidence","audience_explicit_in_restrictions"
     return "unverified","insufficient_applicant_evidence"
