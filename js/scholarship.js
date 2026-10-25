@@ -163,6 +163,9 @@ function scholarshipStrictAffiliation(c){
 
 function scholarshipStrictStudentLevel(c){
   const s=[c.title,c.target,c.academic,c.restrictions].join(' ');
+  const target=String(c.target||'').replace(/\s+/g,'');
+  if(/^(?:國小|國中|高中|高職|高中職|碩士|博士|研究所|在職專班)(?:學生|生|班|研究生)?$/.test(target))
+    return '獎助對象限定其他教育階段／學制';
   const acceptsUndergrad=/(?:大學部|學士班|大專校院|大專院校|大學生|大專生|日間學士班|各級學生|全校學生)/.test(s);
   if(acceptsUndergrad)return null;
   if(/(?:僅限|限|限定|專供|申請對象|獎助對象).{0,24}(?:國小|國中|高中|高職|高中職|五專前三年|碩士班|博士班|研究生|在職專班)/.test(s))return '限定其他教育階段／學制';
@@ -173,6 +176,12 @@ function scholarshipStrictStudentLevel(c){
 function scholarshipStrictMajor(c){
   const s=[c.target,c.academic,c.restrictions].join(' ');
   if(!s)return null;
+  // Explicit exclusions and restricted majors take precedence over generic
+  // phrases like '全校學生' or the substring '法律' in '非法律'.
+  if(/(?:非法律(?:系|學系)?|排除法律|不含法律|法律(?:系|學系)?不得|法律(?:系|學系)?不適用)/.test(s))
+    return '官方條件明確排除法律系';
+  if(/(?:僅限|只限|限於|限定|必須為|須為).{0,32}(?:管理學院|財務金融|財金系|會計系|工學院|資訊工程|電機工程|機械工程|醫學院|護理系|教育學系|藝術學院)/.test(s))
+    return '官方條件明確限定其他科系／學門';
   if(/(?:法律|法學|不限科系|不限學系|各系|各學系|全校學生|全校各系)/.test(s))return null;
   const hasDepartmentSignal=/(?:學院|學系|科系|系所|學門)/.test(s);
   if(!hasDepartmentSignal)return null;
@@ -205,8 +214,16 @@ function scholarshipEligibility(a){
   for(const [code,reason] of checks){
     if(reason)return {eligible:false,excluded:true,code,reason,specialty};
   }
-  if(scholarshipStrictRequiresVerifiedDetail(a)&&a?.eligibilityVerified!==true)
-    return {eligible:false,excluded:true,code:'UNVERIFIED',reason:'東海獎學金官方詳細資格尚未完成驗證，嚴格模式暫不推薦',specialty};
+  if(scholarshipStrictRequiresVerifiedDetail(a)){
+    const review=String(a?.eligibilityReviewStatus||'');
+    if(Number(a?.eligibilityEnrichmentVersion)!==4 ||
+       !['excluded','eligible_evidence','unverified'].includes(review))
+      return {eligible:false,excluded:true,code:'UNVERIFIED',reason:'仍使用舊版資格驗證資料，待重新核實後才推薦',specialty};
+    if(review==='excluded')
+      return {eligible:false,excluded:true,code:'EVIDENCE_EXCLUDED',reason:'官方必要資格具有不符合個人條件的限制',specialty};
+    if(review!=='eligible_evidence'||a?.eligibilityVerified!==true)
+      return {eligible:false,excluded:true,code:'UNVERIFIED',reason:'官方申請資格證據不足或跨分類證據不一致，暫不推薦',specialty};
+  }
   return {eligible:true,excluded:false,code:'PASS',reason:'通過嚴格硬性資格審查',specialty};
 }
 
@@ -236,7 +253,7 @@ function renderScholarships(){
    return {...a,score:assessment.score,assessment,life};
  });
  const excluded=assessedAll.filter(a=>a.life.keep&&!a.assessment.eligible).length;
- let arr=assessedAll.filter(a=>a.life.keep&&a.assessment.eligible);
+ let arr=assessedAll.filter(a=>a.life.keep&&a.assessment.eligible&&!a.duplicateOf);
  arr=arr.filter(a=>{
    if(filter==='高度符合')return a.score>=80;
    if(filter==='可能符合')return a.score>=60&&a.score<80;
@@ -286,7 +303,7 @@ function openScholarshipInfo(id){
   ${life?.state?`<div class="info-kv"><small>期限狀態</small><b>${esc(life.state)}</b></div>`:''}
  </div><div class="notice">${assessment.eligible
  ?'地域限制、清寒／低收入／經濟弱勢、特定族群、軍公教／軍警消、疾病／傷病、急難／受災、特定組織／親屬、非大學部或非法律科系等，只要是必要資格即排除；額外加發或非必要補助不因此排除。專業考照與外語能力獎勵仍提高排序。'
- :'此項因公告呈現明確的特定資格限制而不列入個人推薦；最終資格仍以官方簡章為準。'
+ :(assessment.code==='UNVERIFIED'?'此項官方資格證據不足，待確認後才推薦；最終條件以官方簡章為準。':'此項因公告呈現明確的特定資格限制而不列入個人推薦；最終資格仍以官方簡章為準。')
  }</div><div class="goal-info-actions">${official?`<a class="btn primary" href="${esc(safeExternalUrl(official))}" target="_blank" rel="noopener noreferrer">${number?'開啟官方詳細辦法／申請書':'查看官方資訊'}</a>`:''}${assessment.eligible&&(a.date||a.deadline)?`<button class="btn dark" type="button" onclick="addActivityToCalendar('${String(a.id).replace(/'/g,"\\'")}');closeScholarshipInfoModal()">加入申請截止日</button>`:''}<button class="btn" type="button" onclick="closeScholarshipInfoModal()">關閉</button></div>`;
  document.getElementById('scholarshipInfoModal').classList.add('show');document.body.style.overflow='hidden';bindInteractionFeedback();
 }
