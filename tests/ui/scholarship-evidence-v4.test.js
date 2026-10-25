@@ -7,9 +7,9 @@ const scope={RadarPolicy:{scholarshipRegionReason:()=>null}};
 vm.createContext(scope);vm.runInContext(src,scope);
 const eligibility=vm.runInContext('scholarshipEligibility',scope);
 const base={id:'auto-thu-sch-external-100',sourceId:'thu_scholarship_official',auto:true,
-  eligibilityTarget:'一般學生',eligibilityVerified:true,eligibilityEnrichmentVersion:4};
+  eligibilityTarget:'一般學生',eligibilityVerified:true,eligibilityEnrichmentVersion:5};
 assert.equal(eligibility({...base,eligibilityReviewStatus:'eligible_evidence'}).eligible,true);
-assert.equal(eligibility({...base,eligibilityEnrichmentVersion:3}).code,'UNVERIFIED');
+assert.equal(eligibility({...base,eligibilityEnrichmentVersion:4}).code,'UNVERIFIED');
 assert.equal(eligibility({...base,eligibilityReviewStatus:'unverified'}).code,'UNVERIFIED');
 assert.equal(eligibility({...base,eligibilityReviewStatus:'excluded'}).code,'EVIDENCE_EXCLUDED');
 assert.equal(eligibility({...base,eligibilityReviewStatus:'eligible_evidence',eligibilityVerified:false}).code,'UNVERIFIED');
