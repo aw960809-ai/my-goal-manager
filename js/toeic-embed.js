@@ -14,10 +14,15 @@
   const TRAINER_PATH='/toeic-trainer/';
   // Static content revision only; never used as a data or storage version.
   const FRAME_REV='98.13.10';
-  function isHosted(loc){
-    return !!loc&&loc.protocol==='https:'&&loc.hostname==='aw960809-ai.github.io'&&
-      /^\/my-goal-manager\/(?:index\.html)?$/.test(String(loc.pathname||''));
+  function isLocalGoal(loc){
+    return !!loc&&loc.protocol==='http:'&&['127.0.0.1','localhost','[::1]'].includes(loc.hostname)&&
+      /^\/(?:index\.html)?$/.test(String(loc.pathname||''));
   }
+  function isHosted(loc){
+    return isLocalGoal(loc)||!!(loc&&loc.protocol==='https:'&&loc.hostname==='aw960809-ai.github.io'&&
+      /^\/my-goal-manager\/(?:index\.html)?$/.test(String(loc.pathname||'')));
+  }
+  function trainerPath(loc){return isLocalGoal(loc)?'/apps/toeic-trainer/':TRAINER_PATH;}
   function attach({window,document}={}){
     const launcher=document?.getElementById('homeToeicTraining');
     const overlay=document?.getElementById('gmToeicImmersive');
@@ -31,7 +36,7 @@
     let open=false,ownsHistory=false,previousFocus=null;
     let frameReloads=0,frameNonce=0;
     function frameUrl(force=false){
-      const url=new URL(TRAINER_PATH,window.location.origin);
+      const url=new URL(trainerPath(window.location),window.location.origin);
       // A distinct document URL bypasses stale in-memory / HTTP HTML entries.
       url.searchParams.set('gm_rev',FRAME_REV);
       if(force)url.searchParams.set('_fresh',Date.now()+'-'+(++frameNonce));
@@ -149,7 +154,8 @@
         if(!anchor)return;
         try{
           const url=new URL(anchor.href,frame.contentWindow.location.href);
-          if(url.origin===window.location.origin&&url.pathname.startsWith('/my-goal-manager/')){
+          if(url.origin===window.location.origin&&(url.pathname.startsWith('/my-goal-manager/')||
+              (isLocalGoal(window.location)&&['/','/index.html'].includes(url.pathname)))){
             event.preventDefault();restore(false);
           }
         }catch(_){/* Keep Trainer's own navigation on parsing failures. */}
@@ -167,5 +173,5 @@
     window.addEventListener('popstate',()=>{if(open)restore(true)});
     return Object.freeze({launch,close:restore,isOpen:()=>open});
   }
-  return Object.freeze({TRAINER_PATH,isHosted,attach});
+  return Object.freeze({TRAINER_PATH,trainerPath,isHosted,attach});
 });
