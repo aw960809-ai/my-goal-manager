@@ -233,6 +233,7 @@ def run_source(*, fetch_fn, stamp, limit=50, logger=print, today=None):
     category_ok=0
     results={}
     skipped_past=0
+    review_reasons={}
     for cat in CATEGORIES:
         url=API_ROOT+cat
         try:
@@ -250,8 +251,16 @@ def run_source(*, fetch_fn, stamp, limit=50, logger=print, today=None):
             candidate=event_candidate(row,cat,stamp,today=today)
             if candidate:
                 results[candidate['id']]=candidate
-            elif isinstance(row,dict) and row.get('startDate') and date_key(row['startDate']) and date_key(row['startDate'])<today.isoformat():
-                skipped_past+=1
+            else:
+                if not isinstance(row,dict):
+                    reason='invalid_source_record'
+                elif not topic_relevant(row.get('title'),row.get('descriptionFilterHtml')):
+                    reason='topic_mismatch'
+                else:
+                    reason='date_eligibility_or_link_unverified'
+                review_reasons[reason]=review_reasons.get(reason,0)+1
+                if isinstance(row,dict) and row.get('startDate') and date_key(row['startDate']) and date_key(row['startDate'])<today.isoformat():
+                    skipped_past+=1
     healthy=category_ok==len(CATEGORIES) and seen>0
     candidates=sorted(results.values(), key=lambda c:(c['date'],c['title']))[:max(1,min(int(limit),80))]
     logger(f'MOC_NATIONAL source={SOURCE_ID} categories={category_ok}/{len(CATEGORIES)} '
@@ -260,7 +269,8 @@ def run_source(*, fetch_fn, stamp, limit=50, logger=print, today=None):
         'sourceId':SOURCE_ID,'prefix':PREFIX,'discovered':seen,
         'parsedOk':len(results),'accepted':candidates if healthy else [],
         'skippedPast':skipped_past,'rejected':[],'fetchFailures':failures,
-        'healthy':healthy,'nationalTopics':sorted({tag for c in candidates for tag in c['nationwideTopics']}),
+        'healthy':healthy,'reviewReasons':review_reasons,
+        'nationalTopics':sorted({tag for c in candidates for tag in c['nationwideTopics']}),
         'categoryOk':category_ok,'categoryTotal':len(CATEGORIES),
         'nationwideMatchCount':len(results),
     }

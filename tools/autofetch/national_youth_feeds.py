@@ -381,6 +381,38 @@ def candidate(card,body,source_id,stamp,*,today=None,reasons=None):
     }
 
 
+
+def youthfirst_verified_pages(page, listing_url):
+    """Only canonical, source-advertised pagination links (no guessed 404s)."""
+    query=urlparse(listing_url).query
+    if not query or 'project_type' not in query:
+        return []
+    # Match only the two configured categories; pages are bounded, not crawled.
+    is_competition='%E7%AB%B6' in query.upper()
+    max_offset=6 if is_competition else 2
+    collected=[]
+    for href,label,_pos in page.links:
+        try:
+            raw=urlparse(str(href).strip())
+            if raw.scheme and raw.scheme!='https':
+                continue
+            if raw.netloc and (raw.hostname!='youthfirst.yda.gov.tw' or raw.username or raw.password or raw.port is not None):
+                continue
+        except ValueError:
+            continue
+        # Accept exactly the pagination path published by the website, but
+        # reconstruct an HTTPS URL under our fixed, trusted category query.
+        match=re.search(r'(?:^|/)subject/index/0/(\d{1,2})$',raw.path)
+        if not match:
+            continue
+        offset=int(match.group(1))
+        if 1<=offset<=max_offset:
+            canonical='https://youthfirst.yda.gov.tw/index.php/subject/index/0/'+str(offset)+'?'+query
+            if canonical not in collected:
+                collected.append(canonical)
+    return collected
+
+
 def run_source(source_id,*,fetch_fn,stamp,logger=print,limit=10,today=None):
     """Standard per-source isolation, bounded network IO, strict partial fail-closed."""
     today=today or taipei_today()
@@ -395,25 +427,26 @@ def run_source(source_id,*,fetch_fn,stamp,logger=print,limit=10,today=None):
         if rec and len(out['reviewSamples'].get(code,[]))<2:
             out['reviewSamples'].setdefault(code,[]).append({
                 'title':rec['title'][:120],'url':rec['url']})
+    # Load only two configured category pages. Further pages must first be
+    # advertised in a verified official HTML page (no manufactured offsets).
     urls=list(spec['lists'])
-    if source_id=='youthfirst_national':
-        # Explicit category + page. Never domain-wide crawl.
-        # Competition covers at most 7 pages (~63 entries), events 3 pages.
-        more=[]
-        for base in urls:
-            for page in range(2,8 if '%E7%AB%B6' in base else 4):
-                url='https://youthfirst.yda.gov.tw/index.php/subject/index/0/'+str(page)+'?'+base.partition('?')[2]
-                more.append(url)
-        urls+=more
+    visited_urls=set()
     failures=[]
     empty_verified=False
     for url in urls:
+        if url in visited_urls:
+            continue
+        visited_urls.add(url)
         try:
             final,html=fetch_fn(url,[spec['host']])
             fp=urlparse(final)
             if fp.scheme!='https' or fp.hostname!=spec['host'] or fp.username or fp.password or fp.port:
                 raise ValueError('official listing redirect mismatch')
             cards,p=listing(html,spec)
+            if source_id=='youthfirst_national':
+                for next_page in youthfirst_verified_pages(p,url):
+                    if next_page not in visited_urls and next_page not in urls:
+                        urls.append(next_page)
             if not cards:
                 if re.search(r'顯示\s*0\s*筆|沒有符合',clean(' '.join(p.lines))):
                     empty_verified=True

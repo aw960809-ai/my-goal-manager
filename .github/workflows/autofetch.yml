@@ -6,12 +6,11 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
-  actions: write
 concurrency:
   group: goal-manager-main-writers
   cancel-in-progress: false
 jobs:
-  refresh-build-deploy:
+  refresh-catalog:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -183,4 +182,3 @@ jobs:
           git commit -m "chore(data): zero-config autofetch ${GITHUB_RUN_ID}"
           git pull --rebase origin "${GITHUB_REF_NAME}"
           git push origin "HEAD:${GITHUB_REF_NAME}"
-          gh workflow run pages.yml --ref "${GITHUB_REF_NAME}"
