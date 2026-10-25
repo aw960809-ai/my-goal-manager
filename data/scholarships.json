@@ -1,6 +1,6 @@
 {
   "meta": {
-    "updatedAt": "2026-10-25T06:14:10+00:00",
+    "updatedAt": "2026-10-25T12:15:25+00:00",
     "sourceId": "thu_scholarship_official",
     "eligibilityDetail": {
       "detailCandidates": 0,
@@ -12,8 +12,37 @@
       "detailBudgetExpired": 0,
       "detailWorkers": 6,
       "detailBudgetSeconds": 480,
-      "detailElapsedSeconds": 0.0
+      "detailElapsedSeconds": 0.0,
+      "crossCategoryDuplicates": 12,
+      "duplicateConflicts": 0
     },
+    "categoryHealth": [
+      {
+        "id": "external",
+        "ok": false,
+        "error": "URLError: <urlopen error timed out>"
+      },
+      {
+        "id": "government",
+        "ok": false,
+        "error": "URLError: <urlopen error timed out>"
+      },
+      {
+        "id": "department",
+        "ok": false,
+        "error": "URLError: <urlopen error timed out>"
+      },
+      {
+        "id": "campus",
+        "ok": false,
+        "error": "URLError: <urlopen error timed out>"
+      },
+      {
+        "id": "specialty",
+        "ok": true,
+        "error": ""
+      }
+    ],
     "categories": 5,
     "healthyCategories": 1,
     "failedCategories": 4,
@@ -311,12 +340,14 @@
       "requiredDocuments": "填寫列印資料表-學校存檔(按：我要申請) 在學證明或學生證正反面影印本(蓋註冊章) 申請書本人簽名蓋章 戶口名簿影本(由申請人加蓋私章) 上學期成績單〈須附班級排名〉",
       "scoreCondition": "前學期學業成績平均分數需80分(含)以上。每科都要及格。",
       "applicationNote": "備妥資料並於學校申請截止日10月29日前至學務處生輔組辦理",
-      "eligibilityVerified": true,
+      "eligibilityVerified": false,
       "eligibilityFetchedAt": "2026-09-15T06:12:09+00:00",
       "firstSeen": "2026-09-15T06:11:44+00:00",
       "lastSeen": "2026-10-21T06:05:48+00:00",
       "missCount": 0,
-      "needsReview": false
+      "needsReview": false,
+      "eligibilityReviewStatus": "unverified",
+      "eligibilityError": "duplicate_evidence_incomplete"
     },
     {
       "id": "auto-thu-sch-external-435",
@@ -393,12 +424,14 @@
       "requiredDocuments": "其他證明文件(參見辦法) 操行獎懲證明 申請書/表 切結書 前一學期名次證明書",
       "scoreCondition": "",
       "applicationNote": "備妥資料並於學校申請截止日10月30日前至學務處生輔組辦理",
-      "eligibilityVerified": true,
+      "eligibilityVerified": false,
       "eligibilityFetchedAt": "2026-09-24T06:14:25+00:00",
       "firstSeen": "2026-09-24T06:13:12+00:00",
       "lastSeen": "2026-10-21T06:05:48+00:00",
       "missCount": 0,
-      "needsReview": false
+      "needsReview": false,
+      "eligibilityReviewStatus": "unverified",
+      "eligibilityError": "duplicate_evidence_incomplete"
     },
     {
       "id": "auto-thu-sch-external-262",
@@ -964,12 +997,14 @@
       "requiredDocuments": "其他應繳資料請詳閱申請辦法",
       "scoreCondition": "前學期學業成績平均分數需60分(含)以上。",
       "applicationNote": "申請人請於此網址申請獎學金，並上傳所需資料，逾期不受理https://forms.gle/emFYWQ7ch6kbq3WZ8",
-      "eligibilityVerified": true,
+      "eligibilityVerified": false,
       "eligibilityFetchedAt": "2026-10-15T07:43:49+00:00",
       "firstSeen": "2026-10-15T07:43:36+00:00",
       "lastSeen": "2026-10-21T06:05:48+00:00",
       "missCount": 0,
-      "needsReview": false
+      "needsReview": false,
+      "eligibilityReviewStatus": "unverified",
+      "eligibilityError": "duplicate_evidence_incomplete"
     },
     {
       "id": "auto-thu-sch-external-417",
@@ -1005,12 +1040,14 @@
       "requiredDocuments": "其他證明文件(參見辦法) 居留證 在學證明或學生證正反面影印本(蓋註冊章) 清寒證明 前學年成績證明 學生銀行或郵局帳簿封面影本 該單位提供之申請書(於辦法右上方下載)",
       "scoreCondition": "前學年學業成績平均分數需60分(含)以上。",
       "applicationNote": "申請人請於此網址申請獎學金，並上傳所需資料，逾期不受理https://forms.gle/emFYWQ7ch6kbq3WZ8。",
-      "eligibilityVerified": true,
+      "eligibilityVerified": false,
       "eligibilityFetchedAt": "2026-10-15T07:43:49+00:00",
       "firstSeen": "2026-10-15T07:43:36+00:00",
       "lastSeen": "2026-10-21T06:05:48+00:00",
       "missCount": 0,
-      "needsReview": false
+      "needsReview": false,
+      "eligibilityReviewStatus": "unverified",
+      "eligibilityError": "duplicate_evidence_incomplete"
     },
     {
       "id": "auto-thu-sch-external-547",
@@ -1046,12 +1083,14 @@
       "requiredDocuments": "填寫列印資料表-學校存檔(按：我要申請) 教授推薦函乙份 上學期成績證明 申請書/表 學生銀行或郵局帳簿封面影本 居留証影本 有助於申請本獎學金之證明文件",
       "scoreCondition": "前學期學業成績平均分數需85分(含)以上。",
       "applicationNote": "申請人請於此網址申請獎學金，並上傳所需資料，逾期不受理https://forms.gle/m7J9EBV9QHASoGDS6，教授/導師推薦函填寫: https://form2.thu.edu.tw/4879932",
-      "eligibilityVerified": true,
+      "eligibilityVerified": false,
       "eligibilityFetchedAt": "2026-10-15T07:43:49+00:00",
       "firstSeen": "2026-10-15T07:43:36+00:00",
       "lastSeen": "2026-10-21T06:05:48+00:00",
       "missCount": 0,
-      "needsReview": false
+      "needsReview": false,
+      "eligibilityReviewStatus": "unverified",
+      "eligibilityError": "duplicate_evidence_incomplete"
     },
     {
       "id": "auto-thu-sch-external-260",
@@ -1369,12 +1408,14 @@
       "requiredDocuments": "依辦法內容之規定繳交",
       "scoreCondition": "歷年學業成績每科都要及格。",
       "applicationNote": "備妥資料並於學校申請截止日12月27日前至國際職場實習發展中心辦理",
-      "eligibilityVerified": true,
+      "eligibilityVerified": false,
       "eligibilityFetchedAt": "2026-10-08T05:48:16+00:00",
       "firstSeen": "2026-10-08T05:47:58+00:00",
       "lastSeen": "2026-10-21T06:05:48+00:00",
       "missCount": 0,
-      "needsReview": false
+      "needsReview": false,
+      "eligibilityReviewStatus": "unverified",
+      "eligibilityError": "duplicate_evidence_incomplete"
     },
     {
       "id": "auto-thu-sch-external-778",
@@ -1721,7 +1762,8 @@
       "detailUrl": "https://tscholarship.thu.edu.tw/wwwstud/frontend/Scholarship_detail.php?schno=601&term=1&year=115",
       "eligibilityEnrichmentVersion": 3,
       "eligibilityVerified": false,
-      "eligibilityError": "RuntimeError: detail_structure_not_trusted"
+      "eligibilityError": "duplicate_evidence_incomplete",
+      "eligibilityReviewStatus": "unverified"
     },
     {
       "id": "auto-thu-sch-external-797",
@@ -1879,7 +1921,8 @@
       "firstSeen": "2026-09-15T06:11:47+00:00",
       "lastSeen": "2026-10-21T06:05:48+00:00",
       "missCount": 0,
-      "needsReview": false
+      "needsReview": false,
+      "duplicateOf": "auto-thu-sch-external-57"
     },
     {
       "id": "auto-thu-sch-government-855",
@@ -1920,7 +1963,8 @@
       "firstSeen": "2026-09-24T06:13:13+00:00",
       "lastSeen": "2026-10-21T06:05:48+00:00",
       "missCount": 0,
-      "needsReview": false
+      "needsReview": false,
+      "duplicateOf": "auto-thu-sch-external-855"
     },
     {
       "id": "auto-thu-sch-government-671",
@@ -1961,7 +2005,8 @@
       "firstSeen": "2026-10-15T07:43:38+00:00",
       "lastSeen": "2026-10-21T06:05:48+00:00",
       "missCount": 0,
-      "needsReview": false
+      "needsReview": false,
+      "duplicateOf": "auto-thu-sch-external-671"
     },
     {
       "id": "auto-thu-sch-government-417",
@@ -2002,7 +2047,8 @@
       "firstSeen": "2026-10-15T07:43:38+00:00",
       "lastSeen": "2026-10-21T06:05:48+00:00",
       "missCount": 0,
-      "needsReview": false
+      "needsReview": false,
+      "duplicateOf": "auto-thu-sch-external-417"
     },
     {
       "id": "auto-thu-sch-government-547",
@@ -2043,7 +2089,8 @@
       "firstSeen": "2026-10-15T07:43:38+00:00",
       "lastSeen": "2026-10-21T06:05:48+00:00",
       "missCount": 0,
-      "needsReview": false
+      "needsReview": false,
+      "duplicateOf": "auto-thu-sch-external-547"
     },
     {
       "id": "auto-thu-sch-government-601",
@@ -2078,7 +2125,8 @@
       "detailUrl": "https://tscholarship.thu.edu.tw/wwwstud/frontend/Scholarship_detail.php?schno=601&term=1&year=115",
       "eligibilityEnrichmentVersion": 3,
       "eligibilityVerified": false,
-      "eligibilityError": "RuntimeError: detail_structure_not_trusted"
+      "eligibilityError": "RuntimeError: detail_structure_not_trusted",
+      "duplicateOf": "auto-thu-sch-external-601"
     },
     {
       "id": "auto-thu-sch-campus-580",
@@ -2119,7 +2167,8 @@
       "firstSeen": "2026-10-08T05:48:04+00:00",
       "lastSeen": "2026-10-21T06:05:48+00:00",
       "missCount": 0,
-      "needsReview": false
+      "needsReview": false,
+      "duplicateOf": "auto-thu-sch-external-580"
     },
     {
       "id": "auto-thu-sch-specialty-professional-certificate",
@@ -2147,13 +2196,13 @@
       "specialtyKind": "professional",
       "eligibilityTarget": "general_student",
       "statusText": "東海官方專業考照獎勵；申請期限 2026-11-02",
-      "fetchedAt": "2026-10-25T06:14:10+00:00",
+      "fetchedAt": "2026-10-25T12:15:25+00:00",
       "firstSeen": "2026-09-10T14:37:26+00:00",
-      "lastSeen": "2026-10-25T06:14:10+00:00",
+      "lastSeen": "2026-10-25T12:15:25+00:00",
       "missCount": 0,
       "needsReview": false,
       "eligibilityVerified": true,
-      "eligibilityEnrichmentVersion": 3
+      "eligibilityEnrichmentVersion": 5
     },
     {
       "id": "auto-thu-sch-external-640",
@@ -2187,15 +2236,16 @@
       "number": "640",
       "detailUrl": "https://tscholarship.thu.edu.tw/wwwstud/frontend/Scholarship_detail.php?schno=640&term=1&year=115",
       "eligibilityEnrichmentVersion": 3,
-      "eligibilityVerified": true,
-      "eligibilityError": "URLError: <urlopen error timed out>",
+      "eligibilityVerified": false,
+      "eligibilityError": "duplicate_evidence_incomplete",
       "eligibilityTarget": "115大一新生。",
       "restrictions": "◎在職生不可申請 ◎延修生不可申請 ◎被記過者不可申請 ◎1.本學年新生且為低收入戶或中低收入戶持有證明者 2.繁星推薦或申請入學學測成績任二科達頂標者 3.獲獎生應於獲獎後繳交感謝函或感謝卡一份",
       "academicScope": "日間學士班1年級。",
       "requiredDocuments": "其他應繳資料請詳閱申請辦法",
       "scoreCondition": "",
       "applicationNote": "請符合資格的新生持申請獎助學金資料表、低收入戶或中低收入戶證明及學測成績單至生活輔導組申請",
-      "eligibilityFetchedAt": "2026-09-12T05:53:09+00:00"
+      "eligibilityFetchedAt": "2026-09-12T05:53:09+00:00",
+      "eligibilityReviewStatus": "unverified"
     },
     {
       "id": "auto-thu-sch-campus-640",
@@ -2236,7 +2286,8 @@
       "scoreCondition": "",
       "applicationNote": "請符合資格的新生持申請獎助學金資料表、低收入戶或中低收入戶證明及學測成績單至生活輔導組申請",
       "eligibilityVerified": true,
-      "eligibilityFetchedAt": "2026-09-10T17:02:11+00:00"
+      "eligibilityFetchedAt": "2026-09-10T17:02:11+00:00",
+      "duplicateOf": "auto-thu-sch-external-640"
     },
     {
       "id": "auto-thu-sch-external-513",
@@ -2270,15 +2321,16 @@
       "number": "513",
       "detailUrl": "https://tscholarship.thu.edu.tw/wwwstud/frontend/Scholarship_detail.php?schno=513&term=1&year=115",
       "eligibilityEnrichmentVersion": 3,
-      "eligibilityVerified": true,
-      "eligibilityError": "URLError: <urlopen error timed out>",
+      "eligibilityVerified": false,
+      "eligibilityError": "duplicate_evidence_incomplete",
       "eligibilityTarget": "清寒學生。",
       "restrictions": "◎在職生不可申請 ◎延修生不可申請 ◎被記過者不可申請 ◎1.申請書及配分評估參考表請同學先行自評給分。 2.研究生限家人發生重大意外變故者始得申請。 3.其他條件請參考申請辦法。 4.家庭成員每人國稅局年度綜合所得稅各類所得資料清單與家庭成員每人財產 歸屬資料清單【家庭成員介紹/全戶總人數合計__人(務必據實申報，否則取消資格)】。【例外：有低收入戶或中低收入戶證明者免繳】 5.獲獎生須於接獲得獎通知一周內繳交感謝卡或感謝函一份並參加當年頒獎典禮。",
       "academicScope": "日間學士班2年級(含)以上。碩士班。博士班。",
       "requiredDocuments": "填寫列印資料表-學校存檔(按：我要申請) 全戶戶籍謄本 依辦法內容之規定繳交 配分評估參考表 申請單 低收入或中低收入證明 前一年度家戶所得財產清單證明書",
       "scoreCondition": "前學年學業成績平均分數需75分(含)以上。",
       "applicationNote": "備妥資料並於學校申請截止日前至學務處生輔組辦理",
-      "eligibilityFetchedAt": "2026-10-16T03:50:41+00:00"
+      "eligibilityFetchedAt": "2026-10-16T03:50:41+00:00",
+      "eligibilityReviewStatus": "unverified"
     },
     {
       "id": "auto-thu-sch-external-304",
@@ -2314,12 +2366,14 @@
       "requiredDocuments": "申請書上所註明之附件資料",
       "scoreCondition": "前學年學業成績平均分數需80分(含)以上。每科都要及格。",
       "applicationNote": "請備齊相關資料於10月22日前至學務處生輔組辦理",
-      "eligibilityVerified": true,
+      "eligibilityVerified": false,
       "eligibilityFetchedAt": "2026-10-01T07:13:12+00:00",
       "firstSeen": "2026-10-01T07:12:56+00:00",
       "lastSeen": "2026-10-21T06:05:48+00:00",
       "missCount": 0,
-      "needsReview": false
+      "needsReview": false,
+      "eligibilityReviewStatus": "unverified",
+      "eligibilityError": "duplicate_evidence_incomplete"
     },
     {
       "id": "auto-thu-sch-external-108",
@@ -2401,8 +2455,10 @@
       "requiredDocuments": "上學期成績證明 戶口名簿影本(由申請人加蓋私章) 該單位提供之申請書(於辦法右上方下載) 低收入或中低收入證明",
       "scoreCondition": "前學期學業成績平均分數需80分(含)以上。每科都要及格。",
       "applicationNote": "備妥資料並於學校申請截止日10月22日前至學務處生輔組辦理",
-      "eligibilityVerified": true,
-      "eligibilityFetchedAt": "2026-09-10T17:02:11+00:00"
+      "eligibilityVerified": false,
+      "eligibilityFetchedAt": "2026-09-10T17:02:11+00:00",
+      "eligibilityReviewStatus": "unverified",
+      "eligibilityError": "duplicate_evidence_incomplete"
     },
     {
       "id": "auto-thu-sch-government-304",
@@ -2443,7 +2499,8 @@
       "firstSeen": "2026-10-01T07:12:58+00:00",
       "lastSeen": "2026-10-21T06:05:48+00:00",
       "missCount": 0,
-      "needsReview": false
+      "needsReview": false,
+      "duplicateOf": "auto-thu-sch-external-304"
     },
     {
       "id": "auto-thu-sch-government-70",
@@ -2484,7 +2541,8 @@
       "scoreCondition": "前學期學業成績平均分數需80分(含)以上。每科都要及格。",
       "applicationNote": "備妥資料並於學校申請截止日10月22日前至學務處生輔組辦理",
       "eligibilityVerified": true,
-      "eligibilityFetchedAt": "2026-09-10T17:02:11+00:00"
+      "eligibilityFetchedAt": "2026-09-10T17:02:11+00:00",
+      "duplicateOf": "auto-thu-sch-external-70"
     },
     {
       "id": "auto-thu-sch-campus-513",
@@ -2526,7 +2584,8 @@
       "requiredDocuments": "填寫列印資料表-學校存檔(按：我要申請) 全戶戶籍謄本 依辦法內容之規定繳交 配分評估參考表 申請單 低收入或中低收入證明 前一年度家戶所得財產清單證明書",
       "scoreCondition": "前學年學業成績平均分數需75分(含)以上。",
       "applicationNote": "備妥資料並於學校申請截止日前至學務處生輔組辦理",
-      "eligibilityFetchedAt": "2026-10-16T03:50:41+00:00"
+      "eligibilityFetchedAt": "2026-10-16T03:50:41+00:00",
+      "duplicateOf": "auto-thu-sch-external-513"
     },
     {
       "id": "auto-thu-sch-external-382",
@@ -2562,12 +2621,14 @@
       "requiredDocuments": "填寫列印資料表-學校存檔(按：我要申請) 志向說明書 數學系所教授二人以上推薦書 歷年成績證明 該單位提供之申請書(於辦法右上方下載)",
       "scoreCondition": "",
       "applicationNote": "備妥資料並於學校申請截止日10月21日前至學務處生輔組辦理",
-      "eligibilityVerified": true,
+      "eligibilityVerified": false,
       "eligibilityFetchedAt": "2026-09-15T06:12:09+00:00",
       "firstSeen": "2026-09-15T06:11:44+00:00",
       "lastSeen": "2026-10-21T06:05:48+00:00",
       "missCount": 0,
-      "needsReview": false
+      "needsReview": false,
+      "eligibilityReviewStatus": "unverified",
+      "eligibilityError": "duplicate_evidence_incomplete"
     },
     {
       "id": "auto-thu-sch-external-179",
@@ -2733,7 +2794,8 @@
       "firstSeen": "2026-09-15T06:11:47+00:00",
       "lastSeen": "2026-10-21T06:05:48+00:00",
       "missCount": 0,
-      "needsReview": false
+      "needsReview": false,
+      "duplicateOf": "auto-thu-sch-external-382"
     }
   ]
 }
