@@ -23,6 +23,12 @@
       /^\/my-goal-manager\/(?:index\.html)?$/.test(String(loc.pathname||'')));
   }
   function trainerPath(loc){return isLocalGoal(loc)?'/apps/toeic-trainer/':TRAINER_PATH;}
+  function isOldFrame(child){
+    // Current TOEIC also has a settings tab.
+    if(!child?.querySelector?.('.main-nav [data-tab="settings"]'))return false;
+    const modern=['#homeStartPractice','#homeStartVocab','#homeStartGrammar','#vocabViewTabs'];
+    return !modern.every(selector=>!!child.querySelector(selector));
+  }
   function attach({window,document}={}){
     const launcher=document?.getElementById('homeToeicTraining');
     const overlay=document?.getElementById('gmToeicImmersive');
@@ -42,9 +48,6 @@
       if(force)url.searchParams.set('_fresh',Date.now()+'-'+(++frameNonce));
       return url.href;
     }
-    function isOldFrame(child){
-      return !!child?.querySelector?.('.main-nav [data-tab="settings"]');
-    }
     function hasActiveExam(child){
       // Do NOT reload an in-progress test (only submitted/draft state is durable).
       return !!child?.querySelector?.('#vocabSession:not([hidden]) .exam-panel, #practiceSession:not([hidden]) .exam-panel, #readingLessonPanel:not([hidden]) .reading-study');
@@ -52,7 +55,7 @@
     function refreshTrainerWorker(){
       try{
         const sw=window.navigator?.serviceWorker;
-        if(sw?.getRegistration)Promise.resolve(sw.getRegistration(TRAINER_PATH))
+        if(sw?.getRegistration)Promise.resolve(sw.getRegistration(trainerPath(window.location)))
           .then(reg=>reg?.update?.()).catch(()=>{});
       }catch(_){/* Offline and unsupported browsers retain the existing iframe fallback. */}
     }
@@ -173,5 +176,5 @@
     window.addEventListener('popstate',()=>{if(open)restore(true)});
     return Object.freeze({launch,close:restore,isOpen:()=>open});
   }
-  return Object.freeze({TRAINER_PATH,trainerPath,isHosted,attach});
+  return Object.freeze({TRAINER_PATH,trainerPath,isHosted,isOldFrame,attach});
 });
