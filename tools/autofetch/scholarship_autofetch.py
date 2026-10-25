@@ -103,7 +103,7 @@ def parse(html,sub_id,sub_name,url,today=None):
     return sorted(uniq.values(),key=lambda x:(x["deadline"],x["title"])),recognized,parsed_total
 
 # official detail eligibility enrichment
-DETAIL_ENRICH_VERSION=4
+DETAIL_ENRICH_VERSION=5
 DETAIL_LABELS=(
     "獎助學金代號","獎助學金名稱","學生申請日期","預計名額","獎助學金提供單位",
     "申請辦法下載","申請書下載","申請說明","獎助學門","獎助對象","成績條件",
@@ -220,44 +220,137 @@ REVIEW_ATTACHMENT_ONLY=re.compile(
 )
 
 
+# V5: resolve explicit necessary applicant restrictions without assuming that
+# every mention of a special group is mandatory. General and restricted tracks
+# remain unverified unless each track is independently established.
+REVIEW_DISALLOWED_V5 = re.compile(
+    r"低收入戶|中低收入戶|清寒|經濟弱勢|家境清寒|家境困難|"
+    r"原住民|原住民族|新住民|僑生|外籍生|境外生|"
+    r"軍公教|軍警消|軍眷|公務員子女|榮民|"
+    r"身心障礙|身障|聽障|聽覺障礙|重大傷病|罕見疾病|"
+    r"急難|家庭重大變故|受災|受災戶|"
+    r"員工子女|教職員子女|會員子女|宗親|特定姓氏"
+)
+REVIEW_EXPLICIT_MANDATORY_V5 = re.compile(
+    r"僅限|只限|限於|限定|限具|必須|須具備|須為|需具備|"
+    r"應具備|申請資格|申請對象|獎助對象|受獎對象|"
+    r"補助對象|申請人須|申請者須|申請者應|限.+申請|專供|方可申請|"
+    r"(?:領有|持有|具備|需有|具有).{0,14}(?:身分|資格|證明|卡)"
+)
+REVIEW_OPTIONAL_V5 = re.compile(
+    r"另可|另得|另行|額外|加發|加碼|優先|加分|得另申請|"
+    r"報名費補助|減免考試費|符合者可另外"
+)
+REVIEW_NEGATED_V5 = re.compile(
+    r"不具|不得具|無.{0,8}身分|非屬|未領|未曾領|不可同時|不含|排除|除外|"
+    r"不得領取|不得申請|不符合"
+)
+REVIEW_GENERAL_V5 = re.compile(
+    r"一般學生|一般在學生|一般優秀學生|全校學生|全體學生|"
+    r"本校學生|本校在學學生|東海大學.{0,10}(?:學生|學士班)|"
+    r"大學部在學學生|日間學士班在學學生|"
+    r"不限身分|不限科系|不限學系|各系學生|各學系學生"
+)
+REVIEW_AUDIENCE_V5 = re.compile(r"申請資格|申請對象|獎助對象|受獎對象|補助對象|申請人|申請者|凡.+學生")
+REVIEW_ATTACHMENT_V5 = re.compile(
+    r"(?:完整|全部|其餘|其他|詳細).{0,10}(?:資格|條件|規定|限制).{0,18}"
+    r"(?:請詳見|詳見|以.+為準|依).{0,16}(?:附件|簡章|辦法)"
+)
+REVIEW_SCOPE_ONLY_V5 = re.compile(
+    r"(?:熱河|貴州|(?:臺|台)?(?:北|中|南|東)|高雄|桃園|新竹|嘉義|彰化|南投|雲林|屏東|花蓮|宜蘭|苗栗|基隆|澎湖|金門|連江)"
+    r"(?:省|縣|市)?(?:籍|設籍|戶籍)"
+)
+REVIEW_EXCLUSIVE_MAJOR_V5 = re.compile(
+    r"(?:僅限|只限|限於|限定|專供|申請資格.{0,16}|就讀|具備.{0,8})"
+    r".{0,28}(?:電機|資工|資訊工程|機械|戲劇|劇場藝術|表演藝術|護理|醫學|牙醫|財金|會計)"
+    r".{0,12}(?:學院|學系|系|科|相關學系|學生|就讀者|研究生)"
+)
+REVIEW_RESTRICTED_AUDIENCE_V5 = re.compile(
+    r"(?:低收入戶|中低收入戶|清寒|原住民|聽障|聽覺障礙|身心障礙|"
+    r"重大傷病|軍公教|軍眷|僑生|榮民|受災|急難|員工子女|教職員子女)"
+    r"(?:學生|生|者|子女|身分|戶|證明)?"
+)
+
+
+def _review_clauses_v5(content):
+    # Treat each field and enumerated requirement as an independent clause.
+    # Do not let an unrelated '一般學生' clause override a necessary restriction.
+    content = clean(content)
+    return [clean(x) for x in re.split(
+        r"[。；;\n]|[①②③④⑤⑥⑦⑧⑨⑩⓪]|(?<!\d)\d{1,2}[.．、）)]",
+        content
+    ) if clean(x)]
+
+
 def review_scholarship_evidence(info, title=""):
-    """Return (status, reason), never equate successful fetch with eligibility.
+    """Classify evidence, not applicants: excluded / eligible_evidence / unverified.
 
-    eligible_evidence means only that published audience evidence permits further
-    frontend strict-rule review; it does NOT establish personal eligibility.
+    The frontend performs an additional eligibility gate. Missing/ambiguous
+    conditions must NOT become positive recommendations.
     """
-    info=info if isinstance(info,dict) else {}
-    target=clean(info.get("eligibilityTarget"))
-    restrictions=clean(info.get("restrictions"))
-    academic=clean(info.get("academicScope"))
-    documents=clean(info.get("requiredDocuments"))
-    note=clean(info.get("applicationNote"))
-    score=clean(info.get("scoreCondition"))
-    text=clean(" ".join((target,restrictions,academic,documents,note,score)))
-    if REVIEW_DISALLOWED.search(clean(title)):
-        return "excluded","restricted_title"
-    # A restrictive status must be an essential applicant condition, not an
-    # optional top-up, an illustrative example, or a negative prohibition.
-    clauses=re.split(r"[。；;\n]",clean("。".join((target,restrictions,academic,documents,note,score))))
-    for clause in clauses:
-        clause=clean(clause)
-        if (REVIEW_DISALLOWED.search(clause) and REVIEW_MANDATORY.search(clause)
-            and not REVIEW_OPTIONAL.search(clause) and not REVIEW_NEGATION.search(clause)):
-            # Mixed general/restricted audiences in the same clause can be
-            # alternative tracks; classify as unresolved instead of excluding.
-            if REVIEW_GENERAL.search(clause):
-                return "unverified","mixed_eligibility_tracks_require_review"
-            return "excluded","mandatory_restricted_identity_or_economics"
-    if REVIEW_ATTACHMENT_ONLY.search(text):
-        return "unverified","eligibility_requires_attachment"
-    # A nonempty audience field is NOT sufficient: e.g. "高中職學生"
-    # or merely "不限科系" does not establish general undergraduate access.
-    if REVIEW_GENERAL.search(target) and re.search(r"學生|學士班|在學",target):
-        return "eligible_evidence","official_general_student_audience"
-    if REVIEW_GENERAL.search(restrictions) and REVIEW_AUDIENCE.search(restrictions):
-        return "eligible_evidence","audience_explicit_in_restrictions"
-    return "unverified","insufficient_applicant_evidence"
+    info = info if isinstance(info, dict) else {}
+    target = clean(info.get('eligibilityTarget'))
+    restrictions = clean(info.get('restrictions'))
+    academic = clean(info.get('academicScope'))
+    documents = clean(info.get('requiredDocuments'))
+    note = clean(info.get('applicationNote'))
+    score = clean(info.get('scoreCondition'))
+    all_text = clean(' '.join((target, restrictions, academic, documents, note, score)))
+    if REVIEW_DISALLOWED_V5.search(clean(title)):
+        return 'excluded', 'restricted_title'
 
+    # An explicitly restricted audience field is itself a necessary condition,
+    # even when it does not literally contain '僅限' or '申請資格'.
+    if REVIEW_DISALLOWED_V5.search(target) and not REVIEW_NEGATED_V5.search(target) and not REVIEW_OPTIONAL_V5.search(target):
+        if REVIEW_GENERAL_V5.search(target):
+            return 'unverified', 'mixed_eligibility_tracks_require_review'
+        return 'excluded', 'restricted_official_audience'
+
+    # Explicit province/county of origin (as distinct from a national identity)
+    # is incompatible with the strict no-region-restriction preference.
+    if REVIEW_SCOPE_ONLY_V5.search(' '.join((target, restrictions, note))):
+        return 'excluded', 'restricted_domicile_or_origin'
+
+    # A restrictive major and academic level cannot be assumed to accept Law.
+    if REVIEW_EXCLUSIVE_MAJOR_V5.search(' '.join((target, academic, restrictions))):
+        major_scope = ' '.join((target, academic, restrictions))
+        if not re.search(r'法律(?:系|學系|專業)?(?:學生|者)?(?:均|也|亦)?可(?:申請|參加)|不限科系|不限學系', major_scope):
+            return 'excluded', 'restricted_major_evidence'
+        return 'unverified', 'mixed_or_conditional_major_evidence'
+
+    # A numbered line in '其他限制條件' is an applicant requirement. Detect
+    # '領有低收入戶證明' / '就讀聽障系學生' even without the words '必須' or '須'.
+    for field_name, field in (
+        ('restrictions', restrictions), ('note', note), ('academic', academic),
+        ('documents', documents), ('score', score)
+    ):
+        for clause in _review_clauses_v5(field):
+            if not REVIEW_DISALLOWED_V5.search(clause):
+                continue
+            if REVIEW_NEGATED_V5.search(clause) or REVIEW_OPTIONAL_V5.search(clause):
+                continue
+            strong_required = bool(REVIEW_EXPLICIT_MANDATORY_V5.search(clause))
+            explicit_document = bool(re.search(r'應.{0,8}繳|須.{0,8}附|應.{0,8}附|必備|必須檢附', clause))
+            credential = bool(re.search(r'(?:領有|持有|具備|具有).{0,20}(?:低收入戶|中低收入戶|清寒|聽障|身障|原住民)', clause))
+            exclusive_population = bool(re.search(r'(?:低收入戶|中低收入戶|清寒|聽障|聽覺障礙|原住民|身心障礙).{0,12}(?:學生|子女|者|證明|身分)', clause))
+            if field_name == 'documents' and not (strong_required or explicit_document):
+                # An item mentioned among possible documents may be optional.
+                return 'unverified', 'restricted_document_requirement_unclear'
+            if strong_required or credential or (field_name in ('restrictions', 'academic') and exclusive_population):
+                if REVIEW_GENERAL_V5.search(clause):
+                    return 'unverified', 'mixed_eligibility_tracks_require_review'
+                return 'excluded', 'mandatory_restricted_identity_or_economics'
+            # Mention of a restricted category without a required relationship
+            # is insufficient evidence for automatic exclusion OR recommendation.
+            return 'unverified', 'restricted_condition_context_unclear'
+
+    if REVIEW_ATTACHMENT_V5.search(all_text):
+        return 'unverified', 'eligibility_requires_attachment'
+    if REVIEW_GENERAL_V5.search(target) and re.search(r'學生|學士班|在學', target):
+        return 'eligible_evidence', 'official_general_student_audience'
+    if REVIEW_GENERAL_V5.search(restrictions) and REVIEW_AUDIENCE_V5.search(restrictions):
+        return 'eligible_evidence', 'audience_explicit_in_restrictions'
+    return 'unverified', 'insufficient_applicant_evidence'
 
 def mark_cross_category_duplicates(rows):
     """Annotate instead of deleting historical rows; same number/title/deadline only."""

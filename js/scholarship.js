@@ -216,7 +216,7 @@ function scholarshipEligibility(a){
   }
   if(scholarshipStrictRequiresVerifiedDetail(a)){
     const review=String(a?.eligibilityReviewStatus||'');
-    if(Number(a?.eligibilityEnrichmentVersion)!==4 ||
+    if(Number(a?.eligibilityEnrichmentVersion)!==5 ||
        !['excluded','eligible_evidence','unverified'].includes(review))
       return {eligible:false,excluded:true,code:'UNVERIFIED',reason:'仍使用舊版資格驗證資料，待重新核實後才推薦',specialty};
     if(review==='excluded')
