@@ -347,6 +347,7 @@
 
       <div class="gm-af-summary">
         ${metric("App",window.AppConfig?.version||"未知")}
+        ${metric("資料來源網址",window.location?.origin||"未知來源")}
         ${metric("下次預計排程",next.short)}
         ${metric("主排程","09:17")}
         ${metric("備援排程","10:47")}
