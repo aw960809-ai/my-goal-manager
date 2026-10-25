@@ -198,7 +198,9 @@ function openToeicSuiteTrainer(){
   closeSettings();
   const launcher=document.getElementById('homeToeicTraining');
   if(launcher?.click)launcher.click();
-  else window.location.assign('https://aw960809-ai.github.io/toeic-trainer/');
+  else window.location.assign(window.GoalToeicEmbed?.trainerPath?.(window.location)==='/apps/toeic-trainer/'
+    ?new URL('/apps/toeic-trainer/',window.location.origin).href
+    :'https://aw960809-ai.github.io/toeic-trainer/');
 }
 window.addEventListener?.('storage',event=>{
   if(['goal-manager:toeic-sync-status-v1','toeic-trainer:v051-link-settings'].includes(event.key))

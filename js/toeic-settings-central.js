@@ -16,8 +16,11 @@
   const APP_ID='toeic-trainer-standalone';
   const plain=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
   function hosted(location){
-    return !!location&&location.protocol==='https:'&&location.hostname==='aw960809-ai.github.io'&&
-      /^\/my-goal-manager\/(?:index\.html)?$/.test(String(location.pathname||''));
+    const local=!!location&&location.protocol==='http:'&&
+      ['127.0.0.1','localhost','[::1]'].includes(location.hostname)&&
+      /^\/(?:index\.html)?$/.test(String(location.pathname||''));
+    return local||!!(location&&location.protocol==='https:'&&location.hostname==='aw960809-ai.github.io'&&
+      /^\/my-goal-manager\/(?:index\.html)?$/.test(String(location.pathname||'')));
   }
   function stringBytes(x){return new TextEncoder().encode(x).byteLength;}
   function inspect(raw){

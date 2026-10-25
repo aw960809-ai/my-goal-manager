@@ -12,10 +12,14 @@
   }
 })(typeof globalThis!=='undefined'?globalThis:this,function(){
   'use strict';
-  const KEY='toeic-trainer:v05-link-settings';
+  const KEY='toeic-trainer:v051-link-settings';
   const STATUS_KEY='goal-manager:toeic-sync-status-v1';
   const PAGE_PATH_RX=/\/apps\/toeic-trainer\/(?:index\.html)?$/;
-  function hosted(location){return !!location&&location.protocol==='https:'&&PAGE_PATH_RX.test(location.pathname)}
+  function hosted(location){
+    const local=!!location&&location.protocol==='http:'&&
+      ['127.0.0.1','localhost','[::1]'].includes(location.hostname);
+    return !!location&&(location.protocol==='https:'||local)&&PAGE_PATH_RX.test(location.pathname);
+  }
   function read(store){try{const raw=store.getItem(KEY);return raw?JSON.parse(raw):null}catch(_){return null}}
   function save(store,record){
     const raw=JSON.stringify(record);
@@ -24,7 +28,7 @@
     return record;
   }
   function enable(store,{now=new Date(),location=null}={}){
-    if(!hosted(location))throw new Error('請先使用 Goal Manager 同網域的 TOEIC Trainer，勿在 localhost 啟用同步');
+    if(!hosted(location))throw new Error('僅能在 Goal Manager 同網域的 TOEIC Trainer 啟用同步');
     const before=read(store)||{};
     if(before.enabled===true&&before.version===1)return before;
     const consent={version:1,enabled:true,enabledAt:now.toISOString()};
@@ -35,7 +39,7 @@
     return save(store,{version:1,enabled:false,enabledAt:before.enabledAt||new Date().toISOString()});
   }
   function statusText(window){
-    if(!hosted(window.location))return '本機模式：資料仍在此瀏覽器。自動連動需從 Goal Manager 網站開啟已部署的訓練版。';
+    if(!hosted(window.location))return '請從 Goal Manager 同網域開啟 TOEIC Trainer，才能啟用自動連動。';
     const settings=read(window.localStorage);
     if(!settings?.enabled)return '尚未啟用。啟用後只同步此時間點以後完成、達 60 秒的正式交卷紀錄。';
     let receipt=null;
