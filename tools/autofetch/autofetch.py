@@ -1316,6 +1316,10 @@ def run_thu_source(limit):
         except Exception as exc:
             list_failures.append({'url': list_url, 'reason': str(exc)})
             log(f'THU LIST page={page} FAIL {exc}')
+            # When page 1 cannot connect, stop the redundant page-2..5
+            # attempts and retain the last verified THU events.
+            if page == 1:
+                break
             continue
 
         page_new = 0

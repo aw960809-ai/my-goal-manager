@@ -3,7 +3,7 @@ from __future__ import annotations
 import concurrent.futures
 import time
 import urllib.parse
-import argparse, json, os, re, ssl, tempfile, urllib.request
+import argparse, json, os, re, ssl, tempfile, urllib.error, urllib.request
 from datetime import date, datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
@@ -56,10 +56,22 @@ def fetch(url):
       "Accept-Language":"zh-TW,zh;q=0.9",
       "Cache-Control":"no-cache"
     })
-    with urllib.request.urlopen(req,timeout=25,context=ssl_context()) as r:
-        raw=r.read()
-        enc=r.headers.get_content_charset() or "utf-8"
-        return raw.decode(enc,"replace")
+    # Retry transient official-site/network failures once; never retry an
+    # untrusted structure or bypass verification/eligibility checks.
+    for attempt in range(2):
+        try:
+            with urllib.request.urlopen(req,timeout=25,context=ssl_context()) as r:
+                raw=r.read()
+                enc=r.headers.get_content_charset() or "utf-8"
+                return raw.decode(enc,"replace")
+        except urllib.error.HTTPError as exc:
+            if exc.code not in (408, 429, 500, 502, 503, 504) or attempt:
+                raise
+        except (urllib.error.URLError, TimeoutError, ConnectionError):
+            if attempt:
+                raise
+        time.sleep(1)
+    raise RuntimeError("unreachable retry state")
 
 def last_date(text):
     out=[]
@@ -720,6 +732,11 @@ def run(repo,check):
     meta={
       "updatedAt":stamp,"sourceId":SOURCE_ID,
       "eligibilityDetail":eligibility_detail_stats,
+      "categoryHealth":[
+        {"id":r["id"], "ok":bool(r.get("ok")),
+         "error":str(r.get("error") or "")[:240]}
+        for r in report
+      ],
       "categories":len(CATEGORIES)+1,
       "healthyCategories":len(healthy),
       "failedCategories":len(CATEGORIES)+1-len(healthy),
