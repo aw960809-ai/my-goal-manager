@@ -164,10 +164,21 @@ def detail_field(lines,label):
         return clean(" ".join(vals))
     return ""
 
-def parse_scholarship_detail(html):
+def parse_scholarship_detail(html, *, expected_number="", expected_title=""):
+    """Verify an actual official record independently of optional eligibility fields.
+
+    Never substitute page validity for a complete eligibility determination.
+    """
     p=ScholarshipDetailTextParser();p.feed(html)
     joined=" ".join(p.lines)
-    recognized=("獎助對象" in joined and "獎助學金" in joined)
+    code=detail_field(p.lines,"獎助學金代號")
+    number=str(expected_number or "").strip()
+    number_matches=(not number or bool(re.search(r"(?<!\d)"+re.escape(number)+r"(?!\d)",code)))
+    compact=lambda s:re.sub(r"\s+","",str(s or ""))
+    title_matches=(not expected_title or compact(expected_title) in compact(joined))
+    structural=all(label in joined for label in (
+        "獎助學金代號","獎助學金名稱","學生申請日期"))
+    recognized=structural and number_matches and title_matches
     return {
       "recognized":recognized,
       "eligibilityTarget":detail_field(p.lines,"獎助對象"),
@@ -235,7 +246,7 @@ def enrich_scholarship_eligibility(rows,old_rows,today=None):
         detail_url=scholarship_detail_url(number,today)
         if not detail_url:return index,None,"missing_scholarship_number"
         try:
-            info=parse_scholarship_detail(fetch(detail_url))
+            info=parse_scholarship_detail(fetch(detail_url),expected_number=number,expected_title=x.get("title"))
             if not info.get("recognized"):
                 raise RuntimeError("detail_structure_not_trusted")
             return index,info,None
@@ -294,10 +305,18 @@ def enrich_scholarship_eligibility(rows,old_rows,today=None):
             x["requiredDocuments"]=clean(info.get("requiredDocuments"))
             x["scoreCondition"]=clean(info.get("scoreCondition"))
             x["applicationNote"]=clean(info.get("applicationNote"))
-            x["eligibilityVerified"]=True
             x["eligibilityFetchedAt"]=now_iso()
-            x.pop("eligibilityError",None)
-            stats["detailFetched"]+=1;stats["detailVerified"]+=1
+            stats["detailFetched"]+=1
+            # A valid official detail page may omit the eligibility audience.
+            # Such records remain blocked from personal recommendations.
+            if x["eligibilityTarget"]:
+                x["eligibilityVerified"]=True
+                x.pop("eligibilityError",None)
+                stats["detailVerified"]+=1
+            else:
+                x["eligibilityVerified"]=False
+                x["eligibilityError"]="eligibility_target_not_published"
+                stats["detailUnverified"]+=1
         elif not preserve_last_good(x,old):
             x["eligibilityVerified"]=False
             x["eligibilityError"]=error or "detail_fetch_failed"
