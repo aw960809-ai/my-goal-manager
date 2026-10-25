@@ -1,34 +1,32 @@
 {
   "meta": {
-    "updatedAt": "2026-10-24T06:02:46.816998+00:00",
-    "sources": 6,
+    "updatedAt": "2026-10-25T06:18:10.518750+00:00",
+    "sources": 8,
     "events": 29,
-    "ok": 1,
-    "failed": 7,
+    "ok": 2,
+    "failed": 5,
     "errors": [
-      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached",
-      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached",
-      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8001 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached",
-      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached",
-      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached",
-      "youthfirst.yda.gov.tw: curl: (22) The requested URL returned error: 404",
-      "n058.ncut.edu.tw: curl: (28) Failed to connect to n058.ncut.edu.tw port 443 after 8002 ms: Timeout was reached\ncurl: (28) Failed to connect to n058.ncut.edu.tw port 443 after 8002 ms: Timeout was reached"
+      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14002 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14002 ms: Timeout was reached",
+      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14001 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14002 ms: Timeout was reached",
+      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14002 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14002 ms: Timeout was reached",
+      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14002 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14002 ms: Timeout was reached",
+      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14000 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14002 ms: Timeout was reached"
     ],
     "generator": "V96.6.11.1.1 Multi-Source AutoFetch + Activity Radar",
     "sourcePolicy": "政府資訊為主；東海官方活動為活動核心；獎學金獨立資料集合與獨立判斷",
     "scholarships": 7,
     "totalSources": 9,
-    "healthySources": 6,
-    "failedSources": 3,
+    "healthySources": 8,
+    "failedSources": 1,
     "rejectedItems": 0,
-    "fetchFailedItems": 7,
+    "fetchFailedItems": 5,
     "skippedPast": 97,
     "fitFiltered": 18,
     "semanticDuplicates": 0,
-    "retiredThisRun": 2,
+    "retiredThisRun": 0,
     "revivedThisRun": 0,
     "archiveCount": 60,
-    "retainedOnFailure": 22,
+    "retainedOnFailure": 21,
     "carriedMissing": 0,
     "needsReview": 0,
     "lifecyclePolicy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive",
@@ -36,25 +34,13 @@
     "nationwideOfficialHealthy": true,
     "nationwideOfficialEvents": 0,
     "nationwideOfficialEligible": 0,
-    "nationwideOfficialDiscovered": 129,
+    "nationwideOfficialDiscovered": 124,
     "sourceFailures": [
       {
         "sourceId": "thu_official",
         "name": "東海大學活動報名系統",
         "url": "https://tevent.thu.edu.tw/tEvent_front/index.php",
-        "error": "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 8002 ms: Timeout was reached"
-      },
-      {
-        "sourceId": "youthfirst_national",
-        "name": "教育部青年第一讚｜全國競賽及徵件",
-        "url": "https://youthfirst.yda.gov.tw/index.php/subject/index/0/7?project_type%5B%5D=%E7%AB%B6%E8%B3%BD",
-        "error": "youthfirst.yda.gov.tw: curl: (22) The requested URL returned error: 404"
-      },
-      {
-        "sourceId": "ncut_competitions_official",
-        "name": "國立勤益科技大學｜全國競賽公告",
-        "url": "https://n058.ncut.edu.tw/p/403-1058-292-1.php?Lang=zh-tw",
-        "error": "n058.ncut.edu.tw: curl: (28) Failed to connect to n058.ncut.edu.tw port 443 after 8002 ms: Timeout was reached\ncurl: (28) Failed to connect to n058.ncut.edu.tw port 443 after 8002 ms: Timeout was reached"
+        "error": "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14002 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14002 ms: Timeout was reached"
       }
     ],
     "legalAcademicSourcesConfigured": 0,
@@ -63,23 +49,23 @@
     "semanticPolicyRetired": 0,
     "preferenceExcludedThisRun": 0,
     "nationalExpansionSources": 2,
-    "nationalExpansionHealthy": 1,
-    "nationalExpansionDiscovered": 132,
+    "nationalExpansionHealthy": 2,
+    "nationalExpansionDiscovered": 128,
     "nationalExpansionFreshEligible": 0,
     "nationalExpansionActive": 0,
     "nationalExpansionOnsiteFinal": 0,
     "nationalExpansionReviewReasons": {
-      "topic_mismatch": 121,
+      "topic_mismatch": 117,
       "listing_deadline_closed": 3,
       "deadline_not_verified": 8
     },
     "nationalExpansionReviewBySource": {
       "youthfirst_national": {
-        "discovered": 62,
+        "discovered": 58,
         "detailVerified": 1,
         "accepted": 0,
         "reasons": {
-          "topic_mismatch": 58,
+          "topic_mismatch": 54,
           "listing_deadline_closed": 3,
           "deadline_not_verified": 1
         },
@@ -145,12 +131,20 @@
       }
     },
     "officialCompetitionSourceCount": 1,
-    "officialCompetitionSourceHealthy": 0,
-    "officialCompetitionDiscovered": 0,
-    "officialCompetitionVerified": 0,
-    "officialCompetitionFreshEligible": 0,
+    "officialCompetitionSourceHealthy": 1,
+    "officialCompetitionDiscovered": 12,
+    "officialCompetitionVerified": 10,
+    "officialCompetitionFreshEligible": 1,
     "officialCompetitionActive": 1,
-    "officialCompetitionReviewReasons": {}
+    "officialCompetitionReviewReasons": {
+      "topic_mismatch": 2,
+      "eligibility_not_verified": 7,
+      "remote_submission_not_verified": 2
+    },
+    "nationwideOfficialReviewReasons": {
+      "topic_mismatch": 121,
+      "date_eligibility_or_link_unverified": 2
+    }
   },
   "events": [
     {
@@ -1859,6 +1853,72 @@
       "category": "legal_academic"
     },
     {
+      "id": "auto-mofa-wh-portal",
+      "title": "青年度假打工｜外交部官方計畫入口",
+      "date": "",
+      "time": "",
+      "scope": "海外／國際",
+      "type": "語言／國際",
+      "kind": "program",
+      "url": "https://youthtaiwan.mofa.gov.tw/WorkingHoliday/",
+      "keywords": "青年度假打工 海外工作 國際交流 海外生活 外語 澳洲 日本 加拿大 紐西蘭 英國 德國 韓國",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "中華民國外交部｜臺灣青年FUN眼世界",
+      "statusText": "外交部常設青年度假打工官方入口；各國年齡、名額、簽證與保險條件依官方國別資訊",
+      "government": true,
+      "deadline": "",
+      "eventEndDate": "",
+      "location": "海外／依度假打工協定國",
+      "organizer": "中華民國外交部",
+      "audience": "青年；實際年齡與簽證資格依各協定國規定",
+      "openEnded": true,
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "mofa_working_holiday",
+        "fetchedAt": "2026-10-25T06:17:26.232217+00:00"
+      },
+      "fitScore": 94,
+      "fitTier": "高適配",
+      "fitReasons": [
+        "同心圓第4圈：海外／國際+0",
+        "語言／國際／海外+40",
+        "青少年／營隊／教學+34",
+        "直接連結海外／國際經驗目標+18",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "語言／國際／海外",
+        "青少年／營隊／教學"
+      ],
+      "circleLevel": 4,
+      "circleLabel": "海外／國際",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-09T12:50:00.937440+00:00",
+      "lastSeen": "2026-10-25T06:18:10.518191+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "mofa_working_holiday",
+      "sourceCategories": [
+        "international",
+        "career_internship",
+        "youth_program"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 4,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [],
+        "schoolNames": []
+      },
+      "country": "TW",
+      "category": "international"
+    },
+    {
       "id": "auto-ncut-competition-96514",
       "title": "德明財經科技大學-2026 全國大專綠色商品展暨海外行銷企劃大賽",
       "date": "2026-10-30",
@@ -1888,7 +1948,7 @@
         "engine": "official-contests-v4",
         "sourceId": "ncut_competitions_official",
         "noticeId": "96514",
-        "fetchedAt": "2026-10-23T06:09:02.944267+00:00",
+        "fetchedAt": "2026-10-25T06:17:59.459964+00:00",
         "reviewLevel": "official_list_and_detail"
       },
       "fitScore": 46,
@@ -1909,7 +1969,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-17T05:00:04.565139+00:00",
-      "lastSeen": "2026-10-23T06:09:13.948370+00:00",
+      "lastSeen": "2026-10-25T06:18:10.518191+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceCategories": [
@@ -1927,72 +1987,6 @@
       },
       "country": "TW",
       "category": "competition"
-    },
-    {
-      "id": "auto-mofa-wh-portal",
-      "title": "青年度假打工｜外交部官方計畫入口",
-      "date": "",
-      "time": "",
-      "scope": "海外／國際",
-      "type": "語言／國際",
-      "kind": "program",
-      "url": "https://youthtaiwan.mofa.gov.tw/WorkingHoliday/",
-      "keywords": "青年度假打工 海外工作 國際交流 海外生活 外語 澳洲 日本 加拿大 紐西蘭 英國 德國 韓國",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "中華民國外交部｜臺灣青年FUN眼世界",
-      "statusText": "外交部常設青年度假打工官方入口；各國年齡、名額、簽證與保險條件依官方國別資訊",
-      "government": true,
-      "deadline": "",
-      "eventEndDate": "",
-      "location": "海外／依度假打工協定國",
-      "organizer": "中華民國外交部",
-      "audience": "青年；實際年齡與簽證資格依各協定國規定",
-      "openEnded": true,
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-10-24T06:01:58.207318+00:00"
-      },
-      "fitScore": 94,
-      "fitTier": "高適配",
-      "fitReasons": [
-        "同心圓第4圈：海外／國際+0",
-        "語言／國際／海外+40",
-        "青少年／營隊／教學+34",
-        "直接連結海外／國際經驗目標+18",
-        "有明確地點+2"
-      ],
-      "goalMatches": [
-        "語言／國際／海外",
-        "青少年／營隊／教學"
-      ],
-      "circleLevel": 4,
-      "circleLabel": "海外／國際",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-10-24T06:02:46.816154+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "mofa_working_holiday",
-      "sourceCategories": [
-        "international",
-        "career_internship",
-        "youth_program"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 4,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [],
-        "schoolNames": []
-      },
-      "country": "TW",
-      "category": "international"
     }
   ]
 }
