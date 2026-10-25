@@ -1,0 +1,18 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const vm=require('node:vm');
+const path=require('node:path');
+const src=fs.readFileSync(path.resolve(__dirname,'../../js/scholarship.js'),'utf8');
+const scope={RadarPolicy:{scholarshipRegionReason:()=>null}};
+vm.createContext(scope);vm.runInContext(src,scope);
+const eligibility=vm.runInContext('scholarshipEligibility',scope);
+const base={id:'auto-thu-sch-external-100',sourceId:'thu_scholarship_official',auto:true,
+  eligibilityTarget:'一般學生',eligibilityVerified:true,eligibilityEnrichmentVersion:4};
+assert.equal(eligibility({...base,eligibilityReviewStatus:'eligible_evidence'}).eligible,true);
+assert.equal(eligibility({...base,eligibilityEnrichmentVersion:3}).code,'UNVERIFIED');
+assert.equal(eligibility({...base,eligibilityReviewStatus:'unverified'}).code,'UNVERIFIED');
+assert.equal(eligibility({...base,eligibilityReviewStatus:'excluded'}).code,'EVIDENCE_EXCLUDED');
+assert.equal(eligibility({...base,eligibilityReviewStatus:'eligible_evidence',eligibilityVerified:false}).code,'UNVERIFIED');
+assert.equal(eligibility({...base,eligibilityReviewStatus:'eligible_evidence',restrictions:'申請資格：須具備低收入戶身分。'}).eligible,false);
+assert.ok(src.includes('a.assessment.eligible&&!a.duplicateOf'),'canonical display should hide duplicate alias');
+console.log('PASS scholarship V4 three-state qualification and duplicate display');

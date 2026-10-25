@@ -103,7 +103,7 @@ def parse(html,sub_id,sub_name,url,today=None):
     return sorted(uniq.values(),key=lambda x:(x["deadline"],x["title"])),recognized,parsed_total
 
 # official detail eligibility enrichment
-DETAIL_ENRICH_VERSION=3
+DETAIL_ENRICH_VERSION=4
 DETAIL_LABELS=(
     "獎助學金代號","獎助學金名稱","學生申請日期","預計名額","獎助學金提供單位",
     "申請辦法下載","申請書下載","申請說明","獎助學門","獎助對象","成績條件",
@@ -189,6 +189,114 @@ def parse_scholarship_detail(html, *, expected_number="", expected_title=""):
       "applicationNote":detail_field(p.lines,"申請說明"),
     }
 
+
+# V4: official page trust, eligibility evidence, and personal qualification
+# are distinct states. Ambiguous cases must remain blocked from recommendation.
+REVIEW_DISALLOWED=re.compile(
+    r"低收入戶|中低收入戶|清寒|經濟弱勢|家境清寒|家境困難|"
+    r"原住民|原住民族|新住民|僑生|外籍生|"
+    r"軍公教|軍警消|軍眷|公務員子女|榮民|"
+    r"身心障礙|身障|重大傷病|罕見疾病|"
+    r"急難|家庭重大變故|受災|受災戶|"
+    r"員工子女|教職員子女|會員子女|宗親|特定姓氏"
+)
+REVIEW_MANDATORY=re.compile(
+    r"僅限|只限|限於|限定|限具|必須|須具備|須為|需具備|"
+    r"應具備|符合.+資格|申請對象|申請資格|獎助對象|受獎對象|"
+    r"補助對象|申請人須|申請者須|限.+申請|專供|方可申請"
+)
+REVIEW_OPTIONAL=re.compile(r"另可|另得|另行|額外|加發|加碼|優先|加分|得另申請|報名費補助")
+REVIEW_NEGATION=re.compile(r"不具|不得具|無.+身分|非屬|未領|未曾領|不可同時|不含|排除|除外")
+REVIEW_GENERAL=re.compile(
+    r"一般學生|一般在學生|一般優秀學生|全校學生|全體學生|"
+    r"本校學生|本校在學學生|東海大學.{0,10}(?:學生|學士班)|"
+    r"大學部在學學生|日間學士班在學學生|"
+    r"不限身分|不限科系|不限學系|各系學生|各學系學生"
+)
+REVIEW_AUDIENCE=re.compile(r"申請資格|申請對象|獎助對象|受獎對象|補助對象|申請人|申請者|凡.+學生")
+REVIEW_ATTACHMENT_ONLY=re.compile(
+    r"(?:完整|全部|其餘|其他|詳細).{0,10}(?:資格|條件|規定|限制).{0,18}"
+    r"(?:請詳見|詳見|以.+為準|依).{0,16}(?:附件|簡章|辦法)"
+)
+
+
+def review_scholarship_evidence(info, title=""):
+    """Return (status, reason), never equate successful fetch with eligibility.
+
+    eligible_evidence means only that published audience evidence permits further
+    frontend strict-rule review; it does NOT establish personal eligibility.
+    """
+    info=info if isinstance(info,dict) else {}
+    target=clean(info.get("eligibilityTarget"))
+    restrictions=clean(info.get("restrictions"))
+    academic=clean(info.get("academicScope"))
+    documents=clean(info.get("requiredDocuments"))
+    note=clean(info.get("applicationNote"))
+    text=clean(" ".join((target,restrictions,academic,documents,note)))
+    if REVIEW_DISALLOWED.search(clean(title)):
+        return "excluded","restricted_title"
+    # A restrictive status must be an essential applicant condition, not an
+    # optional top-up, an illustrative example, or a negative prohibition.
+    clauses=re.split(r"[。；;\n]",clean(" ".join((target,restrictions,academic,documents))))
+    for clause in clauses:
+        clause=clean(clause)
+        if (REVIEW_DISALLOWED.search(clause) and REVIEW_MANDATORY.search(clause)
+            and not REVIEW_OPTIONAL.search(clause) and not REVIEW_NEGATION.search(clause)):
+            # Mixed general/restricted audiences in the same clause can be
+            # alternative tracks; classify as unresolved instead of excluding.
+            if REVIEW_GENERAL.search(clause):
+                return "unverified","mixed_eligibility_tracks_require_review"
+            return "excluded","mandatory_restricted_identity_or_economics"
+    if REVIEW_ATTACHMENT_ONLY.search(text):
+        return "unverified","eligibility_requires_attachment"
+    if target and not re.fullmatch(r"(?:請參閱|詳見|依|同)(?:公告|簡章|附件|辦法|規定|網站).*",target):
+        return "eligible_evidence","official_audience_published"
+    if REVIEW_GENERAL.search(restrictions) and REVIEW_AUDIENCE.search(restrictions):
+        return "eligible_evidence","audience_explicit_in_restrictions"
+    return "unverified","insufficient_applicant_evidence"
+
+
+def mark_cross_category_duplicates(rows):
+    """Annotate instead of deleting historical rows; same number/title/deadline only."""
+    buckets={}
+    for x in rows:
+        if not isinstance(x,dict):continue
+        if not (x.get("sourceId")==SOURCE_ID and x.get("auto") is True):continue
+        x.pop("duplicateOf",None)
+        if x.get("sourceSubId")=="specialty":continue
+        num=scholarship_number_from_row(x)
+        title=re.sub(r"\s+|[（）()．.·]","",clean(x.get("title")))
+        deadline=clean(x.get("deadline") or x.get("date"))
+        if num and title and deadline:
+            buckets.setdefault((num,title,deadline),[]).append(x)
+    duplicate_count=0
+    conflicted=0
+    category_order={"external":0,"government":1,"department":2,"campus":3}
+    for group in buckets.values():
+        if len(group)<2:continue
+        group.sort(key=lambda x:(category_order.get(str(x.get("sourceSubId")),99),str(x.get("id"))))
+        primary=group[0]
+        statuses={str(x.get("eligibilityReviewStatus") or "unverified") for x in group}
+        # Contradictory evidence from two official categories blocks recommendation.
+        if "excluded" in statuses and "eligible_evidence" in statuses:
+            primary["eligibilityReviewStatus"]="unverified"
+            primary["eligibilityVerified"]=False
+            primary["eligibilityError"]="conflicting_duplicate_eligibility"
+            conflicted+=1
+        elif "excluded" in statuses:
+            primary["eligibilityReviewStatus"]="excluded"
+            primary["eligibilityVerified"]=True
+            primary["eligibilityError"]="mandatory_restricted_identity_or_economics"
+        elif "unverified" in statuses:
+            # Missing evidence in one category must not be silently assumed away.
+            primary["eligibilityReviewStatus"]="unverified"
+            primary["eligibilityVerified"]=False
+            primary["eligibilityError"]="duplicate_evidence_incomplete"
+        for secondary in group[1:]:
+            secondary["duplicateOf"]=primary["id"]
+            duplicate_count+=1
+    return duplicate_count,conflicted
+
 # widen detail enrichment to every THU scholarship category
 def scholarship_detail_candidate(row):
     rid=str(row.get("id") or "")
@@ -229,16 +337,27 @@ def enrich_scholarship_eligibility(rows,old_rows,today=None):
     carry_fields=(
         "number","detailUrl","eligibilityTarget","restrictions","academicScope",
         "requiredDocuments","scoreCondition","applicationNote",
-        "eligibilityVerified","eligibilityEnrichmentVersion","eligibilityFetchedAt"
+        "eligibilityVerified","eligibilityEnrichmentVersion","eligibilityFetchedAt",
+        "eligibilityReviewStatus","eligibilityError"
     )
 
     def preserve_last_good(x,old):
-        if old.get("eligibilityVerified") is True:
+        # Only previous V4 evidence is safe to reuse as a verified decision.
+        # V3 'verified' merely indicated a nonempty audience field.
+        if (old.get("eligibilityEnrichmentVersion")==DETAIL_ENRICH_VERSION
+            and old.get("eligibilityReviewStatus") in ("excluded","eligible_evidence")
+            and old.get("eligibilityVerified") is True):
             for k in carry_fields:
                 if k in old:x[k]=old[k]
             stats["detailReused"]+=1
             stats["detailVerified"]+=1
             return True
+        # Preserve harmless explanatory text, NOT a stale positive decision.
+        for field in ("eligibilityTarget","restrictions","academicScope","requiredDocuments","scoreCondition","applicationNote"):
+            if not x.get(field) and old.get(field):x[field]=old[field]
+        x["eligibilityVerified"]=False
+        x["eligibilityReviewStatus"]="unverified"
+        x["eligibilityError"]="detail_current_evidence_unavailable"
         return False
 
     def detail_job(index,x,old):
@@ -267,7 +386,9 @@ def enrich_scholarship_eligibility(rows,old_rows,today=None):
         stats["detailCandidates"]+=1
         old=old_by.get(str(x.get("id") or ""),{})
         same_window=(str(old.get("applicationWindow") or "")==str(x.get("applicationWindow") or ""))
-        if same_window and old.get("eligibilityEnrichmentVersion")==DETAIL_ENRICH_VERSION and old.get("eligibilityVerified") is True:
+        if (same_window and old.get("eligibilityEnrichmentVersion")==DETAIL_ENRICH_VERSION
+            and old.get("eligibilityReviewStatus") in ("excluded","eligible_evidence")
+            and old.get("eligibilityVerified") is True):
             for k in carry_fields:
                 if k in old:x[k]=old[k]
             stats["detailReused"]+=1
@@ -307,19 +428,20 @@ def enrich_scholarship_eligibility(rows,old_rows,today=None):
             x["applicationNote"]=clean(info.get("applicationNote"))
             x["eligibilityFetchedAt"]=now_iso()
             stats["detailFetched"]+=1
-            # A valid official detail page may omit the eligibility audience.
-            # Such records remain blocked from personal recommendations.
-            if x["eligibilityTarget"]:
-                x["eligibilityVerified"]=True
+            status,reason=review_scholarship_evidence(info,title=x.get("title"))
+            x["eligibilityReviewStatus"]=status
+            x["eligibilityVerified"]=status!="unverified"
+            x["eligibilityEvidenceReason"]=reason
+            if status!="unverified":
                 x.pop("eligibilityError",None)
                 stats["detailVerified"]+=1
             else:
-                x["eligibilityVerified"]=False
-                x["eligibilityError"]="eligibility_target_not_published"
+                x["eligibilityError"]=reason
                 stats["detailUnverified"]+=1
         elif not preserve_last_good(x,old):
             x["eligibilityVerified"]=False
             x["eligibilityError"]=error or "detail_fetch_failed"
+            x["eligibilityReviewStatus"]="unverified"
             stats["detailUnverified"]+=1
 
     for future in not_done:
@@ -328,6 +450,7 @@ def enrich_scholarship_eligibility(rows,old_rows,today=None):
         if not preserve_last_good(x,old):
             x["eligibilityVerified"]=False
             x["eligibilityError"]="detail_budget_expired"
+            x["eligibilityReviewStatus"]="unverified"
             stats["detailUnverified"]+=1
         stats["detailBudgetExpired"]+=1
 
@@ -494,6 +617,9 @@ def run(repo,check):
         source_id=SOURCE_ID,
         now=stamp,
     )
+    duplicate_count,duplicate_conflicts=mark_cross_category_duplicates(rows)
+    eligibility_detail_stats["crossCategoryDuplicates"]=duplicate_count
+    eligibility_detail_stats["duplicateConflicts"]=duplicate_conflicts
     active_auto=sum(1 for x in rows if isinstance(x,dict) and x.get("sourceId")==SOURCE_ID and x.get("auto") is True)
     meta={
       "updatedAt":stamp,"sourceId":SOURCE_ID,

@@ -205,8 +205,16 @@ function scholarshipEligibility(a){
   for(const [code,reason] of checks){
     if(reason)return {eligible:false,excluded:true,code,reason,specialty};
   }
-  if(scholarshipStrictRequiresVerifiedDetail(a)&&a?.eligibilityVerified!==true)
-    return {eligible:false,excluded:true,code:'UNVERIFIED',reason:'東海獎學金官方詳細資格尚未完成驗證，嚴格模式暫不推薦',specialty};
+  if(scholarshipStrictRequiresVerifiedDetail(a)){
+    const review=String(a?.eligibilityReviewStatus||'');
+    if(Number(a?.eligibilityEnrichmentVersion)!==4 ||
+       !['excluded','eligible_evidence','unverified'].includes(review))
+      return {eligible:false,excluded:true,code:'UNVERIFIED',reason:'仍使用舊版資格驗證資料，待重新核實後才推薦',specialty};
+    if(review==='excluded')
+      return {eligible:false,excluded:true,code:'EVIDENCE_EXCLUDED',reason:'官方必要資格具有不符合個人條件的限制',specialty};
+    if(review!=='eligible_evidence'||a?.eligibilityVerified!==true)
+      return {eligible:false,excluded:true,code:'UNVERIFIED',reason:'官方申請資格證據不足或跨分類證據不一致，暫不推薦',specialty};
+  }
   return {eligible:true,excluded:false,code:'PASS',reason:'通過嚴格硬性資格審查',specialty};
 }
 
@@ -236,7 +244,7 @@ function renderScholarships(){
    return {...a,score:assessment.score,assessment,life};
  });
  const excluded=assessedAll.filter(a=>a.life.keep&&!a.assessment.eligible).length;
- let arr=assessedAll.filter(a=>a.life.keep&&a.assessment.eligible);
+ let arr=assessedAll.filter(a=>a.life.keep&&a.assessment.eligible&&!a.duplicateOf);
  arr=arr.filter(a=>{
    if(filter==='高度符合')return a.score>=80;
    if(filter==='可能符合')return a.score>=60&&a.score<80;
@@ -286,7 +294,7 @@ function openScholarshipInfo(id){
   ${life?.state?`<div class="info-kv"><small>期限狀態</small><b>${esc(life.state)}</b></div>`:''}
  </div><div class="notice">${assessment.eligible
  ?'地域限制、清寒／低收入／經濟弱勢、特定族群、軍公教／軍警消、疾病／傷病、急難／受災、特定組織／親屬、非大學部或非法律科系等，只要是必要資格即排除；額外加發或非必要補助不因此排除。專業考照與外語能力獎勵仍提高排序。'
- :'此項因公告呈現明確的特定資格限制而不列入個人推薦；最終資格仍以官方簡章為準。'
+ :(assessment.code==='UNVERIFIED'?'此項官方資格證據不足，待確認後才推薦；最終條件以官方簡章為準。':'此項因公告呈現明確的特定資格限制而不列入個人推薦；最終資格仍以官方簡章為準。')
  }</div><div class="goal-info-actions">${official?`<a class="btn primary" href="${esc(safeExternalUrl(official))}" target="_blank" rel="noopener noreferrer">${number?'開啟官方詳細辦法／申請書':'查看官方資訊'}</a>`:''}${assessment.eligible&&(a.date||a.deadline)?`<button class="btn dark" type="button" onclick="addActivityToCalendar('${String(a.id).replace(/'/g,"\\'")}');closeScholarshipInfoModal()">加入申請截止日</button>`:''}<button class="btn" type="button" onclick="closeScholarshipInfoModal()">關閉</button></div>`;
  document.getElementById('scholarshipInfoModal').classList.add('show');document.body.style.overflow='hidden';bindInteractionFeedback();
 }
