@@ -9,12 +9,13 @@ const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
 for(const expected of [
   'workflow_run:', 'pull_request_target:',
   'Goal Manager PR Safety Check','types: [labeled]',
-  'pull-requests: write','actions: write','checks: read',
+  'pull-requests: write','checks: read',
   'persist-credentials: false','safe-ui-policy.cjs',
   'compareCommitsWithBasehead','latest.head.sha!==pr.head.sha',
-  "check.conclusion==='success'",'github.rest.pulls.merge',
-  'github.rest.actions.createWorkflowDispatch',"workflow_id:'pages.yml'"
+  "check.conclusion==='success'",'github.rest.pulls.merge'
 ])assert(wf.includes(expected),`missing safety gate: ${expected}`);
+assert(!wf.includes('createWorkflowDispatch'),'private local PWA must not dispatch Pages');
+assert(!fs.existsSync(path.join(root,'.github/workflows/pages.yml')),'old Pages workflow must be removed');
 assert(verify.includes('run: bash scripts/verify.sh'));
 assert(sw.includes('networkFirst(request)'),'UI updates should be network first');
-console.log('OK: auto-merge workflow checks latest PR, explicitly dispatches Pages');
+console.log('OK: auto-merge workflow checks latest PR without Pages deployment');
