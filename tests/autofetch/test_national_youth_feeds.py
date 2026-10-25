@@ -166,6 +166,7 @@ class Tests(unittest.TestCase):
     def test_complete_source_and_failure(self):
         source='youthfirst_national'
         h,d=self.yf()
+        h=h.replace(b'</html>', b'<a href="/index.php/subject/index/0/1?project_type%5B%5D=%E7%AB%B6%E8%B3%BD">2</a></html>')
         spec=y.SOURCES[source]
         seen=[]
         def fetch(u,allowlist):
@@ -177,13 +178,24 @@ class Tests(unittest.TestCase):
         self.assertEqual(res['discovered'],1)
         self.assertEqual(res['parsedOk'],1)
         self.assertTrue(len(seen)>3)
+        self.assertFalse(any('/0/2?' in u for u in seen), 'unadvertised pages must not be manufactured')
         def fail(u,allowlist):
-            if '/0/2?' in u:raise TimeoutError('timeout')
+            if '/0/1?' in u:raise TimeoutError('timeout')
             return fetch(u,allowlist)
         res2=y.run_source(source,fetch_fn=fail,stamp='s',today=TODAY,logger=lambda s:None)
         self.assertFalse(res2['healthy'])
         self.assertEqual(res2['accepted'],[])
         self.assertGreaterEqual(len(res2['fetchFailures']),1)
+    def test_youthfirst_pagination_is_advertised_and_bounded(self):
+        spec=y.SOURCES['youthfirst_national']
+        base=spec['lists'][0]
+        html=('<html><a href="/index.php/subject/index/0/1?project_type%5B%5D=%E7%AB%B6%E8%B3%BD">2</a>'
+              '<a href="/index.php/subject/index/0/7?project_type%5B%5D=%E7%AB%B6%E8%B3%BD">8</a>'
+              '<a href="https://attacker.example/subject/index/0/3">bad</a></html>')
+        links=y.youthfirst_verified_pages(y.parser(html),base)
+        self.assertEqual(links,['https://youthfirst.yda.gov.tw/index.php/subject/index/0/1?'+base.partition('?')[2]])
+        self.assertEqual(y.youthfirst_verified_pages(y.parser('<html></html>'),base),[])
+
     def test_news_source_listing_and_fallback(self):
         source='yda_national_news'
         h,d=self.yn()

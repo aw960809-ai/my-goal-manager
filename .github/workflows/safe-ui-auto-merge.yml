@@ -11,7 +11,6 @@ on:
     types: [labeled]
 
 permissions:
-  actions: write
   checks: read
   contents: write
   pull-requests: write
@@ -92,10 +91,3 @@ jobs:
             });
             if(!merged.merged)throw new Error(`Merge was not confirmed: ${merged.message||'unknown error'}`);
             core.notice(`Auto-merged safe UI PR #${prNumber}: ${decision.reason}`);
-
-            // A merge performed with GITHUB_TOKEN will NOT trigger the usual
-            // push-event Actions workflow. Explicitly dispatch Pages instead.
-            await github.rest.actions.createWorkflowDispatch({
-              owner,repo,workflow_id:'pages.yml',ref:'main'
-            });
-            core.notice('Triggered Pages deployment after GITHUB_TOKEN merge.');

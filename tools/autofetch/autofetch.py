@@ -438,7 +438,8 @@ def install(repo: Path, src: Path):
     write_json(repo / 'tools/autofetch/sources.json', SOURCES)
     wf = repo / '.github/workflows/autofetch.yml'
     wf.parent.mkdir(parents=True, exist_ok=True)
-    wf.write_text(WORKFLOW, encoding='utf-8')
+    if not wf.is_file():
+        raise RuntimeError('找不到既有 AutoFetch workflow；不以舊版 Pages 範本覆寫')
 
     staging = repo / 'data/staging'
     staging.mkdir(parents=True, exist_ok=True)
@@ -578,13 +579,13 @@ def allowed(host, allowlist):
     return any(host == a or host.endswith('.' + a) for a in [x.lower().strip('.') for x in allowlist])
 
 
-def fetch(url, allowlist, *, max_bytes=MAX_BYTES):
+def fetch(url, allowlist, *, max_bytes=MAX_BYTES, connect_timeout=8, max_time=25):
     parsed = urlparse(url)
     if parsed.scheme != 'https' or not allowed(parsed.hostname, allowlist):
         raise RuntimeError('URL 白名單拒絕')
     cmd = [
         'curl', '--fail', '--location', '--silent', '--show-error',
-        '--connect-timeout', '8', '--max-time', '25',
+        '--connect-timeout', str(connect_timeout), '--max-time', str(max_time),
         '--retry', '1', '--retry-delay', '1', '--retry-max-time', '46',
         '--proto', '=https', '--proto-redir', '=https',
         '--user-agent', USER_AGENT,
@@ -1311,7 +1312,7 @@ def run_thu_source(limit):
     for page in range(1, 6):
         list_url = THU_LIST if page == 1 else f'{THU_LIST}?page={page}'
         try:
-            final, body = fetch(list_url, allowlist)
+            final, body = fetch(list_url, allowlist, connect_timeout=14, max_time=32)
         except Exception as exc:
             list_failures.append({'url': list_url, 'reason': str(exc)})
             log(f'THU LIST page={page} FAIL {exc}')
@@ -1379,7 +1380,7 @@ def run_thu_source(limit):
         'skippedPast': skipped_past,
         'rejected': rejected,
         'fetchFailures': fetch_failed,
-        'healthy': source_health(len(details), parsed_ok, len(fetch_failed)),
+        'healthy': not list_failures and source_health(len(details), parsed_ok, len(fetch_failed)),
     }
 
 
@@ -2413,7 +2414,8 @@ def run(repo, limit, apply):
     if OFFICIAL_CONTEST_ID in enabled:
         try:
             results.append(run_official_competitions(
-                fetch_fn=fetch, stamp=now_iso(), logger=log, limit=15))
+                fetch_fn=lambda u,a: fetch(u,a,connect_timeout=14,max_time=32) if u == OFFICIAL_CONTEST_LIST else fetch(u,a),
+                stamp=now_iso(), logger=log, limit=15))
         except Exception as exc:
             results.append({
                 'sourceId':OFFICIAL_CONTEST_ID,'prefix':OFFICIAL_CONTEST_PREFIX,
@@ -2520,6 +2522,8 @@ def run(repo, limit, apply):
                     'skippedPast': r['skippedPast'],
                     'rejected': len(r['rejected']),
                     'fetchFailed': len(r['fetchFailures']),
+                    'reviewReasons': r.get('reviewReasons', {}),
+                    'reviewSamples': r.get('reviewSamples', {}),
                     'rejectedItems': r['rejected'],
                     'fetchFailures': r['fetchFailures'],
                 }
@@ -2646,6 +2650,7 @@ def run(repo, limit, apply):
             'nationwideOfficialEvents':national_active,
             'nationwideOfficialEligible':len(national_r.get('radarEligible',[])) if national_r else 0,
             'nationwideOfficialDiscovered':national_r.get('discovered',0) if national_r else 0,
+            'nationwideOfficialReviewReasons':national_r.get('reviewReasons',{}) if national_r else {},
             'legalAcademicSourcesConfigured':len(law_runs),
             'legalAcademicSourcesHealthy':sum(r['healthy'] for r in law_runs),
             'legalAcademicEvents':law_active,

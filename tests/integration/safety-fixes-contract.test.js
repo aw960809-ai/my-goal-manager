@@ -47,18 +47,16 @@ assert.strictEqual(second.applied,false);
 assert.strictEqual(action.weeklyMinutes,99);
 assert.strictEqual(action.name,'我的學習項目');
 
-// Publishing must include every root + nested suite icon referenced by SW/manifest.
-const pages=read('.github/workflows/pages.yml');
-assert.match(pages,/cp -r css js config data assets _site\//);
-for(const file of ['suite-icon-release.json','icon-192.png','icon-512.png','icon-maskable-512.png','apple-touch-icon.png']){
- assert.ok(pages.includes(file),`Pages build omitted ${file}`);
+// Private GitHub + local PWA: no public Pages workflow; all app icons still present.
+assert.strictEqual(fs.existsSync(path.join(root,'.github/workflows/pages.yml')),false,'obsolete public Pages workflow present');
+for(const file of ['suite-icon-release.json','icon-192.png','icon-512.png','icon-maskable-512.png','apple-touch-icon.png',
+                   'assets/suite-icons/20261005a/icon-192.png','assets/suite-icons/20261005a/icon-maskable-512.png']){
+ assert.ok(fs.existsSync(path.join(root,file)),`local PWA asset missing: ${file}`);
 }
-assert.ok(pages.includes('_site/assets/suite-icons/20261005a/icon-192.png'));
-assert.ok(pages.includes('_site/assets/suite-icons/20261005a/icon-maskable-512.png'));
 
 // Coverage is tracked alongside activity and scholarship catalogs.
 const auto=read('.github/workflows/autofetch.yml');
 assert.ok(auto.includes('git add data/activities.json data/scholarships.json data/activity-archive.json data/scholarship-archive.json data/activity-source-coverage.json'));
 assert.ok(auto.includes('if git diff --quiet -- data/activities.json data/scholarships.json data/activity-archive.json data/scholarship-archive.json data/activity-source-coverage.json'));
 assert.ok(auto.includes('if ! git diff --quiet; then'));
-console.log('OK: protected recovery, storage fallback, user-owned TOEIC, deployment icons, AutoFetch');
+console.log('OK: protected recovery, storage fallback, user-owned TOEIC, local PWA icons, AutoFetch');

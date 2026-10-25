@@ -39,7 +39,7 @@ function harness({event='workflow_run',pr=basePr,run=baseRun,files=baseFiles,beh
   return {calls,run:()=>execute(github,context,core,include)};
 }
 (async()=>{
-  const ok=harness();await ok.run();assert(ok.calls.some(x=>x[0]==='merge'));assert(ok.calls.some(x=>x[0]==='dispatch'&&x[1]==='pages.yml'));
+  const ok=harness();await ok.run();assert(ok.calls.some(x=>x[0]==='merge'));assert(!ok.calls.some(x=>x[0]==='dispatch'),'local-only PWA must not trigger Pages');
   for(const cfg of [
     {files:[{filename:'js/data/persistence.js',status:'modified',changes:1}]},
     {pr:{...basePr,labels:[]}},
@@ -55,6 +55,6 @@ function harness({event='workflow_run',pr=basePr,run=baseRun,files=baseFiles,beh
   }
   const label=harness({event:'pull_request_target'});await label.run();
   assert(label.calls.some(x=>x[0]==='merge'));
-  assert(label.calls.some(x=>x[0]==='dispatch'));
+  assert(!label.calls.some(x=>x[0]==='dispatch'),'labeled merge cannot dispatch Pages');
   console.log('OK: privileged workflow simulations merge only safe, fully tested latest-head PRs');
 })().catch(err=>{console.error(err);process.exit(1)});
