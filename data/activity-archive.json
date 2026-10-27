@@ -2,18 +2,102 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-10-26T08:13:08.371817+00:00",
-    "count": 60,
-    "retiredThisRun": 0,
+    "updatedAt": "2026-10-27T06:27:03.865902+00:00",
+    "count": 61,
+    "retiredThisRun": 1,
     "revivedThisRun": 0,
-    "retiredTotal": 60,
+    "retiredTotal": 61,
     "revivedTotal": 0,
-    "retainedOnFailure": 21,
-    "carriedMissing": 0,
+    "retainedOnFailure": 20,
+    "carriedMissing": 1,
     "needsReview": 0,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
+    {
+      "id": "auto-thu-2026090017",
+      "title": "【東海大學未來永續英雄行動者計畫】行動起點：問題探索工作坊暨說明會(申請教師專業成長活動、終身學習護照及博雅認證)",
+      "date": "2026-10-27",
+      "time": "",
+      "scope": "東海校內",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=1&conference_code=2026090017",
+      "keywords": "【東海大學未來永續英雄行動者計畫】行動起點：問題探索工作坊暨說明會(申請教師專業成長活動、終身學習護照及博雅認證) 東海大學 永續發展暨校務研究處 教師專業成長活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 永續發展暨校務研究處；活動日 2026-10-27；截止 2026-10-26",
+      "government": false,
+      "deadline": "2026-10-26",
+      "eventEndDate": "2026-10-27",
+      "location": "東海大學校內場地(另行公告)",
+      "organizer": "永續發展暨校務研究處",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090017",
+        "fetchedAt": "2026-10-02T07:03:18.959990+00:00"
+      },
+      "fitScore": 44,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "職涯／實習+5",
+        "直接連結法律學習目標+15",
+        "具體職涯體驗，可轉化為行動+8",
+        "教師增能取向-8",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "職涯／實習"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-17T08:01:17.326390+00:00",
+      "lastSeen": "2026-10-02T07:05:01.119748+00:00",
+      "missCount": 21,
+      "needsReview": true,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-27T06:27:03.865067+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-10-02T07:05:01.119748+00:00"
+    },
     {
       "id": "auto-thu-2026100001",
       "title": "【工工系專題演講】10/23 為什麼你完美的AI履歷正在被批量淘汰-AI時代下未來科技人的求職準備與因應策略",
