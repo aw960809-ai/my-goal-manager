@@ -2,18 +2,98 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-10-29T09:00:18.242703+00:00",
-    "count": 61,
-    "retiredThisRun": 0,
+    "updatedAt": "2026-10-30T07:19:18.709851+00:00",
+    "count": 62,
+    "retiredThisRun": 1,
     "revivedThisRun": 0,
-    "retiredTotal": 61,
+    "retiredTotal": 62,
     "revivedTotal": 0,
-    "retainedOnFailure": 20,
+    "retainedOnFailure": 19,
     "carriedMissing": 1,
     "needsReview": 1,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
+    {
+      "id": "auto-thu-2026090060",
+      "title": "115-1 建造屬於我的島嶼~小島支持團體諮商(點選連結填寫表單報名)",
+      "date": "2026-10-16",
+      "time": "",
+      "scope": "東海校內",
+      "type": "法律／學術",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026090060",
+      "keywords": "115-1 建造屬於我的島嶼~小島支持團體諮商(點選連結填寫表單報名) 東海大學 健康暨諮商中心 藝文活動 學生，費用：0；說明： 大一新生、轉學生、或渴望適應新環境的你 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 健康暨諮商中心；活動日 2026-10-16–2026-10-30；截止 2026-10-29",
+      "government": false,
+      "deadline": "2026-10-29",
+      "eventEndDate": "2026-10-30",
+      "location": "】：學務處3樓 團體諮商室(需脫鞋進入，請務必著襪參加)",
+      "organizer": "健康暨諮商中心",
+      "audience": "學生，費用：0；說明： 大一新生、轉學生、或渴望適應新環境的你",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090060",
+        "fetchedAt": "2026-10-21T06:06:46.390800+00:00"
+      },
+      "fitScore": 39,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "直接連結法律學習目標+15",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-23T06:04:32.174585+00:00",
+      "lastSeen": "2026-10-21T06:08:56.973058+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-10-30T07:19:18.709032+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-10-21T06:08:56.973058+00:00"
+    },
     {
       "id": "auto-thu-2026090017",
       "title": "【東海大學未來永續英雄行動者計畫】行動起點：問題探索工作坊暨說明會(申請教師專業成長活動、終身學習護照及博雅認證)",
