@@ -1,6 +1,6 @@
 {
   "meta": {
-    "updatedAt": "2026-10-30T07:19:18.709851+00:00",
+    "updatedAt": "2026-10-30T09:04:24.654474+00:00",
     "sources": 8,
     "events": 28,
     "ok": 2,
@@ -19,7 +19,7 @@
     "skippedPast": 93,
     "fitFiltered": 15,
     "semanticDuplicates": 0,
-    "retiredThisRun": 1,
+    "retiredThisRun": 0,
     "revivedThisRun": 0,
     "archiveCount": 62,
     "retainedOnFailure": 19,
@@ -1719,7 +1719,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "pathfinder_official",
-        "fetchedAt": "2026-10-30T07:18:29.374422+00:00"
+        "fetchedAt": "2026-10-30T09:03:41.452032+00:00"
       },
       "fitScore": 98,
       "fitTier": "高適配",
@@ -1742,7 +1742,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-30T07:19:18.709032+00:00",
-      "lastSeen": "2026-10-30T07:19:18.709032+00:00",
+      "lastSeen": "2026-10-30T09:04:24.653663+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "pathfinder_official",
@@ -1785,7 +1785,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-10-30T07:18:31.104386+00:00"
+        "fetchedAt": "2026-10-30T09:03:43.354637+00:00"
       },
       "fitScore": 94,
       "fitTier": "高適配",
@@ -1807,7 +1807,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-10-30T07:19:18.709032+00:00",
+      "lastSeen": "2026-10-30T09:04:24.653663+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "mofa_working_holiday",
@@ -1878,7 +1878,7 @@
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-17T05:00:04.565139+00:00",
       "lastSeen": "2026-10-26T08:13:08.370947+00:00",
-      "missCount": 7,
+      "missCount": 8,
       "needsReview": true,
       "sourceCategories": [
         "competition",
