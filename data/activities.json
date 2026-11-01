@@ -1,6 +1,6 @@
 {
   "meta": {
-    "updatedAt": "2026-10-31T07:08:09.119004+00:00",
+    "updatedAt": "2026-11-01T07:42:19.943067+00:00",
     "sources": 8,
     "events": 25,
     "ok": 2,
@@ -19,7 +19,7 @@
     "skippedPast": 92,
     "fitFiltered": 13,
     "semanticDuplicates": 0,
-    "retiredThisRun": 3,
+    "retiredThisRun": 0,
     "revivedThisRun": 0,
     "archiveCount": 65,
     "retainedOnFailure": 17,
@@ -30,7 +30,7 @@
     "nationwideOfficialHealthy": true,
     "nationwideOfficialEvents": 0,
     "nationwideOfficialEligible": 0,
-    "nationwideOfficialDiscovered": 115,
+    "nationwideOfficialDiscovered": 111,
     "sourceFailures": [
       {
         "sourceId": "thu_official",
@@ -46,22 +46,22 @@
     "preferenceExcludedThisRun": 0,
     "nationalExpansionSources": 2,
     "nationalExpansionHealthy": 2,
-    "nationalExpansionDiscovered": 126,
+    "nationalExpansionDiscovered": 125,
     "nationalExpansionFreshEligible": 0,
     "nationalExpansionActive": 0,
     "nationalExpansionOnsiteFinal": 0,
     "nationalExpansionReviewReasons": {
-      "topic_mismatch": 116,
+      "topic_mismatch": 115,
       "listing_deadline_closed": 3,
       "deadline_not_verified": 7
     },
     "nationalExpansionReviewBySource": {
       "youthfirst_national": {
-        "discovered": 57,
+        "discovered": 56,
         "detailVerified": 1,
         "accepted": 0,
         "reasons": {
-          "topic_mismatch": 53,
+          "topic_mismatch": 52,
           "listing_deadline_closed": 3,
           "deadline_not_verified": 1
         },
@@ -138,7 +138,7 @@
       "eligibility_not_verified": 7
     },
     "nationwideOfficialReviewReasons": {
-      "topic_mismatch": 112,
+      "topic_mismatch": 108,
       "date_eligibility_or_link_unverified": 3
     }
   },
@@ -1568,7 +1568,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "pathfinder_official",
-        "fetchedAt": "2026-10-31T07:07:08.776222+00:00"
+        "fetchedAt": "2026-11-01T07:41:39.047684+00:00"
       },
       "fitScore": 98,
       "fitTier": "高適配",
@@ -1591,7 +1591,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-30T07:19:18.709032+00:00",
-      "lastSeen": "2026-10-31T07:08:09.118094+00:00",
+      "lastSeen": "2026-11-01T07:42:19.942182+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "pathfinder_official",
@@ -1634,7 +1634,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-10-31T07:07:11.046809+00:00"
+        "fetchedAt": "2026-11-01T07:41:40.199286+00:00"
       },
       "fitScore": 94,
       "fitTier": "高適配",
@@ -1656,7 +1656,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-10-31T07:08:09.118094+00:00",
+      "lastSeen": "2026-11-01T07:42:19.942182+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "mofa_working_holiday",
