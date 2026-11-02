@@ -1,6 +1,6 @@
 {
   "meta": {
-    "updatedAt": "2026-11-02T07:46:42+00:00",
+    "updatedAt": "2026-11-02T10:00:30+00:00",
     "sourceId": "thu_scholarship_official",
     "eligibilityDetail": {
       "detailCandidates": 0,
@@ -1048,9 +1048,9 @@
       "specialtyKind": "professional",
       "eligibilityTarget": "general_student",
       "statusText": "東海官方專業考照獎勵；申請期限 2026-11-02",
-      "fetchedAt": "2026-11-02T07:46:42+00:00",
+      "fetchedAt": "2026-11-02T10:00:30+00:00",
       "firstSeen": "2026-09-10T14:37:26+00:00",
-      "lastSeen": "2026-11-02T07:46:42+00:00",
+      "lastSeen": "2026-11-02T10:00:30+00:00",
       "missCount": 0,
       "needsReview": false,
       "eligibilityVerified": true,
@@ -1082,9 +1082,9 @@
       "specialtyKind": "language",
       "eligibilityTarget": "general_student",
       "statusText": "東海官方外語能力獎勵；申請期限 2027-10-12",
-      "fetchedAt": "2026-11-02T07:46:42+00:00",
+      "fetchedAt": "2026-11-02T10:00:30+00:00",
       "firstSeen": "2026-09-10T14:37:26+00:00",
-      "lastSeen": "2026-11-02T07:46:42+00:00",
+      "lastSeen": "2026-11-02T10:00:30+00:00",
       "missCount": 0,
       "needsReview": false,
       "eligibilityVerified": true,
