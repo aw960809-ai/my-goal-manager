@@ -1,6 +1,6 @@
 {
   "meta": {
-    "updatedAt": "2026-11-05T08:02:14.149913+00:00",
+    "updatedAt": "2026-11-05T09:56:11.881886+00:00",
     "sources": 8,
     "events": 25,
     "ok": 2,
@@ -105,12 +105,12 @@
         "samples": {
           "topic_mismatch": [
             {
-              "title": "海外圓夢．壯闊臺灣 116年度換你出發圓夢",
-              "url": "https://www.yda.gov.tw/docDetail.aspx?docid=69758&pid=53&uid=60"
+              "title": "【活動公告】116年青年生涯領航計畫實體說明會及企劃撰寫工作坊開放報名！",
+              "url": "https://www.yda.gov.tw/docDetail.aspx?docid=69759&pid=53&uid=60"
             },
             {
-              "title": "世界看見臺灣！「青聚點」獲日本GOOD DESIGN AWARD肯定 12月5日至6日「115年Changemaker暨青聚點成果展」共襄盛舉",
-              "url": "https://www.yda.gov.tw/docDetail.aspx?docid=69738&pid=53&uid=60"
+              "title": "海外圓夢．壯闊臺灣 116年度換你出發圓夢",
+              "url": "https://www.yda.gov.tw/docDetail.aspx?docid=69758&pid=53&uid=60"
             }
           ],
           "deadline_not_verified": [
@@ -1569,7 +1569,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "pathfinder_official",
-        "fetchedAt": "2026-11-05T08:01:11.797079+00:00"
+        "fetchedAt": "2026-11-05T09:55:29.488417+00:00"
       },
       "fitScore": 98,
       "fitTier": "高適配",
@@ -1592,7 +1592,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-30T07:19:18.709032+00:00",
-      "lastSeen": "2026-11-05T08:02:14.149407+00:00",
+      "lastSeen": "2026-11-05T09:56:11.881258+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "pathfinder_official",
@@ -1635,7 +1635,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-11-05T08:01:13.187328+00:00"
+        "fetchedAt": "2026-11-05T09:55:29.794214+00:00"
       },
       "fitScore": 94,
       "fitTier": "高適配",
@@ -1657,7 +1657,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-11-05T08:02:14.149407+00:00",
+      "lastSeen": "2026-11-05T09:56:11.881258+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "mofa_working_holiday",
