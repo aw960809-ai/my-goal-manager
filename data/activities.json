@@ -1,12 +1,14 @@
 {
   "meta": {
-    "updatedAt": "2026-11-07T07:20:50.910959+00:00",
+    "updatedAt": "2026-11-07T09:22:44.709324+00:00",
     "sources": 8,
     "events": 24,
     "ok": 2,
-    "failed": 1,
+    "failed": 3,
     "errors": [
-      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14002 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14002 ms: Timeout was reached"
+      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14002 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14002 ms: Timeout was reached",
+      "www.yda.gov.tw: curl: (28) Operation timed out after 25002 milliseconds with 0 bytes received\ncurl: (28) Operation timed out after 25002 milliseconds with 0 bytes received",
+      "www.yda.gov.tw: curl: (28) Operation timed out after 25002 milliseconds with 0 bytes received\ncurl: (22) The requested URL returned error: 503"
     ],
     "generator": "V96.6.11.1.1 Multi-Source AutoFetch + Activity Radar",
     "sourcePolicy": "政府資訊為主；東海官方活動為活動核心；獎學金獨立資料集合與獨立判斷",
@@ -15,11 +17,11 @@
     "healthySources": 8,
     "failedSources": 1,
     "rejectedItems": 0,
-    "fetchFailedItems": 1,
-    "skippedPast": 91,
+    "fetchFailedItems": 3,
+    "skippedPast": 89,
     "fitFiltered": 10,
     "semanticDuplicates": 0,
-    "retiredThisRun": 1,
+    "retiredThisRun": 0,
     "revivedThisRun": 0,
     "archiveCount": 66,
     "retainedOnFailure": 16,
@@ -30,7 +32,7 @@
     "nationwideOfficialHealthy": true,
     "nationwideOfficialEvents": 0,
     "nationwideOfficialEligible": 0,
-    "nationwideOfficialDiscovered": 95,
+    "nationwideOfficialDiscovered": 93,
     "sourceFailures": [
       {
         "sourceId": "thu_official",
@@ -139,7 +141,7 @@
       "eligibility_not_verified": 5
     },
     "nationwideOfficialReviewReasons": {
-      "topic_mismatch": 93,
+      "topic_mismatch": 91,
       "date_eligibility_or_link_unverified": 2
     }
   },
@@ -1494,7 +1496,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "pathfinder_official",
-        "fetchedAt": "2026-11-07T07:20:00.269039+00:00"
+        "fetchedAt": "2026-11-07T09:22:05.893331+00:00"
       },
       "fitScore": 98,
       "fitTier": "高適配",
@@ -1517,7 +1519,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-30T07:19:18.709032+00:00",
-      "lastSeen": "2026-11-07T07:20:50.909771+00:00",
+      "lastSeen": "2026-11-07T09:22:44.707761+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "pathfinder_official",
@@ -1560,7 +1562,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-11-07T07:20:02.414337+00:00"
+        "fetchedAt": "2026-11-07T09:22:07.884861+00:00"
       },
       "fitScore": 94,
       "fitTier": "高適配",
@@ -1582,7 +1584,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-11-07T07:20:50.909771+00:00",
+      "lastSeen": "2026-11-07T09:22:44.707761+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "mofa_working_holiday",
