@@ -2,18 +2,98 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-11-06T09:59:07.852798+00:00",
-    "count": 65,
-    "retiredThisRun": 0,
+    "updatedAt": "2026-11-07T07:20:50.910959+00:00",
+    "count": 66,
+    "retiredThisRun": 1,
     "revivedThisRun": 0,
-    "retiredTotal": 65,
+    "retiredTotal": 66,
     "revivedTotal": 0,
-    "retainedOnFailure": 17,
+    "retainedOnFailure": 16,
     "carriedMissing": 0,
     "needsReview": 0,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
+    {
+      "id": "auto-thu-2026100037",
+      "title": "校外賃居安全教育宣導講座-學生租屋必懂的法律保障與常見糾紛解析",
+      "date": "2026-11-09",
+      "time": "",
+      "scope": "東海校內",
+      "type": "法律／學術",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026100037",
+      "keywords": "校外賃居安全教育宣導講座-學生租屋必懂的法律保障與常見糾紛解析 東海大學 生活輔導組 教育活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 生活輔導組；活動日 2026-11-09；截止 2026-11-06",
+      "government": false,
+      "deadline": "2026-11-06",
+      "eventEndDate": "2026-11-09",
+      "location": "人文大樓 H208",
+      "organizer": "生活輔導組",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026100037",
+        "fetchedAt": "2026-10-21T06:07:01.720849+00:00"
+      },
+      "fitScore": 71,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+42",
+        "直接連結法律學習目標+15",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-10-14T06:14:10.797433+00:00",
+      "lastSeen": "2026-10-21T06:08:56.973058+00:00",
+      "missCount": 0,
+      "needsReview": false,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-11-07T07:20:50.909771+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-10-21T06:08:56.973058+00:00"
+    },
     {
       "id": "auto-ncut-competition-96514",
       "title": "德明財經科技大學-2026 全國大專綠色商品展暨海外行銷企劃大賽",
