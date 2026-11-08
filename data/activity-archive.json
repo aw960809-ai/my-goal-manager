@@ -2,18 +2,99 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-11-07T09:22:44.709324+00:00",
-    "count": 66,
-    "retiredThisRun": 0,
+    "updatedAt": "2026-11-08T07:32:29.940103+00:00",
+    "count": 67,
+    "retiredThisRun": 1,
     "revivedThisRun": 0,
-    "retiredTotal": 66,
+    "retiredTotal": 67,
     "revivedTotal": 0,
-    "retainedOnFailure": 16,
+    "retainedOnFailure": 15,
     "carriedMissing": 0,
     "needsReview": 0,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
+    {
+      "id": "auto-thu-2026100028",
+      "title": "【勵學生與學生志工增能講座】從無到有的AI加速器:告別報告地獄！用AI輕鬆搞定專案企劃與簡報",
+      "date": "2026-11-10",
+      "time": "",
+      "scope": "東海校內",
+      "type": "教育／青少年",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026100028",
+      "keywords": "【勵學生與學生志工增能講座】從無到有的AI加速器:告別報告地獄！用AI輕鬆搞定專案企劃與簡報 東海大學 學生事務處 學術活動 教職員，費用：0；學生，費用：0 學術／講座 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 學生事務處；活動日 2026-11-10；截止 2026-11-07",
+      "government": false,
+      "deadline": "2026-11-07",
+      "eventEndDate": "2026-11-10",
+      "location": "圖書館玉釵教室[LIB009]",
+      "organizer": "學生事務處",
+      "audience": "教職員，費用：0；學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026100028",
+        "fetchedAt": "2026-10-15T07:44:24.612669+00:00"
+      },
+      "fitScore": 62,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "青少年／營隊／教學+34",
+        "通用能力／AI工具+14",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "青少年／營隊／教學",
+        "通用能力／AI工具"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-10-13T07:49:21.560728+00:00",
+      "lastSeen": "2026-10-15T07:45:45.125665+00:00",
+      "missCount": 12,
+      "needsReview": true,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-11-08T07:32:29.938623+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-10-15T07:45:45.125665+00:00"
+    },
     {
       "id": "auto-thu-2026100037",
       "title": "校外賃居安全教育宣導講座-學生租屋必懂的法律保障與常見糾紛解析",
