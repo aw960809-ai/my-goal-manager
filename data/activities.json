@@ -1,12 +1,12 @@
 {
   "meta": {
-    "updatedAt": "2026-11-08T09:34:07.757398+00:00",
+    "updatedAt": "2026-11-09T08:07:46.355885+00:00",
     "sources": 8,
-    "events": 23,
+    "events": 22,
     "ok": 2,
     "failed": 1,
     "errors": [
-      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14000 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14002 ms: Timeout was reached"
+      "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14001 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14002 ms: Timeout was reached"
     ],
     "generator": "V96.6.11.1.1 Multi-Source AutoFetch + Activity Radar",
     "sourcePolicy": "政府資訊為主；東海官方活動為活動核心；獎學金獨立資料集合與獨立判斷",
@@ -17,12 +17,12 @@
     "rejectedItems": 0,
     "fetchFailedItems": 1,
     "skippedPast": 91,
-    "fitFiltered": 10,
+    "fitFiltered": 11,
     "semanticDuplicates": 0,
-    "retiredThisRun": 0,
+    "retiredThisRun": 1,
     "revivedThisRun": 0,
-    "archiveCount": 67,
-    "retainedOnFailure": 15,
+    "archiveCount": 68,
+    "retainedOnFailure": 14,
     "carriedMissing": 0,
     "needsReview": 0,
     "lifecyclePolicy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive",
@@ -30,13 +30,13 @@
     "nationwideOfficialHealthy": true,
     "nationwideOfficialEvents": 0,
     "nationwideOfficialEligible": 0,
-    "nationwideOfficialDiscovered": 109,
+    "nationwideOfficialDiscovered": 91,
     "sourceFailures": [
       {
         "sourceId": "thu_official",
         "name": "東海大學活動報名系統",
         "url": "https://tevent.thu.edu.tw/tEvent_front/index.php",
-        "error": "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14000 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14002 ms: Timeout was reached"
+        "error": "tevent.thu.edu.tw: curl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14001 ms: Timeout was reached\ncurl: (28) Failed to connect to tevent.thu.edu.tw port 443 after 14002 ms: Timeout was reached"
       }
     ],
     "legalAcademicSourcesConfigured": 0,
@@ -46,12 +46,12 @@
     "preferenceExcludedThisRun": 0,
     "nationalExpansionSources": 2,
     "nationalExpansionHealthy": 2,
-    "nationalExpansionDiscovered": 123,
+    "nationalExpansionDiscovered": 124,
     "nationalExpansionFreshEligible": 0,
     "nationalExpansionActive": 0,
     "nationalExpansionOnsiteFinal": 0,
     "nationalExpansionReviewReasons": {
-      "topic_mismatch": 113,
+      "topic_mismatch": 114,
       "listing_deadline_closed": 3,
       "deadline_not_verified": 7
     },
@@ -95,22 +95,22 @@
         }
       },
       "yda_national_news": {
-        "discovered": 70,
+        "discovered": 71,
         "detailVerified": 6,
         "accepted": 0,
         "reasons": {
-          "topic_mismatch": 64,
+          "topic_mismatch": 65,
           "deadline_not_verified": 6
         },
         "samples": {
           "topic_mismatch": [
             {
-              "title": "【活動公告】116年青年生涯領航計畫實體說明會及企劃撰寫工作坊開放報名！",
-              "url": "https://www.yda.gov.tw/docDetail.aspx?docid=69759&pid=53&uid=60"
+              "title": "面對變遷展現社區韌性 青年行動串聯大溪漁港文化與大林蒲記憶",
+              "url": "https://www.yda.gov.tw/docDetail.aspx?docid=69764&pid=53&uid=60"
             },
             {
-              "title": "海外圓夢．壯闊臺灣 116年度換你出發圓夢",
-              "url": "https://www.yda.gov.tw/docDetail.aspx?docid=69758&pid=53&uid=60"
+              "title": "116年超牆青年E學院平臺維護及營運行政作業採購案",
+              "url": "https://www.yda.gov.tw/docDetail.aspx?docid=69761&pid=53&uid=60"
             }
           ],
           "deadline_not_verified": [
@@ -134,12 +134,12 @@
     "officialCompetitionActive": 0,
     "officialCompetitionReviewReasons": {
       "topic_mismatch": 5,
+      "eligibility_not_verified": 5,
       "deadline_not_verified": 1,
-      "deadline_expired": 1,
-      "eligibility_not_verified": 5
+      "deadline_expired": 1
     },
     "nationwideOfficialReviewReasons": {
-      "topic_mismatch": 107,
+      "topic_mismatch": 89,
       "date_eligibility_or_link_unverified": 2
     }
   },
@@ -526,83 +526,6 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-20T06:09:03.240736+00:00",
-      "lastSeen": "2026-10-21T06:08:56.973058+00:00",
-      "missCount": 0,
-      "needsReview": false,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
-      "id": "auto-thu-2026100045",
-      "title": "【學生講師系列工作坊】戲劇表演工作坊",
-      "date": "2026-11-09",
-      "time": "",
-      "scope": "東海校內",
-      "type": "職涯／實習",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026100045",
-      "keywords": "【學生講師系列工作坊】戲劇表演工作坊 東海大學 課外活動暨學生發展組 教育活動 教職員，費用：0；學生，費用：0 法律／學術 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 課外活動暨學生發展組；活動日 2026-11-09；截止 2026-11-08",
-      "government": false,
-      "deadline": "2026-11-08",
-      "eventEndDate": "2026-11-09",
-      "location": "",
-      "organizer": "課外活動暨學生發展組",
-      "audience": "教職員，費用：0；學生，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026100045",
-        "fetchedAt": "2026-10-21T06:06:33.394276+00:00"
-      },
-      "fitScore": 50,
-      "fitTier": "探索",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "法律／轉學考+10",
-        "職涯／實習+5",
-        "直接連結法律學習目標+15",
-        "具體職涯體驗，可轉化為行動+8",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "法律／轉學考",
-        "職涯／實習"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-10-19T06:18:50.685484+00:00",
       "lastSeen": "2026-10-21T06:08:56.973058+00:00",
       "missCount": 0,
       "needsReview": false,
@@ -1418,7 +1341,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "pathfinder_official",
-        "fetchedAt": "2026-11-08T09:33:22.059401+00:00"
+        "fetchedAt": "2026-11-09T08:06:58.738774+00:00"
       },
       "fitScore": 98,
       "fitTier": "高適配",
@@ -1441,7 +1364,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-30T07:19:18.709032+00:00",
-      "lastSeen": "2026-11-08T09:34:07.756829+00:00",
+      "lastSeen": "2026-11-09T08:07:46.354329+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "pathfinder_official",
@@ -1484,7 +1407,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-11-08T09:33:23.525060+00:00"
+        "fetchedAt": "2026-11-09T08:07:00.254280+00:00"
       },
       "fitScore": 94,
       "fitTier": "高適配",
@@ -1506,7 +1429,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-11-08T09:34:07.756829+00:00",
+      "lastSeen": "2026-11-09T08:07:46.354329+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "mofa_working_holiday",
