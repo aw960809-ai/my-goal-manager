@@ -1,6 +1,6 @@
 {
   "schemaVersion": "7B.2-coverage-1",
-  "generatedAt": "2026-11-10T08:32:54.275371+00:00",
+  "generatedAt": "2026-11-10T10:31:29.722865+00:00",
   "policy": {
     "localCoverageMustMatchUserProfile": true,
     "uncoveredLocalScopeFailClosed": true,
