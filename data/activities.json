@@ -1,8 +1,8 @@
 {
   "meta": {
-    "updatedAt": "2026-11-11T09:56:31.709556+00:00",
+    "updatedAt": "2026-11-12T08:29:14.946975+00:00",
     "sources": 8,
-    "events": 19,
+    "events": 18,
     "ok": 2,
     "failed": 1,
     "errors": [
@@ -19,10 +19,10 @@
     "skippedPast": 90,
     "fitFiltered": 10,
     "semanticDuplicates": 0,
-    "retiredThisRun": 0,
+    "retiredThisRun": 1,
     "revivedThisRun": 0,
-    "archiveCount": 71,
-    "retainedOnFailure": 11,
+    "archiveCount": 72,
+    "retainedOnFailure": 10,
     "carriedMissing": 0,
     "needsReview": 0,
     "lifecyclePolicy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive",
@@ -30,7 +30,7 @@
     "nationwideOfficialHealthy": true,
     "nationwideOfficialEvents": 0,
     "nationwideOfficialEligible": 0,
-    "nationwideOfficialDiscovered": 111,
+    "nationwideOfficialDiscovered": 92,
     "sourceFailures": [
       {
         "sourceId": "thu_official",
@@ -78,7 +78,7 @@
           ],
           "listing_deadline_closed": [
             {
-              "title": "115 年教育部青年署Dream Idea績優點子競賽",
+              "title": "教育部青年署Dream Idea績優點子競賽",
               "url": "https://youthfirst.yda.gov.tw/index.php/subject/content/79014"
             },
             {
@@ -139,7 +139,7 @@
       "deadline_expired": 1
     },
     "nationwideOfficialReviewReasons": {
-      "topic_mismatch": 109,
+      "topic_mismatch": 90,
       "date_eligibility_or_link_unverified": 2
     }
   },
@@ -859,81 +859,6 @@
       "category": "legal_academic"
     },
     {
-      "id": "auto-thu-2026100010",
-      "title": "從國際學生證到朝聖者護照",
-      "date": "2026-11-11",
-      "time": "",
-      "scope": "東海校內",
-      "type": "語言／國際",
-      "kind": "event",
-      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026100010",
-      "keywords": "從國際學生證到朝聖者護照 東海大學 創新創業中心 學術活動 教職員，費用：0；學生，費用：0；校外人士，費用：0 學術／講座 校內",
-      "direct": true,
-      "team": false,
-      "available": true,
-      "source": "東海大學活動報名系統",
-      "statusText": "東海大學官方活動；承辦 創新創業中心；活動日 2026-11-11；截止 2026-11-11",
-      "government": false,
-      "deadline": "2026-11-11",
-      "eventEndDate": "2026-11-11",
-      "location": "",
-      "organizer": "創新創業中心",
-      "audience": "教職員，費用：0；學生，費用：0；校外人士，費用：0",
-      "autofetch": {
-        "engine": "V96.6.11.1.1",
-        "sourceId": "thu_official",
-        "conferenceCode": "2026100010",
-        "fetchedAt": "2026-10-12T07:26:39.163382+00:00"
-      },
-      "fitScore": 57,
-      "fitTier": "中適配",
-      "fitReasons": [
-        "同心圓第1圈：東海校內+8",
-        "語言／國際／海外+40",
-        "職涯／實習+5",
-        "有明確截止日+4"
-      ],
-      "goalMatches": [
-        "語言／國際／海外",
-        "職涯／實習"
-      ],
-      "circleLevel": 1,
-      "circleLabel": "東海校內",
-      "radarEligible": true,
-      "hardFilterReason": "",
-      "eligibilityReason": "",
-      "semanticDuplicateOf": "",
-      "firstSeen": "2026-10-08T05:49:56.532833+00:00",
-      "lastSeen": "2026-10-12T07:28:06.885824+00:00",
-      "missCount": 15,
-      "needsReview": true,
-      "sourceId": "thu_official",
-      "sourceCategories": [
-        "legal_academic",
-        "lecture",
-        "career_internship",
-        "competition"
-      ],
-      "sourceTrust": "official",
-      "sourcePriority": 1,
-      "sourceProfileMatch": {
-        "country": "TW",
-        "cities": [
-          "臺中市",
-          "台中市",
-          "Taichung"
-        ],
-        "schoolNames": [
-          "東海大學",
-          "Tunghai University"
-        ]
-      },
-      "country": "TW",
-      "city": "臺中市",
-      "schoolName": "東海大學",
-      "category": "legal_academic"
-    },
-    {
       "id": "auto-thu-2026090056",
       "title": "115學年第1學期活力體適能",
       "date": "2026-09-30",
@@ -1111,7 +1036,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "pathfinder_official",
-        "fetchedAt": "2026-11-11T09:55:48.005013+00:00"
+        "fetchedAt": "2026-11-12T08:28:29.823426+00:00"
       },
       "fitScore": 98,
       "fitTier": "高適配",
@@ -1134,7 +1059,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-30T07:19:18.709032+00:00",
-      "lastSeen": "2026-11-11T09:56:31.709022+00:00",
+      "lastSeen": "2026-11-12T08:29:14.945580+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "pathfinder_official",
@@ -1177,7 +1102,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-11-11T09:55:49.979737+00:00"
+        "fetchedAt": "2026-11-12T08:28:32.570579+00:00"
       },
       "fitScore": 94,
       "fitTier": "高適配",
@@ -1199,7 +1124,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-11-11T09:56:31.709022+00:00",
+      "lastSeen": "2026-11-12T08:29:14.945580+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "mofa_working_holiday",
