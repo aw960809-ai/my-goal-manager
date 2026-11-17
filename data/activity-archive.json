@@ -2,18 +2,181 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "activity",
-    "updatedAt": "2026-11-16T10:15:22.624267+00:00",
-    "count": 75,
-    "retiredThisRun": 0,
+    "updatedAt": "2026-11-17T09:21:31.121383+00:00",
+    "count": 77,
+    "retiredThisRun": 2,
     "revivedThisRun": 0,
-    "retiredTotal": 75,
+    "retiredTotal": 77,
     "revivedTotal": 0,
-    "retainedOnFailure": 7,
+    "retainedOnFailure": 5,
     "carriedMissing": 0,
     "needsReview": 0,
     "policy": "expired-immediate; missing-two-hits-plus-30-days; failed-source-no-miss; source-reappearance-auto-revive"
   },
   "archive": [
+    {
+      "id": "auto-thu-2026090071",
+      "title": "【 紓壓工作坊 】10/21 從動作找回自己的節奏、11/18 讓情緒動一動：從身體靠近自己的感受（將申請博雅認證）",
+      "date": "2026-10-21",
+      "time": "",
+      "scope": "東海校內",
+      "type": "職涯／實習",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=4&conference_code=2026090071",
+      "keywords": "【 紓壓工作坊 】10/21 從動作找回自己的節奏、11/18 讓情緒動一動：從身體靠近自己的感受（將申請博雅認證） 東海大學 健康暨諮商中心 藝文活動 學生，費用：0 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 健康暨諮商中心；活動日 2026-10-21；截止 2026-11-16",
+      "government": false,
+      "deadline": "2026-11-16",
+      "eventEndDate": "2026-10-21",
+      "location": "諮商中心團體室（學務處三樓）",
+      "organizer": "健康暨諮商中心",
+      "audience": "學生，費用：0",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026090071",
+        "fetchedAt": "2026-09-27T08:35:42.586259+00:00"
+      },
+      "fitScore": 52,
+      "fitTier": "中適配",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "職涯／實習+5",
+        "直接連結法律學習目標+15",
+        "具體職涯體驗，可轉化為行動+8",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考",
+        "職涯／實習"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-09-22T06:20:42.670284+00:00",
+      "lastSeen": "2026-09-27T08:38:20.904863+00:00",
+      "missCount": 25,
+      "needsReview": true,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-11-17T09:21:31.120725+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-09-27T08:38:20.904863+00:00"
+    },
+    {
+      "id": "auto-thu-2026100013",
+      "title": "115-1 宿舍生活系列講座【場次二】手作藝術療癒活動-輕黏土舒壓創作",
+      "date": "2026-11-17",
+      "time": "14:00–16:00",
+      "scope": "東海校內",
+      "type": "法律／學術",
+      "kind": "event",
+      "url": "https://tevent.thu.edu.tw/tEvent_front/tEvent.php?type=0&page=5&conference_code=2026100013",
+      "keywords": "115-1 宿舍生活系列講座【場次二】手作藝術療癒活動-輕黏土舒壓創作 東海大學 學生住宿中心 其他活動 學生，費用：0；說明：住宿生優先 法律／學術 校內",
+      "direct": true,
+      "team": false,
+      "available": true,
+      "source": "東海大學活動報名系統",
+      "statusText": "東海大學官方活動；承辦 學生住宿中心；活動日 2026-11-17；截止 2026-11-16",
+      "government": false,
+      "deadline": "2026-11-16",
+      "eventEndDate": "",
+      "location": "第二教學區宿舍學習工坊",
+      "organizer": "學生住宿中心",
+      "audience": "學生，費用：0；說明：住宿生優先",
+      "autofetch": {
+        "engine": "V96.6.11.1.1",
+        "sourceId": "thu_official",
+        "conferenceCode": "2026100013",
+        "fetchedAt": "2026-10-19T06:17:26.155756+00:00"
+      },
+      "fitScore": 39,
+      "fitTier": "探索",
+      "fitReasons": [
+        "同心圓第1圈：東海校內+8",
+        "法律／轉學考+10",
+        "直接連結法律學習目標+15",
+        "有明確截止日+4",
+        "有明確地點+2"
+      ],
+      "goalMatches": [
+        "法律／轉學考"
+      ],
+      "circleLevel": 1,
+      "circleLabel": "東海校內",
+      "radarEligible": true,
+      "hardFilterReason": "",
+      "eligibilityReason": "",
+      "semanticDuplicateOf": "",
+      "firstSeen": "2026-10-14T06:14:10.797433+00:00",
+      "lastSeen": "2026-10-19T06:18:50.685484+00:00",
+      "missCount": 2,
+      "needsReview": true,
+      "sourceId": "thu_official",
+      "sourceCategories": [
+        "legal_academic",
+        "lecture",
+        "career_internship",
+        "competition"
+      ],
+      "sourceTrust": "official",
+      "sourcePriority": 1,
+      "sourceProfileMatch": {
+        "country": "TW",
+        "cities": [
+          "臺中市",
+          "台中市",
+          "Taichung"
+        ],
+        "schoolNames": [
+          "東海大學",
+          "Tunghai University"
+        ]
+      },
+      "country": "TW",
+      "city": "臺中市",
+      "schoolName": "東海大學",
+      "category": "legal_academic",
+      "archiveKind": "activity",
+      "retiredAt": "2026-11-17T09:21:31.120725+00:00",
+      "retireCode": "expired",
+      "retireReason": "截止日已過",
+      "lastActiveAt": "2026-10-19T06:18:50.685484+00:00"
+    },
     {
       "id": "auto-thu-2026080007",
       "title": "*注意事項： 1.報名參加會議的人員，主辦單位不另提供午膳。 2.報名者出現發燒、呼吸道不適等類流感症狀者，建議避免出席會議。 3.本場會議廳內至多接受40人同時於場內。 4.報名參加者，主辦單位於會議前二天提供手冊電子檔，當天會場不另發紙本論文。",
