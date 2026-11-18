@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "meta": {
     "kind": "scholarship",
-    "updatedAt": "2026-11-18T08:39:09+00:00",
+    "updatedAt": "2026-11-18T10:47:22+00:00",
     "count": 161,
     "retiredThisRun": 44,
     "revivedThisRun": 0,
-    "retiredTotal": 1885,
+    "retiredTotal": 1929,
     "revivedTotal": 2,
     "retainedOnFailure": 64,
     "carriedMissing": 0,
