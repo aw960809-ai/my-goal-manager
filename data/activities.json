@@ -1,12 +1,12 @@
 {
   "meta": {
-    "updatedAt": "2026-11-20T08:43:46.515803+00:00",
+    "updatedAt": "2026-11-20T10:35:43.451502+00:00",
     "sources": 8,
     "events": 12,
     "ok": 2,
     "failed": 1,
     "errors": [
-      "tevent.thu.edu.tw: curl: (28) Connection timed out after 14000 milliseconds\ncurl: (28) Connection timed out after 14002 milliseconds"
+      "tevent.thu.edu.tw: curl: (28) Connection timed out after 14002 milliseconds\ncurl: (28) Connection timed out after 14003 milliseconds"
     ],
     "generator": "V96.6.11.1.1 Multi-Source AutoFetch + Activity Radar",
     "sourcePolicy": "政府資訊為主；東海官方活動為活動核心；獎學金獨立資料集合與獨立判斷",
@@ -19,7 +19,7 @@
     "skippedPast": 87,
     "fitFiltered": 7,
     "semanticDuplicates": 0,
-    "retiredThisRun": 1,
+    "retiredThisRun": 0,
     "revivedThisRun": 0,
     "archiveCount": 78,
     "retainedOnFailure": 4,
@@ -36,7 +36,7 @@
         "sourceId": "thu_official",
         "name": "東海大學活動報名系統",
         "url": "https://tevent.thu.edu.tw/tEvent_front/index.php",
-        "error": "tevent.thu.edu.tw: curl: (28) Connection timed out after 14000 milliseconds\ncurl: (28) Connection timed out after 14002 milliseconds"
+        "error": "tevent.thu.edu.tw: curl: (28) Connection timed out after 14002 milliseconds\ncurl: (28) Connection timed out after 14003 milliseconds"
       }
     ],
     "legalAcademicSourcesConfigured": 0,
@@ -578,7 +578,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "pathfinder_official",
-        "fetchedAt": "2026-11-20T08:42:57.306813+00:00"
+        "fetchedAt": "2026-11-20T10:34:40.006928+00:00"
       },
       "fitScore": 98,
       "fitTier": "高適配",
@@ -601,7 +601,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-10-30T07:19:18.709032+00:00",
-      "lastSeen": "2026-11-20T08:43:46.515136+00:00",
+      "lastSeen": "2026-11-20T10:35:43.450809+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "pathfinder_official",
@@ -644,7 +644,7 @@
       "autofetch": {
         "engine": "V96.6.11.1.1",
         "sourceId": "mofa_working_holiday",
-        "fetchedAt": "2026-11-20T08:42:59.333561+00:00"
+        "fetchedAt": "2026-11-20T10:34:56.421633+00:00"
       },
       "fitScore": 94,
       "fitTier": "高適配",
@@ -666,7 +666,7 @@
       "eligibilityReason": "",
       "semanticDuplicateOf": "",
       "firstSeen": "2026-09-09T12:50:00.937440+00:00",
-      "lastSeen": "2026-11-20T08:43:46.515136+00:00",
+      "lastSeen": "2026-11-20T10:35:43.450809+00:00",
       "missCount": 0,
       "needsReview": false,
       "sourceId": "mofa_working_holiday",
